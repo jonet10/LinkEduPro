@@ -1,0 +1,49 @@
+﻿const Joi = require('joi');
+
+const registerSchema = Joi.object({
+  firstName: Joi.string().trim().min(2).max(80).required(),
+  lastName: Joi.string().trim().min(2).max(80).required(),
+  sex: Joi.string().valid('MALE', 'FEMALE', 'OTHER').required(),
+  dateOfBirth: Joi.date().iso().required(),
+  school: Joi.string().trim().min(2).max(120).required(),
+  gradeLevel: Joi.string().trim().min(1).max(50).required(),
+  email: Joi.string().email().allow(null, ''),
+  phone: Joi.string().trim().max(30).allow(null, ''),
+  password: Joi.string().min(6).max(128).required()
+}).or('email', 'phone');
+
+const loginSchema = Joi.object({
+  identifier: Joi.string().required(),
+  password: Joi.string().required()
+});
+
+const quizParamsSchema = Joi.object({
+  subjectId: Joi.number().integer().positive().required()
+});
+
+const quizQuerySchema = Joi.object({
+  limit: Joi.number().integer().min(1).max(50).default(10)
+});
+
+const submitQuizSchema = Joi.object({
+  subjectId: Joi.number().integer().positive().required(),
+  startedAt: Joi.date().iso().required(),
+  durationSec: Joi.number().integer().min(1).max(7200).required(),
+  answers: Joi.array()
+    .items(
+      Joi.object({
+        questionId: Joi.number().integer().positive().required(),
+        selectedOption: Joi.number().integer().min(0).max(3).required()
+      })
+    )
+    .min(1)
+    .required()
+});
+
+module.exports = {
+  registerSchema,
+  loginSchema,
+  quizParamsSchema,
+  quizQuerySchema,
+  submitQuizSchema
+};

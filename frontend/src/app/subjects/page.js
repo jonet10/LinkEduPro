@@ -1,0 +1,42 @@
+﻿"use client";
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { apiClient } from '@/lib/api';
+import { getToken } from '@/lib/auth';
+
+export default function SubjectsPage() {
+  const [subjects, setSubjects] = useState([]);
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    apiClient('/subjects', { token })
+      .then(setSubjects)
+      .catch((e) => setError(e.message || 'Impossible de charger les matieres'));
+  }, [router]);
+
+  return (
+    <section>
+      <h1 className="mb-6 text-3xl font-bold text-brand-900">Catalogue des matieres</h1>
+      {error ? <p className="mb-4 text-red-600">{error}</p> : null}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {subjects.map((subject) => (
+          <article key={subject.id} className="card">
+            <h2 className="text-xl font-semibold text-brand-900">{subject.name}</h2>
+            <p className="mt-2 text-sm text-brand-700">{subject.description}</p>
+            <p className="mt-3 text-xs font-semibold text-brand-500">{subject.questionCount} questions disponibles</p>
+            <Link href={`/quiz/${subject.id}`} className="btn-primary mt-4 inline-block">Lancer le quiz</Link>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}

@@ -1,0 +1,80 @@
+﻿generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Sex {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model Student {
+  id           Int           @id @default(autoincrement())
+  firstName    String
+  lastName     String
+  sex          Sex
+  dateOfBirth  DateTime
+  school       String
+  gradeLevel   String
+  email        String?       @unique
+  phone        String?
+  passwordHash String
+  attempts     QuizAttempt[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Subject {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  description String?
+  questions   Question[]
+  attempts    QuizAttempt[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Question {
+  id            Int          @id @default(autoincrement())
+  subjectId     Int
+  prompt        String
+  options       Json
+  correctOption Int
+  explanation   String?
+  subject       Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  answers       QuizAnswer[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model QuizAttempt {
+  id             Int          @id @default(autoincrement())
+  studentId      Int
+  subjectId      Int
+  startedAt      DateTime
+  finishedAt     DateTime
+  durationSec    Int
+  score          Int
+  totalQuestions Int
+  student        Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject        Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  answers        QuizAnswer[]
+  createdAt      DateTime     @default(now())
+}
+
+model QuizAnswer {
+  id             Int         @id @default(autoincrement())
+  attemptId      Int
+  questionId     Int
+  selectedOption Int
+  isCorrect      Boolean
+  attempt        QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question       Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+}
