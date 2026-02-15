@@ -1,4 +1,4 @@
-﻿-- CreateEnum
+-- CreateEnum
 CREATE TYPE "Sex" AS ENUM ('MALE', 'FEMALE', 'OTHER');
 
 -- CreateTable
