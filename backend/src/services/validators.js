@@ -22,7 +22,8 @@ const quizParamsSchema = Joi.object({
 });
 
 const quizQuerySchema = Joi.object({
-  limit: Joi.number().integer().min(1).max(50).default(10)
+  limit: Joi.number().integer().min(1).max(50).default(10),
+  set: Joi.string().trim().max(50).optional()
 });
 
 const submitQuizSchema = Joi.object({

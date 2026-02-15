@@ -13,12 +13,30 @@ export default function QuizPage() {
   const subjectId = params.subjectId;
 
   const [subject, setSubject] = useState(null);
+  const [quizSets, setQuizSets] = useState([]);
+  const [selectedSetKey, setSelectedSetKey] = useState('');
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(QUIZ_SECONDS);
   const [startedAt, setStartedAt] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const selectedSet = quizSets.find((s) => s.key === selectedSetKey) || null;
+
+  const loadQuestions = async (setKey) => {
+    const token = getToken();
+    const now = new Date().toISOString();
+    setStartedAt(now);
+    setTimeLeft(QUIZ_SECONDS);
+    setAnswers({});
+    setError('');
+
+    const setQuery = setKey && setKey !== 'default' ? `&set=${encodeURIComponent(setKey)}` : '';
+    const data = await apiClient(`/quiz/subject/${subjectId}?limit=10${setQuery}`, { token });
+    setSubject(data.subject);
+    setQuestions(data.questions);
+  };
 
   useEffect(() => {
     const token = getToken();
@@ -27,13 +45,15 @@ export default function QuizPage() {
       return;
     }
 
-    const now = new Date().toISOString();
-    setStartedAt(now);
-
-    apiClient(`/quiz/subject/${subjectId}?limit=10`, { token })
-      .then((data) => {
+    apiClient(`/quiz/subject/${subjectId}/sets`, { token })
+      .then(async (data) => {
         setSubject(data.subject);
-        setQuestions(data.questions);
+        setQuizSets(data.sets || []);
+        if (data.sets && data.sets.length === 1) {
+          const only = data.sets[0].key;
+          setSelectedSetKey(only);
+          await loadQuestions(only);
+        }
       })
       .catch((e) => setError(e.message || 'Erreur chargement quiz'));
   }, [subjectId, router]);
@@ -61,6 +81,15 @@ export default function QuizPage() {
     setAnswers((prev) => ({ ...prev, [questionId]: selectedOption }));
   };
 
+  const startSet = async (setKey) => {
+    setSelectedSetKey(setKey);
+    try {
+      await loadQuestions(setKey);
+    } catch (e) {
+      setError(e.message || 'Erreur chargement des questions');
+    }
+  };
+
   const submitQuiz = async () => {
     if (loading || questions.length === 0) return;
     setLoading(true);
@@ -68,7 +97,7 @@ export default function QuizPage() {
 
     const token = getToken();
     const payload = {
-      subjectId: Number(subjectId),
+      subjectId: Number(questions[0].subjectId),
       startedAt,
       durationSec: Math.max(durationSec, 1),
       answers: questions
@@ -102,36 +131,56 @@ export default function QuizPage() {
   return (
     <section>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-brand-900">Quiz {subject ? `- ${subject.name}` : ''}</h1>
-        <p className="rounded-lg bg-accent/20 px-3 py-2 text-sm font-semibold text-brand-900">Temps restant: {timeLeft}s</p>
+        <h1 className="text-2xl font-bold text-brand-900">
+          Quiz {subject ? `- ${subject.name}` : ''} {selectedSet ? `(${selectedSet.name})` : ''}
+        </h1>
+        {questions.length > 0 ? (
+          <p className="rounded-lg bg-accent/20 px-3 py-2 text-sm font-semibold text-brand-900">Temps restant: {timeLeft}s</p>
+        ) : null}
       </div>
 
       {error ? <p className="mb-4 text-red-600">{error}</p> : null}
 
-      <div className="space-y-4">
-        {questions.map((q, idx) => (
-          <article key={q.id} className="card">
-            <p className="mb-3 font-semibold">{idx + 1}. {q.prompt}</p>
-            <div className="space-y-2">
-              {q.options.map((opt, optIdx) => (
-                <label key={optIdx} className="flex cursor-pointer items-center gap-2 rounded border border-brand-100 px-3 py-2 hover:bg-brand-50">
-                  <input
-                    type="radio"
-                    name={`q_${q.id}`}
-                    checked={answers[q.id] === optIdx}
-                    onChange={() => setAnswer(q.id, optIdx)}
-                  />
-                  <span>{opt}</span>
-                </label>
-              ))}
-            </div>
-          </article>
-        ))}
-      </div>
+      {questions.length === 0 && quizSets.length > 1 ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {quizSets.map((setItem) => (
+            <article key={setItem.key} className="card">
+              <h2 className="text-lg font-semibold text-brand-900">{setItem.name}</h2>
+              <p className="mt-2 text-sm text-brand-700">{setItem.questionCount} questions disponibles</p>
+              <button className="btn-primary mt-4" onClick={() => startSet(setItem.key)}>Commencer ce quiz</button>
+            </article>
+          ))}
+        </div>
+      ) : null}
 
-      <button className="btn-primary mt-6" onClick={submitQuiz} disabled={loading || questions.length === 0}>
-        {loading ? 'Soumission...' : 'Soumettre le quiz'}
-      </button>
+      {questions.length > 0 ? (
+        <>
+          <div className="space-y-4">
+            {questions.map((q, idx) => (
+              <article key={q.id} className="card">
+                <p className="mb-3 font-semibold">{idx + 1}. {q.prompt}</p>
+                <div className="space-y-2">
+                  {q.options.map((opt, optIdx) => (
+                    <label key={optIdx} className="flex cursor-pointer items-center gap-2 rounded border border-brand-100 px-3 py-2 hover:bg-brand-50">
+                      <input
+                        type="radio"
+                        name={`q_${q.id}`}
+                        checked={answers[q.id] === optIdx}
+                        onChange={() => setAnswer(q.id, optIdx)}
+                      />
+                      <span>{opt}</span>
+                    </label>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <button className="btn-primary mt-6" onClick={submitQuiz} disabled={loading || questions.length === 0}>
+            {loading ? 'Soumission...' : 'Soumettre le quiz'}
+          </button>
+        </>
+      ) : null}
     </section>
   );
 }
