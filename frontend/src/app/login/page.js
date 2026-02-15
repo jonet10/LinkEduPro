@@ -32,9 +32,9 @@ export default function LoginPage() {
 
   return (
     <section className="mx-auto max-w-md card">
-      <h1 className="mb-6 text-2xl font-bold text-brand-900">Connexion eleve</h1>
+      <h1 className="mb-6 text-2xl font-bold text-brand-900">Connexion élève</h1>
       <form onSubmit={onSubmit} className="space-y-4">
-        <input className="input" placeholder="Email ou telephone" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required />
+        <input className="input" placeholder="Email ou téléphone" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required />
         <input className="input" type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} required />
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <button className="btn-primary w-full" type="submit" disabled={loading}>{loading ? 'Connexion...' : 'Se connecter'}</button>

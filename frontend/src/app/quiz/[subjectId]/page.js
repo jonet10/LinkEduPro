@@ -55,7 +55,7 @@ export default function QuizPage() {
           await loadQuestions(only);
         }
       })
-      .catch((e) => setError(e.message || 'Erreur chargement quiz'));
+      .catch((e) => setError(e.message || 'Erreur de chargement du quiz'));
   }, [subjectId, router]);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function QuizPage() {
     try {
       await loadQuestions(setKey);
     } catch (e) {
-      setError(e.message || 'Erreur chargement des questions');
+      setError(e.message || 'Erreur de chargement des questions');
     }
   };
 
@@ -109,7 +109,7 @@ export default function QuizPage() {
     };
 
     if (payload.answers.length === 0) {
-      setError('Repondez au moins a une question avant soumission.');
+      setError('Répondez au moins à une question avant soumission.');
       setLoading(false);
       return;
     }
@@ -122,7 +122,7 @@ export default function QuizPage() {
       });
       router.push('/progress');
     } catch (e) {
-      setError(e.message || 'Echec soumission quiz');
+      setError(e.message || 'Échec de la soumission du quiz');
     } finally {
       setLoading(false);
     }
@@ -135,7 +135,7 @@ export default function QuizPage() {
           Quiz {subject ? `- ${subject.name}` : ''} {selectedSet ? `(${selectedSet.name})` : ''}
         </h1>
         {questions.length > 0 ? (
-          <p className="rounded-lg bg-accent/20 px-3 py-2 text-sm font-semibold text-brand-900">Temps restant: {timeLeft}s</p>
+          <p className="rounded-lg bg-accent/20 px-3 py-2 text-sm font-semibold text-brand-900">Temps restant : {timeLeft}s</p>
         ) : null}
       </div>
 

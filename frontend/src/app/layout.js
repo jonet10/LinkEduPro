@@ -3,8 +3,8 @@ import Link from 'next/link';
 import HeaderNav from '@/components/HeaderNav';
 
 export const metadata = {
-  title: 'LinkEduPro - Education connectee',
-  description: 'Plateforme SaaS educative de revision'
+  title: 'LinkEduPro - Éducation connectée',
+  description: 'Plateforme SaaS éducative de révision'
 };
 
 export default function RootLayout({ children }) {

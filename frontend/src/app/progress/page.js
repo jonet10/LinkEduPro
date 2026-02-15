@@ -19,14 +19,14 @@ export default function ProgressPage() {
 
     apiClient('/results/progress', { token })
       .then(setData)
-      .catch((e) => setError(e.message || 'Erreur chargement progression'));
+      .catch((e) => setError(e.message || 'Erreur de chargement de la progression'));
   }, [router]);
 
   if (!data && !error) return <p>Chargement...</p>;
 
   return (
     <section className="space-y-6">
-      <h1 className="text-3xl font-bold text-brand-900">Tableau de bord des progres</h1>
+      <h1 className="text-3xl font-bold text-brand-900">Tableau de bord des progrès</h1>
       {error ? <p className="text-red-600">{error}</p> : null}
 
       {data ? (
@@ -43,7 +43,7 @@ export default function ProgressPage() {
           </div>
 
           <div className="card">
-            <h2 className="mb-3 text-xl font-semibold">Statistiques par matiere</h2>
+            <h2 className="mb-3 text-xl font-semibold">Statistiques par matière</h2>
             <div className="space-y-2 text-sm">
               {data.subjectStats.map((s) => (
                 <div key={s.subject} className="flex flex-wrap items-center justify-between rounded border border-brand-100 px-3 py-2">
@@ -57,7 +57,7 @@ export default function ProgressPage() {
           </div>
 
           <div className="card">
-            <h2 className="mb-3 text-xl font-semibold">Dernieres tentatives</h2>
+            <h2 className="mb-3 text-xl font-semibold">Dernières tentatives</h2>
             <div className="space-y-2 text-sm">
               {data.recentAttempts.map((a) => (
                 <div key={a.id} className="flex flex-wrap items-center justify-between rounded border border-brand-100 px-3 py-2">
