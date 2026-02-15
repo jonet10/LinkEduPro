@@ -20,12 +20,12 @@ export default function SubjectsPage() {
 
     apiClient('/subjects', { token })
       .then(setSubjects)
-      .catch((e) => setError(e.message || 'Impossible de charger les matieres'));
+      .catch((e) => setError(e.message || 'Impossible de charger les matières'));
   }, [router]);
 
   return (
     <section>
-      <h1 className="mb-6 text-3xl font-bold text-brand-900">Catalogue des matieres</h1>
+      <h1 className="mb-6 text-3xl font-bold text-brand-900">Catalogue des matières</h1>
       {error ? <p className="mb-4 text-red-600">{error}</p> : null}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {subjects.map((subject) => (
