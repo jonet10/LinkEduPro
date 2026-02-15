@@ -5,12 +5,14 @@ export function setAuth(token, student) {
   if (typeof window === 'undefined') return;
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(STUDENT_KEY, JSON.stringify(student));
+  window.dispatchEvent(new Event('auth-changed'));
 }
 
 export function clearAuth() {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(STUDENT_KEY);
+  window.dispatchEvent(new Event('auth-changed'));
 }
 
 export function getToken() {
