@@ -46,6 +46,9 @@ model Question {
   options       Json
   correctOption Int
   explanation   String?
+  isPremium     Boolean      @default(false)
+  frequencyScore Int         @default(0)
+  sourceTopic   String?
   subject       Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   answers       QuizAnswer[]
   createdAt     DateTime     @default(now())

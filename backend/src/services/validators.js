@@ -1,4 +1,4 @@
-﻿const Joi = require('joi');
+const Joi = require('joi');
 
 const registerSchema = Joi.object({
   firstName: Joi.string().trim().min(2).max(80).required(),
@@ -23,7 +23,11 @@ const quizParamsSchema = Joi.object({
 
 const quizQuerySchema = Joi.object({
   limit: Joi.number().integer().min(1).max(50).default(10),
-  set: Joi.string().trim().max(50).optional()
+  set: Joi.string().trim().max(50).optional(),
+  premium: Joi.alternatives().try(
+    Joi.boolean(),
+    Joi.string().valid('1', '0', 'true', 'false')
+  ).optional()
 });
 
 const submitQuizSchema = Joi.object({

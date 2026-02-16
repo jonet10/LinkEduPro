@@ -69,6 +69,7 @@ async function getQuizQuestions(req, res, next) {
     const subjectId = Number(req.params.subjectId);
     const limit = Number(req.query.limit || 10);
     const set = req.query.set;
+    const premium = ['1', 'true', true].includes(req.query.premium);
 
     const subject = await prisma.subject.findUnique({ where: { id: subjectId } });
     if (!subject) {
@@ -94,15 +95,31 @@ async function getQuizQuestions(req, res, next) {
       selectedSet = { key: String(chosen.id), name: toSetName(chosen.name) };
     }
 
-    const questions = await prisma.question.findMany({
-      where: { subjectId: targetSubject.id },
+    const baseWhere = premium
+      ? { subjectId: targetSubject.id, isPremium: true }
+      : { subjectId: targetSubject.id };
+
+    let questions = await prisma.question.findMany({
+      where: baseWhere,
       take: limit,
-      orderBy: { id: 'asc' }
+      orderBy: premium
+        ? [{ frequencyScore: 'desc' }, { id: 'asc' }]
+        : [{ id: 'asc' }]
     });
+
+    // Fallback safe if no premium questions exist for this subject.
+    if (premium && questions.length === 0) {
+      questions = await prisma.question.findMany({
+        where: { subjectId: targetSubject.id },
+        take: limit,
+        orderBy: [{ id: 'asc' }]
+      });
+    }
 
     return res.json({
       subject: { id: subject.id, name: subjectLabel },
       selectedSet,
+      mode: premium ? 'premium' : 'standard',
       questions: questions.map(toClientQuestion)
     });
   } catch (error) {
@@ -165,4 +182,37 @@ async function submitQuiz(req, res, next) {
   }
 }
 
-module.exports = { getQuizSets, getQuizQuestions, submitQuiz };
+async function getPremiumInsights(req, res, next) {
+  try {
+    const subjectId = Number(req.params.subjectId);
+    const subject = await prisma.subject.findUnique({ where: { id: subjectId } });
+    if (!subject) {
+      return res.status(404).json({ message: 'Matiere introuvable.' });
+    }
+
+    const premiumQuestions = await prisma.question.findMany({
+      where: { subjectId, isPremium: true },
+      select: { sourceTopic: true, frequencyScore: true }
+    });
+
+    const topicMap = new Map();
+    for (const q of premiumQuestions) {
+      const key = q.sourceTopic || 'General';
+      if (!topicMap.has(key)) topicMap.set(key, { topic: key, count: 0, score: 0 });
+      const t = topicMap.get(key);
+      t.count += 1;
+      t.score += q.frequencyScore || 0;
+    }
+
+    const topics = Array.from(topicMap.values()).sort((a, b) => b.score - a.score || b.count - a.count);
+    return res.json({
+      subject: { id: subject.id, name: subject.name },
+      premiumQuestionCount: premiumQuestions.length,
+      topics
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { getQuizSets, getQuizQuestions, submitQuiz, getPremiumInsights };

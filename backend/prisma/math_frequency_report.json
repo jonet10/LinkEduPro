@@ -1,0 +1,21 @@
+{
+  "sourceFolders": [
+    "Mathematiques",
+    "Compilations"
+  ],
+  "topRecurringTopics": [
+    { "topic": "complexe", "score": 14 },
+    { "topic": "fonction", "score": 12 },
+    { "topic": "suite", "score": 12 },
+    { "topic": "statistique", "score": 11 },
+    { "topic": "graphique", "score": 11 },
+    { "topic": "analytique", "score": 6 },
+    { "topic": "rationnel", "score": 6 },
+    { "topic": "matrice", "score": 4 },
+    { "topic": "parametre", "score": 4 },
+    { "topic": "cartesien", "score": 3 },
+    { "topic": "methodique", "score": 3 },
+    { "topic": "elasticite", "score": 3 }
+  ],
+  "note": "Scores issus d'une analyse mixte noms de fichiers + extraction textuelle PDF (pages 1-3)."
+}

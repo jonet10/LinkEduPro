@@ -25,6 +25,186 @@ const seedData = [
         options: ['2', '3', '4', '5'],
         correctOption: 1,
         explanation: 'Un triangle a 3 cotes.'
+      },
+      {
+        prompt: 'Premium: Dans le plan cartesien, la pente de la droite y = ax + b est :',
+        options: ['a', 'b', 'ab', '1/a'],
+        correctOption: 0,
+        explanation: 'Theme frequent cartesien (annales LLA).',
+        isPremium: true,
+        frequencyScore: 82,
+        sourceTopic: 'cartesien'
+      },
+      {
+        prompt: 'Premium: Le discriminant de ax^2 + bx + c = 0 est :',
+        options: ['Delta = b^2 - 4ac', 'Delta = b^2 + 4ac', 'Delta = 4ac - b', 'Delta = a^2 - c^2'],
+        correctOption: 0,
+        explanation: 'Question recurrente en analytique.',
+        isPremium: true,
+        frequencyScore: 88,
+        sourceTopic: 'analytique'
+      },
+      {
+        prompt: 'Premium: Si Delta > 0 pour une equation du second degre, le nombre de solutions reelles est :',
+        options: ['Deux', 'Une', 'Aucune', 'Infini'],
+        correctOption: 0,
+        explanation: 'Classique dans les sujets analytiques.',
+        isPremium: true,
+        frequencyScore: 83,
+        sourceTopic: 'analytique'
+      },
+      {
+        prompt: 'Premium: Le module du complexe z = a + ib est :',
+        options: ['sqrt(a^2 + b^2)', 'a + b', 'a^2 + b^2', 'a - b'],
+        correctOption: 0,
+        explanation: 'Theme complexe tres present.',
+        isPremium: true,
+        frequencyScore: 95,
+        sourceTopic: 'complexe'
+      },
+      {
+        prompt: 'Premium: L argument d un complexe represente :',
+        options: ['L angle avec l axe reel', 'Sa norme', 'Sa partie imaginaire', 'Sa conjugaison'],
+        correctOption: 0,
+        explanation: 'Question usuelle dans les annales complexe.',
+        isPremium: true,
+        frequencyScore: 86,
+        sourceTopic: 'complexe'
+      },
+      {
+        prompt: 'Premium: La forme exponentielle d un complexe est :',
+        options: ['z = r e^(i theta)', 'z = a + ib', 'z = r + theta', 'z = i^2 r'],
+        correctOption: 0,
+        explanation: 'Thematique complexe recurrente.',
+        isPremium: true,
+        frequencyScore: 84,
+        sourceTopic: 'complexe'
+      },
+      {
+        prompt: 'Premium: Une fonction est croissante sur un intervalle si sa derivee est :',
+        options: ['Positive', 'Negative', 'Nulle partout', 'Imaginaire'],
+        correctOption: 0,
+        explanation: 'Fonctions/derivees frequentes dans compilations.',
+        isPremium: true,
+        frequencyScore: 78,
+        sourceTopic: 'fonction'
+      },
+      {
+        prompt: 'Premium: Le coefficient directeur de la tangente a y = f(x) en x0 est :',
+        options: ['f prime(x0)', 'f(x0)', 'x0', 'f(x0)/x0'],
+        correctOption: 0,
+        explanation: 'Question recurrente sur derivee.',
+        isPremium: true,
+        frequencyScore: 76,
+        sourceTopic: 'fonction'
+      },
+      {
+        prompt: 'Premium: Une suite geometrique de raison q verifie :',
+        options: ['u(n+1)=q*u(n)', 'u(n+1)=u(n)+q', 'u(n)=n+q', 'u(n)=q/n'],
+        correctOption: 0,
+        explanation: 'Theme suite frequent selon analyse des annales.',
+        isPremium: true,
+        frequencyScore: 90,
+        sourceTopic: 'suite'
+      },
+      {
+        prompt: 'Premium: La somme des n premiers termes d une suite arithmetique est :',
+        options: ['S(n)=n(u1+un)/2', 'S(n)=u1+un', 'S(n)=n*u1*un', 'S(n)=u1-un'],
+        correctOption: 0,
+        explanation: 'Question tres classique de suite.',
+        isPremium: true,
+        frequencyScore: 81,
+        sourceTopic: 'suite'
+      },
+      {
+        prompt: 'Premium: Une fonction rationnelle est de la forme :',
+        options: ['P(x)/Q(x)', 'P(x)+Q(x) seulement', 'sqrt(P(x))', 'e^x uniquement'],
+        correctOption: 0,
+        explanation: 'Theme rationnel present en SMP/SVT-SMP.',
+        isPremium: true,
+        frequencyScore: 89,
+        sourceTopic: 'rationnel'
+      },
+      {
+        prompt: 'Premium: Le domaine de definition de P(x)/Q(x) exclut :',
+        options: ['Les zeros de Q(x)', 'Les zeros de P(x)', 'Tous les reels', 'Uniquement 0'],
+        correctOption: 0,
+        explanation: 'Rationnel: question de base recurrente.',
+        isPremium: true,
+        frequencyScore: 87,
+        sourceTopic: 'rationnel'
+      },
+      {
+        prompt: 'Premium: Dans y = f(x,m), m est appele :',
+        options: ['Parametre', 'Variable dependante unique', 'Constante physique', 'Vecteur'],
+        correctOption: 0,
+        explanation: 'Theme parametre frequent dans les dossiers.',
+        isPremium: true,
+        frequencyScore: 74,
+        sourceTopic: 'parametre'
+      },
+      {
+        prompt: 'Premium: Graphiquement, une elasticite-prix negative indique :',
+        options: ['La demande baisse quand le prix augmente', 'La demande augmente avec le prix', 'Aucune relation', 'Offre nulle'],
+        correctOption: 0,
+        explanation: 'Theme SES elasticite tres recurrent.',
+        isPremium: true,
+        frequencyScore: 72,
+        sourceTopic: 'elasticite'
+      },
+      {
+        prompt: 'Premium: Sur un graphique lineaire, l ordonnee a l origine correspond a :',
+        options: ['La valeur de y quand x=0', 'La pente', 'Le maximum', 'Le minimum'],
+        correctOption: 0,
+        explanation: 'Theme graphique SES/compilations.',
+        isPremium: true,
+        frequencyScore: 77,
+        sourceTopic: 'graphique'
+      },
+      {
+        prompt: 'Premium: Pour deux matrices A(mxn) et B(nx p), le produit AB est defini si :',
+        options: ['Le nombre de colonnes de A = nombre de lignes de B', 'm=n', 'A et B carrees', 'm=p uniquement'],
+        correctOption: 0,
+        explanation: 'Matrices ressort frequemment dans compilations.',
+        isPremium: true,
+        frequencyScore: 68,
+        sourceTopic: 'matrice'
+      },
+      {
+        prompt: 'Premium: La moyenne arithmetique d une serie est :',
+        options: ['Somme des valeurs / effectif total', 'Valeur la plus frequente', 'Valeur centrale uniquement', 'Ecart-type'],
+        correctOption: 0,
+        explanation: 'Statistique frequent dans compilations NS4.',
+        isPremium: true,
+        frequencyScore: 80,
+        sourceTopic: 'statistique'
+      },
+      {
+        prompt: 'Premium: La mediane d une serie ordonnee est :',
+        options: ['La valeur qui partage la serie en deux parts egales', 'Toujours la moyenne', 'Toujours le minimum', 'Toujours le maximum'],
+        correctOption: 0,
+        explanation: 'Statistique recurrente en annales.',
+        isPremium: true,
+        frequencyScore: 79,
+        sourceTopic: 'statistique'
+      },
+      {
+        prompt: 'Premium: Une equation exponentielle se ramene souvent via :',
+        options: ['Le logarithme', 'La derivee seconde uniquement', 'Le determinant', 'La matrice inverse'],
+        correctOption: 0,
+        explanation: 'Technique methodique frequente.',
+        isPremium: true,
+        frequencyScore: 66,
+        sourceTopic: 'methodique'
+      },
+      {
+        prompt: 'Premium: Dans un repere cartesien, deux droites paralleles ont :',
+        options: ['Le meme coefficient directeur', 'La meme ordonnee a l origine obligatoire', 'Des pentes opposees', 'Un angle droit'],
+        correctOption: 0,
+        explanation: 'Cartesien: question de base tres posee.',
+        isPremium: true,
+        frequencyScore: 73,
+        sourceTopic: 'cartesien'
       }
     ]
   },
@@ -665,7 +845,19 @@ async function main() {
             prompt: q.prompt,
             options: q.options,
             correctOption: q.correctOption,
-            explanation: q.explanation
+            explanation: q.explanation,
+            isPremium: Boolean(q.isPremium),
+            frequencyScore: Number(q.frequencyScore || 0),
+            sourceTopic: q.sourceTopic || null
+          }
+        });
+      } else if (q.isPremium || q.frequencyScore || q.sourceTopic) {
+        await prisma.question.update({
+          where: { id: existing.id },
+          data: {
+            isPremium: Boolean(q.isPremium),
+            frequencyScore: Number(q.frequencyScore || 0),
+            sourceTopic: q.sourceTopic || null
           }
         });
       }
