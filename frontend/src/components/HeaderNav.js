@@ -34,6 +34,8 @@ export default function HeaderNav() {
           <Link href="/subjects" className="hover:text-brand-700">Matieres</Link>
           <Link href="/progress" className="hover:text-brand-700">Progres</Link>
           <Link href="/library" className="hover:text-brand-700">Bibliotheque</Link>
+          <Link href="/blog" className="hover:text-brand-700">Blog</Link>
+          <Link href="/admin/super-dashboard" className="hover:text-brand-700">Dashboard</Link>
           <button className="hover:text-brand-700" onClick={onLogout}>Deconnexion</button>
         </>
       ) : (

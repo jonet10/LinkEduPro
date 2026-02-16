@@ -17,6 +17,16 @@ const loginSchema = Joi.object({
   password: Joi.string().required()
 });
 
+const acceptTeacherInviteSchema = Joi.object({
+  token: Joi.string().trim().length(48).required(),
+  firstName: Joi.string().trim().min(2).max(80).required(),
+  lastName: Joi.string().trim().min(2).max(80).required(),
+  password: Joi.string().min(8).max(128).required(),
+  sex: Joi.string().valid('MALE', 'FEMALE', 'OTHER').default('OTHER'),
+  dateOfBirth: Joi.date().iso().optional(),
+  phone: Joi.string().trim().max(30).allow(null, '')
+});
+
 const quizParamsSchema = Joi.object({
   subjectId: Joi.number().integer().positive().required()
 });
@@ -48,6 +58,7 @@ const submitQuizSchema = Joi.object({
 module.exports = {
   registerSchema,
   loginSchema,
+  acceptTeacherInviteSchema,
   quizParamsSchema,
   quizQuerySchema,
   submitQuizSchema

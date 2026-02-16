@@ -15,7 +15,21 @@ enum Sex {
 
 enum UserRole {
   STUDENT
+  TEACHER
   ADMIN
+}
+
+enum TeacherLevel {
+  STANDARD
+  VERIFIED
+  CERTIFIED
+  PREMIUM
+}
+
+enum TeacherVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum SchoolRole {
@@ -55,7 +69,22 @@ model Student {
   phone        String?
   passwordHash String
   role         UserRole      @default(STUDENT)
+  teacherLevel TeacherLevel  @default(STANDARD)
+  reputationScore Int        @default(0)
   attempts     QuizAttempt[]
+  posts        BlogPost[]
+  comments     BlogComment[]
+  postLikes    BlogPostLike[] @relation("BlogPostLikeUser")
+  approvedPosts BlogPost[] @relation("BlogPostApprover")
+  postReports  PostReport[]
+  postReportsReviewed PostReport[] @relation("PostReportReviewer")
+  reputationEntries ReputationPoint[]
+  userBadges   UserBadge[]
+  teacherVerifications TeacherVerification[] @relation("TeacherVerificationTeacher")
+  teacherVerificationReviews TeacherVerification[] @relation("TeacherVerificationReviewer")
+  communityConfigUpdates CommunityConfig[]
+  communityLogs CommunityLog[]
+  teacherInvitationsCreated TeacherInvitation[] @relation("TeacherInvitationCreator")
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -282,4 +311,224 @@ model SchoolLog {
 
   @@index([schoolId, createdAt])
   @@map("school_logs")
+}
+
+model TeacherVerification {
+  id          Int                       @id @default(autoincrement())
+  teacherId   Int
+  documentUrl String
+  status      TeacherVerificationStatus @default(PENDING)
+  reviewedBy  Int?
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  teacher     Student                   @relation("TeacherVerificationTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  reviewer    Student?                  @relation("TeacherVerificationReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([teacherId, status])
+  @@map("teacher_verifications")
+}
+
+model BlogPost {
+  id          Int       @id @default(autoincrement())
+  authorId    Int
+  title       String
+  content     String
+  excerpt     String?
+  isGlobal    Boolean   @default(true)
+  schoolId    Int?
+  isApproved  Boolean   @default(false)
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime?
+  approvedBy  Int?
+  approvedAt  DateTime?
+  likeCount   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  author      Student   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  approver    Student?  @relation("BlogPostApprover", fields: [approvedBy], references: [id], onDelete: SetNull)
+  comments    BlogComment[]
+  likes       BlogPostLike[]
+  categories  PostCategoryOnPost[]
+  tags        PostTagOnPost[]
+  reports     PostReport[]
+
+  @@index([authorId, createdAt])
+  @@index([isApproved, createdAt])
+  @@index([schoolId, createdAt])
+  @@index([isDeleted, createdAt])
+  @@map("posts")
+}
+
+model BlogComment {
+  id         Int      @id @default(autoincrement())
+  postId     Int
+  authorId   Int
+  content    String
+  isHelpful  Boolean  @default(false)
+  isDeleted  Boolean  @default(false)
+  deletedAt  DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  post       BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author     Student  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+  @@index([authorId, createdAt])
+  @@index([isDeleted, createdAt])
+  @@map("comments")
+}
+
+model BlogPostLike {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    Int
+  createdAt DateTime @default(now())
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      Student  @relation("BlogPostLikeUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId, createdAt])
+  @@map("post_likes")
+}
+
+model PostCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  posts       PostCategoryOnPost[]
+
+  @@map("post_categories")
+}
+
+model PostTag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     PostTagOnPost[]
+
+  @@map("post_tags")
+}
+
+model PostCategoryOnPost {
+  postId      Int
+  categoryId  Int
+  assignedAt  DateTime @default(now())
+  post        BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category    PostCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([postId, categoryId])
+  @@map("post_category_links")
+}
+
+model PostTagOnPost {
+  postId      Int
+  tagId       Int
+  assignedAt  DateTime @default(now())
+  post        BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag         PostTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tag_links")
+}
+
+model PostReport {
+  id          Int      @id @default(autoincrement())
+  postId      Int
+  reportedBy  Int
+  reason      String
+  details     String?
+  status      String   @default("PENDING")
+  reviewedBy  Int?
+  reviewedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  post        BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporter    Student  @relation(fields: [reportedBy], references: [id], onDelete: Cascade)
+  reviewer    Student? @relation("PostReportReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([postId, createdAt])
+  @@index([status, createdAt])
+  @@map("post_reports")
+}
+
+model ReputationPoint {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  points    Int
+  reason    String
+  createdAt DateTime @default(now())
+  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("reputation_points")
+}
+
+model Badge {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String
+  icon        String
+  userBadges  UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  userId    Int
+  badgeId   Int
+  awardedAt DateTime @default(now())
+  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, badgeId])
+  @@index([badgeId, awardedAt])
+  @@map("user_badges")
+}
+
+model CommunityConfig {
+  id                  Int      @id
+  maxPostsPerDay      Int      @default(3)
+  maxPostsPerMonth    Int      @default(10)
+  commentRatePerMin   Int      @default(10)
+  updatedBy           Int?
+  updatedAt           DateTime @updatedAt
+  updatedByUser       Student? @relation(fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@map("community_config")
+}
+
+model CommunityLog {
+  id         Int      @id @default(autoincrement())
+  actorId    Int?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  actor      Student? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+  @@index([entityType, createdAt])
+  @@map("community_logs")
+}
+
+model TeacherInvitation {
+  id         Int      @id @default(autoincrement())
+  email      String
+  token      String   @unique
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdBy  Int
+  createdAt  DateTime @default(now())
+  usedAt     DateTime?
+  creator    Student  @relation("TeacherInvitationCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([email, expiresAt])
+  @@index([used, expiresAt])
+  @@map("teacher_invitations")
 }

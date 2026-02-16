@@ -14,6 +14,8 @@ function sanitizeStudent(student) {
     email: student.email,
     phone: student.phone,
     role: student.role,
+    teacherLevel: student.teacherLevel,
+    reputationScore: student.reputationScore,
     createdAt: student.createdAt
   };
 }
@@ -91,4 +93,64 @@ async function login(req, res, next) {
   }
 }
 
-module.exports = { register, login };
+async function acceptTeacherInvite(req, res, next) {
+  try {
+    const { token, firstName, lastName, password, sex, dateOfBirth, phone } = req.body;
+
+    const invitation = await prisma.teacherInvitation.findUnique({ where: { token } });
+    if (!invitation || invitation.used || invitation.expiresAt < new Date()) {
+      return res.status(400).json({ message: 'Invitation invalide ou expiree.' });
+    }
+
+    const existing = await prisma.student.findUnique({ where: { email: invitation.email } });
+    if (existing) {
+      return res.status(409).json({ message: 'Un compte existe deja pour cet email.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const teacher = await prisma.$transaction(async (tx) => {
+      const created = await tx.student.create({
+        data: {
+          firstName,
+          lastName,
+          sex: sex || 'OTHER',
+          dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date('1990-01-01T00:00:00.000Z'),
+          school: 'LinkEduPro',
+          gradeLevel: 'TEACHER',
+          email: invitation.email,
+          phone: phone || null,
+          passwordHash,
+          role: 'TEACHER',
+          teacherLevel: 'STANDARD'
+        }
+      });
+
+      await tx.teacherInvitation.update({
+        where: { id: invitation.id },
+        data: { used: true, usedAt: new Date() }
+      });
+
+      return created;
+    });
+
+    const tokenJwt = generateToken(teacher);
+    return res.status(201).json({ token: tokenJwt, student: sanitizeStudent(teacher) });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function validateTeacherInvite(req, res, next) {
+  try {
+    const token = req.params.token;
+    const invitation = await prisma.teacherInvitation.findUnique({ where: { token } });
+    if (!invitation || invitation.used || invitation.expiresAt < new Date()) {
+      return res.status(404).json({ valid: false, message: 'Invitation invalide ou expiree.' });
+    }
+    return res.json({ valid: true, email: invitation.email, expiresAt: invitation.expiresAt });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { register, login, acceptTeacherInvite, validateTeacherInvite };
