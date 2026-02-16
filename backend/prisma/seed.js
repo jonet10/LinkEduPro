@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
@@ -862,6 +863,42 @@ async function main() {
         });
       }
     }
+  }
+
+  const superAdminEmail = process.env.SUPER_ADMIN_EMAIL || 'infolinkedupro@gmail.com';
+  const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
+
+  if (superAdminEmail && superAdminPassword) {
+    const existingAdmin = await prisma.student.findUnique({
+      where: { email: superAdminEmail }
+    });
+
+    if (!existingAdmin) {
+      const passwordHash = await bcrypt.hash(superAdminPassword, 10);
+      await prisma.student.create({
+        data: {
+          firstName: 'Super',
+          lastName: 'Admin',
+          sex: 'OTHER',
+          dateOfBirth: new Date('2000-01-01'),
+          school: 'LinkEduPro',
+          gradeLevel: 'ADMIN',
+          email: superAdminEmail,
+          phone: null,
+          passwordHash,
+          role: 'ADMIN'
+        }
+      });
+      console.log(`Super admin cree: ${superAdminEmail}`);
+    } else if (existingAdmin.role !== 'ADMIN') {
+      await prisma.student.update({
+        where: { id: existingAdmin.id },
+        data: { role: 'ADMIN' }
+      });
+      console.log(`Role admin applique a: ${superAdminEmail}`);
+    }
+  } else {
+    console.log('Super admin non cree: SUPER_ADMIN_PASSWORD manquant.');
   }
 
   console.log('Seed completed.');

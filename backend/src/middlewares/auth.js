@@ -16,7 +16,7 @@ async function authMiddleware(req, res, next) {
       return res.status(401).json({ message: 'Utilisateur introuvable.' });
     }
 
-    req.user = { id: student.id };
+    req.user = { id: student.id, role: student.role };
     return next();
   } catch (error) {
     return res.status(401).json({ message: 'Token invalide ou expiré.' });

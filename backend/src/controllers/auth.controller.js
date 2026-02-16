@@ -13,6 +13,7 @@ function sanitizeStudent(student) {
     gradeLevel: student.gradeLevel,
     email: student.email,
     phone: student.phone,
+    role: student.role,
     createdAt: student.createdAt
   };
 }
@@ -51,7 +52,8 @@ async function register(req, res, next) {
         gradeLevel,
         email: normalizedEmail,
         phone: phone || null,
-        passwordHash
+        passwordHash,
+        role: 'STUDENT'
       }
     });
 
