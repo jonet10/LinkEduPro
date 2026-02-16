@@ -6,8 +6,8 @@ const SLIDES = [
   {
     id: 'school-1',
     kind: 'Écoles haïtiennes',
-    title: "Lycée partenaire - Port-au-Prince",
-    subtitle: "Des classes connectées qui utilisent LinkEduPro pour les révisions hebdomadaires.",
+    title: 'Lycée partenaire - Port-au-Prince',
+    subtitle: 'Des classes connectées qui utilisent LinkEduPro pour les révisions hebdomadaires.',
     image:
       'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80'
   },
@@ -23,7 +23,7 @@ const SLIDES = [
     id: 'testimonial-1',
     kind: 'Témoignage clé',
     title: 'Les résultats montent après 4 semaines',
-    subtitle: "Plusieurs écoles observent une progression moyenne de 18% sur les quiz.",
+    subtitle: 'Plusieurs écoles observent une progression moyenne de 18% sur les quiz.',
     image:
       'https://images.unsplash.com/photo-1497486751825-1233686d5d80?auto=format&fit=crop&w=1600&q=80'
   }
@@ -43,9 +43,6 @@ export default function HomeCarousel() {
 
   const current = useMemo(() => SLIDES[index], [index]);
 
-  const prev = () => setIndex((i) => (i - 1 + total) % total);
-  const next = () => setIndex((i) => (i + 1) % total);
-
   return (
     <section className="card" aria-label="Carrousel d accueil">
       <div className="relative overflow-hidden rounded-xl">
@@ -64,21 +61,14 @@ export default function HomeCarousel() {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between">
-        <div className="flex gap-2" aria-label="Indicateurs du carrousel">
-          {SLIDES.map((slide, i) => (
-            <button
-              key={slide.id}
-              className={`h-2 w-8 rounded-full ${i === index ? 'bg-brand-700' : 'bg-brand-100'}`}
-              onClick={() => setIndex(i)}
-              aria-label={`Afficher la slide ${i + 1}`}
-            />
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <button className="btn-secondary" onClick={prev} aria-label="Slide précédente">Précédent</button>
-          <button className="btn-secondary" onClick={next} aria-label="Slide suivante">Suivant</button>
-        </div>
+      <div className="mt-4 flex gap-2" aria-label="Indicateurs du carrousel">
+        {SLIDES.map((slide, i) => (
+          <span
+            key={slide.id}
+            className={`h-2 w-8 rounded-full ${i === index ? 'bg-brand-700' : 'bg-brand-100'}`}
+            aria-hidden="true"
+          />
+        ))}
       </div>
     </section>
   );
