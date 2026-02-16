@@ -31,9 +31,10 @@ export default function HeaderNav() {
     <div className="flex items-center gap-3 text-sm">
       {isAuthed ? (
         <>
-          <Link href="/subjects" className="hover:text-brand-700">Matières</Link>
-          <Link href="/progress" className="hover:text-brand-700">Progrès</Link>
-          <button className="hover:text-brand-700" onClick={onLogout}>Déconnexion</button>
+          <Link href="/subjects" className="hover:text-brand-700">Matieres</Link>
+          <Link href="/progress" className="hover:text-brand-700">Progres</Link>
+          <Link href="/library" className="hover:text-brand-700">Bibliotheque</Link>
+          <button className="hover:text-brand-700" onClick={onLogout}>Deconnexion</button>
         </>
       ) : (
         <Link href="/login" className="hover:text-brand-700">Connexion</Link>
