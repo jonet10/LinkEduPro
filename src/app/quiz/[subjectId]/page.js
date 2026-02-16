@@ -15,6 +15,8 @@ export default function QuizPage() {
   const [subject, setSubject] = useState(null);
   const [quizSets, setQuizSets] = useState([]);
   const [selectedSetKey, setSelectedSetKey] = useState('');
+  const [mode, setMode] = useState('standard');
+  const [premiumAvailable, setPremiumAvailable] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(QUIZ_SECONDS);
@@ -24,7 +26,7 @@ export default function QuizPage() {
 
   const selectedSet = quizSets.find((s) => s.key === selectedSetKey) || null;
 
-  const loadQuestions = async (setKey) => {
+  const loadQuestions = async (setKey, selectedMode = mode) => {
     const token = getToken();
     const now = new Date().toISOString();
     setStartedAt(now);
@@ -33,7 +35,8 @@ export default function QuizPage() {
     setError('');
 
     const setQuery = setKey && setKey !== 'default' ? `&set=${encodeURIComponent(setKey)}` : '';
-    const data = await apiClient(`/quiz/subject/${subjectId}?limit=10${setQuery}`, { token });
+    const premiumQuery = selectedMode === 'premium' ? '&premium=1' : '';
+    const data = await apiClient(`/quiz/subject/${subjectId}?limit=10${setQuery}${premiumQuery}`, { token });
     setSubject(data.subject);
     setQuestions(data.questions);
   };
@@ -45,14 +48,19 @@ export default function QuizPage() {
       return;
     }
 
-    apiClient(`/quiz/subject/${subjectId}/sets`, { token })
-      .then(async (data) => {
+    Promise.all([
+      apiClient(`/quiz/subject/${subjectId}/sets`, { token }),
+      apiClient(`/quiz/subject/${subjectId}/premium-insights`, { token }).catch(() => null)
+    ])
+      .then(async ([data, premiumInfo]) => {
         setSubject(data.subject);
         setQuizSets(data.sets || []);
+        setPremiumAvailable(Boolean(premiumInfo && premiumInfo.premiumQuestionCount > 0));
+
         if (data.sets && data.sets.length === 1) {
           const only = data.sets[0].key;
           setSelectedSetKey(only);
-          await loadQuestions(only);
+          await loadQuestions(only, 'standard');
         }
       })
       .catch((e) => setError(e.message || 'Erreur de chargement du quiz'));
@@ -84,7 +92,18 @@ export default function QuizPage() {
   const startSet = async (setKey) => {
     setSelectedSetKey(setKey);
     try {
-      await loadQuestions(setKey);
+      await loadQuestions(setKey, mode);
+    } catch (e) {
+      setError(e.message || 'Erreur de chargement des questions');
+    }
+  };
+
+  const onModeChange = async (nextMode) => {
+    setMode(nextMode);
+    if (!selectedSetKey) return;
+
+    try {
+      await loadQuestions(selectedSetKey, nextMode);
     } catch (e) {
       setError(e.message || 'Erreur de chargement des questions');
     }
@@ -134,6 +153,24 @@ export default function QuizPage() {
         <h1 className="text-2xl font-bold text-brand-900">
           Quiz {subject ? `- ${subject.name}` : ''} {selectedSet ? `(${selectedSet.name})` : ''}
         </h1>
+
+        <div className="flex gap-2">
+          <button
+            className={mode === 'standard' ? 'btn-primary' : 'btn-secondary'}
+            onClick={() => onModeChange('standard')}
+          >
+            Standard
+          </button>
+          {premiumAvailable ? (
+            <button
+              className={mode === 'premium' ? 'btn-primary' : 'btn-secondary'}
+              onClick={() => onModeChange('premium')}
+            >
+              Premium
+            </button>
+          ) : null}
+        </div>
+
         {questions.length > 0 ? (
           <p className="rounded-lg bg-accent/20 px-3 py-2 text-sm font-semibold text-brand-900">Temps restant : {timeLeft}s</p>
         ) : null}
