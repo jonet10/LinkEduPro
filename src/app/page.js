@@ -41,16 +41,24 @@ export default function HomePage() {
   if (!isAuthed) {
     return (
       <section className="space-y-8">
+        <div className="rounded-xl border border-brand-100 bg-brand-50 px-4 py-3 text-sm text-brand-900">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="font-semibold">🎉 Rejoins LinkEduPro — Inscris-toi et démarre les quiz !</p>
+            <Link href="/register" className="btn-primary">S'inscrire</Link>
+          </div>
+        </div>
+
         <HomeCarousel />
 
         <section className="card" aria-labelledby="cta-title">
-          <h2 id="cta-title" className="text-2xl font-bold text-brand-900">Prêt à progresser dès aujourd hui ?</h2>
+          <h2 id="cta-title" className="text-2xl font-bold text-brand-900">Prêt à progresser dès aujourd'hui ?</h2>
           <p className="mt-2 text-sm text-brand-700">
             Lance un quiz, découvre les séries disponibles et commence ton entraînement.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link href="/login" className="btn-primary">Commencer un Quiz</Link>
             <Link href="/subjects" className="btn-secondary">Explorer les Quiz</Link>
+            <Link href="/register" className="btn-secondary">Créer un compte</Link>
           </div>
         </section>
 
@@ -89,7 +97,7 @@ export default function HomePage() {
           {student ? `${student.firstName} ${student.lastName}` : 'Espace élève'}
         </h1>
         <p className="mt-2 text-sm text-brand-700">
-          Compare tes performances avec d autres élèves et découvre les écoles les plus actives.
+          Compare tes performances avec d'autres élèves et découvre les écoles les plus actives.
         </p>
         <div className="mt-4 flex gap-3">
           <Link href="/subjects" className="btn-primary">Commencer un quiz</Link>
