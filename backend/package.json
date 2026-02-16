@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "test": "jest --runInBand",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
-    "prisma:seed": "node prisma/seed.js"
+    "prisma:seed": "node prisma/seed.js",
+    "school:backup": "node scripts/school-backup.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -18,11 +20,16 @@
     "express": "^4.19.2",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
     "morgan": "^1.10.0",
+    "pdfkit": "^0.15.2",
+    "xlsx": "^0.18.5",
     "@prisma/client": "^5.18.0"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
     "nodemon": "^3.1.4",
-    "prisma": "^5.18.0"
+    "prisma": "^5.18.0",
+    "supertest": "^7.0.0"
   }
 }

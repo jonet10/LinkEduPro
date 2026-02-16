@@ -18,6 +18,31 @@ enum UserRole {
   ADMIN
 }
 
+enum SchoolRole {
+  SUPER_ADMIN
+  SCHOOL_ADMIN
+  SCHOOL_ACCOUNTANT
+  SCHOOL_TEACHER
+}
+
+enum SchoolType {
+  PUBLIC
+  PRIVATE
+  OTHER
+}
+
+enum SchoolStudentSex {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum SchoolPaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+}
+
 model Student {
   id           Int           @id @default(autoincrement())
   firstName    String
@@ -86,4 +111,175 @@ model QuizAnswer {
   question       Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([attemptId, questionId])
+}
+
+model School {
+  id            Int                 @id @default(autoincrement())
+  name          String
+  type          SchoolType
+  phone         String
+  email         String              @unique
+  address       String
+  city          String
+  country       String
+  logo          String?
+  isActive      Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  admins        SchoolAdmin[]
+  academicYears SchoolAcademicYear[]
+  classes       SchoolClass[]
+  students      SchoolStudent[]
+  paymentTypes  SchoolPaymentType[]
+  payments      SchoolPayment[]
+  logs          SchoolLog[]
+
+  @@map("schools")
+}
+
+model SchoolAdmin {
+  id                   Int           @id @default(autoincrement())
+  schoolId             Int?
+  firstName            String
+  lastName             String
+  email                String        @unique
+  phone                String?
+  passwordHash         String
+  role                 SchoolRole
+  mustChangePassword   Boolean       @default(true)
+  isActive             Boolean       @default(true)
+  lastLoginAt          DateTime?
+  createdBySuperAdmin  Int?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  school               School?       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  recordedPayments     SchoolPayment[] @relation("PaymentRecordedBy")
+  logs                 SchoolLog[]   @relation("SchoolLogActor")
+
+  @@index([schoolId, role])
+  @@map("school_admins")
+}
+
+model SchoolAcademicYear {
+  id          Int            @id @default(autoincrement())
+  schoolId    Int
+  label       String
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  school      School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classes     SchoolClass[]
+  students    SchoolStudent[]
+  payments    SchoolPayment[]
+
+  @@unique([schoolId, label])
+  @@index([schoolId, isActive])
+  @@map("school_academic_years")
+}
+
+model SchoolClass {
+  id             Int               @id @default(autoincrement())
+  schoolId       Int
+  academicYearId Int
+  name           String
+  level          String?
+  capacity       Int?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  school         School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  academicYear   SchoolAcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  students       SchoolStudent[]
+  payments       SchoolPayment[]
+
+  @@unique([schoolId, academicYearId, name])
+  @@index([schoolId, academicYearId])
+  @@map("school_classes")
+}
+
+model SchoolStudent {
+  id             Int               @id @default(autoincrement())
+  schoolId       Int
+  classId        Int
+  academicYearId Int
+  studentId      String
+  firstName      String
+  lastName       String
+  sex            SchoolStudentSex
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  school         School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolClass    SchoolClass       @relation(fields: [classId], references: [id], onDelete: Restrict)
+  academicYear   SchoolAcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  payments       SchoolPayment[]
+
+  @@unique([schoolId, studentId])
+  @@unique([schoolId, academicYearId, classId, firstName, lastName])
+  @@index([schoolId, classId])
+  @@map("school_students")
+}
+
+model SchoolPaymentType {
+  id          Int            @id @default(autoincrement())
+  schoolId    Int
+  name        String
+  description String?
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  school      School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  payments    SchoolPayment[]
+
+  @@unique([schoolId, name])
+  @@map("school_payment_types")
+}
+
+model SchoolPayment {
+  id              Int               @id @default(autoincrement())
+  schoolId        Int
+  studentId       Int
+  classId         Int
+  academicYearId  Int
+  paymentTypeId   Int
+  amountDue       Decimal           @db.Decimal(10, 2)
+  amountPaid      Decimal           @db.Decimal(10, 2)
+  status          SchoolPaymentStatus
+  receiptNumber   String
+  receiptPath     String?
+  notes           String?
+  recordedById    Int
+  paymentDate     DateTime          @default(now())
+  deletedAt       DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  school          School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  student         SchoolStudent     @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  schoolClass     SchoolClass       @relation(fields: [classId], references: [id], onDelete: Restrict)
+  academicYear    SchoolAcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  paymentType     SchoolPaymentType @relation(fields: [paymentTypeId], references: [id], onDelete: Restrict)
+  recordedBy      SchoolAdmin       @relation("PaymentRecordedBy", fields: [recordedById], references: [id], onDelete: Restrict)
+
+  @@unique([schoolId, receiptNumber])
+  @@index([schoolId, paymentDate])
+  @@index([schoolId, deletedAt])
+  @@map("school_payments")
+}
+
+model SchoolLog {
+  id         Int        @id @default(autoincrement())
+  schoolId   Int?
+  actorId    Int?
+  actorRole  SchoolRole?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime   @default(now())
+  school     School?    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  actor      SchoolAdmin? @relation("SchoolLogActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, createdAt])
+  @@map("school_logs")
 }
