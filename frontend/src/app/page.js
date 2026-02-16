@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getToken, getStudent } from '@/lib/auth';
+import HomeCarousel from '@/components/HomeCarousel';
+import VerifiedTestimonials from '@/components/VerifiedTestimonials';
 
 export default function HomePage() {
   const [ready, setReady] = useState(false);
@@ -38,25 +40,43 @@ export default function HomePage() {
 
   if (!isAuthed) {
     return (
-      <section className="grid gap-6 md:grid-cols-2 md:items-center">
-        <div>
-          <p className="mb-2 inline-block rounded-full bg-accent/20 px-3 py-1 text-xs font-semibold text-brand-900">L'éducation connectée</p>
-          <h1 className="mb-4 text-4xl font-black leading-tight text-brand-900">Réviser, simuler, progresser avec LinkEduPro</h1>
-          <p className="mb-6 text-brand-700">Module élève: quiz par matière, examens chronométrés, score automatique et suivi précis des progrès.</p>
-          <div className="flex gap-3">
-            <Link href="/register" className="btn-primary">Commencer</Link>
-            <Link href="/login" className="btn-secondary">Se connecter</Link>
+      <section className="space-y-8">
+        <HomeCarousel />
+
+        <section className="card" aria-labelledby="cta-title">
+          <h2 id="cta-title" className="text-2xl font-bold text-brand-900">Prêt à progresser dès aujourd hui ?</h2>
+          <p className="mt-2 text-sm text-brand-700">
+            Lance un quiz, découvre les séries disponibles et commence ton entraînement.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href="/login" className="btn-primary">Commencer un Quiz</Link>
+            <Link href="/subjects" className="btn-secondary">Explorer les Quiz</Link>
           </div>
-        </div>
-        <div className="card">
-          <h2 className="mb-3 text-lg font-bold">Ce que vous obtenez</h2>
-          <ul className="space-y-2 text-sm text-brand-900">
-            <li>- Catalogue de matières</li>
-            <li>- Quiz interactifs et notation immédiate</li>
-            <li>- Simulation d'examen chronométrée</li>
-            <li>- Tableau de bord de progression</li>
-          </ul>
-        </div>
+        </section>
+
+        <section className="card" aria-labelledby="features-title">
+          <h2 id="features-title" className="mb-4 text-2xl font-bold text-brand-900">Fonctionnalités principales</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <article className="rounded-xl border border-brand-100 p-4">
+              <h3 className="font-semibold text-brand-900">Quiz interactifs</h3>
+              <p className="mt-2 text-sm text-brand-700">Questions dynamiques, chronomètre et correction immédiate.</p>
+            </article>
+            <article className="rounded-xl border border-brand-100 p-4">
+              <h3 className="font-semibold text-brand-900">Statistiques</h3>
+              <p className="mt-2 text-sm text-brand-700">Suivi des scores, moyenne par matière et progression.</p>
+            </article>
+            <article className="rounded-xl border border-brand-100 p-4">
+              <h3 className="font-semibold text-brand-900">Profils</h3>
+              <p className="mt-2 text-sm text-brand-700">Profil élève avec niveau, école et historique des tentatives.</p>
+            </article>
+            <article className="rounded-xl border border-brand-100 p-4">
+              <h3 className="font-semibold text-brand-900">Opportunités</h3>
+              <p className="mt-2 text-sm text-brand-700">Concours actifs, annonces académiques et recommandations ciblées.</p>
+            </article>
+          </div>
+        </section>
+
+        <VerifiedTestimonials />
       </section>
     );
   }
@@ -69,7 +89,7 @@ export default function HomePage() {
           {student ? `${student.firstName} ${student.lastName}` : 'Espace élève'}
         </h1>
         <p className="mt-2 text-sm text-brand-700">
-          Compare tes performances avec d'autres élèves et découvre les écoles les plus actives.
+          Compare tes performances avec d autres élèves et découvre les écoles les plus actives.
         </p>
         <div className="mt-4 flex gap-3">
           <Link href="/subjects" className="btn-primary">Commencer un quiz</Link>
@@ -91,7 +111,7 @@ export default function HomePage() {
                 <span>Meilleur: {row.best}%</span>
               </div>
             ))}
-            {community.leaderboard.length === 0 ? <p>Aucune donnee pour le moment.</p> : null}
+            {community.leaderboard.length === 0 ? <p>Aucune donnée pour le moment.</p> : null}
           </div>
         </article>
 
@@ -104,7 +124,7 @@ export default function HomePage() {
                 <p>{s.students} élève(s) | moyenne {s.average}%</p>
               </div>
             ))}
-            {community.schools.length === 0 ? <p>Aucune donnee pour le moment.</p> : null}
+            {community.schools.length === 0 ? <p>Aucune donnée pour le moment.</p> : null}
           </div>
         </article>
       </div>
