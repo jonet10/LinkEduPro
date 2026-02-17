@@ -126,6 +126,7 @@ model Student {
   approvalLogs ApprovalLog[] @relation("ContentApprovalAdmin")
   personalStudyPlans PersonalStudyPlan[]
   quizResults QuizResult[]
+  searchHistoryEntries SearchHistory[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -136,6 +137,7 @@ model Subject {
   description String?
   questions   Question[]
   attempts    QuizAttempt[]
+  courseTags  CourseTag[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
@@ -391,6 +393,7 @@ model BlogPost {
   likes       BlogPostLike[]
   categories  PostCategoryOnPost[]
   tags        PostTagOnPost[]
+  publicationTags PublicationTag[]
   reports     PostReport[]
 
   @@index([authorId, createdAt])
@@ -724,4 +727,49 @@ model QuizResult {
   @@index([userId, completedAt])
   @@index([quizId, completedAt])
   @@map("quiz_results")
+}
+
+model SearchTag {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  publicationTags PublicationTag[]
+  courseTags      CourseTag[]
+
+  @@map("tags")
+}
+
+model PublicationTag {
+  publicationId Int      @map("publication_id")
+  tagId         Int      @map("tag_id")
+  assignedAt    DateTime @default(now()) @map("assigned_at")
+  publication   BlogPost @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  tag           SearchTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([publicationId, tagId])
+  @@index([tagId])
+  @@map("publication_tags")
+}
+
+model CourseTag {
+  courseId    Int      @map("course_id")
+  tagId       Int      @map("tag_id")
+  assignedAt  DateTime @default(now()) @map("assigned_at")
+  course      Subject  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tag         SearchTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, tagId])
+  @@index([tagId])
+  @@map("course_tags")
+}
+
+model SearchHistory {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  query     String
+  createdAt DateTime @default(now()) @map("created_at")
+  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([query])
+  @@map("search_history")
 }

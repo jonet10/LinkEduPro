@@ -48,6 +48,18 @@ const openApi = {
     },
     '/v2/admin/dashboard': {
       get: { summary: 'v2 admin dashboard stats and content approval panel', security: [{ bearerAuth: [] }] }
+    },
+    '/search/advanced': {
+      get: { summary: 'Advanced multi-category search with filters/pagination', security: [{ bearerAuth: [] }], responses: { '200': { description: 'OK' } } }
+    },
+    '/search/suggestions': {
+      get: { summary: 'Live search suggestions (autocomplete)', responses: { '200': { description: 'OK' } } }
+    },
+    '/search/history': {
+      get: { summary: 'Last 5 searches for authenticated user', security: [{ bearerAuth: [] }], responses: { '200': { description: 'OK' } } }
+    },
+    '/search/trending': {
+      get: { summary: 'Most searched keywords', responses: { '200': { description: 'OK' } } }
     }
   },
   components: {
