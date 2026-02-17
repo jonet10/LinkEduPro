@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const path = require('path');
 const authRoutes = require('./routes/auth.routes');
 const subjectRoutes = require('./routes/subject.routes');
 const quizRoutes = require('./routes/quiz.routes');
@@ -15,13 +14,14 @@ const publicRoutes = require('./routes/public.routes');
 const v2Routes = require('./v2/routes');
 const searchRoutes = require('./search/routes/search.routes');
 const { focusRouter, pomodoroRouter } = require('./focus/routes/focus.routes');
+const { getStorageRoot } = require('./config/storage');
 
 const app = express();
 
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express.json());
 app.use(morgan('dev'));
-app.use('/storage', express.static(path.resolve(__dirname, '../storage')));
+app.use('/storage', express.static(getStorageRoot()));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });

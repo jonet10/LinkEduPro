@@ -1,12 +1,11 @@
-const fs = require('fs');
-const path = require('path');
 const multer = require('multer');
+const { resolveStoragePath, ensureDir } = require('../../config/storage');
 
-const uploadDir = path.resolve(__dirname, '../../../storage/profile-photos');
+const uploadDir = resolveStoragePath('profile-photos');
 
 const storage = multer.diskStorage({
   destination: (_, __, cb) => {
-    fs.mkdirSync(uploadDir, { recursive: true });
+    ensureDir(uploadDir);
     cb(null, uploadDir);
   },
   filename: (_, file, cb) => {

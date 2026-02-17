@@ -1,10 +1,9 @@
-const path = require('path');
-const fs = require('fs');
 const multer = require('multer');
+const { resolveStoragePath, ensureDir } = require('../../config/storage');
 
 const storage = multer.diskStorage({
   destination: (_, __, cb) => {
-    cb(null, path.resolve(__dirname, '../../../storage/teacher-verifications'));
+    cb(null, ensureDir(resolveStoragePath('teacher-verifications')));
   },
   filename: (_, file, cb) => {
     const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -29,8 +28,7 @@ module.exports = { uploadTeacherDocument };
 
 const blogStorage = multer.diskStorage({
   destination: (_, __, cb) => {
-    const dir = path.resolve(__dirname, '../../../storage/blog-images');
-    fs.mkdirSync(dir, { recursive: true });
+    const dir = ensureDir(resolveStoragePath('blog-images'));
     cb(null, dir);
   },
   filename: (_, file, cb) => {
