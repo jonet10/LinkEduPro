@@ -3,6 +3,7 @@ const { addReputationPoints } = require('../services/reputation.service');
 const { evaluateUserBadges } = require('../services/badge-rules.service');
 const { createCommunityLog } = require('../services/log.service');
 const { sanitizeText } = require('../utils/sanitize');
+const { notifyAdmins } = require('../../services/notifications');
 
 function getPagination(query) {
   const page = Math.max(1, Number(query.page || 1));
@@ -61,6 +62,14 @@ async function createPost(req, res, next) {
       entityType: 'Post',
       entityId: String(post.id),
       metadata: { isGlobal, schoolId }
+    });
+
+    await notifyAdmins({
+      type: 'BLOG_POST_CREATED',
+      title: 'Nouveau post publie',
+      message: `${user.firstName} ${user.lastName} a publie "${post.title}".`,
+      entityType: 'Post',
+      entityId: String(post.id)
     });
 
     return res.status(201).json({ post });

@@ -57,6 +57,12 @@ enum SchoolPaymentStatus {
   PAID
 }
 
+enum LibraryBookStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Student {
   id           Int           @id @default(autoincrement())
   firstName    String
@@ -85,6 +91,9 @@ model Student {
   communityConfigUpdates CommunityConfig[]
   communityLogs CommunityLog[]
   teacherInvitationsCreated TeacherInvitation[] @relation("TeacherInvitationCreator")
+  uploadedLibraryBooks LibraryBook[] @relation("LibraryBookUploader")
+  reviewedLibraryBooks LibraryBook[] @relation("LibraryBookReviewer")
+  notifications UserNotification[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -531,4 +540,44 @@ model TeacherInvitation {
   @@index([email, expiresAt])
   @@index([used, expiresAt])
   @@map("teacher_invitations")
+}
+
+model LibraryBook {
+  id          Int               @id @default(autoincrement())
+  title       String
+  subject     String
+  level       String
+  description String?
+  fileUrl     String
+  status      LibraryBookStatus @default(PENDING)
+  isDeleted   Boolean           @default(false)
+  deletedAt   DateTime?
+  uploadedBy  Int
+  reviewedBy  Int?
+  reviewedAt  DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  uploader    Student           @relation("LibraryBookUploader", fields: [uploadedBy], references: [id], onDelete: Cascade)
+  reviewer    Student?          @relation("LibraryBookReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([isDeleted, createdAt])
+  @@index([uploadedBy, createdAt])
+  @@map("library_books")
+}
+
+model UserNotification {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  type       String
+  title      String
+  message    String
+  entityType String?
+  entityId   String?
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  user       Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@map("user_notifications")
 }

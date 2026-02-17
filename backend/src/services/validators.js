@@ -55,11 +55,24 @@ const submitQuizSchema = Joi.object({
     .required()
 });
 
+const createLibraryBookSchema = Joi.object({
+  title: Joi.string().trim().min(3).max(180).required(),
+  subject: Joi.string().trim().min(2).max(120).required(),
+  level: Joi.string().trim().min(2).max(80).required(),
+  description: Joi.string().trim().max(500).allow('', null)
+});
+
+const reviewLibraryBookSchema = Joi.object({
+  status: Joi.string().valid('APPROVED', 'REJECTED').required()
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
   acceptTeacherInviteSchema,
   quizParamsSchema,
   quizQuerySchema,
-  submitQuizSchema
+  submitQuizSchema,
+  createLibraryBookSchema,
+  reviewLibraryBookSchema
 };
