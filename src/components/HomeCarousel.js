@@ -70,11 +70,8 @@ export default function HomeCarousel({ isAuthed = false }) {
     return () => clearInterval(timer);
   }, [total]);
 
-  const nextSlide = () => setIndex((prev) => (prev + 1) % total);
-  const prevSlide = () => setIndex((prev) => (prev - 1 + total) % total);
-
   return (
-    <section className="relative left-1/2 right-1/2 -mx-[50vw] -mt-8 w-screen overflow-hidden" aria-label="Carrousel d accueil">
+    <section className="relative left-1/2 right-1/2 -mx-[50vw] -mt-8 w-screen overflow-hidden" aria-label="Carrousel d'accueil">
       <div className="relative min-h-[calc(100vh-74px)] w-full">
         {SLIDES.map((slide, i) => (
           <div
@@ -125,23 +122,6 @@ export default function HomeCarousel({ isAuthed = false }) {
             ))}
           </div>
         </div>
-
-        <button
-          type="button"
-          onClick={prevSlide}
-          className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/50 bg-black/35 px-3 py-2 text-white backdrop-blur hover:bg-black/55"
-          aria-label="Slide precedente"
-        >
-          ‹
-        </button>
-        <button
-          type="button"
-          onClick={nextSlide}
-          className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/50 bg-black/35 px-3 py-2 text-white backdrop-blur hover:bg-black/55"
-          aria-label="Slide suivante"
-        >
-          ›
-        </button>
 
         <div className="absolute bottom-6 left-0 right-0 z-20 flex justify-center gap-2" aria-label="Indicateurs du carrousel">
           {SLIDES.map((slide, i) => (
