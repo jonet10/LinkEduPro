@@ -141,8 +141,8 @@ export default function Footer() {
           <section aria-label="Contact">
             <h3 className={styles.title}>Contact</h3>
             <ul className={styles.list}>
-              <li><a className={styles.link} href="mailto:contact@linkedupro.com">contact@linkedupro.com</a></li>
-              <li><a className={styles.link} href="tel:+50900000000">+509 00 00 00 00</a></li>
+              <li><a className={styles.link} href="mailto:infolinkedupro@gmail.com">infolinkedupro@gmail.com</a></li>
+              <li><a className={styles.link} href="tel:+50938073835">+50938073835</a></li>
               <li><span className={styles.contactText}>Port-au-Prince, Haiti</span></li>
             </ul>
 
