@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
+import { resolveMediaUrl } from '@/lib/media';
 
 function emptyForm() {
   return {
@@ -388,7 +389,7 @@ export default function BlogPage() {
               {post.author?.role === 'TEACHER' ? ` (${post.author?.teacherLevel})` : ''}
             </p>
 
-            {post.imageUrl ? <img src={post.imageUrl} alt={post.title} className="max-h-72 w-full rounded-lg border border-brand-100 object-cover" /> : null}
+            {post.imageUrl ? <img src={resolveMediaUrl(post.imageUrl)} alt={post.title} className="max-h-72 w-full rounded-lg border border-brand-100 object-cover" /> : null}
 
             {!isExpanded && post.excerpt ? <p className="text-sm text-brand-700">{post.excerpt}</p> : null}
 

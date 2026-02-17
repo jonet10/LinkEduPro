@@ -4,13 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken, setAuth } from '@/lib/auth';
-
-function buildAvatarUrl(photoUrl) {
-  if (!photoUrl) return null;
-  if (String(photoUrl).startsWith('http')) return photoUrl;
-  const backendBaseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
-  return `${backendBaseUrl}${photoUrl}`;
-}
+import { resolveMediaUrl } from '@/lib/media';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -53,7 +47,7 @@ export default function ProfilePage() {
 
   const avatarSrc = useMemo(() => {
     if (photoPreview) return photoPreview;
-    return buildAvatarUrl(profile?.photoUrl);
+    return resolveMediaUrl(profile?.photoUrl);
   }, [photoPreview, profile?.photoUrl]);
 
   function onChangeField(key, value) {

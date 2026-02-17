@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { clearAuth, getDarkMode, getStudent, getToken, setDarkModePreference } from '@/lib/auth';
 import { apiClient } from '@/lib/api';
+import { resolveMediaUrl } from '@/lib/media';
 
 export default function HeaderNav() {
   const [isAuthed, setIsAuthed] = useState(false);
@@ -150,10 +151,7 @@ export default function HeaderNav() {
 
   const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
   const initials = `${(student?.firstName || '').charAt(0)}${(student?.lastName || '').charAt(0)}`.toUpperCase() || 'U';
-  const backendBaseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
-  const avatarUrl = student?.photoUrl
-    ? (String(student.photoUrl).startsWith('http') ? student.photoUrl : `${backendBaseUrl}${student.photoUrl}`)
-    : null;
+  const avatarUrl = resolveMediaUrl(student?.photoUrl);
 
   const mobileLinks = isAuthed
     ? [
