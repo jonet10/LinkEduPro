@@ -1,10 +1,11 @@
 const express = require('express');
 const validate = require('../../middlewares/validate');
-const { requireSuperAdmin } = require('../middlewares/roles');
+const { requireSuperAdmin, requireTeacherOrAdmin } = require('../middlewares/roles');
 const { enforcePostLimit } = require('../middlewares/post-limit');
 const { commentRateLimit } = require('../middlewares/comment-rate-limit');
 const {
   createPost,
+  updatePost,
   listPosts,
   approvePost,
   likePost,
@@ -22,6 +23,7 @@ const {
 } = require('../controllers/blog.controller');
 const {
   createPostSchema,
+  updatePostSchema,
   createCommentSchema,
   reportPostSchema,
   reviewReportSchema,
@@ -35,13 +37,14 @@ router.get('/posts', listPosts);
 router.get('/categories', listCategories);
 router.get('/tags', listTags);
 router.post('/posts', enforcePostLimit, validate(createPostSchema), createPost);
+router.patch('/posts/:postId', validate(updatePostSchema), updatePost);
 router.post('/posts/:postId/like', likePost);
 router.get('/posts/:postId/comments', listComments);
 router.post('/posts/:postId/comments', commentRateLimit, validate(createCommentSchema), createComment);
 router.post('/posts/:postId/report', validate(reportPostSchema), reportPost);
 router.delete('/posts/:postId', softDeletePost);
 
-router.patch('/posts/:postId/approve', requireSuperAdmin, approvePost);
+router.patch('/posts/:postId/approve', requireTeacherOrAdmin, approvePost);
 router.patch('/comments/:commentId/helpful', requireSuperAdmin, markCommentHelpful);
 router.post('/categories', requireSuperAdmin, validate(createCategorySchema), createCategory);
 router.post('/tags', requireSuperAdmin, validate(createTagSchema), createTag);

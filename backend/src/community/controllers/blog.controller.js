@@ -24,22 +24,25 @@ async function createPost(req, res, next) {
     const categoryIds = (req.body.categoryIds || []).map(Number);
     const tagIds = (req.body.tagIds || []).map(Number);
 
-    if (isGlobal && user.role === 'TEACHER' && !['CERTIFIED', 'PREMIUM'].includes(user.teacherLevel)) {
-      return res.status(403).json({ message: 'Seuls les professeurs certifies peuvent publier dans le blog global.' });
-    }
-
     if (!isGlobal && !schoolId) {
       return res.status(400).json({ message: 'schoolId requis pour un blog interne.' });
     }
+
+    const isSuperAdmin = user.role === 'ADMIN' && process.env.SUPER_ADMIN_EMAIL && user.email === process.env.SUPER_ADMIN_EMAIL;
+    const autoApproved = isSuperAdmin || ['ADMIN', 'TEACHER'].includes(user.role);
 
     const post = await prisma.blogPost.create({
       data: {
         authorId: req.user.id,
         title: sanitizeText(req.body.title, 180),
         excerpt: sanitizeText(req.body.excerpt || '', 400) || null,
+        imageUrl: req.body.imageUrl ? String(req.body.imageUrl).trim() : null,
         content: sanitizeText(req.body.content, 10000),
         isGlobal,
         schoolId,
+        isApproved: autoApproved,
+        approvedBy: autoApproved ? req.user.id : null,
+        approvedAt: autoApproved ? new Date() : null,
         categories: {
           create: categoryIds.map((id) => ({ categoryId: id }))
         },
@@ -54,6 +57,9 @@ async function createPost(req, res, next) {
     });
 
     await addReputationPoints(req.user.id, 'ARTICLE_PUBLISHED');
+    if (autoApproved && user.role === 'TEACHER') {
+      await addReputationPoints(req.user.id, 'ARTICLE_APPROVED');
+    }
     await evaluateUserBadges(req.user.id);
 
     await createCommunityLog({
@@ -65,14 +71,116 @@ async function createPost(req, res, next) {
     });
 
     await notifyAdmins({
-      type: 'BLOG_POST_CREATED',
-      title: 'Nouveau post publie',
-      message: `${user.firstName} ${user.lastName} a publie "${post.title}".`,
+      type: autoApproved ? 'BLOG_POST_CREATED' : 'BLOG_POST_PENDING',
+      title: autoApproved ? 'Nouveau post publie' : 'Post en attente de validation',
+      message: autoApproved
+        ? `${user.firstName} ${user.lastName} a publie "${post.title}".`
+        : `${user.firstName} ${user.lastName} a soumis "${post.title}" pour validation.`,
       entityType: 'Post',
       entityId: String(post.id)
     });
 
-    return res.status(201).json({ post });
+    return res.status(201).json({
+      post,
+      moderation: {
+        status: post.isApproved ? 'APPROVED' : 'PENDING',
+        requiresReview: !post.isApproved
+      }
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function updatePost(req, res, next) {
+  try {
+    const postId = Number(req.params.postId);
+    const existing = await prisma.blogPost.findUnique({
+      where: { id: postId },
+      include: { categories: true, tags: true }
+    });
+
+    if (!existing || existing.isDeleted) {
+      return res.status(404).json({ message: 'Post introuvable.' });
+    }
+
+    const actor = await prisma.student.findUnique({ where: { id: req.user.id } });
+    if (!actor) {
+      return res.status(401).json({ message: 'Utilisateur introuvable.' });
+    }
+
+    const canEdit = req.user.role === 'ADMIN' || req.user.id === existing.authorId;
+    if (!canEdit) {
+      return res.status(403).json({ message: 'Action non autorisee.' });
+    }
+
+    const isSuperAdmin = actor.role === 'ADMIN' && process.env.SUPER_ADMIN_EMAIL && actor.email === process.env.SUPER_ADMIN_EMAIL;
+    const autoApproved = isSuperAdmin || ['ADMIN', 'TEACHER'].includes(actor.role);
+
+    const nextIsGlobal = req.body.isGlobal !== undefined ? req.body.isGlobal : existing.isGlobal;
+    const nextSchoolId = req.body.schoolId !== undefined ? (req.body.schoolId ? Number(req.body.schoolId) : null) : existing.schoolId;
+
+    if (!nextIsGlobal && !nextSchoolId) {
+      return res.status(400).json({ message: 'schoolId requis pour un blog interne.' });
+    }
+
+    const categoryIds = Array.isArray(req.body.categoryIds) ? req.body.categoryIds.map(Number) : null;
+    const tagIds = Array.isArray(req.body.tagIds) ? req.body.tagIds.map(Number) : null;
+
+    const updated = await prisma.$transaction(async (tx) => {
+      if (categoryIds) {
+        await tx.postCategoryOnPost.deleteMany({ where: { postId } });
+      }
+
+      if (tagIds) {
+        await tx.postTagOnPost.deleteMany({ where: { postId } });
+      }
+
+      return tx.blogPost.update({
+        where: { id: postId },
+        data: {
+          title: req.body.title !== undefined ? sanitizeText(req.body.title, 180) : undefined,
+          excerpt: req.body.excerpt !== undefined ? (sanitizeText(req.body.excerpt || '', 400) || null) : undefined,
+          imageUrl: req.body.imageUrl !== undefined ? (req.body.imageUrl ? String(req.body.imageUrl).trim() : null) : undefined,
+          content: req.body.content !== undefined ? sanitizeText(req.body.content, 10000) : undefined,
+          isGlobal: nextIsGlobal,
+          schoolId: nextSchoolId,
+          isApproved: autoApproved ? true : false,
+          approvedBy: autoApproved ? req.user.id : null,
+          approvedAt: autoApproved ? new Date() : null,
+          categories: categoryIds
+            ? {
+                create: categoryIds.map((id) => ({ categoryId: id }))
+              }
+            : undefined,
+          tags: tagIds
+            ? {
+                create: tagIds.map((id) => ({ tagId: id }))
+              }
+            : undefined
+        },
+        include: {
+          categories: { include: { category: true } },
+          tags: { include: { tag: true } }
+        }
+      });
+    });
+
+    await createCommunityLog({
+      actorId: req.user.id,
+      action: 'POST_UPDATED',
+      entityType: 'Post',
+      entityId: String(postId),
+      metadata: { autoApproved }
+    });
+
+    return res.json({
+      post: updated,
+      moderation: {
+        status: updated.isApproved ? 'APPROVED' : 'PENDING',
+        requiresReview: !updated.isApproved
+      }
+    });
   } catch (error) {
     return next(error);
   }
@@ -87,9 +195,19 @@ async function listPosts(req, res, next) {
     const categoryId = req.query.categoryId ? Number(req.query.categoryId) : undefined;
     const tagId = req.query.tagId ? Number(req.query.tagId) : undefined;
 
+    const requestedStatus = req.query.status ? String(req.query.status).toUpperCase() : undefined;
+    const canReview = ['ADMIN', 'TEACHER'].includes(req.user.role);
+    const visibilityWhere = canReview
+      ? (requestedStatus === 'PENDING'
+          ? { isApproved: false }
+          : requestedStatus === 'APPROVED'
+            ? { isApproved: true }
+            : {})
+      : { isApproved: true };
+
     const baseWhere = {
       isDeleted: false,
-      ...(req.user.role === 'ADMIN' ? {} : { isApproved: true }),
+      ...visibilityWhere,
       ...(isGlobal === 'true' ? { isGlobal: true } : {}),
       ...(isGlobal === 'false' ? { isGlobal: false } : {}),
       ...(schoolId ? { schoolId } : {}),
@@ -492,6 +610,7 @@ async function createTag(req, res, next) {
 
 module.exports = {
   createPost,
+  updatePost,
   listPosts,
   approvePost,
   likePost,

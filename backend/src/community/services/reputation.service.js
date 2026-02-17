@@ -3,7 +3,7 @@ const { grantBadge } = require('./badge.service');
 
 const reasons = {
   ARTICLE_PUBLISHED: { points: 5, reason: 'Article publie' },
-  ARTICLE_APPROVED: { points: 10, reason: 'Article valide par Super Admin' },
+  ARTICLE_APPROVED: { points: 10, reason: 'Article valide par admin/professeur' },
   COMMENT_HELPFUL: { points: 2, reason: 'Commentaire utile' },
   ARTICLE_POPULAR: { points: 20, reason: 'Article populaire (50 likes)' }
 };

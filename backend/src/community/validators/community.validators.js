@@ -4,11 +4,23 @@ const createPostSchema = Joi.object({
   title: Joi.string().trim().min(5).max(180).required(),
   content: Joi.string().trim().min(20).max(10000).required(),
   excerpt: Joi.string().trim().max(400).allow('', null),
+  imageUrl: Joi.string().uri().allow('', null),
   isGlobal: Joi.boolean().default(true),
   schoolId: Joi.number().integer().positive().allow(null),
   categoryIds: Joi.array().items(Joi.number().integer().positive()).default([]),
   tagIds: Joi.array().items(Joi.number().integer().positive()).default([])
 });
+
+const updatePostSchema = Joi.object({
+  title: Joi.string().trim().min(5).max(180).optional(),
+  content: Joi.string().trim().min(20).max(10000).optional(),
+  excerpt: Joi.string().trim().max(400).allow('', null),
+  imageUrl: Joi.string().uri().allow('', null),
+  isGlobal: Joi.boolean().optional(),
+  schoolId: Joi.number().integer().positive().allow(null),
+  categoryIds: Joi.array().items(Joi.number().integer().positive()).optional(),
+  tagIds: Joi.array().items(Joi.number().integer().positive()).optional()
+}).min(1);
 
 const createCommentSchema = Joi.object({
   content: Joi.string().trim().min(2).max(2000).required()
@@ -55,6 +67,7 @@ const reviewReportSchema = Joi.object({
 
 module.exports = {
   createPostSchema,
+  updatePostSchema,
   createCommentSchema,
   reportPostSchema,
   reviewVerificationSchema,
