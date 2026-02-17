@@ -108,11 +108,11 @@ export default function HeaderNav() {
 
   const mobileLinks = isAuthed
     ? [
-        { href: '/subjects', label: 'Matieres' },
-        { href: '/progress', label: 'Progres' },
-        { href: '/library', label: 'Bibliotheque' },
-        { href: '/blog', label: 'Blog' },
-        ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard' }] : [])
+        { href: '/subjects', label: 'Matières', icon: '📘' },
+        { href: '/progress', label: 'Progrès', icon: '📈' },
+        { href: '/library', label: 'Bibliothèque', icon: '📚' },
+        { href: '/blog', label: 'Blog', icon: '📝' },
+        ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
       ]
     : [];
 
@@ -123,12 +123,14 @@ export default function HeaderNav() {
           <div className="relative">
             <button
               type="button"
-              className="relative rounded-md border border-brand-100 px-3 py-1 hover:bg-brand-50"
+              className="relative rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
               onClick={() => setIsNotifOpen((v) => !v)}
+              aria-label="Notifications"
+              title="Notifications"
             >
-              Notifications
+              <span className="text-base leading-none" aria-hidden="true">🔔</span>
               {unreadCount > 0 ? (
-                <span className="ml-2 rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">
+                <span className="absolute -right-2 -top-2 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               ) : null}
@@ -176,12 +178,12 @@ export default function HeaderNav() {
         <div className="hidden md:flex md:items-center md:gap-3">
           {isAuthed ? (
             <>
-              <Link href="/subjects" className="hover:text-brand-700">Matieres</Link>
-              <Link href="/progress" className="hover:text-brand-700">Progres</Link>
-              <Link href="/library" className="hover:text-brand-700">Bibliotheque</Link>
-              <Link href="/blog" className="hover:text-brand-700">Blog</Link>
+              <Link href="/subjects" className="hover:text-brand-700">📘 Matières</Link>
+              <Link href="/progress" className="hover:text-brand-700">📈 Progrès</Link>
+              <Link href="/library" className="hover:text-brand-700">📚 Bibliothèque</Link>
+              <Link href="/blog" className="hover:text-brand-700">📝 Blog</Link>
               {canSeeGlobalAdminDashboard ? (
-                <Link href="/admin/super-dashboard" className="hover:text-brand-700">Dashboard</Link>
+                <Link href="/admin/super-dashboard" className="hover:text-brand-700">🛠️ Dashboard</Link>
               ) : null}
             </>
           ) : null}
@@ -190,14 +192,18 @@ export default function HeaderNav() {
 
       {mobileLinks.length > 0 ? (
         <>
-          <button
-            type="button"
-            className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full bg-brand-700 px-6 py-3 text-sm font-semibold text-white shadow-lg md:hidden"
-            style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-            onClick={() => setIsMobileMenuOpen((v) => !v)}
+          <div
+            className="fixed inset-x-0 bottom-0 z-50 flex justify-center pb-4 md:hidden"
+            style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
           >
-            Menu
-          </button>
+            <button
+              type="button"
+              className="rounded-full bg-brand-700 px-6 py-3 text-sm font-semibold text-white shadow-lg"
+              onClick={() => setIsMobileMenuOpen((v) => !v)}
+            >
+              Menu
+            </button>
+          </div>
 
           {isMobileMenuOpen ? (
             <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
@@ -214,7 +220,7 @@ export default function HeaderNav() {
                       className="rounded-lg border border-brand-100 px-3 py-2 hover:bg-brand-50"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      {item.label}
+                      {item.icon ? `${item.icon} ` : ''}{item.label}
                     </Link>
                   ))}
                 </nav>
