@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import HeaderNav from '@/components/HeaderNav';
 import ThemeInit from '@/components/ThemeInit';
+import Footer from '@/components/Footer';
 
 export const metadata = {
   title: 'LinkEduPro - Éducation connectée',
@@ -12,7 +13,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="fr">
-      <body>
+      <body className="flex min-h-screen flex-col">
         <ThemeInit />
         <header className="border-b border-brand-100 bg-white/80 backdrop-blur">
           <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -23,7 +24,8 @@ export default function RootLayout({ children }) {
             <HeaderNav />
           </nav>
         </header>
-        <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>
+        <Footer />
       </body>
     </html>
   );
