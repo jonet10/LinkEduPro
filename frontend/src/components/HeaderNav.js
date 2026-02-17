@@ -29,6 +29,9 @@ export default function HeaderNav() {
 
   return (
     <div className="flex items-center gap-3 text-sm">
+      <Link href="/school-management/login" className="rounded-md border border-brand-500 px-2 py-1 text-brand-700 hover:bg-brand-50">
+        Connexion School
+      </Link>
       {isAuthed ? (
         <>
           <Link href="/subjects" className="hover:text-brand-700">Matieres</Link>
