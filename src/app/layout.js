@@ -6,8 +6,31 @@ import ThemeInit from '@/components/ThemeInit';
 import Footer from '@/components/Footer';
 
 export const metadata = {
+  metadataBase: new URL('https://linkedupro-2.onrender.com'),
   title: 'LinkEduPro - Éducation connectée',
-  description: 'Plateforme SaaS éducative de révision'
+  description: 'LinkEduPro est une plateforme éducative qui aide les élèves et les enseignants à apprendre, réviser et progresser ensemble.',
+  openGraph: {
+    type: 'website',
+    locale: 'fr_FR',
+    url: 'https://linkedupro-2.onrender.com/',
+    siteName: 'LinkEduPro',
+    title: 'LinkEduPro - Éducation connectée',
+    description: 'LinkEduPro est une plateforme éducative qui aide les élèves et les enseignants à apprendre, réviser et progresser ensemble.',
+    images: [
+      {
+        url: '/logo.png',
+        width: 512,
+        height: 512,
+        alt: 'Logo LinkEduPro'
+      }
+    ]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'LinkEduPro - Éducation connectée',
+    description: 'LinkEduPro est une plateforme éducative qui aide les élèves et les enseignants à apprendre, réviser et progresser ensemble.',
+    images: ['/logo.png']
+  }
 };
 
 export default function RootLayout({ children }) {
