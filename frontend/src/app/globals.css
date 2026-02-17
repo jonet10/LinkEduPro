@@ -5,6 +5,8 @@
 :root {
   --bg: #f3f8ff;
   --text: #08355f;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: #dbeeff;
 }
 
 body {
@@ -16,8 +18,29 @@ body {
   min-height: 100vh;
 }
 
+.dark {
+  --bg: #0e1b2d;
+  --text: #e8f2ff;
+  --card-bg: rgba(20, 34, 52, 0.92);
+  --card-border: #355172;
+}
+
+.dark body {
+  background:
+    radial-gradient(circle at top right, #1e3a5f, transparent 42%),
+    radial-gradient(circle at 15% 20%, #3c2d24, transparent 30%),
+    var(--bg);
+}
+
+.dark header {
+  background-color: rgba(15, 28, 44, 0.86) !important;
+  border-color: #355172 !important;
+}
+
 .card {
-  @apply rounded-xl border border-brand-100 bg-white/95 p-6 shadow-sm;
+  @apply rounded-xl p-6 shadow-sm;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
 }
 
 .btn-primary {

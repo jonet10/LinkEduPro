@@ -1,6 +1,7 @@
 ﻿const bcrypt = require('bcryptjs');
 const prisma = require('../config/prisma');
 const { generateToken } = require('../utils/token');
+const { toApiLevel } = require('../v2/utils/level');
 
 function sanitizeStudent(student) {
   return {
@@ -13,6 +14,10 @@ function sanitizeStudent(student) {
     gradeLevel: student.gradeLevel,
     email: student.email,
     phone: student.phone,
+    address: student.address,
+    photoUrl: student.photoUrl,
+    level: toApiLevel(student.level),
+    darkMode: student.darkMode,
     role: student.role,
     teacherLevel: student.teacherLevel,
     reputationScore: student.reputationScore,

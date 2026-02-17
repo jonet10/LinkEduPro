@@ -35,6 +35,19 @@ const openApi = {
     },
     '/school-management/dashboard/super-admin': {
       get: { summary: 'School management global dashboard', security: [{ bearerAuth: [] }] }
+    },
+    '/v2/profile/me': {
+      get: { summary: 'Get authenticated user extended profile', security: [{ bearerAuth: [] }] },
+      patch: { summary: 'Update editable profile fields', security: [{ bearerAuth: [] }] }
+    },
+    '/v2/profile/photo': {
+      post: { summary: 'Upload profile photo', security: [{ bearerAuth: [] }] }
+    },
+    '/v2/focus/music': {
+      get: { summary: 'List focus music by level', security: [{ bearerAuth: [] }] }
+    },
+    '/v2/admin/dashboard': {
+      get: { summary: 'v2 admin dashboard stats and content approval panel', security: [{ bearerAuth: [] }] }
     }
   },
   components: {

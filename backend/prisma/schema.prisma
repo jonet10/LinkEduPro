@@ -63,6 +63,29 @@ enum LibraryBookStatus {
   REJECTED
 }
 
+enum EducationLevel {
+  LEVEL_9E   @map("9e")
+  NS1
+  NS2
+  NS3
+  TERMINALE  @map("Terminale")
+  UNIVERSITE @map("Universite")
+}
+
+enum ContentType {
+  QUIZ     @map("quiz")
+  PDF      @map("pdf")
+  VIDEO    @map("video")
+  REVISION @map("revision")
+}
+
+enum ContentStatus {
+  DRAFT    @map("draft")
+  PENDING  @map("pending")
+  APPROVED @map("approved")
+  REJECTED @map("rejected")
+}
+
 model Student {
   id           Int           @id @default(autoincrement())
   firstName    String
@@ -73,7 +96,11 @@ model Student {
   gradeLevel   String
   email        String?       @unique
   phone        String?
+  address      String?
   passwordHash String
+  photoUrl     String?       @map("photo_url")
+  level        EducationLevel?
+  darkMode     Boolean       @default(false) @map("dark_mode")
   role         UserRole      @default(STUDENT)
   teacherLevel TeacherLevel  @default(STANDARD)
   reputationScore Int        @default(0)
@@ -94,6 +121,11 @@ model Student {
   uploadedLibraryBooks LibraryBook[] @relation("LibraryBookUploader")
   reviewedLibraryBooks LibraryBook[] @relation("LibraryBookReviewer")
   notifications UserNotification[]
+  pomodoroSessions PomodoroSession[]
+  submittedContents Content[] @relation("ContentTeacher")
+  approvalLogs ApprovalLog[] @relation("ContentApprovalAdmin")
+  personalStudyPlans PersonalStudyPlan[]
+  quizResults QuizResult[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -580,4 +612,116 @@ model UserNotification {
 
   @@index([userId, isRead, createdAt])
   @@map("user_notifications")
+}
+
+model MusicTrack {
+  id        Int            @id @default(autoincrement())
+  title     String
+  url       String
+  level     EducationLevel
+  createdAt DateTime       @default(now())
+
+  @@index([level])
+  @@map("music_tracks")
+}
+
+model PomodoroSession {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  duration  Int
+  createdAt DateTime @default(now()) @map("created_at")
+  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("pomodoro_sessions")
+}
+
+model Content {
+  id          Int           @id @default(autoincrement())
+  title       String
+  body        String
+  level       EducationLevel
+  type        ContentType
+  status      ContentStatus @default(PENDING)
+  teacherId   Int           @map("teacher_id")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  teacher     Student       @relation("ContentTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  approvalLogs ApprovalLog[]
+
+  @@index([level, status, createdAt])
+  @@index([teacherId, createdAt])
+  @@map("contents")
+}
+
+model ApprovalLog {
+  id        Int      @id @default(autoincrement())
+  contentId Int      @map("content_id")
+  adminId   Int      @map("admin_id")
+  action    String
+  timestamp DateTime @default(now())
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  admin     Student  @relation("ContentApprovalAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([contentId, timestamp])
+  @@index([adminId, timestamp])
+  @@map("approval_logs")
+}
+
+model StudyPlan {
+  id          Int            @id @default(autoincrement())
+  level       EducationLevel
+  title       String
+  description String
+
+  @@index([level])
+  @@map("study_plans")
+}
+
+model PersonalStudyPlan {
+  id                Int       @id @default(autoincrement())
+  userId            Int       @map("user_id")
+  customPreferences Json?     @map("custom_preferences")
+  examDate          DateTime? @map("exam_date")
+  user              Student   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("personal_study_plans")
+}
+
+model LevelQuiz {
+  id        Int             @id @default(autoincrement())
+  level     EducationLevel
+  title     String
+  createdAt DateTime        @default(now()) @map("created_at")
+  questions LevelQuestion[]
+  results   QuizResult[]
+
+  @@index([level, createdAt])
+  @@map("quizzes")
+}
+
+model LevelQuestion {
+  id           Int      @id @default(autoincrement())
+  quizId       Int      @map("quiz_id")
+  questionText String   @map("question_text")
+  options      Json
+  correctAnswer String  @map("correct_answer")
+  quiz         LevelQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
+  @@map("questions")
+}
+
+model QuizResult {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  quizId      Int      @map("quiz_id")
+  score       Int
+  completedAt DateTime @default(now()) @map("completed_at")
+  user        Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz        LevelQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([userId, completedAt])
+  @@index([quizId, completedAt])
+  @@map("quiz_results")
 }
