@@ -41,13 +41,6 @@ export default function HomePage() {
   if (!isAuthed) {
     return (
       <section className="space-y-8">
-        <div className="rounded-xl border border-brand-100 bg-brand-50 px-4 py-3 text-sm text-brand-900">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="font-semibold">🎉 Rejoins LinkEduPro — Inscris-toi et démarre les quiz !</p>
-            <Link href="/register" className="btn-primary">S'inscrire</Link>
-          </div>
-        </div>
-
         <HomeCarousel />
 
         <section className="card" aria-labelledby="cta-title">
