@@ -85,6 +85,10 @@ export default async function PublicBlogPostPage({ params }) {
             src={imageUrl}
             alt={post.title}
             className="max-h-[460px] w-full rounded-lg border border-brand-100 object-cover"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = '/images/article-placeholder.svg';
+            }}
           />
         ) : null}
         {post.excerpt ? <p className="text-base text-brand-800">{post.excerpt}</p> : null}
@@ -96,4 +100,3 @@ export default async function PublicBlogPostPage({ params }) {
     </main>
   );
 }
-

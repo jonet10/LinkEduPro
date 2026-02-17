@@ -49,7 +49,8 @@ export default function VerifiedTestimonials() {
                   className="h-44 w-full object-cover"
                   loading="lazy"
                   onError={(e) => {
-                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/images/article-placeholder.svg';
                   }}
                 />
               ) : null}
