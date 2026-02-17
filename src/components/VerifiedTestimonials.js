@@ -1,6 +1,6 @@
 "use client";
 
-const TESTIMONIALS = [
+const RECENT_PUBLICATIONS = [
   {
     id: 't1',
     type: 'text',
@@ -39,14 +39,14 @@ function aiModeration(content) {
 
 export default function VerifiedTestimonials() {
   return (
-    <section className="card" aria-labelledby="testimonials-title">
+    <section className="card" aria-labelledby="recent-publications-title">
       <div className="mb-4 flex items-center justify-between gap-2">
-        <h2 id="testimonials-title" className="text-2xl font-bold text-brand-900">Témoignages vérifiés</h2>
-        <p className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">Modération automatique IA</p>
+        <h2 id="recent-publications-title" className="text-2xl font-bold text-brand-900">Publications récentes</h2>
+        <p className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">Contenus de la communauté</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        {TESTIMONIALS.map((item) => {
+        {RECENT_PUBLICATIONS.map((item) => {
           const moderation = aiModeration(item.content);
           return (
             <article key={item.id} className="rounded-xl border border-brand-100 p-4">
