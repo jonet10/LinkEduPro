@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken, setAuth } from '@/lib/auth';
 
@@ -14,7 +14,6 @@ function buildAvatarUrl(photoUrl) {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -34,7 +33,8 @@ export default function ProfilePage() {
       return;
     }
 
-    setEditMode(searchParams.get('edit') === '1');
+    const params = new URLSearchParams(window.location.search);
+    setEditMode(params.get('edit') === '1');
 
     apiClient('/v2/profile/me', { token })
       .then((data) => {
@@ -49,7 +49,7 @@ export default function ProfilePage() {
       })
       .catch((e) => setError(e.message || 'Erreur de chargement du profil'))
       .finally(() => setLoading(false));
-  }, [router, searchParams]);
+  }, [router]);
 
   const avatarSrc = useMemo(() => {
     if (photoPreview) return photoPreview;
