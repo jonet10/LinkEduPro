@@ -29,11 +29,18 @@ export default function BlogPage() {
   const [createInfo, setCreateInfo] = useState('');
   const [updateError, setUpdateError] = useState('');
   const [updateInfo, setUpdateInfo] = useState('');
+  const [actionError, setActionError] = useState('');
+  const [actionInfo, setActionInfo] = useState('');
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [uploadingCreateImage, setUploadingCreateImage] = useState(false);
+  const [uploadingEditImage, setUploadingEditImage] = useState(false);
   const [editingPostId, setEditingPostId] = useState(null);
   const [form, setForm] = useState(emptyForm());
   const [editForm, setEditForm] = useState(emptyForm());
+  const [openComments, setOpenComments] = useState({});
+  const [commentsByPost, setCommentsByPost] = useState({});
+  const [commentInputs, setCommentInputs] = useState({});
 
   const token = useMemo(() => getToken(), []);
   const student = useMemo(() => getStudent(), []);
@@ -72,6 +79,34 @@ export default function BlogPage() {
     return status === 'APPROVED'
       ? 'Article publié avec succès.'
       : 'Article soumis. Il sera visible après validation par un admin ou un professeur.';
+  }
+
+  async function uploadImage(file, target) {
+    if (!token || !file) return;
+
+    if (target === 'create') setUploadingCreateImage(true);
+    if (target === 'edit') setUploadingEditImage(true);
+
+    try {
+      const body = new FormData();
+      body.append('image', file);
+      const data = await apiClient('/community/blog/posts/upload-image', {
+        method: 'POST',
+        token,
+        body
+      });
+
+      if (target === 'create') {
+        setForm((prev) => ({ ...prev, imageUrl: data.imageUrl }));
+      } else {
+        setEditForm((prev) => ({ ...prev, imageUrl: data.imageUrl }));
+      }
+    } catch (e) {
+      setActionError(e.message || 'Erreur upload image.');
+    } finally {
+      if (target === 'create') setUploadingCreateImage(false);
+      if (target === 'edit') setUploadingEditImage(false);
+    }
   }
 
   async function createPost() {
@@ -149,17 +184,61 @@ export default function BlogPage() {
       });
 
       const status = data?.moderation?.status || (data?.post?.isApproved ? 'APPROVED' : 'PENDING');
-      setUpdateInfo(
-        status === 'APPROVED'
-          ? 'Publication modifiée et validée.'
-          : 'Publication modifiée. Elle repasse en attente de validation.'
-      );
+      setUpdateInfo(status === 'APPROVED' ? 'Publication modifiée et validée.' : 'Publication modifiée. Elle repasse en attente de validation.');
       setEditingPostId(null);
       await load();
     } catch (e) {
       setUpdateError(e.message || 'Erreur de modification.');
     } finally {
       setUpdating(false);
+    }
+  }
+
+  async function likePost(postId) {
+    if (!token) return;
+    setActionError('');
+    setActionInfo('');
+    try {
+      await apiClient(`/community/blog/posts/${postId}/like`, { method: 'POST', token });
+      setActionInfo('Like ajouté.');
+      await load();
+    } catch (e) {
+      setActionError(e.message || 'Erreur lors du like.');
+    }
+  }
+
+  async function loadComments(postId) {
+    if (!token) return;
+    try {
+      const data = await apiClient(`/community/blog/posts/${postId}/comments`, { token });
+      setCommentsByPost((prev) => ({ ...prev, [postId]: data.comments || [] }));
+    } catch (e) {
+      setActionError(e.message || 'Erreur chargement commentaires.');
+    }
+  }
+
+  async function toggleCommentsPanel(postId) {
+    setOpenComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
+    if (!commentsByPost[postId]) {
+      await loadComments(postId);
+    }
+  }
+
+  async function addComment(postId) {
+    if (!token) return;
+    const content = (commentInputs[postId] || '').trim();
+    if (!content) return;
+
+    try {
+      await apiClient(`/community/blog/posts/${postId}/comments`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({ content })
+      });
+      setCommentInputs((prev) => ({ ...prev, [postId]: '' }));
+      await Promise.all([loadComments(postId), load()]);
+    } catch (e) {
+      setActionError(e.message || 'Erreur ajout commentaire.');
     }
   }
 
@@ -177,6 +256,8 @@ export default function BlogPage() {
           <button className="btn-primary" onClick={() => { setPage(1); load(); }}>Rechercher</button>
         </div>
         {error ? <p className="text-red-600">{error}</p> : null}
+        {actionError ? <p className="text-red-600">{actionError}</p> : null}
+        {actionInfo ? <p className="text-green-600">{actionInfo}</p> : null}
       </section>
 
       {canCreatePost ? (
@@ -191,7 +272,14 @@ export default function BlogPage() {
             <input className="input" placeholder="Extrait (optionnel)" value={form.excerpt} onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))} />
           </div>
 
-          <input className="input" placeholder="Image URL (optionnel)" value={form.imageUrl} onChange={(e) => setForm((prev) => ({ ...prev, imageUrl: e.target.value }))} />
+          <div className="grid gap-2 md:grid-cols-2">
+            <input className="input" placeholder="Image URL (optionnel)" value={form.imageUrl} onChange={(e) => setForm((prev) => ({ ...prev, imageUrl: e.target.value }))} />
+            <label className="rounded-lg border border-brand-100 px-3 py-2 text-sm text-brand-700">
+              Importer image
+              <input type="file" accept="image/*" className="mt-1 block w-full" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
+            </label>
+          </div>
+          {uploadingCreateImage ? <p className="text-xs text-brand-700">Upload image...</p> : null}
 
           <textarea className="input min-h-[140px]" placeholder="Contenu de l’article" value={form.content} onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))} />
 
@@ -242,9 +330,7 @@ export default function BlogPage() {
           {createInfo ? <p className="text-sm text-green-600">{createInfo}</p> : null}
 
           <div>
-            <button className="btn-primary" disabled={creating} onClick={createPost}>
-              {creating ? 'Publication...' : 'Publier'}
-            </button>
+            <button className="btn-primary" disabled={creating} onClick={createPost}>{creating ? 'Publication...' : 'Publier'}</button>
           </div>
         </section>
       ) : null}
@@ -265,12 +351,39 @@ export default function BlogPage() {
               {post.author?.role === 'TEACHER' ? ` (${post.author?.teacherLevel})` : ''}
             </p>
 
-            {post.imageUrl ? (
-              <img src={post.imageUrl} alt={post.title} className="max-h-72 w-full rounded-lg border border-brand-100 object-cover" />
-            ) : null}
+            {post.imageUrl ? <img src={post.imageUrl} alt={post.title} className="max-h-72 w-full rounded-lg border border-brand-100 object-cover" /> : null}
 
-            <p>{post.excerpt || post.content}</p>
+            <p className="text-justify">{post.excerpt || post.content}</p>
             <p className="text-sm text-slate-500">Likes: {post._count?.likes || 0} · Commentaires: {post._count?.comments || 0}</p>
+
+            <div className="flex flex-wrap gap-2">
+              <button className="btn-secondary" onClick={() => likePost(post.id)}>Like</button>
+              <button className="btn-secondary" onClick={() => toggleCommentsPanel(post.id)}>
+                {openComments[post.id] ? 'Masquer commentaires' : 'Voir commentaires'}
+              </button>
+            </div>
+
+            {openComments[post.id] ? (
+              <div className="space-y-2 rounded-lg border border-brand-100 p-3">
+                {(commentsByPost[post.id] || []).map((comment) => (
+                  <div key={comment.id} className="rounded border border-brand-100 p-2 text-sm">
+                    <p className="font-semibold">{comment.author?.firstName} {comment.author?.lastName}</p>
+                    <p className="mt-1 text-justify">{comment.content}</p>
+                  </div>
+                ))}
+                {(commentsByPost[post.id] || []).length === 0 ? <p className="text-sm text-brand-700">Aucun commentaire.</p> : null}
+
+                <div className="flex gap-2">
+                  <input
+                    className="input"
+                    placeholder="Ajouter un commentaire"
+                    value={commentInputs[post.id] || ''}
+                    onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
+                  />
+                  <button className="btn-primary" onClick={() => addComment(post.id)}>Commenter</button>
+                </div>
+              </div>
+            ) : null}
 
             {canEdit ? (
               <div>
@@ -281,7 +394,14 @@ export default function BlogPage() {
                     <p className="text-sm font-semibold">Modifier la publication</p>
                     <input className="input" value={editForm.title} onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))} placeholder="Titre" />
                     <input className="input" value={editForm.excerpt} onChange={(e) => setEditForm((prev) => ({ ...prev, excerpt: e.target.value }))} placeholder="Extrait" />
-                    <input className="input" value={editForm.imageUrl} onChange={(e) => setEditForm((prev) => ({ ...prev, imageUrl: e.target.value }))} placeholder="Image URL" />
+                    <div className="grid gap-2 md:grid-cols-2">
+                      <input className="input" value={editForm.imageUrl} onChange={(e) => setEditForm((prev) => ({ ...prev, imageUrl: e.target.value }))} placeholder="Image URL" />
+                      <label className="rounded-lg border border-brand-100 px-3 py-2 text-sm text-brand-700">
+                        Importer image
+                        <input type="file" accept="image/*" className="mt-1 block w-full" onChange={(e) => uploadImage(e.target.files?.[0], 'edit')} />
+                      </label>
+                    </div>
+                    {uploadingEditImage ? <p className="text-xs text-brand-700">Upload image...</p> : null}
                     <textarea className="input min-h-[120px]" value={editForm.content} onChange={(e) => setEditForm((prev) => ({ ...prev, content: e.target.value }))} placeholder="Contenu" />
 
                     <div className="grid gap-3 md:grid-cols-2">
@@ -331,9 +451,7 @@ export default function BlogPage() {
                     {updateInfo ? <p className="text-sm text-green-600">{updateInfo}</p> : null}
 
                     <div className="flex flex-wrap gap-2">
-                      <button className="btn-primary" disabled={updating} onClick={() => updatePost(post.id)}>
-                        {updating ? 'Mise à jour...' : 'Enregistrer'}
-                      </button>
+                      <button className="btn-primary" disabled={updating} onClick={() => updatePost(post.id)}>{updating ? 'Mise à jour...' : 'Enregistrer'}</button>
                       <button className="btn-secondary" onClick={() => setEditingPostId(null)}>Annuler</button>
                     </div>
                   </div>
