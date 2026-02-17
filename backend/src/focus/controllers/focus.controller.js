@@ -43,6 +43,44 @@ async function addCustomSong(req, res, next) {
   }
 }
 
+async function updateSong(req, res, next) {
+  try {
+    const songId = Number(req.params.songId);
+    const existing = await prisma.focusSong.findUnique({ where: { id: songId } });
+    if (!existing) {
+      return res.status(404).json({ message: 'Piste introuvable.' });
+    }
+
+    const updated = await prisma.focusSong.update({
+      where: { id: songId },
+      data: {
+        title: req.body.title !== undefined ? req.body.title : undefined,
+        url: req.body.url !== undefined ? req.body.url : undefined,
+        category: req.body.category !== undefined ? (req.body.category || 'custom') : undefined
+      }
+    });
+
+    return res.json({ track: updated });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deleteSong(req, res, next) {
+  try {
+    const songId = Number(req.params.songId);
+    const existing = await prisma.focusSong.findUnique({ where: { id: songId } });
+    if (!existing) {
+      return res.status(404).json({ message: 'Piste introuvable.' });
+    }
+
+    await prisma.focusSong.delete({ where: { id: songId } });
+    return res.status(204).send();
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function logMusicListen(req, res, next) {
   try {
     const song = await prisma.focusSong.findUnique({ where: { id: req.body.songId } });
@@ -238,6 +276,8 @@ module.exports = {
   canManageFocusMusic,
   listFocusMusic,
   addCustomSong,
+  updateSong,
+  deleteSong,
   logMusicListen,
   startPomodoro,
   stopPomodoro,

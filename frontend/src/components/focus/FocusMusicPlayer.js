@@ -15,6 +15,10 @@ export default function FocusMusicPlayer() {
   const [customTitle, setCustomTitle] = useState('');
   const [customUrl, setCustomUrl] = useState('');
   const [canManageTracks, setCanManageTracks] = useState(false);
+  const [editingTrackId, setEditingTrackId] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editUrl, setEditUrl] = useState('');
+  const [editCategory, setEditCategory] = useState('');
 
   useEffect(() => {
     const token = getToken();
@@ -109,6 +113,70 @@ export default function FocusMusicPlayer() {
     }
   }
 
+  function startEditTrack(track) {
+    setEditingTrackId(track.id);
+    setEditTitle(track.title || '');
+    setEditUrl(track.url || '');
+    setEditCategory(track.category || '');
+  }
+
+  function cancelEditTrack() {
+    setEditingTrackId(null);
+    setEditTitle('');
+    setEditUrl('');
+    setEditCategory('');
+  }
+
+  async function onUpdateTrack(trackId) {
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      const payload = {};
+      if (editTitle.trim()) payload.title = editTitle.trim();
+      if (editUrl.trim()) payload.url = editUrl.trim();
+      payload.category = editCategory.trim() || 'custom';
+
+      const data = await apiClient(`/focus/music/${trackId}`, {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify(payload)
+      });
+
+      setTracks((prev) => prev.map((t) => (t.id === trackId ? data.track : t)));
+      cancelEditTrack();
+    } catch (e) {
+      setError(e.message || 'Erreur modification piste');
+    }
+  }
+
+  async function onDeleteTrack(trackId) {
+    const token = getToken();
+    if (!token) return;
+    const confirmed = typeof window !== 'undefined' ? window.confirm('Supprimer cette piste ?') : false;
+    if (!confirmed) return;
+
+    try {
+      await apiClient(`/focus/music/${trackId}`, {
+        method: 'DELETE',
+        token
+      });
+
+      setTracks((prev) => {
+        const next = prev.filter((t) => t.id !== trackId);
+        if (currentIndex >= next.length) {
+          setCurrentIndex(Math.max(0, next.length - 1));
+        }
+        return next;
+      });
+      if (editingTrackId === trackId) {
+        cancelEditTrack();
+      }
+    } catch (e) {
+      setError(e.message || 'Erreur suppression piste');
+    }
+  }
+
   return (
     <article className="card space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -123,15 +191,35 @@ export default function FocusMusicPlayer() {
         <>
           <div className="grid gap-2 sm:grid-cols-2">
             {tracks.map((track, idx) => (
-              <button
-                key={track.id}
-                type="button"
-                className={`rounded-lg border px-3 py-2 text-left text-sm ${idx === currentIndex ? 'border-brand-500 bg-brand-50' : 'border-brand-100'}`}
-                onClick={() => setCurrentIndex(idx)}
-              >
-                <p className="font-semibold text-brand-900">{track.title}</p>
-                <p className="text-xs text-brand-700">{track.category || 'focus'}</p>
-              </button>
+              <div key={track.id} className={`rounded-lg border px-3 py-2 text-left text-sm ${idx === currentIndex ? 'border-brand-500 bg-brand-50' : 'border-brand-100'}`}>
+                <button
+                  type="button"
+                  className="w-full text-left"
+                  onClick={() => setCurrentIndex(idx)}
+                >
+                  <p className="font-semibold text-brand-900">{track.title}</p>
+                  <p className="text-xs text-brand-700">{track.category || 'focus'}</p>
+                </button>
+
+                {canManageTracks ? (
+                  <div className="mt-2 flex gap-2">
+                    <button type="button" className="btn-secondary" onClick={() => startEditTrack(track)}>Modifier</button>
+                    <button type="button" className="btn-secondary" onClick={() => onDeleteTrack(track.id)}>Supprimer</button>
+                  </div>
+                ) : null}
+
+                {canManageTracks && editingTrackId === track.id ? (
+                  <div className="mt-2 space-y-2">
+                    <input className="input" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Titre" />
+                    <input className="input" value={editUrl} onChange={(e) => setEditUrl(e.target.value)} placeholder="URL audio (https://...)" />
+                    <input className="input" value={editCategory} onChange={(e) => setEditCategory(e.target.value)} placeholder="Categorie" />
+                    <div className="flex gap-2">
+                      <button type="button" className="btn-primary" onClick={() => onUpdateTrack(track.id)}>Enregistrer</button>
+                      <button type="button" className="btn-secondary" onClick={cancelEditTrack}>Annuler</button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             ))}
           </div>
 

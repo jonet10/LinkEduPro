@@ -6,6 +6,8 @@ const {
   canManageFocusMusic,
   listFocusMusic,
   addCustomSong,
+  updateSong,
+  deleteSong,
   logMusicListen,
   startPomodoro,
   stopPomodoro,
@@ -16,6 +18,8 @@ const {
   stopPomodoroSchema,
   listenSongSchema,
   customSongSchema,
+  songIdParamSchema,
+  updateSongSchema,
   focusStatsQuerySchema
 } = require('../validators/focus.validators');
 
@@ -25,6 +29,8 @@ focusRouter.use(auth);
 focusRouter.get('/music', listFocusMusic);
 focusRouter.get('/music/can-manage', canManageFocusMusic);
 focusRouter.post('/music/custom', requireSuperAdmin, validate(customSongSchema), addCustomSong);
+focusRouter.patch('/music/:songId', requireSuperAdmin, validate(songIdParamSchema, 'params'), validate(updateSongSchema), updateSong);
+focusRouter.delete('/music/:songId', requireSuperAdmin, validate(songIdParamSchema, 'params'), deleteSong);
 focusRouter.post('/music/listen', validate(listenSongSchema), logMusicListen);
 focusRouter.get('/stats', validate(focusStatsQuerySchema, 'query'), getFocusStats);
 

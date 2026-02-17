@@ -20,6 +20,16 @@ const customSongSchema = Joi.object({
   category: Joi.string().trim().max(60).allow('', null)
 });
 
+const songIdParamSchema = Joi.object({
+  songId: Joi.number().integer().positive().required()
+});
+
+const updateSongSchema = Joi.object({
+  title: Joi.string().trim().min(2).max(180).optional(),
+  url: Joi.string().uri().optional(),
+  category: Joi.string().trim().max(60).allow('', null).optional()
+}).min(1);
+
 const focusStatsQuerySchema = Joi.object({
   days: Joi.number().integer().min(1).max(30).default(7)
 });
@@ -29,5 +39,7 @@ module.exports = {
   stopPomodoroSchema,
   listenSongSchema,
   customSongSchema,
+  songIdParamSchema,
+  updateSongSchema,
   focusStatsQuerySchema
 };
