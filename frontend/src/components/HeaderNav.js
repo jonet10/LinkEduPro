@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createPortal } from 'react-dom';
 import { clearAuth, getStudent, getToken } from '@/lib/auth';
 import { apiClient } from '@/lib/api';
 
@@ -15,6 +16,7 @@ export default function HeaderNav() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifError, setNotifError] = useState('');
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -30,6 +32,10 @@ export default function HeaderNav() {
       window.removeEventListener('storage', refresh);
       window.removeEventListener('auth-changed', refresh);
     };
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
   }, []);
 
   useEffect(() => {
@@ -190,45 +196,48 @@ export default function HeaderNav() {
         </div>
       </div>
 
-      {mobileLinks.length > 0 ? (
-        <>
-          <div
-            className="fixed inset-x-0 bottom-0 z-50 flex justify-center pb-4 md:hidden"
-            style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-          >
-            <button
-              type="button"
-              className="rounded-full bg-brand-700 px-6 py-3 text-sm font-semibold text-white shadow-lg"
-              onClick={() => setIsMobileMenuOpen((v) => !v)}
-            >
-              Menu
-            </button>
-          </div>
-
-          {isMobileMenuOpen ? (
-            <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+      {mounted && mobileLinks.length > 0
+        ? createPortal(
+            <>
               <div
-                className="absolute bottom-0 left-0 right-0 rounded-t-2xl bg-white p-5"
-                onClick={(e) => e.stopPropagation()}
+                className="fixed inset-x-0 bottom-0 z-[70] flex justify-center pb-4 md:hidden"
+                style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
               >
-                <div className="mb-3 h-1.5 w-12 rounded-full bg-brand-100" />
-                <nav className="flex flex-col gap-3 text-sm">
-                  {mobileLinks.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="rounded-lg border border-brand-100 px-3 py-2 hover:bg-brand-50"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {item.icon ? `${item.icon} ` : ''}{item.label}
-                    </Link>
-                  ))}
-                </nav>
+                <button
+                  type="button"
+                  className="rounded-full bg-brand-700 px-6 py-3 text-sm font-semibold text-white shadow-lg"
+                  onClick={() => setIsMobileMenuOpen((v) => !v)}
+                >
+                  Menu
+                </button>
               </div>
-            </div>
-          ) : null}
-        </>
-      ) : null}
+
+              {isMobileMenuOpen ? (
+                <div className="fixed inset-0 z-[69] bg-black/40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+                  <div
+                    className="absolute bottom-0 left-0 right-0 rounded-t-2xl bg-white p-5"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="mb-3 h-1.5 w-12 rounded-full bg-brand-100" />
+                    <nav className="flex flex-col gap-3 text-sm">
+                      {mobileLinks.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="rounded-lg border border-brand-100 px-3 py-2 hover:bg-brand-50"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          {item.icon ? `${item.icon} ` : ''}{item.label}
+                        </Link>
+                      ))}
+                    </nav>
+                  </div>
+                </div>
+              ) : null}
+            </>,
+            document.body
+          )
+        : null}
     </>
   );
 }
