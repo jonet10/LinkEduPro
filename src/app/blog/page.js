@@ -389,7 +389,16 @@ export default function BlogPage() {
               {post.author?.role === 'TEACHER' ? ` (${post.author?.teacherLevel})` : ''}
             </p>
 
-            {post.imageUrl ? <img src={resolveMediaUrl(post.imageUrl)} alt={post.title} className="max-h-72 w-full rounded-lg border border-brand-100 object-cover" /> : null}
+            {post.imageUrl ? (
+              <img
+                src={resolveMediaUrl(post.imageUrl)}
+                alt={post.title}
+                className="max-h-72 w-full rounded-lg border border-brand-100 object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : null}
 
             {!isExpanded && post.excerpt ? <p className="text-sm text-brand-700">{post.excerpt}</p> : null}
 

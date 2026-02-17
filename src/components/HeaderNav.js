@@ -19,6 +19,7 @@ export default function HeaderNav() {
   const [notifError, setNotifError] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [isAvatarOpen, setIsAvatarOpen] = useState(false);
+  const [avatarBroken, setAvatarBroken] = useState(false);
   const [mounted, setMounted] = useState(false);
   const avatarRef = useRef(null);
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function HeaderNav() {
       setIsAuthed(Boolean(getToken()));
       const currentStudent = getStudent();
       setStudent(currentStudent);
+      setAvatarBroken(false);
       setDarkMode(typeof currentStudent?.darkMode === 'boolean' ? currentStudent.darkMode : getDarkMode());
     };
     refresh();
@@ -151,7 +153,7 @@ export default function HeaderNav() {
 
   const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
   const initials = `${(student?.firstName || '').charAt(0)}${(student?.lastName || '').charAt(0)}`.toUpperCase() || 'U';
-  const avatarUrl = resolveMediaUrl(student?.photoUrl);
+  const avatarUrl = avatarBroken ? null : resolveMediaUrl(student?.photoUrl);
 
   const mobileLinks = isAuthed
     ? [
@@ -237,7 +239,12 @@ export default function HeaderNav() {
               aria-label="Profil utilisateur"
             >
               {avatarUrl ? (
-                <img src={avatarUrl} alt="Photo de profil" className="h-full w-full object-cover" />
+                <img
+                  src={avatarUrl}
+                  alt="Photo de profil"
+                  className="h-full w-full object-cover"
+                  onError={() => setAvatarBroken(true)}
+                />
               ) : (
                 <span>{initials}</span>
               )}

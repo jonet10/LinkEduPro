@@ -147,6 +147,8 @@ export default function HomePage() {
           {community.recent.length === 0 ? <p>Aucune tentative récente.</p> : null}
         </div>
       </article>
+
+      <VerifiedTestimonials />
     </section>
   );
 }
