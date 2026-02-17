@@ -40,7 +40,49 @@ async function listRecentBlogPosts(req, res, next) {
   }
 }
 
+async function getPublicBlogPost(req, res, next) {
+  try {
+    const postId = Number(req.params.postId);
+    if (!Number.isFinite(postId) || postId <= 0) {
+      return res.status(400).json({ message: 'Identifiant article invalide.' });
+    }
+
+    const post = await prisma.blogPost.findFirst({
+      where: {
+        id: postId,
+        isDeleted: false,
+        isApproved: true,
+        isGlobal: true
+      },
+      select: {
+        id: true,
+        title: true,
+        excerpt: true,
+        imageUrl: true,
+        content: true,
+        createdAt: true,
+        author: {
+          select: {
+            firstName: true,
+            lastName: true,
+            role: true
+          }
+        }
+      }
+    });
+
+    if (!post) {
+      return res.status(404).json({ message: 'Article introuvable.' });
+    }
+
+    return res.json({ post });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
-  listRecentBlogPosts
+  listRecentBlogPosts,
+  getPublicBlogPost
 };
 

@@ -41,7 +41,7 @@ export default function VerifiedTestimonials() {
       <div className="grid gap-4 md:grid-cols-3">
         {items.map((item) => (
           <article key={item.id} className="overflow-hidden rounded-xl border border-brand-100">
-            <Link href={`/blog?post=${item.id}`} className="block">
+            <Link href={`/blog/post/${item.id}`} className="block">
               {item.imageUrl ? (
                 <img
                   src={resolveMediaUrl(item.imageUrl)}

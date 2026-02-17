@@ -249,7 +249,7 @@ export default function BlogPage() {
   }
 
   async function sharePost(post) {
-    const link = `${window.location.origin}/blog?post=${post.id}`;
+    const link = `${window.location.origin}/blog/post/${post.id}`;
     const payload = {
       title: post.title,
       text: post.excerpt || 'Publication LinkEduPro',
