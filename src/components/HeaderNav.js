@@ -199,23 +199,25 @@ export default function HeaderNav() {
       {mounted && mobileLinks.length > 0
         ? createPortal(
             <>
-              <div
-                className="fixed inset-x-0 bottom-0 z-[70] flex justify-end pr-4 pb-4 md:hidden"
-                style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-              >
-                <button
-                  type="button"
-                  className="rounded-full bg-brand-700 px-6 py-3 text-sm font-semibold text-white shadow-lg"
-                  onClick={() => setIsMobileMenuOpen((v) => !v)}
+              {!isMobileMenuOpen ? (
+                <div
+                  className="fixed inset-x-0 bottom-0 z-[70] flex justify-end pr-4 pb-4 md:hidden"
+                  style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
                 >
-                  Menu
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    className="rounded-full bg-brand-700 px-6 py-3 text-sm font-semibold text-white shadow-lg"
+                    onClick={() => setIsMobileMenuOpen(true)}
+                  >
+                    Menu
+                  </button>
+                </div>
+              ) : null}
 
               {isMobileMenuOpen ? (
                 <div className="fixed inset-0 z-[69] bg-black/40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
                   <div
-                    className="absolute bottom-0 left-0 right-0 rounded-t-2xl bg-white p-5"
+                    className="absolute bottom-0 right-0 w-[88vw] max-w-sm rounded-tl-2xl bg-white p-5"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <div className="mb-3 h-1.5 w-12 rounded-full bg-brand-100" />
