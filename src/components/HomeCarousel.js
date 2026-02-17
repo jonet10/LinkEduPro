@@ -30,7 +30,7 @@ const SLIDES = [
     id: 'haiti-student-local-1',
     label: 'Eleves majeurs',
     title: 'Des parcours inspires par la discipline et l ambition',
-    image: '/slides/etudiante-uniforme.jpg'
+    image: '/slides/BIBI.jpeg'
   }
 ];
 
@@ -58,7 +58,7 @@ const CONTEST_CARDS = [
 const INTRO_TEXT =
   "LinkEduPro est une plateforme educative moderne et integree, concue pour connecter eleves, professeurs et ecoles haitiennes dans un reseau academique national et international. Elle offre aux eleves NS4 (18 ans et plus) un espace securise pour apprendre, reviser, publier des contenus academiques et acceder a des opportunites nationales et internationales.";
 
-export default function HomeCarousel() {
+export default function HomeCarousel({ isAuthed = false }) {
   const [index, setIndex] = useState(0);
   const total = SLIDES.length;
 
@@ -107,17 +107,13 @@ export default function HomeCarousel() {
             {INTRO_TEXT}
           </p>
 
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/register" className="rounded-lg bg-accent px-5 py-3 text-sm font-bold text-white shadow-lg shadow-black/20 transition hover:brightness-110">
-              S inscrire
-            </Link>
-            <Link href="/login" className="rounded-lg border border-white/60 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">
-              Se connecter
-            </Link>
-            <Link href="/subjects" className="rounded-lg border border-white/60 bg-transparent px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
-              Explorer les quiz
-            </Link>
-          </div>
+          {!isAuthed ? (
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href="/login" className="rounded-lg border border-white/60 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">
+                Connexion
+              </Link>
+            </div>
+          ) : null}
 
           <div className="mt-8 grid gap-3 md:grid-cols-3">
             {CONTEST_CARDS.map((card) => (
