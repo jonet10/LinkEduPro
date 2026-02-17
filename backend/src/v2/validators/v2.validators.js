@@ -48,6 +48,7 @@ const reviewContentSchema = Joi.object({
 
 const createStudyPlanSchema = Joi.object({
   level: levelSchema.required(),
+  subject: Joi.string().trim().max(120).allow(null, ''),
   title: Joi.string().trim().min(3).max(180).required(),
   description: Joi.string().trim().min(10).max(5000).required()
 });
@@ -58,8 +59,20 @@ const upsertPersonalStudyPlanSchema = Joi.object({
 });
 
 const studyPlanQuerySchema = Joi.object({
-  level: levelSchema.optional()
+  level: levelSchema.optional(),
+  subject: Joi.string().trim().max(120).optional()
 });
+
+const studyPlanParamsSchema = Joi.object({
+  planId: Joi.number().integer().positive().required()
+});
+
+const updateStudyPlanSchema = Joi.object({
+  level: levelSchema.optional(),
+  subject: Joi.string().trim().max(120).allow(null, ''),
+  title: Joi.string().trim().min(3).max(180).optional(),
+  description: Joi.string().trim().min(10).max(5000).optional()
+}).min(1);
 
 const createLevelQuizSchema = Joi.object({
   level: levelSchema.required(),
@@ -104,6 +117,8 @@ module.exports = {
   createStudyPlanSchema,
   upsertPersonalStudyPlanSchema,
   studyPlanQuerySchema,
+  studyPlanParamsSchema,
+  updateStudyPlanSchema,
   createLevelQuizSchema,
   submitLevelQuizSchema,
   quizListQuerySchema
