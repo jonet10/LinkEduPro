@@ -3,18 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --bg: #f7fbf9;
-  --text: #10271f;
+  --bg: #f3f8ff;
+  --text: #08355f;
 }
 
 body {
-  background: radial-gradient(circle at top right, #e7f4ef, var(--bg) 45%);
+  background:
+    radial-gradient(circle at top right, #dbeeff, transparent 42%),
+    radial-gradient(circle at 15% 20%, #fff2e7, transparent 30%),
+    var(--bg);
   color: var(--text);
   min-height: 100vh;
 }
 
 .card {
-  @apply rounded-xl border border-brand-100 bg-white/90 p-6 shadow-sm;
+  @apply rounded-xl border border-brand-100 bg-white/95 p-6 shadow-sm;
 }
 
 .btn-primary {
