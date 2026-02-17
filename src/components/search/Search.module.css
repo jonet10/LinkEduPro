@@ -1,0 +1,247 @@
+.wrapper {
+  position: relative;
+}
+
+.row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.inputWrap {
+  flex: 1;
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  min-height: 2.7rem;
+  border: 1px solid #c9e2fa;
+  border-radius: 0.8rem;
+  padding: 0.55rem 2.5rem 0.55rem 0.8rem;
+  background: #fff;
+  color: #08355f;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #0a6fbe;
+}
+
+.searchBtn {
+  min-height: 2.7rem;
+  border: 0;
+  border-radius: 0.8rem;
+  background: #0a6fbe;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+}
+
+.searchBtn:hover {
+  background: #095996;
+}
+
+.loaderDot {
+  position: absolute;
+  right: 0.8rem;
+  top: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: #0a6fbe;
+  transform: translateY(-50%);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.panel {
+  margin-top: 0.6rem;
+  border: 1px solid #dbeeff;
+  border-radius: 0.8rem;
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(11, 39, 65, 0.12);
+  overflow: hidden;
+  animation: fadeInUp 170ms ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section {
+  padding: 0.6rem 0.8rem;
+  border-top: 1px solid #eef6ff;
+}
+
+.section:first-child {
+  border-top: 0;
+}
+
+.sectionTitle {
+  margin: 0 0 0.35rem;
+  font-size: 0.74rem;
+  color: #165487;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.suggestionBtn {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  color: #08355f;
+  cursor: pointer;
+}
+
+.suggestionBtn:hover,
+.suggestionActive {
+  background: #eaf4ff;
+}
+
+.historyRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.historyBtn {
+  border: 1px solid #c9e2fa;
+  background: #f7fbff;
+  color: #165487;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  cursor: pointer;
+}
+
+.filters {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.control {
+  border: 1px solid #c9e2fa;
+  border-radius: 0.6rem;
+  min-height: 2.3rem;
+  background: #fff;
+  color: #08355f;
+  padding: 0.35rem 0.55rem;
+}
+
+.resultsGrid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.resultCard {
+  border: 1px solid #dbeeff;
+  border-radius: 0.85rem;
+  background: #fff;
+  padding: 0.85rem;
+}
+
+.meta {
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  color: #165487;
+}
+
+.skeleton {
+  border: 1px solid #dbeeff;
+  border-radius: 0.85rem;
+  padding: 0.85rem;
+  background: linear-gradient(90deg, #eff7ff 25%, #f8fbff 50%, #eff7ff 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.1s infinite;
+  min-height: 4.1rem;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.empty {
+  border: 1px dashed #c9e2fa;
+  border-radius: 0.8rem;
+  padding: 1rem;
+  text-align: center;
+  color: #165487;
+}
+
+.pagination {
+  margin-top: 0.8rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.pageBtn {
+  border: 1px solid #c9e2fa;
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  background: #fff;
+  color: #165487;
+  cursor: pointer;
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (min-width: 860px) {
+  .filters {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+:global(.dark) .input,
+:global(.dark) .control,
+:global(.dark) .panel,
+:global(.dark) .resultCard,
+:global(.dark) .pageBtn {
+  background: rgba(20, 34, 52, 0.92);
+  color: #e8f2ff;
+  border-color: #355172;
+}
+
+:global(.dark) .section {
+  border-top-color: #355172;
+}
+
+:global(.dark) .sectionTitle,
+:global(.dark) .meta,
+:global(.dark) .historyBtn,
+:global(.dark) .empty {
+  color: #bfdcff;
+}
+
+:global(.dark) .historyBtn {
+  border-color: #355172;
+  background: rgba(29, 49, 73, 0.7);
+}
+
+:global(.dark) .suggestionBtn:hover,
+:global(.dark) .suggestionActive {
+  background: rgba(53, 81, 114, 0.45);
+}
+
+:global(.dark) .skeleton {
+  border-color: #355172;
+  background: linear-gradient(90deg, rgba(26, 43, 66, 0.85) 25%, rgba(41, 62, 89, 0.85) 50%, rgba(26, 43, 66, 0.85) 75%);
+}

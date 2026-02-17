@@ -6,6 +6,7 @@ import { apiClient } from '@/lib/api';
 import { getToken, getStudent } from '@/lib/auth';
 import HomeCarousel from '@/components/HomeCarousel';
 import VerifiedTestimonials from '@/components/VerifiedTestimonials';
+import SmartSearchSection from '@/components/search/SmartSearchSection';
 
 export default function HomePage() {
   const [ready, setReady] = useState(false);
@@ -41,6 +42,7 @@ export default function HomePage() {
   if (!isAuthed) {
     return (
       <section className="space-y-8">
+        <SmartSearchSection />
         <HomeCarousel isAuthed={isAuthed} />
 
         <section className="card" aria-labelledby="cta-title">
@@ -84,6 +86,7 @@ export default function HomePage() {
 
   return (
     <section className="space-y-6">
+      <SmartSearchSection />
       <div className="card">
         <p className="text-sm text-brand-700">Bienvenue</p>
         <h1 className="text-3xl font-black text-brand-900">
