@@ -2,6 +2,7 @@ import './globals.css';
 import Link from 'next/link';
 import Image from 'next/image';
 import HeaderNav from '@/components/HeaderNav';
+import ThemeInit from '@/components/ThemeInit';
 
 export const metadata = {
   title: 'LinkEduPro - Éducation connectée',
@@ -12,6 +13,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="fr">
       <body>
+        <ThemeInit />
         <header className="border-b border-brand-100 bg-white/80 backdrop-blur">
           <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
             <Link href="/" className="flex items-center gap-3 text-xl font-bold text-brand-700" aria-label="Accueil LinkEduPro">

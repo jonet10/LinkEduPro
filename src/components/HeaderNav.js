@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
-import { clearAuth, getStudent, getToken } from '@/lib/auth';
+import { clearAuth, getDarkMode, getStudent, getToken, setDarkModePreference } from '@/lib/auth';
 import { apiClient } from '@/lib/api';
 
 export default function HeaderNav() {
@@ -16,13 +16,16 @@ export default function HeaderNav() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifError, setNotifError] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const refresh = () => {
       setIsAuthed(Boolean(getToken()));
-      setStudent(getStudent());
+      const currentStudent = getStudent();
+      setStudent(currentStudent);
+      setDarkMode(typeof currentStudent?.darkMode === 'boolean' ? currentStudent.darkMode : getDarkMode());
     };
     refresh();
 
@@ -75,10 +78,30 @@ export default function HeaderNav() {
     clearAuth();
     setIsAuthed(false);
     setStudent(null);
+    setDarkMode(false);
     setNotifications([]);
     setUnreadCount(0);
     router.push('/login');
   };
+
+  async function toggleDarkMode() {
+    const next = !darkMode;
+    setDarkMode(next);
+    setDarkModePreference(next);
+
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      await apiClient('/v2/profile/dark-mode', {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify({ darkMode: next })
+      });
+    } catch (_) {
+      // Keep local preference even if remote persistence fails.
+    }
+  }
 
   async function markAllRead() {
     const token = getToken();
@@ -125,6 +148,16 @@ export default function HeaderNav() {
   return (
     <>
       <div className="flex items-center gap-3 text-sm">
+        <button
+          type="button"
+          className="rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+          onClick={toggleDarkMode}
+          title={darkMode ? 'Desactiver le mode sombre' : 'Activer le mode sombre'}
+          aria-label={darkMode ? 'Desactiver le mode sombre' : 'Activer le mode sombre'}
+        >
+          {darkMode ? '☀️' : '🌙'}
+        </button>
+
         {isAuthed ? (
           <div className="relative">
             <button
