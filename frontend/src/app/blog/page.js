@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { getStudent, getToken } from '@/lib/auth';
 
 export default function BlogPage() {
   const [items, setItems] = useState([]);
@@ -12,8 +12,22 @@ export default function BlogPage() {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [error, setError] = useState('');
+  const [createError, setCreateError] = useState('');
+  const [createInfo, setCreateInfo] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState({
+    title: '',
+    excerpt: '',
+    content: '',
+    isGlobal: true,
+    schoolId: '',
+    categoryIds: [],
+    tagIds: []
+  });
 
   const token = useMemo(() => getToken(), []);
+  const student = useMemo(() => getStudent(), []);
+  const canCreatePost = Boolean(token);
 
   async function load() {
     if (!token) return;
@@ -33,6 +47,64 @@ export default function BlogPage() {
     }
   }
 
+  function toggleArraySelection(key, value) {
+    setForm((prev) => {
+      const exists = prev[key].includes(value);
+      return {
+        ...prev,
+        [key]: exists ? prev[key].filter((id) => id !== value) : [...prev[key], value]
+      };
+    });
+  }
+
+  async function createPost() {
+    if (!token) return;
+    setCreateError('');
+    setCreateInfo('');
+    setCreating(true);
+    try {
+      const payload = {
+        title: form.title.trim(),
+        excerpt: form.excerpt.trim(),
+        content: form.content.trim(),
+        isGlobal: Boolean(form.isGlobal),
+        schoolId: form.isGlobal ? null : Number(form.schoolId || 0),
+        categoryIds: form.categoryIds,
+        tagIds: form.tagIds
+      };
+
+      const data = await apiClient('/community/blog/posts', {
+        method: 'POST',
+        token,
+        body: JSON.stringify(payload)
+      });
+
+      const status = data?.moderation?.status || (data?.post?.isApproved ? 'APPROVED' : 'PENDING');
+      setCreateInfo(
+        status === 'APPROVED'
+          ? 'Article publié avec succès.'
+          : 'Article soumis. Il sera visible après validation par un admin ou un professeur.'
+      );
+
+      setForm({
+        title: '',
+        excerpt: '',
+        content: '',
+        isGlobal: true,
+        schoolId: '',
+        categoryIds: [],
+        tagIds: []
+      });
+
+      setPage(1);
+      await load();
+    } catch (e) {
+      setCreateError(e.message || 'Erreur lors de la création de l’article.');
+    } finally {
+      setCreating(false);
+    }
+  }
+
   useEffect(() => {
     load();
   }, [page]);
@@ -47,6 +119,107 @@ export default function BlogPage() {
         </div>
         {error ? <p className="text-red-600">{error}</p> : null}
       </section>
+
+      {canCreatePost ? (
+        <section className="card space-y-4">
+          <h2 className="text-xl font-semibold">Créer un article</h2>
+          <p className="text-sm text-slate-600">
+            Connecté en tant que: <span className="font-semibold">{student?.role || 'USER'}</span>
+          </p>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <input
+              className="input"
+              placeholder="Titre"
+              value={form.title}
+              onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+            />
+            <input
+              className="input"
+              placeholder="Extrait (optionnel)"
+              value={form.excerpt}
+              onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
+            />
+          </div>
+
+          <textarea
+            className="input min-h-[140px]"
+            placeholder="Contenu de l’article"
+            value={form.content}
+            onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
+          />
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="text-sm text-slate-700">
+              Portée
+              <select
+                className="input mt-1"
+                value={form.isGlobal ? 'global' : 'school'}
+                onChange={(e) => setForm((prev) => ({ ...prev, isGlobal: e.target.value === 'global' }))}
+              >
+                <option value="global">Blog global</option>
+                <option value="school">Blog interne (école)</option>
+              </select>
+            </label>
+
+            {!form.isGlobal ? (
+              <label className="text-sm text-slate-700">
+                School ID
+                <input
+                  className="input mt-1"
+                  type="number"
+                  value={form.schoolId}
+                  onChange={(e) => setForm((prev) => ({ ...prev, schoolId: e.target.value }))}
+                  placeholder="Ex: 1"
+                />
+              </label>
+            ) : null}
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div>
+              <p className="mb-2 text-sm font-semibold text-slate-700">Catégories</p>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((cat) => (
+                  <label key={cat.id} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={form.categoryIds.includes(cat.id)}
+                      onChange={() => toggleArraySelection('categoryIds', cat.id)}
+                    />
+                    {cat.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-sm font-semibold text-slate-700">Tags</p>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <label key={tag.id} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={form.tagIds.includes(tag.id)}
+                      onChange={() => toggleArraySelection('tagIds', tag.id)}
+                    />
+                    {tag.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {createError ? <p className="text-sm text-red-600">{createError}</p> : null}
+          {createInfo ? <p className="text-sm text-green-600">{createInfo}</p> : null}
+
+          <div>
+            <button className="btn-primary" disabled={creating} onClick={createPost}>
+              {creating ? 'Publication...' : 'Publier'}
+            </button>
+          </div>
+        </section>
+      ) : null}
 
       <section className="card">
         <p className="text-sm text-slate-600">Categories: {categories.map((c) => c.name).join(', ') || 'Aucune'}</p>
