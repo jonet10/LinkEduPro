@@ -14,6 +14,14 @@ export default function HomePage() {
   const [student, setStudent] = useState(null);
   const [community, setCommunity] = useState({ leaderboard: [], recent: [], schools: [] });
   const [error, setError] = useState('');
+  const [showCarnivalPopup, setShowCarnivalPopup] = useState(false);
+
+  function closeCarnivalPopup() {
+    setShowCarnivalPopup(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('linkedupro_carnival_2026_seen', '1');
+    }
+  }
 
   useEffect(() => {
     const token = getToken();
@@ -37,11 +45,34 @@ export default function HomePage() {
       });
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const alreadySeen = localStorage.getItem('linkedupro_carnival_2026_seen') === '1';
+    if (!alreadySeen) {
+      setShowCarnivalPopup(true);
+    }
+  }, []);
+
   if (!ready) return <p>Chargement...</p>;
 
   if (!isAuthed) {
     return (
       <section className="space-y-8">
+        {showCarnivalPopup ? (
+          <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-4">
+            <div className="w-full max-w-md rounded-2xl border border-brand-100 bg-white p-6 shadow-2xl">
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Message LinkEduPro</p>
+              <h2 className="mt-2 text-2xl font-black text-brand-900">Joyeux Carnaval !</h2>
+              <p className="mt-3 text-sm text-brand-700">
+                Toute l'equipe LinkEduPro vous souhaite un excellent carnaval, plein de joie, de culture et de reussite.
+              </p>
+              <div className="mt-5 flex justify-end">
+                <button type="button" className="btn-primary" onClick={closeCarnivalPopup}>Merci</button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <SmartSearchSection />
         <HomeCarousel isAuthed={isAuthed} />
 
@@ -86,6 +117,21 @@ export default function HomePage() {
 
   return (
     <section className="space-y-6">
+      {showCarnivalPopup ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-brand-100 bg-white p-6 shadow-2xl">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Message LinkEduPro</p>
+            <h2 className="mt-2 text-2xl font-black text-brand-900">Joyeux Carnaval !</h2>
+            <p className="mt-3 text-sm text-brand-700">
+              Toute l'equipe LinkEduPro vous souhaite un excellent carnaval, plein de joie, de culture et de reussite.
+            </p>
+            <div className="mt-5 flex justify-end">
+              <button type="button" className="btn-primary" onClick={closeCarnivalPopup}>Merci</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <SmartSearchSection />
       <div className="card">
         <p className="text-sm text-brand-700">Bienvenue</p>
