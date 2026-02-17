@@ -14,6 +14,7 @@ export default function FocusMusicPlayer() {
   const [error, setError] = useState('');
   const [customTitle, setCustomTitle] = useState('');
   const [customUrl, setCustomUrl] = useState('');
+  const [canManageTracks, setCanManageTracks] = useState(false);
 
   useEffect(() => {
     const token = getToken();
@@ -25,6 +26,15 @@ export default function FocusMusicPlayer() {
       })
       .catch((e) => setError(e.message || 'Erreur de chargement audio'))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) return;
+
+    apiClient('/focus/music/can-manage', { token })
+      .then((data) => setCanManageTracks(Boolean(data?.canManage)))
+      .catch(() => setCanManageTracks(false));
   }, []);
 
   useEffect(() => {
@@ -144,21 +154,23 @@ export default function FocusMusicPlayer() {
         </>
       ) : null}
 
-      <form className="grid gap-2 sm:grid-cols-3" onSubmit={onAddCustomTrack}>
-        <input
-          className="input"
-          placeholder="Titre piste personnalisée"
-          value={customTitle}
-          onChange={(e) => setCustomTitle(e.target.value)}
-        />
-        <input
-          className="input"
-          placeholder="URL audio (https://...)"
-          value={customUrl}
-          onChange={(e) => setCustomUrl(e.target.value)}
-        />
-        <button type="submit" className="btn-secondary">Ajouter URL perso</button>
-      </form>
+      {canManageTracks ? (
+        <form className="grid gap-2 sm:grid-cols-3" onSubmit={onAddCustomTrack}>
+          <input
+            className="input"
+            placeholder="Titre piste personnalisée"
+            value={customTitle}
+            onChange={(e) => setCustomTitle(e.target.value)}
+          />
+          <input
+            className="input"
+            placeholder="URL audio (https://...)"
+            value={customUrl}
+            onChange={(e) => setCustomUrl(e.target.value)}
+          />
+          <button type="submit" className="btn-secondary">Ajouter URL perso</button>
+        </form>
+      ) : null}
 
       <audio
         ref={audioRef}

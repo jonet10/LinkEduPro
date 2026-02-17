@@ -1,5 +1,10 @@
 const prisma = require('../../config/prisma');
 const { startOfDay, endOfDay, minutesBetween, buildWeekSeries } = require('../utils/focus.utils');
+const { isConfiguredSuperAdmin } = require('../../services/access');
+
+async function canManageFocusMusic(req, res) {
+  return res.json({ canManage: isConfiguredSuperAdmin(req.user) });
+}
 
 async function listFocusMusic(_req, res, next) {
   try {
@@ -230,6 +235,7 @@ async function getFocusStats(req, res, next) {
 }
 
 module.exports = {
+  canManageFocusMusic,
   listFocusMusic,
   addCustomSong,
   logMusicListen,
