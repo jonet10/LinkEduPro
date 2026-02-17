@@ -37,6 +37,38 @@ body {
   border-color: #355172 !important;
 }
 
+.dark .text-brand-900 {
+  color: #e8f2ff !important;
+}
+
+.dark .text-brand-700 {
+  color: #bfdcff !important;
+}
+
+.dark .text-brand-500 {
+  color: #96c2ef !important;
+}
+
+.dark .bg-white,
+.dark .bg-white\/95,
+.dark .bg-white\/90 {
+  background-color: rgba(20, 34, 52, 0.92) !important;
+}
+
+.dark .border-brand-100 {
+  border-color: #355172 !important;
+}
+
+.dark .hover\:bg-brand-50:hover {
+  background-color: rgba(53, 81, 114, 0.45) !important;
+}
+
+.dark .input {
+  background-color: rgba(15, 28, 44, 0.85);
+  color: #e8f2ff;
+  border-color: #355172;
+}
+
 .card {
   @apply rounded-xl p-6 shadow-sm;
   border: 1px solid var(--card-border);
