@@ -4,11 +4,17 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { clearAuth, getStudent, getToken } from '@/lib/auth';
+import { apiClient } from '@/lib/api';
 
 export default function HeaderNav() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [student, setStudent] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifError, setNotifError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -27,6 +33,35 @@ export default function HeaderNav() {
   }, []);
 
   useEffect(() => {
+    async function loadNotifications() {
+      const token = getToken();
+      if (!token) return;
+      try {
+        setNotifLoading(true);
+        setNotifError('');
+        const data = await apiClient('/notifications', { token });
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unreadCount || 0);
+      } catch (e) {
+        setNotifError(e.message || 'Erreur notifications');
+      } finally {
+        setNotifLoading(false);
+      }
+    }
+
+    if (!isAuthed) {
+      setNotifications([]);
+      setUnreadCount(0);
+      setIsNotifOpen(false);
+      return;
+    }
+
+    loadNotifications();
+    const timer = setInterval(loadNotifications, 30000);
+    return () => clearInterval(timer);
+  }, [isAuthed]);
+
+  useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [isAuthed]);
 
@@ -34,8 +69,40 @@ export default function HeaderNav() {
     clearAuth();
     setIsAuthed(false);
     setStudent(null);
+    setNotifications([]);
+    setUnreadCount(0);
     router.push('/login');
   };
+
+  async function markAllRead() {
+    const token = getToken();
+    if (!token) return;
+    try {
+      await apiClient('/notifications/read-all', {
+        method: 'PATCH',
+        token
+      });
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (e) {
+      setNotifError(e.message || 'Erreur notifications');
+    }
+  }
+
+  async function markOneRead(id) {
+    const token = getToken();
+    if (!token) return;
+    try {
+      await apiClient(`/notifications/${id}/read`, {
+        method: 'PATCH',
+        token
+      });
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
+      setUnreadCount((v) => Math.max(0, v - 1));
+    } catch (e) {
+      setNotifError(e.message || 'Erreur notifications');
+    }
+  }
 
   const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
 
@@ -52,6 +119,54 @@ export default function HeaderNav() {
   return (
     <>
       <div className="flex items-center gap-3 text-sm">
+        {isAuthed ? (
+          <div className="relative">
+            <button
+              type="button"
+              className="relative rounded-md border border-brand-100 px-3 py-1 hover:bg-brand-50"
+              onClick={() => setIsNotifOpen((v) => !v)}
+            >
+              Notifications
+              {unreadCount > 0 ? (
+                <span className="ml-2 rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              ) : null}
+            </button>
+
+            {isNotifOpen ? (
+              <div className="absolute right-0 z-50 mt-2 w-[340px] rounded-lg border border-brand-100 bg-white p-3 shadow-xl">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-brand-900">Notifications</p>
+                  <button className="text-xs text-brand-700 hover:underline" onClick={markAllRead}>
+                    Tout marquer lu
+                  </button>
+                </div>
+                {notifLoading ? <p className="text-xs text-brand-700">Chargement...</p> : null}
+                {notifError ? <p className="text-xs text-red-600">{notifError}</p> : null}
+                <div className="max-h-80 space-y-2 overflow-auto">
+                  {notifications.slice(0, 12).map((n) => (
+                    <button
+                      key={n.id}
+                      className={`w-full rounded-md border px-3 py-2 text-left text-xs ${
+                        n.isRead ? 'border-brand-100 bg-white text-brand-700' : 'border-brand-500 bg-brand-50 text-brand-900'
+                      }`}
+                      onClick={() => {
+                        if (!n.isRead) markOneRead(n.id);
+                      }}
+                    >
+                      <p className="font-semibold">{n.title}</p>
+                      <p className="mt-1">{n.message}</p>
+                      <p className="mt-1 text-[11px] opacity-80">{new Date(n.createdAt).toLocaleString()}</p>
+                    </button>
+                  ))}
+                  {notifications.length === 0 && !notifLoading ? <p className="text-xs text-brand-700">Aucune notification.</p> : null}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
         {isAuthed ? (
           <button className="hover:text-brand-700" onClick={onLogout}>Deconnexion</button>
         ) : (
@@ -77,7 +192,8 @@ export default function HeaderNav() {
         <>
           <button
             type="button"
-            className="fixed bottom-5 right-5 z-50 rounded-full bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-lg md:hidden"
+            className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full bg-brand-700 px-6 py-3 text-sm font-semibold text-white shadow-lg md:hidden"
+            style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
             onClick={() => setIsMobileMenuOpen((v) => !v)}
           >
             Menu
