@@ -608,6 +608,19 @@ async function createTag(req, res, next) {
   }
 }
 
+async function uploadPostImage(req, res, next) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Aucune image envoyee.' });
+    }
+
+    const imageUrl = `/storage/blog-images/${req.file.filename}`;
+    return res.status(201).json({ imageUrl });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createPost,
   updatePost,
@@ -624,5 +637,6 @@ module.exports = {
   listCategories,
   createCategory,
   listTags,
-  createTag
+  createTag,
+  uploadPostImage
 };
