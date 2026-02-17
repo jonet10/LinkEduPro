@@ -36,6 +36,7 @@ export default function BlogPage() {
   const [uploadingCreateImage, setUploadingCreateImage] = useState(false);
   const [uploadingEditImage, setUploadingEditImage] = useState(false);
   const [editingPostId, setEditingPostId] = useState(null);
+  const [expandedPostId, setExpandedPostId] = useState(null);
   const [form, setForm] = useState(emptyForm());
   const [editForm, setEditForm] = useState(emptyForm());
   const [openComments, setOpenComments] = useState({});
@@ -242,10 +243,39 @@ export default function BlogPage() {
     }
   }
 
+  async function sharePost(post) {
+    const link = `${window.location.origin}/blog?post=${post.id}`;
+    const payload = {
+      title: post.title,
+      text: post.excerpt || 'Publication LinkEduPro',
+      url: link
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(payload);
+      } else {
+        await navigator.clipboard.writeText(link);
+      }
+      setActionInfo('Lien de partage prêt.');
+      setActionError('');
+    } catch (_) {
+      setActionError('Impossible de partager ce post pour le moment.');
+    }
+  }
+
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const postId = Number(params.get('post') || 0);
+    if (postId > 0) {
+      setExpandedPostId(postId);
+    }
+  }, []);
 
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
@@ -342,10 +372,17 @@ export default function BlogPage() {
 
       {items.map((post) => {
         const canEdit = student && (student.role === 'ADMIN' || student.id === post.authorId);
+        const isExpanded = expandedPostId === post.id;
 
         return (
           <article key={post.id} className="card space-y-3">
-            <h2 className="text-xl font-semibold">{post.title}</h2>
+            <button
+              type="button"
+              className="w-full text-left text-xl font-semibold text-brand-900 hover:text-brand-700"
+              onClick={() => setExpandedPostId((prev) => (prev === post.id ? null : post.id))}
+            >
+              {post.title}
+            </button>
             <p className="text-sm text-slate-600">
               {post.author?.firstName} {post.author?.lastName} · {post.author?.role}
               {post.author?.role === 'TEACHER' ? ` (${post.author?.teacherLevel})` : ''}
@@ -353,36 +390,43 @@ export default function BlogPage() {
 
             {post.imageUrl ? <img src={post.imageUrl} alt={post.title} className="max-h-72 w-full rounded-lg border border-brand-100 object-cover" /> : null}
 
-            <p className="text-justify">{post.excerpt || post.content}</p>
-            <p className="text-sm text-slate-500">Likes: {post._count?.likes || 0} · Commentaires: {post._count?.comments || 0}</p>
+            {!isExpanded && post.excerpt ? <p className="text-sm text-brand-700">{post.excerpt}</p> : null}
 
-            <div className="flex flex-wrap gap-2">
-              <button className="btn-secondary" onClick={() => likePost(post.id)}>Like</button>
-              <button className="btn-secondary" onClick={() => toggleCommentsPanel(post.id)}>
-                {openComments[post.id] ? 'Masquer commentaires' : 'Voir commentaires'}
-              </button>
-            </div>
+            {isExpanded ? (
+              <>
+                <p className="text-justify">{post.content}</p>
+                <p className="text-sm text-slate-500">Likes: {post._count?.likes || 0} · Commentaires: {post._count?.comments || 0}</p>
 
-            {openComments[post.id] ? (
-              <div className="space-y-2 rounded-lg border border-brand-100 p-3">
-                {(commentsByPost[post.id] || []).map((comment) => (
-                  <div key={comment.id} className="rounded border border-brand-100 p-2 text-sm">
-                    <p className="font-semibold">{comment.author?.firstName} {comment.author?.lastName}</p>
-                    <p className="mt-1 text-justify">{comment.content}</p>
-                  </div>
-                ))}
-                {(commentsByPost[post.id] || []).length === 0 ? <p className="text-sm text-brand-700">Aucun commentaire.</p> : null}
-
-                <div className="flex gap-2">
-                  <input
-                    className="input"
-                    placeholder="Ajouter un commentaire"
-                    value={commentInputs[post.id] || ''}
-                    onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
-                  />
-                  <button className="btn-primary" onClick={() => addComment(post.id)}>Commenter</button>
+                <div className="flex flex-wrap gap-2">
+                  <button className="btn-secondary" onClick={() => likePost(post.id)}>Like</button>
+                  <button className="btn-secondary" onClick={() => toggleCommentsPanel(post.id)}>
+                    {openComments[post.id] ? 'Masquer commentaires' : 'Voir commentaires'}
+                  </button>
+                  <button className="btn-secondary" onClick={() => sharePost(post)}>Partager</button>
                 </div>
-              </div>
+
+                {openComments[post.id] ? (
+                  <div className="space-y-2 rounded-lg border border-brand-100 p-3">
+                    {(commentsByPost[post.id] || []).map((comment) => (
+                      <div key={comment.id} className="rounded border border-brand-100 p-2 text-sm">
+                        <p className="font-semibold">{comment.author?.firstName} {comment.author?.lastName}</p>
+                        <p className="mt-1 text-justify">{comment.content}</p>
+                      </div>
+                    ))}
+                    {(commentsByPost[post.id] || []).length === 0 ? <p className="text-sm text-brand-700">Aucun commentaire.</p> : null}
+
+                    <div className="flex gap-2">
+                      <input
+                        className="input"
+                        placeholder="Ajouter un commentaire"
+                        value={commentInputs[post.id] || ''}
+                        onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
+                      />
+                      <button className="btn-primary" onClick={() => addComment(post.id)}>Commenter</button>
+                    </div>
+                  </div>
+                ) : null}
+              </>
             ) : null}
 
             {canEdit ? (
