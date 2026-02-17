@@ -1,6 +1,6 @@
 const express = require('express');
 const validate = require('../../middlewares/validate');
-const { requireRoles } = require('../../middlewares/roles');
+const { requireSuperAdmin } = require('../../middlewares/super-admin');
 const {
   createMusicTrack,
   getMusicTracks,
@@ -17,7 +17,7 @@ const {
 const router = express.Router();
 
 router.get('/music', validate(focusMusicQuerySchema, 'query'), getMusicTracks);
-router.post('/music', requireRoles(['ADMIN', 'TEACHER']), validate(createMusicTrackSchema), createMusicTrack);
+router.post('/music', requireSuperAdmin, validate(createMusicTrackSchema), createMusicTrack);
 router.post('/pomodoro-sessions', validate(logPomodoroSessionSchema), logPomodoroSession);
 router.get('/stats/daily', validate(dailyStatsQuerySchema, 'query'), getDailyStats);
 

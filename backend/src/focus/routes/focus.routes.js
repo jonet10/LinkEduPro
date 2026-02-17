@@ -1,6 +1,7 @@
 const express = require('express');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
+const { requireSuperAdmin } = require('../../middlewares/super-admin');
 const {
   listFocusMusic,
   addCustomSong,
@@ -21,7 +22,7 @@ const focusRouter = express.Router();
 focusRouter.use(auth);
 
 focusRouter.get('/music', listFocusMusic);
-focusRouter.post('/music/custom', validate(customSongSchema), addCustomSong);
+focusRouter.post('/music/custom', requireSuperAdmin, validate(customSongSchema), addCustomSong);
 focusRouter.post('/music/listen', validate(listenSongSchema), logMusicListen);
 focusRouter.get('/stats', validate(focusStatsQuerySchema, 'query'), getFocusStats);
 
