@@ -52,6 +52,23 @@ export default function BlogPage() {
     [items, expandedPostId]
   );
 
+  function scrollToPostTop(postId, smooth = true) {
+    if (!postId || typeof document === 'undefined') return;
+    const node = document.getElementById(`blog-post-${postId}`);
+    if (!node) return;
+    node.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+  }
+
+  function togglePost(postId) {
+    setExpandedPostId((prev) => {
+      const next = prev === postId ? null : postId;
+      if (next) {
+        setTimeout(() => scrollToPostTop(postId, true), 0);
+      }
+      return next;
+    });
+  }
+
   async function load() {
     if (!token) return;
     try {
@@ -282,17 +299,22 @@ export default function BlogPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!expandedPostId) return;
+    scrollToPostTop(expandedPostId, false);
+  }, [expandedPostId, items.length]);
+
   function renderPostCard(post, options = {}) {
     const canEdit = student && (student.role === 'ADMIN' || student.id === post.authorId);
     const isExpanded = expandedPostId === post.id;
     const isPriority = Boolean(options.isPriority);
 
     return (
-      <article key={post.id} className={`card space-y-3 ${isPriority ? 'ring-2 ring-brand-200' : ''}`}>
+      <article id={`blog-post-${post.id}`} key={post.id} className={`card space-y-3 ${isPriority ? 'ring-2 ring-brand-200' : ''}`}>
         <button
           type="button"
           className="w-full text-left text-xl font-semibold text-brand-900 hover:text-brand-700"
-          onClick={() => setExpandedPostId((prev) => (prev === post.id ? null : post.id))}
+          onClick={() => togglePost(post.id)}
         >
           {post.title}
         </button>
@@ -307,7 +329,8 @@ export default function BlogPage() {
             alt={post.title}
             className="max-h-72 w-full rounded-lg border border-brand-100 object-cover"
             onError={(e) => {
-              e.currentTarget.style.display = 'none';
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = '/images/article-placeholder.svg';
             }}
           />
         ) : null}

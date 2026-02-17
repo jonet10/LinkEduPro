@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Image de publication indisponible">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#e9f2ff"/>
+      <stop offset="100%" stop-color="#cfe1fb"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g fill="#1e4f8a">
+    <rect x="445" y="220" width="310" height="180" rx="16" fill="#ffffff" opacity="0.9"/>
+    <path d="M510 352l58-70 48 56 40-46 52 60H510z" fill="#1e4f8a" opacity="0.82"/>
+    <circle cx="620" cy="275" r="16" fill="#1e4f8a" opacity="0.82"/>
+  </g>
+  <text x="600" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" fill="#1e4f8a">
+    Image indisponible
+  </text>
+</svg>
