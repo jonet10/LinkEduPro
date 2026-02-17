@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { clearAuth, getDarkMode, getStudent, getToken, setDarkModePreference } from '@/lib/auth';
@@ -17,7 +17,9 @@ export default function HeaderNav() {
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifError, setNotifError] = useState('');
   const [darkMode, setDarkMode] = useState(false);
+  const [isAvatarOpen, setIsAvatarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const avatarRef = useRef(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -73,6 +75,19 @@ export default function HeaderNav() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [isAuthed]);
+
+  useEffect(() => {
+    if (!isAvatarOpen) return undefined;
+
+    function onClickOutside(event) {
+      if (avatarRef.current && !avatarRef.current.contains(event.target)) {
+        setIsAvatarOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [isAvatarOpen]);
 
   const onLogout = () => {
     clearAuth();
@@ -134,6 +149,11 @@ export default function HeaderNav() {
   }
 
   const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
+  const initials = `${(student?.firstName || '').charAt(0)}${(student?.lastName || '').charAt(0)}`.toUpperCase() || 'U';
+  const backendBaseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  const avatarUrl = student?.photoUrl
+    ? (String(student.photoUrl).startsWith('http') ? student.photoUrl : `${backendBaseUrl}${student.photoUrl}`)
+    : null;
 
   const mobileLinks = isAuthed
     ? [
@@ -209,7 +229,49 @@ export default function HeaderNav() {
         ) : null}
 
         {isAuthed ? (
-          <button className="hover:text-brand-700" onClick={onLogout}>Deconnexion</button>
+          <div className="relative" ref={avatarRef}>
+            <button
+              type="button"
+              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-brand-100 bg-white/90 text-xs font-semibold text-brand-700 hover:bg-brand-50"
+              onClick={() => setIsAvatarOpen((v) => !v)}
+              title="Profil utilisateur"
+              aria-label="Profil utilisateur"
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Photo de profil" className="h-full w-full object-cover" />
+              ) : (
+                <span>{initials}</span>
+              )}
+            </button>
+
+            {isAvatarOpen ? (
+              <div className="absolute right-0 z-50 mt-2 w-52 rounded-lg border border-brand-100 bg-white p-2 shadow-xl">
+                <Link href="/profile" className="block rounded-md px-3 py-2 text-sm hover:bg-brand-50" onClick={() => setIsAvatarOpen(false)}>
+                  Voir profil
+                </Link>
+                <Link href="/profile?edit=1" className="block rounded-md px-3 py-2 text-sm hover:bg-brand-50" onClick={() => setIsAvatarOpen(false)}>
+                  Modifier profil
+                </Link>
+                <button
+                  type="button"
+                  className="block w-full rounded-md px-3 py-2 text-left text-sm hover:bg-brand-50"
+                  onClick={() => {
+                    toggleDarkMode();
+                    setIsAvatarOpen(false);
+                  }}
+                >
+                  Parametres ({darkMode ? 'mode sombre' : 'mode clair'})
+                </button>
+                <button
+                  type="button"
+                  className="mt-1 block w-full rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                  onClick={onLogout}
+                >
+                  Deconnexion
+                </button>
+              </div>
+            ) : null}
+          </div>
         ) : (
           <Link href="/login" className="hover:text-brand-700">Connexion</Link>
         )}
