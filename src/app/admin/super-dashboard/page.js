@@ -1,21 +1,39 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { getStudent, getToken } from '@/lib/auth';
 
 export default function SuperDashboardPage() {
-  const token = useMemo(() => getToken(), []);
+  const router = useRouter();
   const [dashboard, setDashboard] = useState(null);
   const [invites, setInvites] = useState([]);
   const [email, setEmail] = useState('');
   const [expiresInHours, setExpiresInHours] = useState(72);
   const [inviteLink, setInviteLink] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  async function load() {
+  useEffect(() => {
+    const token = getToken();
+    const student = getStudent();
+
+    if (!token || !student || student.role !== 'ADMIN') {
+      router.push('/login');
+      return;
+    }
+
+    load(token);
+  }, [router]);
+
+  async function load(forcedToken = null) {
+    const token = forcedToken || getToken();
+    if (!token) return;
+
     try {
       setError('');
+      setLoading(true);
       const [d, i] = await Promise.all([
         apiClient('/community/admin/super-dashboard', { token }),
         apiClient('/community/admin/teacher-invitations', { token })
@@ -24,10 +42,15 @@ export default function SuperDashboardPage() {
       setInvites(i.invitations || []);
     } catch (e) {
       setError(e.message);
+    } finally {
+      setLoading(false);
     }
   }
 
   async function createInvite() {
+    const token = getToken();
+    if (!token) return;
+
     try {
       setError('');
       const res = await apiClient('/community/admin/teacher-invitations', {
@@ -37,17 +60,21 @@ export default function SuperDashboardPage() {
       });
       setInviteLink(res.inviteLink || '');
       setEmail('');
-      await load();
+      await load(token);
     } catch (e) {
       setError(e.message);
     }
+  }
+
+  if (loading) {
+    return <main className="mx-auto max-w-6xl px-4 py-8">Chargement...</main>;
   }
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <section className="card flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Super Admin Dashboard</h1>
-        <button className="btn-primary" onClick={load}>Actualiser</button>
+        <button className="btn-primary" onClick={() => load()}>Actualiser</button>
       </section>
 
       {error ? <p className="rounded border border-red-300 bg-red-50 p-3 text-red-700">{error}</p> : null}

@@ -16,8 +16,15 @@ export default function SchoolManagementDashboardPage() {
     async function load() {
       const token = getSchoolToken();
       const currentAdmin = getSchoolAdmin();
+      const allowedRoles = ['SUPER_ADMIN', 'SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT'];
 
       if (!token || !currentAdmin) {
+        router.push('/school-management/login');
+        return;
+      }
+
+      if (!allowedRoles.includes(currentAdmin.role)) {
+        clearSchoolAuth();
         router.push('/school-management/login');
         return;
       }
