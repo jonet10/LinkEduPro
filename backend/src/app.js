@@ -13,6 +13,7 @@ const communityRoutes = require('./community/routes');
 const docsRoutes = require('./routes/docs.routes');
 const v2Routes = require('./v2/routes');
 const searchRoutes = require('./search/routes/search.routes');
+const { focusRouter, pomodoroRouter } = require('./focus/routes/focus.routes');
 
 const app = express();
 
@@ -36,6 +37,8 @@ app.use('/api/community', communityRoutes);
 app.use('/api/docs', docsRoutes);
 app.use('/api/v2', v2Routes);
 app.use('/api/search', searchRoutes);
+app.use('/api/focus', focusRouter);
+app.use('/api/pomodoro', pomodoroRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });

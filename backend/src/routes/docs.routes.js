@@ -60,6 +60,21 @@ const openApi = {
     },
     '/search/trending': {
       get: { summary: 'Most searched keywords', responses: { '200': { description: 'OK' } } }
+    },
+    '/focus/music': {
+      get: { summary: 'List focus tracks', security: [{ bearerAuth: [] }] }
+    },
+    '/focus/music/listen': {
+      post: { summary: 'Log focus track listen', security: [{ bearerAuth: [] }] }
+    },
+    '/pomodoro/start': {
+      post: { summary: 'Start a pomodoro session', security: [{ bearerAuth: [] }] }
+    },
+    '/pomodoro/stop': {
+      post: { summary: 'Stop current pomodoro session', security: [{ bearerAuth: [] }] }
+    },
+    '/focus/stats': {
+      get: { summary: 'Get focus stats per user', security: [{ bearerAuth: [] }] }
     }
   },
   components: {

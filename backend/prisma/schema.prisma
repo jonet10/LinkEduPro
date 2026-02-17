@@ -127,6 +127,9 @@ model Student {
   personalStudyPlans PersonalStudyPlan[]
   quizResults QuizResult[]
   searchHistoryEntries SearchHistory[]
+  focusSongsCreated FocusSong[]
+  focusSongListens FocusSongListen[]
+  focusStatistics FocusStatistic[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -632,10 +635,15 @@ model PomodoroSession {
   id        Int      @id @default(autoincrement())
   userId    Int      @map("user_id")
   duration  Int
+  startTime DateTime? @map("start_time")
+  endTime   DateTime? @map("end_time")
+  cycleType String?   @map("cycle_type")
+  status    String?   @default("COMPLETED")
   createdAt DateTime @default(now()) @map("created_at")
   user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([userId, startTime, endTime])
   @@map("pomodoro_sessions")
 }
 
@@ -772,4 +780,46 @@ model SearchHistory {
   @@index([userId, createdAt])
   @@index([query])
   @@map("search_history")
+}
+
+model FocusSong {
+  id        Int      @id @default(autoincrement())
+  title     String
+  url       String
+  category  String?
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy Int?     @map("created_by")
+  listens   FocusSongListen[]
+  creator   Student? @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([createdBy, createdAt])
+  @@map("focus_songs")
+}
+
+model FocusSongListen {
+  id       Int      @id @default(autoincrement())
+  userId   Int      @map("user_id")
+  songId   Int      @map("song_id")
+  playedAt DateTime @default(now()) @map("played_at")
+  user     Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  song     FocusSong @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@index([userId, playedAt])
+  @@index([songId, playedAt])
+  @@map("focus_song_listens")
+}
+
+model FocusStatistic {
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @map("user_id")
+  date               DateTime
+  totalTime          Int      @default(0) @map("total_time")
+  pomodorosCompleted Int      @default(0) @map("pomodoros_completed")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  user               Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([date])
+  @@map("focus_statistics")
 }

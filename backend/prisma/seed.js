@@ -865,6 +865,38 @@ async function main() {
     }
   }
 
+  const focusSongsSeed = [
+    {
+      title: 'Rain Ambience',
+      url: 'https://cdn.pixabay.com/audio/2022/10/25/audio_7f005f4f6d.mp3',
+      category: 'rain'
+    },
+    {
+      title: 'Forest Nature Loop',
+      url: 'https://cdn.pixabay.com/audio/2022/11/17/audio_c98c079d43.mp3',
+      category: 'nature'
+    },
+    {
+      title: 'Lo-Fi Study Beat',
+      url: 'https://cdn.pixabay.com/audio/2022/03/15/audio_c8f58f5f6e.mp3',
+      category: 'lofi'
+    }
+  ];
+
+  for (const song of focusSongsSeed) {
+    const existingSong = await prisma.focusSong.findFirst({
+      where: { title: song.title }
+    });
+    if (!existingSong) {
+      await prisma.focusSong.create({ data: song });
+    } else {
+      await prisma.focusSong.update({
+        where: { id: existingSong.id },
+        data: { url: song.url, category: song.category }
+      });
+    }
+  }
+
   const superAdminEmail = process.env.SUPER_ADMIN_EMAIL || 'infolinkedupro@gmail.com';
   const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
 
