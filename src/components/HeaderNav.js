@@ -200,7 +200,7 @@ export default function HeaderNav() {
         ? createPortal(
             <>
               <div
-                className="fixed inset-x-0 bottom-0 z-[70] flex justify-center pb-4 md:hidden"
+                className="fixed inset-x-0 bottom-0 z-[70] flex justify-end pr-4 pb-4 md:hidden"
                 style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
               >
                 <button
