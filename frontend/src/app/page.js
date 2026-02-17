@@ -41,7 +41,7 @@ export default function HomePage() {
   if (!isAuthed) {
     return (
       <section className="space-y-8">
-        <HomeCarousel />
+        <HomeCarousel isAuthed={isAuthed} />
 
         <section className="card" aria-labelledby="cta-title">
           <h2 id="cta-title" className="text-2xl font-bold text-brand-900">Prêt à progresser dès aujourd'hui ?</h2>

@@ -4,21 +4,17 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { clearAuth, getStudent, getToken } from '@/lib/auth';
-import { clearSchoolAuth, getSchoolAdmin, getSchoolToken } from '@/lib/schoolAuth';
 
 export default function HeaderNav() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [student, setStudent] = useState(null);
-  const [schoolAdmin, setSchoolAdmin] = useState(null);
-  const [isSchoolAuthed, setIsSchoolAuthed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const refresh = () => {
       setIsAuthed(Boolean(getToken()));
       setStudent(getStudent());
-      setIsSchoolAuthed(Boolean(getSchoolToken()));
-      setSchoolAdmin(getSchoolAdmin());
     };
     refresh();
 
@@ -30,6 +26,10 @@ export default function HeaderNav() {
     };
   }, []);
 
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [isAuthed]);
+
   const onLogout = () => {
     clearAuth();
     setIsAuthed(false);
@@ -37,48 +37,76 @@ export default function HeaderNav() {
     router.push('/login');
   };
 
-  const onSchoolLogout = () => {
-    clearSchoolAuth();
-    setIsSchoolAuthed(false);
-    setSchoolAdmin(null);
-    router.push('/school-management/login');
-  };
-
   const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
-  const canSeeSchoolDashboard =
-    isSchoolAuthed &&
-    schoolAdmin &&
-    ['SUPER_ADMIN', 'SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT'].includes(schoolAdmin.role);
+
+  const mobileLinks = isAuthed
+    ? [
+        { href: '/subjects', label: 'Matieres' },
+        { href: '/progress', label: 'Progres' },
+        { href: '/library', label: 'Bibliotheque' },
+        { href: '/blog', label: 'Blog' },
+        ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard' }] : [])
+      ]
+    : [];
 
   return (
-    <div className="flex items-center gap-3 text-sm">
-      {!canSeeSchoolDashboard ? (
-        <Link href="/school-management/login" className="rounded-md border border-brand-500 px-2 py-1 text-brand-700 hover:bg-brand-50">
-          Connexion School
-        </Link>
-      ) : null}
-      {canSeeSchoolDashboard ? (
-        <>
-          <Link href="/school-management/dashboard" className="hover:text-brand-700">
-            Dashboard School
-          </Link>
-          <button className="hover:text-brand-700" onClick={onSchoolLogout}>Deconnexion School</button>
-        </>
-      ) : null}
-      {isAuthed ? (
-        <>
-          <Link href="/subjects" className="hover:text-brand-700">Matieres</Link>
-          <Link href="/progress" className="hover:text-brand-700">Progres</Link>
-          <Link href="/library" className="hover:text-brand-700">Bibliotheque</Link>
-          <Link href="/blog" className="hover:text-brand-700">Blog</Link>
-          {canSeeGlobalAdminDashboard ? (
-            <Link href="/admin/super-dashboard" className="hover:text-brand-700">Dashboard</Link>
-          ) : null}
+    <>
+      <div className="flex items-center gap-3 text-sm">
+        {isAuthed ? (
           <button className="hover:text-brand-700" onClick={onLogout}>Deconnexion</button>
+        ) : (
+          <Link href="/login" className="hover:text-brand-700">Connexion</Link>
+        )}
+
+        <div className="hidden md:flex md:items-center md:gap-3">
+          {isAuthed ? (
+            <>
+              <Link href="/subjects" className="hover:text-brand-700">Matieres</Link>
+              <Link href="/progress" className="hover:text-brand-700">Progres</Link>
+              <Link href="/library" className="hover:text-brand-700">Bibliotheque</Link>
+              <Link href="/blog" className="hover:text-brand-700">Blog</Link>
+              {canSeeGlobalAdminDashboard ? (
+                <Link href="/admin/super-dashboard" className="hover:text-brand-700">Dashboard</Link>
+              ) : null}
+            </>
+          ) : null}
+        </div>
+      </div>
+
+      {mobileLinks.length > 0 ? (
+        <>
+          <button
+            type="button"
+            className="fixed bottom-5 right-5 z-50 rounded-full bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-lg md:hidden"
+            onClick={() => setIsMobileMenuOpen((v) => !v)}
+          >
+            Menu
+          </button>
+
+          {isMobileMenuOpen ? (
+            <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+              <div
+                className="absolute bottom-0 left-0 right-0 rounded-t-2xl bg-white p-5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="mb-3 h-1.5 w-12 rounded-full bg-brand-100" />
+                <nav className="flex flex-col gap-3 text-sm">
+                  {mobileLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="rounded-lg border border-brand-100 px-3 py-2 hover:bg-brand-50"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+            </div>
+          ) : null}
         </>
-      ) : (
-        <Link href="/login" className="hover:text-brand-700">Connexion</Link>
-      )}
-    </div>
+      ) : null}
+    </>
   );
 }
