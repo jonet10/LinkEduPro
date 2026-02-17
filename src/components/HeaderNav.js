@@ -32,6 +32,9 @@ export default function HeaderNav() {
       <Link href="/school-management/login" className="rounded-md border border-brand-500 px-2 py-1 text-brand-700 hover:bg-brand-50">
         Connexion School
       </Link>
+      <Link href="/school-management/dashboard" className="hover:text-brand-700">
+        Dashboard School
+      </Link>
       {isAuthed ? (
         <>
           <Link href="/subjects" className="hover:text-brand-700">Matieres</Link>

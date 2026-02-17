@@ -3,9 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
-
-const SCHOOL_TOKEN_KEY = 'linkedupro_school_token';
-const SCHOOL_ADMIN_KEY = 'linkedupro_school_admin';
+import { setSchoolAuth } from '@/lib/schoolAuth';
 
 export default function SchoolManagementLoginPage() {
   const router = useRouter();
@@ -25,12 +23,8 @@ export default function SchoolManagementLoginPage() {
         body: JSON.stringify({ email, password })
       });
 
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(SCHOOL_TOKEN_KEY, response.token);
-        localStorage.setItem(SCHOOL_ADMIN_KEY, JSON.stringify(response.admin));
-      }
-
-      router.push('/admin/super-dashboard');
+      setSchoolAuth(response.token, response.admin);
+      router.push('/school-management/dashboard');
     } catch (err) {
       setError(err.message || 'Connexion impossible.');
     } finally {

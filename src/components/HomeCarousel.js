@@ -25,6 +25,12 @@ const SLIDES = [
     title: 'Des parcours vers des concours nationaux et internationaux',
     image:
       'https://images.unsplash.com/photo-1497486751825-1233686d5d80?auto=format&fit=crop&w=1600&q=80'
+  },
+  {
+    id: 'haiti-student-local-1',
+    label: 'Eleves majeurs',
+    title: 'Des parcours inspires par la discipline et l ambition',
+    image: '/slides/etudiante-uniforme.jpg'
   }
 ];
 
