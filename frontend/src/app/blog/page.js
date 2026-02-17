@@ -47,6 +47,10 @@ export default function BlogPage() {
   const token = useMemo(() => getToken(), []);
   const student = useMemo(() => getStudent(), []);
   const canCreatePost = Boolean(token);
+  const selectedPost = useMemo(
+    () => items.find((post) => post.id === expandedPostId) || null,
+    [items, expandedPostId]
+  );
 
   async function load() {
     if (!token) return;
@@ -278,8 +282,164 @@ export default function BlogPage() {
     }
   }, []);
 
+  function renderPostCard(post, options = {}) {
+    const canEdit = student && (student.role === 'ADMIN' || student.id === post.authorId);
+    const isExpanded = expandedPostId === post.id;
+    const isPriority = Boolean(options.isPriority);
+
+    return (
+      <article key={post.id} className={`card space-y-3 ${isPriority ? 'ring-2 ring-brand-200' : ''}`}>
+        <button
+          type="button"
+          className="w-full text-left text-xl font-semibold text-brand-900 hover:text-brand-700"
+          onClick={() => setExpandedPostId((prev) => (prev === post.id ? null : post.id))}
+        >
+          {post.title}
+        </button>
+        <p className="text-sm text-slate-600">
+          {post.author?.firstName} {post.author?.lastName} · {post.author?.role}
+          {post.author?.role === 'TEACHER' ? ` (${post.author?.teacherLevel})` : ''}
+        </p>
+
+        {post.imageUrl ? (
+          <img
+            src={resolveMediaUrl(post.imageUrl)}
+            alt={post.title}
+            className="max-h-72 w-full rounded-lg border border-brand-100 object-cover"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        ) : null}
+
+        {!isExpanded && post.excerpt ? <p className="text-sm text-brand-700">{post.excerpt}</p> : null}
+
+        {isExpanded ? (
+          <>
+            <p className="text-justify">{post.content}</p>
+            <p className="text-sm text-slate-500">Likes: {post._count?.likes || 0} · Commentaires: {post._count?.comments || 0}</p>
+
+            <div className="flex flex-wrap gap-2">
+              <button className="btn-secondary" onClick={() => likePost(post.id)}>Like</button>
+              <button className="btn-secondary" onClick={() => toggleCommentsPanel(post.id)}>
+                {openComments[post.id] ? 'Masquer commentaires' : 'Voir commentaires'}
+              </button>
+              <button className="btn-secondary" onClick={() => sharePost(post)}>Partager</button>
+            </div>
+
+            {openComments[post.id] ? (
+              <div className="space-y-2 rounded-lg border border-brand-100 p-3">
+                {(commentsByPost[post.id] || []).map((comment) => (
+                  <div key={comment.id} className="rounded border border-brand-100 p-2 text-sm">
+                    <p className="font-semibold">{comment.author?.firstName} {comment.author?.lastName}</p>
+                    <p className="mt-1 text-justify">{comment.content}</p>
+                  </div>
+                ))}
+                {(commentsByPost[post.id] || []).length === 0 ? <p className="text-sm text-brand-700">Aucun commentaire.</p> : null}
+
+                <div className="flex gap-2">
+                  <input
+                    className="input"
+                    placeholder="Ajouter un commentaire"
+                    value={commentInputs[post.id] || ''}
+                    onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
+                  />
+                  <button className="btn-primary" onClick={() => addComment(post.id)}>Commenter</button>
+                </div>
+              </div>
+            ) : null}
+          </>
+        ) : null}
+
+        {canEdit ? (
+          <div>
+            {editingPostId !== post.id ? (
+              <button className="btn-secondary" onClick={() => openEdit(post)}>Modifier</button>
+            ) : (
+              <div className="mt-3 space-y-3 rounded-lg border border-brand-100 p-3">
+                <p className="text-sm font-semibold">Modifier la publication</p>
+                <input className="input" value={editForm.title} onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))} placeholder="Titre" />
+                <input className="input" value={editForm.excerpt} onChange={(e) => setEditForm((prev) => ({ ...prev, excerpt: e.target.value }))} placeholder="Extrait" />
+                <div className="grid gap-2 md:grid-cols-2">
+                  <input className="input" value={editForm.imageUrl} onChange={(e) => setEditForm((prev) => ({ ...prev, imageUrl: e.target.value }))} placeholder="Image URL" />
+                  <label className="rounded-lg border border-brand-100 px-3 py-2 text-sm text-brand-700">
+                    Importer image
+                    <input type="file" accept="image/*" className="mt-1 block w-full" onChange={(e) => uploadImage(e.target.files?.[0], 'edit')} />
+                  </label>
+                </div>
+                {uploadingEditImage ? <p className="text-xs text-brand-700">Upload image...</p> : null}
+                <textarea className="input min-h-[120px]" value={editForm.content} onChange={(e) => setEditForm((prev) => ({ ...prev, content: e.target.value }))} placeholder="Contenu" />
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  <label className="text-sm text-slate-700">
+                    Portée
+                    <select className="input mt-1" value={editForm.isGlobal ? 'global' : 'school'} onChange={(e) => setEditForm((prev) => ({ ...prev, isGlobal: e.target.value === 'global' }))}>
+                      <option value="global">Blog global</option>
+                      <option value="school">Blog interne</option>
+                    </select>
+                  </label>
+
+                  {!editForm.isGlobal ? (
+                    <label className="text-sm text-slate-700">
+                      School ID
+                      <input className="input mt-1" type="number" value={editForm.schoolId} onChange={(e) => setEditForm((prev) => ({ ...prev, schoolId: e.target.value }))} />
+                    </label>
+                  ) : null}
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <p className="mb-2 text-sm font-semibold text-slate-700">Catégories</p>
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((cat) => (
+                        <label key={`edit_cat_${cat.id}`} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
+                          <input type="checkbox" checked={editForm.categoryIds.includes(cat.id)} onChange={() => toggleArraySelection('edit', 'categoryIds', cat.id)} />
+                          {cat.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="mb-2 text-sm font-semibold text-slate-700">Tags</p>
+                    <div className="flex flex-wrap gap-2">
+                      {tags.map((tag) => (
+                        <label key={`edit_tag_${tag.id}`} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
+                          <input type="checkbox" checked={editForm.tagIds.includes(tag.id)} onChange={() => toggleArraySelection('edit', 'tagIds', tag.id)} />
+                          {tag.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {updateError ? <p className="text-sm text-red-600">{updateError}</p> : null}
+                {updateInfo ? <p className="text-sm text-green-600">{updateInfo}</p> : null}
+
+                <div className="flex flex-wrap gap-2">
+                  <button className="btn-primary" disabled={updating} onClick={() => updatePost(post.id)}>{updating ? 'Mise à jour...' : 'Enregistrer'}</button>
+                  <button className="btn-secondary" onClick={() => setEditingPostId(null)}>Annuler</button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : null}
+      </article>
+    );
+  }
+
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
+      {expandedPostId ? (
+        selectedPost ? (
+          renderPostCard(selectedPost, { isPriority: true })
+        ) : (
+          <section className="card">
+            <p className="text-sm text-brand-700">Chargement de l’article sélectionné...</p>
+          </section>
+        )
+      ) : null}
+
       <section className="card space-y-4">
         <h1 className="text-2xl font-semibold">Blog Global LinkEduPro</h1>
         <div className="flex gap-2">
@@ -371,150 +531,9 @@ export default function BlogPage() {
         <p className="text-sm text-slate-600">Tags: {tags.map((t) => t.name).join(', ') || 'Aucun'}</p>
       </section>
 
-      {items.map((post) => {
-        const canEdit = student && (student.role === 'ADMIN' || student.id === post.authorId);
-        const isExpanded = expandedPostId === post.id;
-
-        return (
-          <article key={post.id} className="card space-y-3">
-            <button
-              type="button"
-              className="w-full text-left text-xl font-semibold text-brand-900 hover:text-brand-700"
-              onClick={() => setExpandedPostId((prev) => (prev === post.id ? null : post.id))}
-            >
-              {post.title}
-            </button>
-            <p className="text-sm text-slate-600">
-              {post.author?.firstName} {post.author?.lastName} · {post.author?.role}
-              {post.author?.role === 'TEACHER' ? ` (${post.author?.teacherLevel})` : ''}
-            </p>
-
-            {post.imageUrl ? (
-              <img
-                src={resolveMediaUrl(post.imageUrl)}
-                alt={post.title}
-                className="max-h-72 w-full rounded-lg border border-brand-100 object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : null}
-
-            {!isExpanded && post.excerpt ? <p className="text-sm text-brand-700">{post.excerpt}</p> : null}
-
-            {isExpanded ? (
-              <>
-                <p className="text-justify">{post.content}</p>
-                <p className="text-sm text-slate-500">Likes: {post._count?.likes || 0} · Commentaires: {post._count?.comments || 0}</p>
-
-                <div className="flex flex-wrap gap-2">
-                  <button className="btn-secondary" onClick={() => likePost(post.id)}>Like</button>
-                  <button className="btn-secondary" onClick={() => toggleCommentsPanel(post.id)}>
-                    {openComments[post.id] ? 'Masquer commentaires' : 'Voir commentaires'}
-                  </button>
-                  <button className="btn-secondary" onClick={() => sharePost(post)}>Partager</button>
-                </div>
-
-                {openComments[post.id] ? (
-                  <div className="space-y-2 rounded-lg border border-brand-100 p-3">
-                    {(commentsByPost[post.id] || []).map((comment) => (
-                      <div key={comment.id} className="rounded border border-brand-100 p-2 text-sm">
-                        <p className="font-semibold">{comment.author?.firstName} {comment.author?.lastName}</p>
-                        <p className="mt-1 text-justify">{comment.content}</p>
-                      </div>
-                    ))}
-                    {(commentsByPost[post.id] || []).length === 0 ? <p className="text-sm text-brand-700">Aucun commentaire.</p> : null}
-
-                    <div className="flex gap-2">
-                      <input
-                        className="input"
-                        placeholder="Ajouter un commentaire"
-                        value={commentInputs[post.id] || ''}
-                        onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
-                      />
-                      <button className="btn-primary" onClick={() => addComment(post.id)}>Commenter</button>
-                    </div>
-                  </div>
-                ) : null}
-              </>
-            ) : null}
-
-            {canEdit ? (
-              <div>
-                {editingPostId !== post.id ? (
-                  <button className="btn-secondary" onClick={() => openEdit(post)}>Modifier</button>
-                ) : (
-                  <div className="mt-3 space-y-3 rounded-lg border border-brand-100 p-3">
-                    <p className="text-sm font-semibold">Modifier la publication</p>
-                    <input className="input" value={editForm.title} onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))} placeholder="Titre" />
-                    <input className="input" value={editForm.excerpt} onChange={(e) => setEditForm((prev) => ({ ...prev, excerpt: e.target.value }))} placeholder="Extrait" />
-                    <div className="grid gap-2 md:grid-cols-2">
-                      <input className="input" value={editForm.imageUrl} onChange={(e) => setEditForm((prev) => ({ ...prev, imageUrl: e.target.value }))} placeholder="Image URL" />
-                      <label className="rounded-lg border border-brand-100 px-3 py-2 text-sm text-brand-700">
-                        Importer image
-                        <input type="file" accept="image/*" className="mt-1 block w-full" onChange={(e) => uploadImage(e.target.files?.[0], 'edit')} />
-                      </label>
-                    </div>
-                    {uploadingEditImage ? <p className="text-xs text-brand-700">Upload image...</p> : null}
-                    <textarea className="input min-h-[120px]" value={editForm.content} onChange={(e) => setEditForm((prev) => ({ ...prev, content: e.target.value }))} placeholder="Contenu" />
-
-                    <div className="grid gap-3 md:grid-cols-2">
-                      <label className="text-sm text-slate-700">
-                        Portée
-                        <select className="input mt-1" value={editForm.isGlobal ? 'global' : 'school'} onChange={(e) => setEditForm((prev) => ({ ...prev, isGlobal: e.target.value === 'global' }))}>
-                          <option value="global">Blog global</option>
-                          <option value="school">Blog interne</option>
-                        </select>
-                      </label>
-
-                      {!editForm.isGlobal ? (
-                        <label className="text-sm text-slate-700">
-                          School ID
-                          <input className="input mt-1" type="number" value={editForm.schoolId} onChange={(e) => setEditForm((prev) => ({ ...prev, schoolId: e.target.value }))} />
-                        </label>
-                      ) : null}
-                    </div>
-
-                    <div className="grid gap-3 md:grid-cols-2">
-                      <div>
-                        <p className="mb-2 text-sm font-semibold text-slate-700">Catégories</p>
-                        <div className="flex flex-wrap gap-2">
-                          {categories.map((cat) => (
-                            <label key={`edit_cat_${cat.id}`} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
-                              <input type="checkbox" checked={editForm.categoryIds.includes(cat.id)} onChange={() => toggleArraySelection('edit', 'categoryIds', cat.id)} />
-                              {cat.name}
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <p className="mb-2 text-sm font-semibold text-slate-700">Tags</p>
-                        <div className="flex flex-wrap gap-2">
-                          {tags.map((tag) => (
-                            <label key={`edit_tag_${tag.id}`} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
-                              <input type="checkbox" checked={editForm.tagIds.includes(tag.id)} onChange={() => toggleArraySelection('edit', 'tagIds', tag.id)} />
-                              {tag.name}
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {updateError ? <p className="text-sm text-red-600">{updateError}</p> : null}
-                    {updateInfo ? <p className="text-sm text-green-600">{updateInfo}</p> : null}
-
-                    <div className="flex flex-wrap gap-2">
-                      <button className="btn-primary" disabled={updating} onClick={() => updatePost(post.id)}>{updating ? 'Mise à jour...' : 'Enregistrer'}</button>
-                      <button className="btn-secondary" onClick={() => setEditingPostId(null)}>Annuler</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : null}
-          </article>
-        );
-      })}
+      {items
+        .filter((post) => !expandedPostId || post.id !== expandedPostId)
+        .map((post) => renderPostCard(post))}
 
       <section className="flex items-center justify-between">
         <button className="btn-secondary" disabled={pagination.page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Precedent</button>
