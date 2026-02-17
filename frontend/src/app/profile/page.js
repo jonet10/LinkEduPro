@@ -19,6 +19,7 @@ export default function ProfilePage() {
   const [form, setForm] = useState({ email: '', phone: '', address: '', password: '' });
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
+  const [avatarBroken, setAvatarBroken] = useState(false);
 
   useEffect(() => {
     const token = getToken();
@@ -34,6 +35,7 @@ export default function ProfilePage() {
       .then((data) => {
         const p = data.profile;
         setProfile(p);
+        setAvatarBroken(false);
         setForm({
           email: p.email || '',
           phone: p.phone || '',
@@ -47,8 +49,9 @@ export default function ProfilePage() {
 
   const avatarSrc = useMemo(() => {
     if (photoPreview) return photoPreview;
+    if (avatarBroken) return null;
     return resolveMediaUrl(profile?.photoUrl);
-  }, [photoPreview, profile?.photoUrl]);
+  }, [photoPreview, profile?.photoUrl, avatarBroken]);
 
   function onChangeField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -82,6 +85,7 @@ export default function ProfilePage() {
       });
 
       setProfile(data.profile);
+      setAvatarBroken(false);
       const student = getStudent();
       if (student) {
         setAuth(token, {
@@ -178,7 +182,12 @@ export default function ProfilePage() {
         <div className="mb-6 flex flex-col items-center gap-3 sm:flex-row sm:items-start">
           <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-brand-100 bg-brand-50 text-xl font-bold text-brand-700">
             {avatarSrc ? (
-              <img src={avatarSrc} alt="Photo de profil" className="h-full w-full object-cover" />
+              <img
+                src={avatarSrc}
+                alt="Photo de profil"
+                className="h-full w-full object-cover"
+                onError={() => setAvatarBroken(true)}
+              />
             ) : (
               <span>{`${(profile.firstName || '').charAt(0)}${(profile.lastName || '').charAt(0)}`.toUpperCase()}</span>
             )}
