@@ -23,6 +23,8 @@ export default function QuizPage() {
   const [startedAt, setStartedAt] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [quizResult, setQuizResult] = useState(null);
+  const [shareInfo, setShareInfo] = useState('');
 
   const selectedSet = quizSets.find((s) => s.key === selectedSetKey) || null;
 
@@ -134,16 +136,41 @@ export default function QuizPage() {
     }
 
     try {
-      await apiClient('/quiz/submit', {
+      const result = await apiClient('/quiz/submit', {
         method: 'POST',
         token,
         body: JSON.stringify(payload)
       });
-      router.push('/progress');
+      setQuizResult(result);
+      setQuestions([]);
+      setShareInfo('');
     } catch (e) {
       setError(e.message || 'Échec de la soumission du quiz');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const shareQuizResult = async () => {
+    if (!quizResult) return;
+
+    const subjectName = subject?.name || 'ce quiz';
+    const text = `J'ai obtenu ${quizResult.percentage}% sur ${subjectName} avec LinkEduPro. Rejoins-moi pour t'entrainer !`;
+    const link = `${window.location.origin}/register`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Mon resultat LinkEduPro',
+          text,
+          url: link
+        });
+      } else {
+        await navigator.clipboard.writeText(`${text} ${link}`);
+      }
+      setShareInfo('Partage pret.');
+    } catch (_) {
+      setShareInfo('Partage non disponible sur cet appareil.');
     }
   };
 
@@ -188,6 +215,30 @@ export default function QuizPage() {
             </article>
           ))}
         </div>
+      ) : null}
+
+      {quizResult ? (
+        <article className="card mt-4 space-y-3">
+          <h2 className="text-xl font-semibold text-brand-900">Quiz termine</h2>
+          <p className="text-sm text-brand-700">
+            Ton score: <span className="font-semibold">{quizResult.score}/{quizResult.totalQuestions}</span> ({quizResult.percentage}%)
+          </p>
+          <p className="text-sm text-brand-700">Partage ton resultat avec tes amis pour les inviter a essayer LinkEduPro.</p>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn-secondary" onClick={shareQuizResult}>Partager avec mes amis</button>
+            <button className="btn-primary" onClick={() => router.push('/progress')}>Voir mes progres</button>
+            <button
+              className="btn-secondary"
+              onClick={async () => {
+                setQuizResult(null);
+                if (selectedSetKey) await startSet(selectedSetKey);
+              }}
+            >
+              Refaire ce quiz
+            </button>
+          </div>
+          {shareInfo ? <p className="text-xs text-brand-700">{shareInfo}</p> : null}
+        </article>
       ) : null}
 
       {questions.length > 0 ? (
