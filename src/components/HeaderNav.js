@@ -152,6 +152,7 @@ export default function HeaderNav() {
   }
 
   const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
+  const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || student?.academicLevel === 'NSIV');
   const initials = `${(student?.firstName || '').charAt(0)}${(student?.lastName || '').charAt(0)}`.toUpperCase() || 'U';
   const avatarUrl = avatarBroken ? null : resolveMediaUrl(student?.photoUrl);
 
@@ -163,6 +164,7 @@ export default function HeaderNav() {
         { href: '/progress', label: 'Progrès', icon: '📈' },
         { href: '/library', label: 'Bibliothèque', icon: '📚' },
         { href: '/blog', label: 'Blog', icon: '📝' },
+        ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : []),
         ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
       ]
     : [];
@@ -292,6 +294,9 @@ export default function HeaderNav() {
               <Link href="/progress" className="hover:text-brand-700">📈 Progrès</Link>
               <Link href="/library" className="hover:text-brand-700">📚 Bibliothèque</Link>
               <Link href="/blog" className="hover:text-brand-700">📝 Blog</Link>
+              {canSeeProbableExercises ? (
+                <Link href="/probable-exercises" className="hover:text-brand-700">🎯 Exercices probables</Link>
+              ) : null}
               {canSeeGlobalAdminDashboard ? (
                 <Link href="/admin/super-dashboard" className="hover:text-brand-700">🛠️ Dashboard</Link>
               ) : null}

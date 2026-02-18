@@ -6,6 +6,8 @@ import { apiClient } from '@/lib/api';
 import { getDepartments, getCommunes, getSchools } from '@/lib/schools';
 
 const initialState = {
+  role: 'STUDENT',
+  academicLevel: '',
   firstName: '',
   lastName: '',
   sex: 'MALE',
@@ -33,6 +35,7 @@ export default function RegisterPage() {
   const schools = useMemo(() => getSchools(form.department, form.commune), [form.department, form.commune]);
 
   const onChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const isStudent = form.role === 'STUDENT';
 
   const onDepartmentChange = (e) => {
     const department = e.target.value;
@@ -72,7 +75,15 @@ export default function RegisterPage() {
       : chosenSchool;
 
     try {
+      if (!isStudent) {
+        setError("L'inscription directe est disponible uniquement pour les eleves. Utilisez l'invitation enseignant ou la gestion scolaire.");
+        setLoading(false);
+        return;
+      }
+
       const payload = {
+        role: form.role,
+        academicLevel: form.academicLevel,
         firstName: form.firstName,
         lastName: form.lastName,
         sex: form.sex,
@@ -104,6 +115,24 @@ export default function RegisterPage() {
     <section className="mx-auto max-w-2xl card">
       <h1 className="mb-6 text-2xl font-bold text-brand-900">Inscription élève</h1>
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
+        <select className="input md:col-span-2" name="role" value={form.role} onChange={onChange}>
+          <option value="STUDENT">Eleve</option>
+          <option value="TEACHER">Enseignant</option>
+          <option value="SCHOOL_ADMIN">Admin scolaire</option>
+        </select>
+
+        {isStudent ? (
+          <select className="input md:col-span-2" name="academicLevel" value={form.academicLevel} onChange={onChange} required>
+            <option value="">Niveau academique</option>
+            <option value="9e">9e</option>
+            <option value="NSI">NSI</option>
+            <option value="NSII">NSII</option>
+            <option value="NSIII">NSIII</option>
+            <option value="NSIV">NSIV</option>
+            <option value="Universitaire">Universitaire</option>
+          </select>
+        ) : null}
+
         <input className="input" name="firstName" placeholder="Prénom" value={form.firstName} onChange={onChange} required />
         <input className="input" name="lastName" placeholder="Nom" value={form.lastName} onChange={onChange} required />
 
