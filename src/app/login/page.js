@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { setAuth } from '@/lib/auth';
@@ -39,6 +40,9 @@ export default function LoginPage() {
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <button className="btn-primary w-full" type="submit" disabled={loading}>{loading ? 'Connexion...' : 'Se connecter'}</button>
       </form>
+      <div className="mt-4 text-sm">
+        <Link href="/forgot-password" className="text-brand-700 hover:underline">Mot de passe oublie ?</Link>
+      </div>
     </section>
   );
 }
