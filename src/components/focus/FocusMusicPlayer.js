@@ -14,7 +14,9 @@ function extractYouTubeVideoId(url) {
 }
 
 function getYouTubeEmbedUrl(videoId, autoplay = false) {
-  return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1&autoplay=${autoplay ? 1 : 0}`;
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const originParam = origin ? `&origin=${encodeURIComponent(origin)}` : '';
+  return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1&autoplay=${autoplay ? 1 : 0}${originParam}`;
 }
 
 export default function FocusMusicPlayer() {
@@ -57,9 +59,13 @@ export default function FocusMusicPlayer() {
   }, []);
 
   useEffect(() => {
+    if (isYouTubeTrack) {
+      sendYouTubeCommand('setVolume', [Math.round(volume * 100)]);
+      return;
+    }
     if (!audioRef.current) return;
     audioRef.current.volume = volume;
-  }, [volume]);
+  }, [volume, isYouTubeTrack]);
 
   const currentTrack = tracks[currentIndex] || null;
   const youtubeVideoId = extractYouTubeVideoId(currentTrack?.url);
@@ -69,7 +75,7 @@ export default function FocusMusicPlayer() {
     if (!currentTrack) return;
 
     if (isYouTubeTrack) {
-      setYoutubeEmbedUrl(getYouTubeEmbedUrl(youtubeVideoId, isPlaying));
+      setYoutubeEmbedUrl(getYouTubeEmbedUrl(youtubeVideoId, false));
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.removeAttribute('src');
@@ -83,15 +89,15 @@ export default function FocusMusicPlayer() {
     if (isPlaying) {
       audioRef.current.play().catch(() => setIsPlaying(false));
     }
-  }, [currentTrack, isPlaying, isYouTubeTrack, youtubeVideoId]);
+  }, [currentTrack, isYouTubeTrack, youtubeVideoId, isPlaying]);
 
-  function sendYouTubeCommand(command) {
+  function sendYouTubeCommand(command, args = []) {
     if (!youtubeRef.current || !youtubeRef.current.contentWindow) return;
     youtubeRef.current.contentWindow.postMessage(
       JSON.stringify({
         event: 'command',
         func: command,
-        args: []
+        args
       }),
       '*'
     );
@@ -120,6 +126,7 @@ export default function FocusMusicPlayer() {
         } else {
           sendYouTubeCommand('playVideo');
         }
+        sendYouTubeCommand('setVolume', [Math.round(volume * 100)]);
       }
       setIsPlaying(true);
       logListen(currentTrack.id);
@@ -330,10 +337,17 @@ export default function FocusMusicPlayer() {
             ref={youtubeRef}
             title={currentTrack?.title || 'YouTube Focus'}
             src={youtubeEmbedUrl}
+            onLoad={() => {
+              sendYouTubeCommand('setVolume', [Math.round(volume * 100)]);
+            }}
             allow="autoplay; encrypted-media; picture-in-picture"
             allowFullScreen
             className="h-56 w-full"
           />
+          <p className="px-3 py-2 text-xs text-brand-700">
+            Note: sur mobile, une video YouTube peut se mettre en pause quand l'ecran est verrouille.
+            Pour lecture continue en arriere-plan, utilise une URL audio directe.
+          </p>
         </div>
       ) : (
         <audio
