@@ -28,16 +28,16 @@ const acceptTeacherInviteSchema = Joi.object({
 });
 
 const forgotPasswordRequestSchema = Joi.object({
-  phone: Joi.string().trim().min(6).max(30).required()
+  email: Joi.string().email({ tlds: { allow: false } }).required()
 });
 
 const forgotPasswordVerifySchema = Joi.object({
-  phone: Joi.string().trim().min(6).max(30).required(),
+  email: Joi.string().email({ tlds: { allow: false } }).required(),
   code: Joi.string().trim().pattern(/^\d{6}$/).required()
 });
 
 const forgotPasswordResetSchema = Joi.object({
-  phone: Joi.string().trim().min(6).max(30).required(),
+  email: Joi.string().email({ tlds: { allow: false } }).required(),
   code: Joi.string().trim().pattern(/^\d{6}$/).required(),
   newPassword: Joi.string().min(8).max(128).required()
 });

@@ -3,7 +3,6 @@ const crypto = require('crypto');
 const prisma = require('../config/prisma');
 const { generateToken } = require('../utils/token');
 const { toApiLevel } = require('../v2/utils/level');
-const { sendSms } = require('../services/sms');
 const { sendEmail } = require('../services/email');
 
 const OTP_EXPIRES_MINUTES = Number(process.env.PASSWORD_RESET_OTP_EXPIRES_MINUTES || 10);
@@ -113,9 +112,9 @@ async function verifyAndConsumeEmailToken(rawToken) {
   return { ok: true, message: 'Email verifie avec succes.' };
 }
 
-function hashResetCode(phone, code) {
+function hashResetCode(email, code) {
   const secret = process.env.JWT_SECRET || 'linkedupro_reset_secret';
-  return crypto.createHash('sha256').update(`${phone}:${code}:${secret}`).digest('hex');
+  return crypto.createHash('sha256').update(`${email}:${code}:${secret}`).digest('hex');
 }
 
 function generateOtpCode() {
@@ -434,10 +433,10 @@ async function validateTeacherInvite(req, res, next) {
 
 async function requestPasswordReset(req, res, next) {
   try {
-    const phone = req.body.phone.trim();
-    const student = await prisma.student.findFirst({ where: { phone } });
+    const email = normalizeEmail(req.body.email);
+    const student = await prisma.student.findUnique({ where: { email } });
 
-    const genericResponse = { message: 'Si ce numero existe, un code de reinitialisation a ete envoye par SMS.' };
+    const genericResponse = { message: 'Si cet email existe, un code de reinitialisation a ete envoye par email.' };
 
     if (!student) {
       return res.json(genericResponse);
@@ -446,7 +445,7 @@ async function requestPasswordReset(req, res, next) {
     const latest = await prisma.passwordResetCode.findFirst({
       where: {
         studentId: student.id,
-        phone,
+        email,
         usedAt: null
       },
       orderBy: { createdAt: 'desc' }
@@ -458,7 +457,7 @@ async function requestPasswordReset(req, res, next) {
     }
 
     const code = generateOtpCode();
-    const codeHash = hashResetCode(phone, code);
+    const codeHash = hashResetCode(email, code);
     const expiresAt = new Date(now.getTime() + OTP_EXPIRES_MINUTES * 60 * 1000);
 
     await prisma.$transaction(async (tx) => {
@@ -470,17 +469,28 @@ async function requestPasswordReset(req, res, next) {
       await tx.passwordResetCode.create({
         data: {
           studentId: student.id,
-          phone,
+          phone: null,
+          email,
           codeHash,
           expiresAt
         }
       });
     });
 
-    const smsText = `LinkEduPro: votre code de reinitialisation est ${code}. Expire dans ${OTP_EXPIRES_MINUTES} min.`;
-    await sendSms({ to: phone, body: smsText });
+    const subject = 'Code de reinitialisation LinkEduPro';
+    const text = `LinkEduPro: votre code de reinitialisation est ${code}. Expire dans ${OTP_EXPIRES_MINUTES} min.`;
+    const html = `<p>LinkEduPro: votre code de reinitialisation est <strong>${code}</strong>.</p><p>Expire dans ${OTP_EXPIRES_MINUTES} minutes.</p>`;
+    try {
+      await sendEmail({ to: email, subject, html, text });
+    } catch (mailError) {
+      console.error('Password reset email send failed:', mailError);
+      return res.status(503).json({
+        message: "Service email indisponible pour le moment. Reessayez plus tard.",
+        code: 'EMAIL_SERVICE_UNAVAILABLE'
+      });
+    }
 
-    if (process.env.NODE_ENV !== 'production' && (process.env.SMS_PROVIDER || 'mock').toLowerCase() === 'mock') {
+    if (process.env.NODE_ENV !== 'production' && (process.env.EMAIL_PROVIDER || 'brevo').toLowerCase() === 'mock') {
       return res.json({ ...genericResponse, devCode: code });
     }
 
@@ -492,11 +502,11 @@ async function requestPasswordReset(req, res, next) {
 
 async function verifyResetCode(req, res, next) {
   try {
-    const phone = req.body.phone.trim();
+    const email = normalizeEmail(req.body.email);
     const code = req.body.code.trim();
 
     const reset = await prisma.passwordResetCode.findFirst({
-      where: { phone, usedAt: null },
+      where: { email, usedAt: null },
       orderBy: { createdAt: 'desc' }
     });
 
@@ -513,7 +523,7 @@ async function verifyResetCode(req, res, next) {
       return res.status(429).json({ message: 'Trop de tentatives. Demandez un nouveau code.' });
     }
 
-    const matches = hashResetCode(phone, code) === reset.codeHash;
+    const matches = hashResetCode(email, code) === reset.codeHash;
     if (!matches) {
       await prisma.passwordResetCode.update({
         where: { id: reset.id },
@@ -530,12 +540,12 @@ async function verifyResetCode(req, res, next) {
 
 async function resetPasswordWithCode(req, res, next) {
   try {
-    const phone = req.body.phone.trim();
+    const email = normalizeEmail(req.body.email);
     const code = req.body.code.trim();
     const newPassword = req.body.newPassword;
 
     const reset = await prisma.passwordResetCode.findFirst({
-      where: { phone, usedAt: null },
+      where: { email, usedAt: null },
       orderBy: { createdAt: 'desc' }
     });
 
@@ -547,7 +557,7 @@ async function resetPasswordWithCode(req, res, next) {
       return res.status(429).json({ message: 'Trop de tentatives. Demandez un nouveau code.' });
     }
 
-    const matches = hashResetCode(phone, code) === reset.codeHash;
+    const matches = hashResetCode(email, code) === reset.codeHash;
     if (!matches) {
       await prisma.passwordResetCode.update({
         where: { id: reset.id },

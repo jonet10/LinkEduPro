@@ -796,7 +796,8 @@ model SearchHistory {
 model PasswordResetCode {
   id        Int      @id @default(autoincrement())
   studentId Int      @map("student_id")
-  phone     String
+  phone     String?
+  email     String?
   codeHash  String   @map("code_hash")
   expiresAt DateTime @map("expires_at")
   usedAt    DateTime? @map("used_at")
@@ -805,6 +806,7 @@ model PasswordResetCode {
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@index([phone, createdAt])
+  @@index([email, createdAt])
   @@index([studentId, createdAt])
   @@map("password_reset_codes")
 }
