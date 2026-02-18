@@ -158,6 +158,7 @@ export default function HeaderNav() {
 
   const mobileLinks = isAuthed
     ? [
+        { href: '/messages', label: 'Messagerie', icon: '💬' },
         { href: '/focus', label: 'Focus', icon: '🎧' },
         { href: '/study-plans', label: 'Plans', icon: '🗂️' },
         { href: '/subjects', label: 'Matières', icon: '📘' },
@@ -288,6 +289,7 @@ export default function HeaderNav() {
         <div className="hidden md:flex md:items-center md:gap-3">
           {isAuthed ? (
             <>
+              <Link href="/messages" className="hover:text-brand-700">💬 Messagerie</Link>
               <Link href="/focus" className="hover:text-brand-700">🎧 Focus</Link>
               <Link href="/study-plans" className="hover:text-brand-700">🗂️ Plans</Link>
               <Link href="/subjects" className="hover:text-brand-700">📘 Matières</Link>
