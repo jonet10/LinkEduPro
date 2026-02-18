@@ -4,10 +4,13 @@ const prisma = require('../config/prisma');
 const { generateToken } = require('../utils/token');
 const { toApiLevel } = require('../v2/utils/level');
 const { sendSms } = require('../services/sms');
+const { sendEmail } = require('../services/email');
 
 const OTP_EXPIRES_MINUTES = Number(process.env.PASSWORD_RESET_OTP_EXPIRES_MINUTES || 10);
 const OTP_COOLDOWN_SECONDS = Number(process.env.PASSWORD_RESET_OTP_COOLDOWN_SECONDS || 60);
 const OTP_MAX_ATTEMPTS = Number(process.env.PASSWORD_RESET_OTP_MAX_ATTEMPTS || 5);
+const EMAIL_VERIFICATION_EXPIRES_MINUTES = Number(process.env.EMAIL_VERIFICATION_EXPIRES_MINUTES || 30);
+const EMAIL_VERIFICATION_COOLDOWN_SECONDS = Number(process.env.EMAIL_VERIFICATION_COOLDOWN_SECONDS || 60);
 
 function sanitizeStudent(student) {
   return {
@@ -19,6 +22,7 @@ function sanitizeStudent(student) {
     school: student.school,
     gradeLevel: student.gradeLevel,
     email: student.email,
+    emailVerified: student.emailVerified,
     phone: student.phone,
     address: student.address,
     photoUrl: student.photoUrl,
@@ -29,6 +33,49 @@ function sanitizeStudent(student) {
     reputationScore: student.reputationScore,
     createdAt: student.createdAt
   };
+}
+
+function normalizeEmail(email) {
+  return typeof email === 'string' ? email.trim().toLowerCase() : null;
+}
+
+function buildEmailVerificationLink(token) {
+  const frontend = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+  return `${frontend}/verify-email?token=${encodeURIComponent(token)}`;
+}
+
+async function issueEmailVerificationToken(studentId, email, tx = prisma) {
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + EMAIL_VERIFICATION_EXPIRES_MINUTES * 60 * 1000);
+  const token = crypto.randomBytes(32).toString('hex');
+
+  await tx.emailVerificationToken.updateMany({
+    where: {
+      studentId,
+      usedAt: null
+    },
+    data: { usedAt: now }
+  });
+
+  await tx.emailVerificationToken.create({
+    data: {
+      studentId,
+      email,
+      token,
+      expiresAt
+    }
+  });
+
+  return { token, expiresAt };
+}
+
+async function sendVerificationEmail({ to, token }) {
+  const link = buildEmailVerificationLink(token);
+  const subject = 'Verification de votre email LinkEduPro';
+  const text = `Cliquez sur ce lien pour verifier votre email: ${link}. Ce lien expire dans ${EMAIL_VERIFICATION_EXPIRES_MINUTES} minutes.`;
+  const html = `<p>Cliquez sur ce lien pour verifier votre email:</p><p><a href="${link}">${link}</a></p><p>Ce lien expire dans ${EMAIL_VERIFICATION_EXPIRES_MINUTES} minutes.</p>`;
+
+  await sendEmail({ to, subject, html, text });
 }
 
 function hashResetCode(phone, code) {
@@ -54,34 +101,46 @@ async function register(req, res, next) {
       password
     } = req.body;
 
-    const normalizedEmail = email || null;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (normalizedEmail) {
-      const existing = await prisma.student.findUnique({ where: { email: normalizedEmail } });
-      if (existing) {
-        return res.status(409).json({ message: 'Email deja utilise.' });
-      }
+    const existing = await prisma.student.findUnique({ where: { email: normalizedEmail } });
+    if (existing) {
+      return res.status(409).json({ message: 'Email deja utilise.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const student = await prisma.student.create({
-      data: {
-        firstName,
-        lastName,
-        sex,
-        dateOfBirth: new Date(dateOfBirth),
-        school,
-        gradeLevel,
-        email: normalizedEmail,
-        phone: phone || null,
-        passwordHash,
-        role: 'STUDENT'
-      }
+    const { student, verificationToken } = await prisma.$transaction(async (tx) => {
+      const created = await tx.student.create({
+        data: {
+          firstName,
+          lastName,
+          sex,
+          dateOfBirth: new Date(dateOfBirth),
+          school,
+          gradeLevel,
+          email: normalizedEmail,
+          phone: phone || null,
+          passwordHash,
+          role: 'STUDENT',
+          emailVerified: false
+        }
+      });
+
+      const issued = await issueEmailVerificationToken(created.id, normalizedEmail, tx);
+      return { student: created, verificationToken: issued.token };
     });
 
-    const token = generateToken(student);
+    await sendVerificationEmail({ to: normalizedEmail, token: verificationToken });
 
-    return res.status(201).json({ token, student: sanitizeStudent(student) });
+    const response = {
+      message: 'Compte cree. Verifiez votre email avant de vous connecter.',
+      requiresEmailVerification: true
+    };
+    if (process.env.NODE_ENV !== 'production' && (process.env.EMAIL_PROVIDER || 'mock').toLowerCase() === 'mock') {
+      response.devVerificationToken = verificationToken;
+    }
+
+    return res.status(201).json(response);
   } catch (error) {
     return next(error);
   }
@@ -90,10 +149,12 @@ async function register(req, res, next) {
 async function login(req, res, next) {
   try {
     const { identifier, password } = req.body;
+    const normalizedIdentifier = identifier.trim();
+    const emailIdentifier = normalizedIdentifier.includes('@') ? normalizeEmail(normalizedIdentifier) : null;
 
     const student = await prisma.student.findFirst({
       where: {
-        OR: [{ email: identifier }, { phone: identifier }]
+        OR: [{ email: emailIdentifier || normalizedIdentifier }, { phone: normalizedIdentifier }]
       }
     });
 
@@ -104,6 +165,14 @@ async function login(req, res, next) {
     const valid = await bcrypt.compare(password, student.passwordHash);
     if (!valid) {
       return res.status(401).json({ message: 'Identifiants invalides.' });
+    }
+
+    if (!student.emailVerified) {
+      return res.status(403).json({
+        message: 'Email non verifie. Verifiez votre boite mail ou renvoyez un email de verification.',
+        code: 'EMAIL_NOT_VERIFIED',
+        email: student.email
+      });
     }
 
     const token = generateToken(student);
@@ -141,7 +210,8 @@ async function acceptTeacherInvite(req, res, next) {
           phone: phone || null,
           passwordHash,
           role: 'TEACHER',
-          teacherLevel: 'STANDARD'
+          teacherLevel: 'STANDARD',
+          emailVerified: true
         }
       });
 
@@ -155,6 +225,84 @@ async function acceptTeacherInvite(req, res, next) {
 
     const tokenJwt = generateToken(teacher);
     return res.status(201).json({ token: tokenJwt, student: sanitizeStudent(teacher) });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function verifyEmail(req, res, next) {
+  try {
+    const token = req.body.token.trim();
+
+    const verification = await prisma.emailVerificationToken.findFirst({
+      where: { token, usedAt: null },
+      include: { student: true }
+    });
+
+    if (!verification || verification.expiresAt < new Date()) {
+      if (verification && verification.usedAt === null && verification.expiresAt < new Date()) {
+        await prisma.emailVerificationToken.update({
+          where: { id: verification.id },
+          data: { usedAt: new Date() }
+        });
+      }
+      return res.status(400).json({ message: 'Lien de verification invalide ou expire.' });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.student.update({
+        where: { id: verification.studentId },
+        data: { emailVerified: true }
+      });
+      await tx.emailVerificationToken.update({
+        where: { id: verification.id },
+        data: { usedAt: new Date() }
+      });
+    });
+
+    return res.json({ message: 'Email verifie avec succes.' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function resendVerificationEmail(req, res, next) {
+  try {
+    const email = normalizeEmail(req.body.email);
+    const genericResponse = { message: 'Si ce compte existe, un email de verification a ete envoye.' };
+
+    const student = await prisma.student.findUnique({
+      where: { email }
+    });
+
+    if (!student) {
+      return res.json(genericResponse);
+    }
+
+    if (student.emailVerified) {
+      return res.json({ message: 'Cet email est deja verifie.' });
+    }
+
+    const latest = await prisma.emailVerificationToken.findFirst({
+      where: {
+        studentId: student.id,
+        usedAt: null
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const now = new Date();
+    if (latest && (now.getTime() - new Date(latest.createdAt).getTime()) / 1000 < EMAIL_VERIFICATION_COOLDOWN_SECONDS) {
+      return res.status(429).json({ message: 'Veuillez patienter avant de demander un nouvel email.' });
+    }
+
+    const { token } = await issueEmailVerificationToken(student.id, student.email);
+    await sendVerificationEmail({ to: student.email, token });
+
+    if (process.env.NODE_ENV !== 'production' && (process.env.EMAIL_PROVIDER || 'mock').toLowerCase() === 'mock') {
+      return res.json({ ...genericResponse, devVerificationToken: token });
+    }
+    return res.json(genericResponse);
   } catch (error) {
     return next(error);
   }
@@ -321,6 +469,8 @@ module.exports = {
   login,
   acceptTeacherInvite,
   validateTeacherInvite,
+  verifyEmail,
+  resendVerificationEmail,
   requestPasswordReset,
   verifyResetCode,
   resetPasswordWithCode

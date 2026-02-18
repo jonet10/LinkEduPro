@@ -7,10 +7,10 @@ const registerSchema = Joi.object({
   dateOfBirth: Joi.date().iso().required(),
   school: Joi.string().trim().min(2).max(120).required(),
   gradeLevel: Joi.string().trim().min(1).max(50).required(),
-  email: Joi.string().email().allow(null, ''),
+  email: Joi.string().email({ tlds: { allow: false } }).required(),
   phone: Joi.string().trim().max(30).allow(null, ''),
   password: Joi.string().min(6).max(128).required()
-}).or('email', 'phone');
+});
 
 const loginSchema = Joi.object({
   identifier: Joi.string().required(),
@@ -40,6 +40,14 @@ const forgotPasswordResetSchema = Joi.object({
   phone: Joi.string().trim().min(6).max(30).required(),
   code: Joi.string().trim().pattern(/^\d{6}$/).required(),
   newPassword: Joi.string().min(8).max(128).required()
+});
+
+const verifyEmailSchema = Joi.object({
+  token: Joi.string().trim().min(32).max(256).required()
+});
+
+const resendVerificationEmailSchema = Joi.object({
+  email: Joi.string().email({ tlds: { allow: false } }).required()
 });
 
 const quizParamsSchema = Joi.object({
@@ -88,6 +96,8 @@ module.exports = {
   forgotPasswordRequestSchema,
   forgotPasswordVerifySchema,
   forgotPasswordResetSchema,
+  verifyEmailSchema,
+  resendVerificationEmailSchema,
   quizParamsSchema,
   quizQuerySchema,
   submitQuizSchema,

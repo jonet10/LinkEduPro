@@ -98,6 +98,7 @@ model Student {
   phone        String?
   address      String?
   passwordHash String
+  emailVerified Boolean      @default(false) @map("email_verified")
   photoUrl     String?       @map("photo_url")
   level        EducationLevel?
   darkMode     Boolean       @default(false) @map("dark_mode")
@@ -132,6 +133,7 @@ model Student {
   focusSongListens FocusSongListen[]
   focusStatistics FocusStatistic[]
   passwordResetCodes PasswordResetCode[]
+  emailVerificationTokens EmailVerificationToken[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -804,6 +806,22 @@ model PasswordResetCode {
   @@index([phone, createdAt])
   @@index([studentId, createdAt])
   @@map("password_reset_codes")
+}
+
+model EmailVerificationToken {
+  id        Int      @id @default(autoincrement())
+  studentId Int      @map("student_id")
+  email     String
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, createdAt])
+  @@index([email, createdAt])
+  @@index([token, usedAt])
+  @@map("email_verification_tokens")
 }
 
 model FocusSong {

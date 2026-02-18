@@ -17,7 +17,11 @@ export async function apiClient(path, options = {}) {
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    throw new Error(data.message || 'Erreur API');
+    const error = new Error(data.message || 'Erreur API');
+    error.status = res.status;
+    error.code = data.code;
+    error.data = data;
+    throw error;
   }
 
   return data;

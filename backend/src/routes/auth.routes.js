@@ -4,6 +4,8 @@ const {
   login,
   acceptTeacherInvite,
   validateTeacherInvite,
+  verifyEmail,
+  resendVerificationEmail,
   requestPasswordReset,
   verifyResetCode,
   resetPasswordWithCode
@@ -13,6 +15,8 @@ const {
   registerSchema,
   loginSchema,
   acceptTeacherInviteSchema,
+  verifyEmailSchema,
+  resendVerificationEmailSchema,
   forgotPasswordRequestSchema,
   forgotPasswordVerifySchema,
   forgotPasswordResetSchema
@@ -22,6 +26,8 @@ const router = express.Router();
 
 router.post('/register', validate(registerSchema), register);
 router.post('/login', validate(loginSchema), login);
+router.post('/verify-email', validate(verifyEmailSchema), verifyEmail);
+router.post('/resend-verification-email', validate(resendVerificationEmailSchema), resendVerificationEmail);
 router.post('/forgot-password/request', validate(forgotPasswordRequestSchema), requestPasswordReset);
 router.post('/forgot-password/verify', validate(forgotPasswordVerifySchema), verifyResetCode);
 router.post('/forgot-password/reset', validate(forgotPasswordResetSchema), resetPasswordWithCode);
