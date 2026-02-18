@@ -27,6 +27,21 @@ const acceptTeacherInviteSchema = Joi.object({
   phone: Joi.string().trim().max(30).allow(null, '')
 });
 
+const forgotPasswordRequestSchema = Joi.object({
+  phone: Joi.string().trim().min(6).max(30).required()
+});
+
+const forgotPasswordVerifySchema = Joi.object({
+  phone: Joi.string().trim().min(6).max(30).required(),
+  code: Joi.string().trim().pattern(/^\d{6}$/).required()
+});
+
+const forgotPasswordResetSchema = Joi.object({
+  phone: Joi.string().trim().min(6).max(30).required(),
+  code: Joi.string().trim().pattern(/^\d{6}$/).required(),
+  newPassword: Joi.string().min(8).max(128).required()
+});
+
 const quizParamsSchema = Joi.object({
   subjectId: Joi.number().integer().positive().required()
 });
@@ -70,6 +85,9 @@ module.exports = {
   registerSchema,
   loginSchema,
   acceptTeacherInviteSchema,
+  forgotPasswordRequestSchema,
+  forgotPasswordVerifySchema,
+  forgotPasswordResetSchema,
   quizParamsSchema,
   quizQuerySchema,
   submitQuizSchema,
