@@ -336,26 +336,6 @@ export default function HeaderNav() {
           <Link href="/login" className="hover:text-brand-700">Connexion</Link>
         )}
 
-        <div className="hidden lg:flex lg:items-center lg:gap-3">
-          {isAuthed ? (
-            <>
-              <Link href="/" className="hover:text-brand-700">🏠 Accueil</Link>
-              <Link href="/focus" className="hover:text-brand-700">🎧 Focus</Link>
-              <Link href="/study-plans" className="hover:text-brand-700">🗂️ Plans</Link>
-              <Link href="/subjects" className="hover:text-brand-700">📘 Matières</Link>
-              <Link href="/progress" className="hover:text-brand-700">📈 Progrès</Link>
-              <Link href="/library" className="hover:text-brand-700">📚 Bibliothèque</Link>
-              <Link href="/blog" className="hover:text-brand-700">📝 Blog</Link>
-              {canSeeProbableExercises ? (
-                <Link href="/probable-exercises" className="hover:text-brand-700">🎯 Exercices probables</Link>
-              ) : null}
-              {canSeeGlobalAdminDashboard ? (
-                <Link href="/admin/super-dashboard" className="hover:text-brand-700">🛠️ Dashboard</Link>
-              ) : null}
-            </>
-          ) : null}
-        </div>
-
         {isAuthed ? (
           <div className="relative" ref={quickMenuRef}>
             <button
