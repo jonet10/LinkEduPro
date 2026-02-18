@@ -123,6 +123,7 @@ model Student {
   notifications UserNotification[]
   pomodoroSessions PomodoroSession[]
   submittedContents Content[] @relation("ContentTeacher")
+  createdStudyPlans StudyPlan[] @relation("StudyPlanCreator")
   approvalLogs ApprovalLog[] @relation("ContentApprovalAdmin")
   personalStudyPlans PersonalStudyPlan[]
   quizResults QuizResult[]
@@ -682,10 +683,15 @@ model ApprovalLog {
 model StudyPlan {
   id          Int            @id @default(autoincrement())
   level       EducationLevel
+  subject     String?
   title       String
   description String
+  createdById Int?           @map("created_by_id")
+  creator     Student?       @relation("StudyPlanCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([level])
+  @@index([subject])
+  @@index([createdById])
   @@map("study_plans")
 }
 
