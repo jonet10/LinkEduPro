@@ -176,6 +176,7 @@ export default function HeaderNav() {
   const menuItems = useMemo(() => {
     if (!isAuthed) return [];
     return [
+      { href: '/', label: 'Accueil', icon: '🏠' },
       { href: '/focus', label: 'Focus', icon: '🎧' },
       { href: '/study-plans', label: 'Plans', icon: '🗂️' },
       { href: '/subjects', label: 'Matières', icon: '📘' },
@@ -203,11 +204,23 @@ export default function HeaderNav() {
         {isAuthed ? (
           <Link
             href="/messages"
-            className="rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+            className="rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:hidden"
             aria-label="Messagerie"
             title="Messagerie"
           >
             <span className="text-base leading-none" aria-hidden="true">💬</span>
+          </Link>
+        ) : null}
+
+        {isAuthed ? (
+          <Link
+            href="/messages"
+            className="hidden rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
+            aria-label="Messagerie"
+            title="Messagerie"
+          >
+            <span className="text-base leading-none" aria-hidden="true">💬</span>
+            <span>Messagerie</span>
           </Link>
         ) : null}
 
@@ -262,6 +275,18 @@ export default function HeaderNav() {
               </div>
             ) : null}
           </div>
+        ) : null}
+
+        {isAuthed ? (
+          <Link
+            href="/profile"
+            className="hidden rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
+            aria-label="Profil"
+            title="Profil"
+          >
+            <span className="text-base leading-none" aria-hidden="true">👤</span>
+            <span>Profil</span>
+          </Link>
         ) : null}
 
         {isAuthed ? (
@@ -356,31 +381,25 @@ export default function HeaderNav() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="mx-auto mb-4 h-1.5 w-16 rounded-full bg-brand-100" />
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Menu rapide</p>
-                    <p className="text-lg font-bold text-brand-900">{student?.firstName || 'Utilisateur'}</p>
-                  </div>
-                  <button
-                    type="button"
-                    className="rounded-md border border-brand-100 px-3 py-1.5 text-sm"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Fermer
+                <div className="mb-4 flex justify-end">
+                  <button type="button" className="rounded-md border border-brand-100 px-3 py-1.5 text-sm" onClick={() => setIsMobileMenuOpen(false)}>
+                    ✕
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <Link href="/messages" className="rounded-xl border border-brand-100 px-3 py-3 text-sm font-medium" onClick={() => setIsMobileMenuOpen(false)}>
-                    💬 Messagerie
+                <div className="grid grid-cols-4 gap-2">
+                  <Link href="/messages" className="rounded-xl border border-brand-100 px-3 py-3 text-center text-xl font-medium" onClick={() => setIsMobileMenuOpen(false)} aria-label="Messagerie" title="Messagerie">
+                    💬
                   </Link>
                   {menuItems.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="rounded-xl border border-brand-100 px-3 py-3 text-sm font-medium"
+                      className="rounded-xl border border-brand-100 px-3 py-3 text-center text-xl font-medium"
                       onClick={() => setIsMobileMenuOpen(false)}
+                      aria-label={item.label}
+                      title={item.label}
                     >
-                      {item.icon} {item.label}
+                      {item.icon}
                     </Link>
                   ))}
                 </div>
@@ -391,20 +410,22 @@ export default function HeaderNav() {
         : null}
 
       {isAuthed ? (
-        <button
-          type="button"
-          className="fixed bottom-4 right-4 z-[70] rounded-full bg-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-xl md:hidden"
-          style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-          onClick={() => {
-            setIsMobileMenuOpen(true);
-            setIsNotifOpen(false);
-            setIsAvatarOpen(false);
-            setIsQuickMenuOpen(false);
-          }}
-          aria-label="Ouvrir le menu"
-        >
-          ☰ Menu
-        </button>
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[70] flex justify-center pb-3 md:hidden" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+          <button
+            type="button"
+            className="pointer-events-auto rounded-full bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-xl"
+            onClick={() => {
+              setIsMobileMenuOpen(true);
+              setIsNotifOpen(false);
+              setIsAvatarOpen(false);
+              setIsQuickMenuOpen(false);
+            }}
+            aria-label="Ouvrir le menu"
+            title="Menu"
+          >
+            ☰
+          </button>
+        </div>
       ) : null}
     </>
   );
