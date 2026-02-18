@@ -9,7 +9,7 @@ import SearchResults from './SearchResults';
 import SearchSuggestions from './SearchSuggestions';
 import styles from './Search.module.css';
 
-export default function SmartSearchSection() {
+export default function SmartSearchSection({ className = '' }) {
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({
     category: 'all',
@@ -160,7 +160,7 @@ export default function SmartSearchSection() {
   }
 
   return (
-    <section className="card" ref={rootRef}>
+    <section className={`card ${className}`.trim()} ref={rootRef}>
       <h2 className="text-2xl font-bold text-brand-900">Recherche intelligente</h2>
       <p className="mt-2 text-sm text-brand-700">Recherche multi-catégorie avec filtres, suggestions et historique utilisateur.</p>
 
