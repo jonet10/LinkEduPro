@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { clearAuth, getDarkMode, getStudent, getToken, setDarkModePreference } from '@/lib/auth';
 import { apiClient } from '@/lib/api';
@@ -26,6 +26,7 @@ export default function HeaderNav() {
   const avatarRef = useRef(null);
   const quickMenuRef = useRef(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const refresh = () => {
@@ -204,17 +205,6 @@ export default function HeaderNav() {
         {isAuthed ? (
           <Link
             href="/messages"
-            className="rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:hidden"
-            aria-label="Messagerie"
-            title="Messagerie"
-          >
-            <span className="text-base leading-none" aria-hidden="true">💬</span>
-          </Link>
-        ) : null}
-
-        {isAuthed ? (
-          <Link
-            href="/messages"
             className="hidden rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
             aria-label="Messagerie"
             title="Messagerie"
@@ -225,10 +215,10 @@ export default function HeaderNav() {
         ) : null}
 
         {isAuthed ? (
-          <div className="relative">
+          <div className="relative hidden md:block">
             <button
               type="button"
-              className="relative rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5 md:px-3"
+              className="relative rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
               onClick={() => {
                 setIsNotifOpen((v) => !v);
                 setIsQuickMenuOpen(false);
@@ -291,7 +281,7 @@ export default function HeaderNav() {
         ) : null}
 
         {isAuthed ? (
-          <div className="relative" ref={avatarRef}>
+          <div className="relative hidden md:block" ref={avatarRef}>
             <button
               type="button"
               className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-brand-100 bg-white/90 text-xs font-semibold text-brand-700 hover:bg-brand-50"
@@ -337,7 +327,7 @@ export default function HeaderNav() {
         )}
 
         {isAuthed ? (
-          <div className="relative" ref={quickMenuRef}>
+          <div className="relative hidden md:block" ref={quickMenuRef}>
             <button
               type="button"
               className="rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
@@ -407,6 +397,22 @@ export default function HeaderNav() {
                     </Link>
                   ))}
                 </div>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <Link
+                    href="/profile"
+                    className="rounded-xl border border-brand-100 px-3 py-2 text-center text-sm font-medium"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    👤 Profil
+                  </Link>
+                  <button
+                    type="button"
+                    className="rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-600"
+                    onClick={onLogout}
+                  >
+                    ⎋ Déconnexion
+                  </button>
+                </div>
               </div>
             </div>,
             document.body
@@ -414,21 +420,45 @@ export default function HeaderNav() {
         : null}
 
       {isAuthed ? (
-        <div className="pointer-events-none fixed bottom-0 right-0 z-[70] pb-3 pr-4 md:hidden" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
-          <button
-            type="button"
-            className="pointer-events-auto rounded-full bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-xl"
-            onClick={() => {
-              setIsMobileMenuOpen(true);
-              setIsNotifOpen(false);
-              setIsAvatarOpen(false);
-              setIsQuickMenuOpen(false);
-            }}
-            aria-label="Ouvrir le menu"
-            title="Menu"
-          >
-            ☰
-          </button>
+        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-brand-100 bg-white/95 backdrop-blur md:hidden" style={{ paddingBottom: 'max(0.35rem, env(safe-area-inset-bottom))' }}>
+          <nav className="mx-auto grid max-w-md grid-cols-5 gap-1 px-2 py-2">
+            <Link href="/" className={`rounded-lg px-1 py-1 text-center text-[11px] ${pathname === '/' ? 'bg-brand-50 text-brand-900' : 'text-brand-700'}`}>
+              <div className="text-lg">🏠</div>
+              <div>Accueil</div>
+            </Link>
+            <Link href="/messages" className={`rounded-lg px-1 py-1 text-center text-[11px] ${pathname === '/messages' ? 'bg-brand-50 text-brand-900' : 'text-brand-700'}`}>
+              <div className="text-lg">💬</div>
+              <div>Messages</div>
+            </Link>
+            <Link href="/progress" className={`rounded-lg px-1 py-1 text-center text-[11px] ${pathname === '/progress' ? 'bg-brand-50 text-brand-900' : 'text-brand-700'}`}>
+              <div className="relative text-lg">
+                🔔
+                {unreadCount > 0 ? (
+                  <span className="absolute -right-2 -top-1 rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                ) : null}
+              </div>
+              <div>Activité</div>
+            </Link>
+            <Link href="/search" className={`rounded-lg px-1 py-1 text-center text-[11px] ${pathname === '/search' ? 'bg-brand-50 text-brand-900' : 'text-brand-700'}`}>
+              <div className="text-lg">🔎</div>
+              <div>Recherche</div>
+            </Link>
+            <button
+              type="button"
+              className="rounded-lg px-1 py-1 text-center text-[11px] text-brand-700"
+              onClick={() => {
+                setIsMobileMenuOpen(true);
+                setIsNotifOpen(false);
+                setIsAvatarOpen(false);
+                setIsQuickMenuOpen(false);
+              }}
+            >
+              <div className="text-lg">⋯</div>
+              <div>Plus</div>
+            </button>
+          </nav>
         </div>
       ) : null}
     </>
