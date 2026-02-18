@@ -23,6 +23,19 @@ function parseAcademicLevel(value) {
   return ACADEMIC_LEVEL_TO_DB[value.trim().toLowerCase()] || null;
 }
 
+function startOfTodayServerTime() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
+function isSameDay(a, b) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
 function toProfile(student) {
   return {
     id: student.id,
@@ -171,9 +184,79 @@ async function setDarkMode(req, res, next) {
   }
 }
 
+async function getDailyWelcomePopup(req, res, next) {
+  try {
+    const student = await prisma.student.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        firstName: true,
+        dateOfBirth: true,
+        lastWelcomePopupDate: true,
+        usedWelcomeMessageIds: true
+      }
+    });
+
+    if (!student) {
+      return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    }
+
+    if (!student.dateOfBirth) {
+      return res.json({ shouldShow: false });
+    }
+
+    const today = startOfTodayServerTime();
+    if (student.lastWelcomePopupDate && isSameDay(new Date(student.lastWelcomePopupDate), today)) {
+      return res.json({ shouldShow: false });
+    }
+
+    const allMessages = await prisma.welcomeMessage.findMany({
+      select: { id: true, text: true, category: true },
+      orderBy: { id: 'asc' }
+    });
+
+    if (!allMessages.length) {
+      return res.json({ shouldShow: false });
+    }
+
+    let usedIds = Array.isArray(student.usedWelcomeMessageIds)
+      ? student.usedWelcomeMessageIds.map((id) => Number(id)).filter((id) => Number.isInteger(id))
+      : [];
+
+    let unusedMessages = allMessages.filter((m) => !usedIds.includes(m.id));
+    if (!unusedMessages.length) {
+      usedIds = [];
+      unusedMessages = allMessages;
+    }
+
+    const chosen = unusedMessages[Math.floor(Math.random() * unusedMessages.length)];
+    const nextUsedIds = [...usedIds, chosen.id];
+    const msInDay = 1000 * 60 * 60 * 24;
+    const daysLived = Math.floor((today.getTime() - new Date(student.dateOfBirth).getTime()) / msInDay);
+
+    await prisma.student.update({
+      where: { id: student.id },
+      data: {
+        lastWelcomePopupDate: today,
+        usedWelcomeMessageIds: nextUsedIds
+      }
+    });
+
+    return res.json({
+      shouldShow: true,
+      firstName: student.firstName,
+      daysLived,
+      message: chosen
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getMyProfile,
   updateMyProfile,
   uploadMyPhoto,
-  setDarkMode
+  setDarkMode,
+  getDailyWelcomePopup
 };

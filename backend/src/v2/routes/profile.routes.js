@@ -6,13 +6,15 @@ const {
   getMyProfile,
   updateMyProfile,
   uploadMyPhoto,
-  setDarkMode
+  setDarkMode,
+  getDailyWelcomePopup
 } = require('../controllers/profile.controller');
 const { updateProfileSchema, darkModeSchema } = require('../validators/v2.validators');
 
 const router = express.Router();
 
 router.get('/me', getMyProfile);
+router.get('/daily-welcome-popup', getDailyWelcomePopup);
 router.patch('/me', requireRoles(['STUDENT', 'TEACHER']), validate(updateProfileSchema), updateMyProfile);
 router.post('/photo', requireRoles(['STUDENT', 'TEACHER']), uploadProfilePhoto.single('photo'), uploadMyPhoto);
 router.patch('/dark-mode', validate(darkModeSchema), setDarkMode);

@@ -110,6 +110,8 @@ model Student {
   emailVerified Boolean      @default(false) @map("email_verified")
   verificationToken String?  @map("verification_token")
   tokenExpiry   DateTime?    @map("token_expiry")
+  lastWelcomePopupDate DateTime? @map("last_welcome_popup_date")
+  usedWelcomeMessageIds Json? @map("used_welcome_message_ids")
   photoUrl     String?       @map("photo_url")
   level        EducationLevel?
   darkMode     Boolean       @default(false) @map("dark_mode")
@@ -147,6 +149,15 @@ model Student {
   studentProfile StudentProfile?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+}
+
+model WelcomeMessage {
+  id        Int      @id @default(autoincrement())
+  text      String   @unique
+  category  String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("welcome_messages")
 }
 
 model StudentProfile {
