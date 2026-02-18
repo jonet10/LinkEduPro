@@ -1,42 +1,49 @@
-async function sendViaResend({ to, subject, html, text }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM;
+async function sendViaBrevo({ to, subject, html, text }) {
+  const apiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.EMAIL_FROM || 'no-reply@linkedupro.com';
+  const senderName = process.env.EMAIL_FROM_NAME || 'LinkEduPro';
 
-  if (!apiKey || !from) {
-    throw new Error('Configuration email Resend manquante.');
+  if (!apiKey) {
+    throw new Error('Configuration Brevo manquante: BREVO_API_KEY.');
   }
 
-  const res = await fetch('https://api.resend.com/emails', {
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      'api-key': apiKey,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from,
-      to: Array.isArray(to) ? to : [to],
+      sender: {
+        email: senderEmail,
+        name: senderName
+      },
+      to: (Array.isArray(to) ? to : [to]).map((email) => ({ email })),
       subject,
-      html,
-      text
+      htmlContent: html,
+      textContent: text
     })
   });
 
   if (!res.ok) {
     const payload = await res.text();
-    throw new Error(`Echec envoi email Resend: ${payload}`);
+    throw new Error(`Echec envoi email Brevo: ${payload}`);
   }
 }
 
 async function sendEmail({ to, subject, html, text }) {
-  const provider = (process.env.EMAIL_PROVIDER || 'mock').toLowerCase();
+  const provider = (process.env.EMAIL_PROVIDER || 'brevo').toLowerCase();
 
-  if (provider === 'resend') {
-    await sendViaResend({ to, subject, html, text });
+  if (provider === 'mock') {
+    console.log(`[EMAIL MOCK] to=${to} subject=${subject} text=${text || ''}`);
     return;
   }
 
-  // Dev fallback: logs email content.
-  console.log(`[EMAIL MOCK] to=${to} subject=${subject} text=${text || ''}`);
+  if (provider !== 'brevo') {
+    throw new Error(`EMAIL_PROVIDER non supporte: ${provider}`);
+  }
+
+  await sendViaBrevo({ to, subject, html, text });
 }
 
 module.exports = { sendEmail };

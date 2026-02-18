@@ -5,18 +5,22 @@ const {
   acceptTeacherInvite,
   validateTeacherInvite,
   verifyEmail,
+  verifyEmailByLink,
   resendVerificationEmail,
+  updateUnverifiedEmail,
   requestPasswordReset,
   verifyResetCode,
   resetPasswordWithCode
 } = require('../controllers/auth.controller');
 const validate = require('../middlewares/validate');
+const loginRateLimit = require('../middlewares/login-rate-limit');
 const {
   registerSchema,
   loginSchema,
   acceptTeacherInviteSchema,
   verifyEmailSchema,
   resendVerificationEmailSchema,
+  updateUnverifiedEmailSchema,
   forgotPasswordRequestSchema,
   forgotPasswordVerifySchema,
   forgotPasswordResetSchema
@@ -25,9 +29,11 @@ const {
 const router = express.Router();
 
 router.post('/register', validate(registerSchema), register);
-router.post('/login', validate(loginSchema), login);
+router.post('/login', loginRateLimit, validate(loginSchema), login);
+router.get('/verify-email', verifyEmailByLink);
 router.post('/verify-email', validate(verifyEmailSchema), verifyEmail);
 router.post('/resend-verification-email', validate(resendVerificationEmailSchema), resendVerificationEmail);
+router.post('/update-unverified-email', validate(updateUnverifiedEmailSchema), updateUnverifiedEmail);
 router.post('/forgot-password/request', validate(forgotPasswordRequestSchema), requestPasswordReset);
 router.post('/forgot-password/verify', validate(forgotPasswordVerifySchema), verifyResetCode);
 router.post('/forgot-password/reset', validate(forgotPasswordResetSchema), resetPasswordWithCode);

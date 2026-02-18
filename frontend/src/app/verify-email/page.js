@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 function getApiBaseUrl() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -37,14 +37,6 @@ async function verifyToken(token) {
 export default async function VerifyEmailPage({ searchParams }) {
   const token = typeof searchParams?.token === 'string' ? searchParams.token : '';
   const result = await verifyToken(token);
-
-  return (
-    <section className="mx-auto max-w-md card space-y-4">
-      <h1 className="text-2xl font-bold text-brand-900">Verification email</h1>
-      <p className={result.ok ? 'text-sm text-green-600' : 'text-sm text-red-600'}>{result.message}</p>
-      <Link href="/login" className="text-sm text-brand-700 hover:underline">
-        Aller a la connexion
-      </Link>
-    </section>
-  );
+  const query = `verified=${result.ok ? '1' : '0'}&message=${encodeURIComponent(result.message)}`;
+  redirect(`/login?${query}`);
 }

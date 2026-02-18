@@ -50,6 +50,12 @@ const resendVerificationEmailSchema = Joi.object({
   email: Joi.string().email({ tlds: { allow: false } }).required()
 });
 
+const updateUnverifiedEmailSchema = Joi.object({
+  email: Joi.string().email({ tlds: { allow: false } }).required(),
+  newEmail: Joi.string().email({ tlds: { allow: false } }).required(),
+  password: Joi.string().min(6).max(128).required()
+});
+
 const quizParamsSchema = Joi.object({
   subjectId: Joi.number().integer().positive().required()
 });
@@ -98,6 +104,7 @@ module.exports = {
   forgotPasswordResetSchema,
   verifyEmailSchema,
   resendVerificationEmailSchema,
+  updateUnverifiedEmailSchema,
   quizParamsSchema,
   quizQuerySchema,
   submitQuizSchema,

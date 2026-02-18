@@ -9,8 +9,8 @@ const { sendEmail } = require('../services/email');
 const OTP_EXPIRES_MINUTES = Number(process.env.PASSWORD_RESET_OTP_EXPIRES_MINUTES || 10);
 const OTP_COOLDOWN_SECONDS = Number(process.env.PASSWORD_RESET_OTP_COOLDOWN_SECONDS || 60);
 const OTP_MAX_ATTEMPTS = Number(process.env.PASSWORD_RESET_OTP_MAX_ATTEMPTS || 5);
-const EMAIL_VERIFICATION_EXPIRES_MINUTES = Number(process.env.EMAIL_VERIFICATION_EXPIRES_MINUTES || 30);
-const EMAIL_VERIFICATION_COOLDOWN_SECONDS = Number(process.env.EMAIL_VERIFICATION_COOLDOWN_SECONDS || 60);
+const EMAIL_VERIFICATION_EXPIRES_MINUTES = Number(process.env.EMAIL_VERIFICATION_EXPIRES_MINUTES || 20);
+const EMAIL_VERIFICATION_COOLDOWN_SECONDS = Number(process.env.EMAIL_VERIFICATION_COOLDOWN_SECONDS || 120);
 
 function sanitizeStudent(student) {
   return {
@@ -39,43 +39,78 @@ function normalizeEmail(email) {
   return typeof email === 'string' ? email.trim().toLowerCase() : null;
 }
 
+function hashEmailVerificationToken(token) {
+  const secret = process.env.JWT_SECRET || 'linkedupro_email_verification_secret';
+  return crypto.createHash('sha256').update(`${token}:${secret}`).digest('hex');
+}
+
 function buildEmailVerificationLink(token) {
-  const frontend = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+  const frontend = (process.env.FRONTEND_URL || 'https://linkedupro.com').replace(/\/$/, '');
   return `${frontend}/verify-email?token=${encodeURIComponent(token)}`;
 }
 
-async function issueEmailVerificationToken(studentId, email, tx = prisma) {
-  const now = new Date();
-  const expiresAt = new Date(now.getTime() + EMAIL_VERIFICATION_EXPIRES_MINUTES * 60 * 1000);
-  const token = crypto.randomBytes(32).toString('hex');
+function getVerificationIssuedAt(student) {
+  if (!student?.tokenExpiry) return null;
+  return new Date(student.tokenExpiry.getTime() - EMAIL_VERIFICATION_EXPIRES_MINUTES * 60 * 1000);
+}
 
-  await tx.emailVerificationToken.updateMany({
+function createEmailVerificationToken() {
+  const plainToken = crypto.randomBytes(32).toString('hex');
+  const tokenHash = hashEmailVerificationToken(plainToken);
+  const tokenExpiry = new Date(Date.now() + EMAIL_VERIFICATION_EXPIRES_MINUTES * 60 * 1000);
+  return { plainToken, tokenHash, tokenExpiry };
+}
+
+async function sendVerificationEmail({ to, name, token }) {
+  const link = buildEmailVerificationLink(token);
+  const displayName = (name || '').trim() || 'Utilisateur';
+  const subject = 'Activez votre compte LinkEduPro';
+  const text = `Bonjour ${displayName}, cliquez sur ce lien pour activer votre compte : ${link}. Ce lien expire dans 20 minutes.`;
+  const html = `<p>Bonjour ${displayName},</p><p>Cliquez sur ce lien pour activer votre compte : <a href="${link}">${link}</a>.</p><p>Ce lien expire dans 20 minutes.</p>`;
+
+  await sendEmail({ to, subject, html, text });
+}
+
+async function verifyAndConsumeEmailToken(rawToken) {
+  const token = typeof rawToken === 'string' ? rawToken.trim() : '';
+  if (!token) {
+    return { ok: false, message: 'Token de verification manquant.' };
+  }
+
+  const tokenHash = hashEmailVerificationToken(token);
+  const student = await prisma.student.findFirst({
     where: {
-      studentId,
-      usedAt: null
-    },
-    data: { usedAt: now }
-  });
-
-  await tx.emailVerificationToken.create({
-    data: {
-      studentId,
-      email,
-      token,
-      expiresAt
+      verificationToken: tokenHash,
+      emailVerified: false
     }
   });
 
-  return { token, expiresAt };
-}
+  if (!student) {
+    return { ok: false, message: 'Lien de verification invalide ou deja utilise.' };
+  }
 
-async function sendVerificationEmail({ to, token }) {
-  const link = buildEmailVerificationLink(token);
-  const subject = 'Verification de votre email LinkEduPro';
-  const text = `Cliquez sur ce lien pour verifier votre email: ${link}. Ce lien expire dans ${EMAIL_VERIFICATION_EXPIRES_MINUTES} minutes.`;
-  const html = `<p>Cliquez sur ce lien pour verifier votre email:</p><p><a href="${link}">${link}</a></p><p>Ce lien expire dans ${EMAIL_VERIFICATION_EXPIRES_MINUTES} minutes.</p>`;
+  const now = new Date();
+  if (!student.tokenExpiry || student.tokenExpiry < now) {
+    await prisma.student.update({
+      where: { id: student.id },
+      data: {
+        verificationToken: null,
+        tokenExpiry: null
+      }
+    });
+    return { ok: false, message: 'Lien de verification expire.' };
+  }
 
-  await sendEmail({ to, subject, html, text });
+  await prisma.student.update({
+    where: { id: student.id },
+    data: {
+      emailVerified: true,
+      verificationToken: null,
+      tokenExpiry: null
+    }
+  });
+
+  return { ok: true, message: 'Email verifie avec succes.' };
 }
 
 function hashResetCode(phone, code) {
@@ -109,29 +144,32 @@ async function register(req, res, next) {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const { student, verificationToken } = await prisma.$transaction(async (tx) => {
-      const created = await tx.student.create({
-        data: {
-          firstName,
-          lastName,
-          sex,
-          dateOfBirth: new Date(dateOfBirth),
-          school,
-          gradeLevel,
-          email: normalizedEmail,
-          phone: phone || null,
-          passwordHash,
-          role: 'STUDENT',
-          emailVerified: false
-        }
-      });
+    const { plainToken, tokenHash, tokenExpiry } = createEmailVerificationToken();
 
-      const issued = await issueEmailVerificationToken(created.id, normalizedEmail, tx);
-      return { student: created, verificationToken: issued.token };
+    const student = await prisma.student.create({
+      data: {
+        firstName,
+        lastName,
+        sex,
+        dateOfBirth: new Date(dateOfBirth),
+        school,
+        gradeLevel,
+        email: normalizedEmail,
+        phone: phone || null,
+        passwordHash,
+        role: 'STUDENT',
+        emailVerified: false,
+        verificationToken: tokenHash,
+        tokenExpiry
+      }
     });
 
     try {
-      await sendVerificationEmail({ to: normalizedEmail, token: verificationToken });
+      await sendVerificationEmail({
+        to: normalizedEmail,
+        name: `${firstName} ${lastName}`,
+        token: plainToken
+      });
     } catch (mailError) {
       console.error('Email verification send failed on register:', mailError);
       return res.status(503).json({
@@ -143,11 +181,11 @@ async function register(req, res, next) {
     }
 
     const response = {
-      message: 'Compte cree. Verifiez votre email avant de vous connecter.',
+      message: 'Un email de verification a ete envoye. Veuillez verifier votre boite mail.',
       requiresEmailVerification: true
     };
-    if (process.env.NODE_ENV !== 'production' && (process.env.EMAIL_PROVIDER || 'mock').toLowerCase() === 'mock') {
-      response.devVerificationToken = verificationToken;
+    if (process.env.NODE_ENV !== 'production' && (process.env.EMAIL_PROVIDER || 'brevo').toLowerCase() === 'mock') {
+      response.devVerificationToken = plainToken;
     }
 
     return res.status(201).json(response);
@@ -179,7 +217,7 @@ async function login(req, res, next) {
 
     if (!student.emailVerified) {
       return res.status(403).json({
-        message: 'Email non verifie. Verifiez votre boite mail ou renvoyez un email de verification.',
+        message: 'Veuillez verifier votre email pour activer votre compte.',
         code: 'EMAIL_NOT_VERIFIED',
         email: student.email
       });
@@ -221,7 +259,9 @@ async function acceptTeacherInvite(req, res, next) {
           passwordHash,
           role: 'TEACHER',
           teacherLevel: 'STANDARD',
-          emailVerified: true
+          emailVerified: true,
+          verificationToken: null,
+          tokenExpiry: null
         }
       });
 
@@ -242,35 +282,22 @@ async function acceptTeacherInvite(req, res, next) {
 
 async function verifyEmail(req, res, next) {
   try {
-    const token = req.body.token.trim();
-
-    const verification = await prisma.emailVerificationToken.findFirst({
-      where: { token, usedAt: null },
-      include: { student: true }
-    });
-
-    if (!verification || verification.expiresAt < new Date()) {
-      if (verification && verification.usedAt === null && verification.expiresAt < new Date()) {
-        await prisma.emailVerificationToken.update({
-          where: { id: verification.id },
-          data: { usedAt: new Date() }
-        });
-      }
-      return res.status(400).json({ message: 'Lien de verification invalide ou expire.' });
+    const result = await verifyAndConsumeEmailToken(req.body.token);
+    if (!result.ok) {
+      return res.status(400).json({ message: result.message });
     }
+    return res.json({ message: result.message });
+  } catch (error) {
+    return next(error);
+  }
+}
 
-    await prisma.$transaction(async (tx) => {
-      await tx.student.update({
-        where: { id: verification.studentId },
-        data: { emailVerified: true }
-      });
-      await tx.emailVerificationToken.update({
-        where: { id: verification.id },
-        data: { usedAt: new Date() }
-      });
-    });
-
-    return res.json({ message: 'Email verifie avec succes.' });
+async function verifyEmailByLink(req, res, next) {
+  try {
+    const frontendBase = (process.env.FRONTEND_URL || 'https://linkedupro.com').replace(/\/$/, '');
+    const result = await verifyAndConsumeEmailToken(req.query.token);
+    const query = `verified=${result.ok ? '1' : '0'}&message=${encodeURIComponent(result.message)}`;
+    return res.redirect(`${frontendBase}/login?${query}`);
   } catch (error) {
     return next(error);
   }
@@ -281,9 +308,7 @@ async function resendVerificationEmail(req, res, next) {
     const email = normalizeEmail(req.body.email);
     const genericResponse = { message: 'Si ce compte existe, un email de verification a ete envoye.' };
 
-    const student = await prisma.student.findUnique({
-      where: { email }
-    });
+    const student = await prisma.student.findUnique({ where: { email } });
 
     if (!student) {
       return res.json(genericResponse);
@@ -293,34 +318,102 @@ async function resendVerificationEmail(req, res, next) {
       return res.json({ message: 'Cet email est deja verifie.' });
     }
 
-    const latest = await prisma.emailVerificationToken.findFirst({
-      where: {
-        studentId: student.id,
-        usedAt: null
-      },
-      orderBy: { createdAt: 'desc' }
-    });
-
     const now = new Date();
-    if (latest && (now.getTime() - new Date(latest.createdAt).getTime()) / 1000 < EMAIL_VERIFICATION_COOLDOWN_SECONDS) {
-      return res.status(429).json({ message: 'Veuillez patienter avant de demander un nouvel email.' });
+    const issuedAt = getVerificationIssuedAt(student);
+    if (issuedAt && now.getTime() - issuedAt.getTime() < EMAIL_VERIFICATION_COOLDOWN_SECONDS * 1000) {
+      return res.status(429).json({ message: 'Veuillez patienter 2 minutes avant de renvoyer un email.' });
     }
 
-    const { token } = await issueEmailVerificationToken(student.id, student.email);
+    const { plainToken, tokenHash, tokenExpiry } = createEmailVerificationToken();
+
+    await prisma.student.update({
+      where: { id: student.id },
+      data: {
+        verificationToken: tokenHash,
+        tokenExpiry
+      }
+    });
+
     try {
-      await sendVerificationEmail({ to: student.email, token });
+      await sendVerificationEmail({
+        to: student.email,
+        name: `${student.firstName} ${student.lastName}`,
+        token: plainToken
+      });
     } catch (mailError) {
       console.error('Email verification resend failed:', mailError);
       return res.status(503).json({
-        message: "Service email indisponible pour le moment. Reessayez plus tard.",
+        message: 'Service email indisponible pour le moment. Reessayez plus tard.',
         code: 'EMAIL_SERVICE_UNAVAILABLE'
       });
     }
 
-    if (process.env.NODE_ENV !== 'production' && (process.env.EMAIL_PROVIDER || 'mock').toLowerCase() === 'mock') {
-      return res.json({ ...genericResponse, devVerificationToken: token });
+    if (process.env.NODE_ENV !== 'production' && (process.env.EMAIL_PROVIDER || 'brevo').toLowerCase() === 'mock') {
+      return res.json({ ...genericResponse, devVerificationToken: plainToken });
     }
     return res.json(genericResponse);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function updateUnverifiedEmail(req, res, next) {
+  try {
+    const currentEmail = normalizeEmail(req.body.email);
+    const newEmail = normalizeEmail(req.body.newEmail);
+    const password = req.body.password;
+
+    if (!currentEmail || !newEmail) {
+      return res.status(400).json({ message: 'Email actuel et nouvel email requis.' });
+    }
+
+    if (currentEmail === newEmail) {
+      return res.status(400).json({ message: 'Le nouvel email doit etre different.' });
+    }
+
+    const student = await prisma.student.findUnique({ where: { email: currentEmail } });
+    if (!student) {
+      return res.status(404).json({ message: 'Compte introuvable pour cet email.' });
+    }
+
+    if (student.emailVerified) {
+      return res.status(400).json({ message: 'Cet email est deja verifie.' });
+    }
+
+    const valid = await bcrypt.compare(password, student.passwordHash);
+    if (!valid) {
+      return res.status(401).json({ message: 'Mot de passe invalide.' });
+    }
+
+    const taken = await prisma.student.findUnique({ where: { email: newEmail } });
+    if (taken) {
+      return res.status(409).json({ message: 'Le nouvel email est deja utilise.' });
+    }
+
+    const { plainToken, tokenHash, tokenExpiry } = createEmailVerificationToken();
+
+    await prisma.student.update({
+      where: { id: student.id },
+      data: {
+        email: newEmail,
+        emailVerified: false,
+        verificationToken: tokenHash,
+        tokenExpiry
+      }
+    });
+
+    await sendVerificationEmail({
+      to: newEmail,
+      name: `${student.firstName} ${student.lastName}`,
+      token: plainToken
+    });
+
+    const response = { message: 'Email mis a jour. Un nouvel email de verification a ete envoye.' };
+    if (process.env.NODE_ENV !== 'production' && (process.env.EMAIL_PROVIDER || 'brevo').toLowerCase() === 'mock') {
+      response.devVerificationToken = plainToken;
+    }
+
+    return res.json(response);
   } catch (error) {
     return next(error);
   }
@@ -488,7 +581,9 @@ module.exports = {
   acceptTeacherInvite,
   validateTeacherInvite,
   verifyEmail,
+  verifyEmailByLink,
   resendVerificationEmail,
+  updateUnverifiedEmail,
   requestPasswordReset,
   verifyResetCode,
   resetPasswordWithCode

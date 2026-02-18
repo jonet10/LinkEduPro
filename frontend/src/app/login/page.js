@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
@@ -12,16 +12,37 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [showResend, setShowResend] = useState(false);
+  const [showUpdateEmail, setShowUpdateEmail] = useState(false);
   const [resendEmail, setResendEmail] = useState('');
+  const [newEmail, setNewEmail] = useState('');
   const [resending, setResending] = useState(false);
+  const [updatingEmail, setUpdatingEmail] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const message = params.get('message');
+    const verified = params.get('verified');
+    if (!message) return;
+
+    if (verified === '1') {
+      setInfo(message);
+      setError('');
+      return;
+    }
+
+    setError(message);
+    setInfo('');
+  }, []);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setInfo('');
     setShowResend(false);
+    setShowUpdateEmail(false);
     setLoading(true);
     try {
       const data = await apiClient('/auth/login', {
@@ -34,6 +55,7 @@ export default function LoginPage() {
       setError(err.message || 'Erreur de connexion');
       if (err.code === 'EMAIL_NOT_VERIFIED') {
         setShowResend(true);
+        setShowUpdateEmail(true);
         setResendEmail(err.data?.email || (identifier.includes('@') ? identifier.trim() : ''));
       }
     } finally {
@@ -65,11 +87,39 @@ export default function LoginPage() {
     }
   };
 
+  const onUpdateEmail = async () => {
+    setError('');
+    setInfo('');
+
+    if (!resendEmail || !newEmail || !password) {
+      setError('Email actuel, nouvel email et mot de passe sont requis.');
+      return;
+    }
+
+    setUpdatingEmail(true);
+    try {
+      const data = await apiClient('/auth/update-unverified-email', {
+        method: 'POST',
+        body: JSON.stringify({ email: resendEmail, newEmail, password })
+      });
+      setInfo(data.message || 'Email mis a jour.');
+      setResendEmail(newEmail);
+      setNewEmail('');
+      if (data.devVerificationToken) {
+        setInfo((prev) => `${prev} Token dev: ${data.devVerificationToken}`);
+      }
+    } catch (err) {
+      setError(err.message || "Erreur mise a jour de l'email.");
+    } finally {
+      setUpdatingEmail(false);
+    }
+  };
+
   return (
     <section className="mx-auto max-w-md card">
-      <h1 className="mb-6 text-2xl font-bold text-brand-900">Connexion élève</h1>
+      <h1 className="mb-6 text-2xl font-bold text-brand-900">Connexion eleve</h1>
       <form onSubmit={onSubmit} className="space-y-4">
-        <input className="input" placeholder="Email ou téléphone" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required />
+        <input className="input" placeholder="Email ou telephone" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required />
         <input className="input" type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} required />
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         {info ? <p className="text-sm text-green-600">{info}</p> : null}
@@ -79,6 +129,14 @@ export default function LoginPage() {
             <button className="btn-secondary w-full" type="button" onClick={onResend} disabled={resending}>
               {resending ? 'Envoi...' : 'Renvoyer email de verification'}
             </button>
+            {showUpdateEmail ? (
+              <>
+                <input className="input" type="email" placeholder="Nouvel email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+                <button className="btn-secondary w-full" type="button" onClick={onUpdateEmail} disabled={updatingEmail}>
+                  {updatingEmail ? 'Mise a jour...' : "Modifier l'adresse email"}
+                </button>
+              </>
+            ) : null}
           </div>
         ) : null}
         <button className="btn-primary w-full" type="submit" disabled={loading}>{loading ? 'Connexion...' : 'Se connecter'}</button>
