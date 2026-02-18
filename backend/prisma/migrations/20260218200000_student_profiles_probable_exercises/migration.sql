@@ -30,13 +30,13 @@ CREATE INDEX IF NOT EXISTS "student_profiles_level_idx" ON "student_profiles"("l
 INSERT INTO "student_profiles" ("user_id", "level", "created_at", "updated_at")
 SELECT
   s.id,
-  CASE s.level
-    WHEN 'LEVEL_9E' THEN CAST('9e' AS "AcademicLevel")
+  CASE s.level::text
+    WHEN '9e' THEN CAST('9e' AS "AcademicLevel")
     WHEN 'NS1' THEN CAST('NSI' AS "AcademicLevel")
     WHEN 'NS2' THEN CAST('NSII' AS "AcademicLevel")
     WHEN 'NS3' THEN CAST('NSIII' AS "AcademicLevel")
-    WHEN 'TERMINALE' THEN CAST('NSIV' AS "AcademicLevel")
-    WHEN 'UNIVERSITE' THEN CAST('Universitaire' AS "AcademicLevel")
+    WHEN 'Terminale' THEN CAST('NSIV' AS "AcademicLevel")
+    WHEN 'Universite' THEN CAST('Universitaire' AS "AcademicLevel")
     ELSE CAST('NSIV' AS "AcademicLevel")
   END,
   CURRENT_TIMESTAMP,
