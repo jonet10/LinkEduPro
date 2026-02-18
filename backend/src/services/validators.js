@@ -3,6 +3,12 @@ const Joi = require('joi');
 const registerSchema = Joi.object({
   firstName: Joi.string().trim().min(2).max(80).required(),
   lastName: Joi.string().trim().min(2).max(80).required(),
+  role: Joi.string().valid('STUDENT', 'TEACHER', 'SCHOOL_ADMIN').default('STUDENT'),
+  academicLevel: Joi.when('role', {
+    is: 'STUDENT',
+    then: Joi.string().valid('9e', 'NSI', 'NSII', 'NSIII', 'NSIV', 'Universitaire').required(),
+    otherwise: Joi.forbidden()
+  }),
   sex: Joi.string().valid('MALE', 'FEMALE', 'OTHER').required(),
   dateOfBirth: Joi.date().iso().required(),
   school: Joi.string().trim().min(2).max(120).required(),

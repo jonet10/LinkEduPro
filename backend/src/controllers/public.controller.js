@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { Prisma } = require('@prisma/client');
 
 function getLimit(value, fallback = 6) {
   const parsed = Number(value);
@@ -38,6 +39,12 @@ async function listRecentBlogPosts(req, res, next) {
   } catch (error) {
     return next(error);
   }
+}
+
+function classifyFrequency(frequency) {
+  if (frequency >= 10) return 'Tres frequent';
+  if (frequency >= 5) return 'Frequent';
+  return 'Occasionnel';
 }
 
 async function getPublicBlogPost(req, res, next) {
@@ -81,8 +88,51 @@ async function getPublicBlogPost(req, res, next) {
   }
 }
 
+async function listProbableExercises(req, res, next) {
+  try {
+    const rows = await prisma.$queryRaw(
+      Prisma.sql`
+        SELECT
+          e.subject AS subject,
+          q.topic AS topic,
+          COUNT(*)::int AS frequency
+        FROM exam_questions q
+        INNER JOIN exams e ON e.id = q.exam_id
+        WHERE e.level = CAST('NSIV' AS "AcademicLevel")
+        GROUP BY e.subject, q.topic
+        ORDER BY e.subject ASC, frequency DESC, q.topic ASC
+      `
+    );
+
+    const bySubject = new Map();
+    for (const row of rows) {
+      if (!bySubject.has(row.subject)) {
+        bySubject.set(row.subject, []);
+      }
+      bySubject.get(row.subject).push({
+        topic: row.topic,
+        frequency: Number(row.frequency),
+        classification: classifyFrequency(Number(row.frequency))
+      });
+    }
+
+    const items = Array.from(bySubject.entries()).map(([subject, topics]) => ({
+      subject,
+      topics
+    }));
+
+    return res.json({
+      level: 'NSIV',
+      items
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   listRecentBlogPosts,
-  getPublicBlogPost
+  getPublicBlogPost,
+  listProbableExercises
 };
 

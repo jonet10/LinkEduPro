@@ -10,6 +10,22 @@ const OTP_COOLDOWN_SECONDS = Number(process.env.PASSWORD_RESET_OTP_COOLDOWN_SECO
 const OTP_MAX_ATTEMPTS = Number(process.env.PASSWORD_RESET_OTP_MAX_ATTEMPTS || 5);
 const EMAIL_VERIFICATION_EXPIRES_MINUTES = Number(process.env.EMAIL_VERIFICATION_EXPIRES_MINUTES || 20);
 const EMAIL_VERIFICATION_COOLDOWN_SECONDS = Number(process.env.EMAIL_VERIFICATION_COOLDOWN_SECONDS || 120);
+const ACADEMIC_LEVEL_TO_DB = {
+  '9e': 'LEVEL_9E',
+  nsi: 'NSI',
+  nsii: 'NSII',
+  nsiii: 'NSIII',
+  nsiv: 'NSIV',
+  universitaire: 'UNIVERSITAIRE'
+};
+const ACADEMIC_LEVEL_TO_API = {
+  LEVEL_9E: '9e',
+  NSI: 'NSI',
+  NSII: 'NSII',
+  NSIII: 'NSIII',
+  NSIV: 'NSIV',
+  UNIVERSITAIRE: 'Universitaire'
+};
 
 function sanitizeStudent(student) {
   return {
@@ -22,6 +38,7 @@ function sanitizeStudent(student) {
     gradeLevel: student.gradeLevel,
     email: student.email,
     emailVerified: student.emailVerified,
+    academicLevel: student.studentProfile ? ACADEMIC_LEVEL_TO_API[student.studentProfile.level] : null,
     phone: student.phone,
     address: student.address,
     photoUrl: student.photoUrl,
@@ -36,6 +53,30 @@ function sanitizeStudent(student) {
 
 function normalizeEmail(email) {
   return typeof email === 'string' ? email.trim().toLowerCase() : null;
+}
+
+function parseAcademicLevel(value) {
+  if (typeof value !== 'string') return null;
+  return ACADEMIC_LEVEL_TO_DB[value.trim().toLowerCase()] || null;
+}
+
+function mapAcademicLevelToEducationLevel(academicLevel) {
+  switch (academicLevel) {
+    case 'LEVEL_9E':
+      return 'LEVEL_9E';
+    case 'NSI':
+      return 'NS1';
+    case 'NSII':
+      return 'NS2';
+    case 'NSIII':
+      return 'NS3';
+    case 'NSIV':
+      return 'TERMINALE';
+    case 'UNIVERSITAIRE':
+      return 'UNIVERSITE';
+    default:
+      return null;
+  }
 }
 
 function hashEmailVerificationToken(token) {
@@ -130,10 +171,21 @@ async function register(req, res, next) {
       dateOfBirth,
       school,
       gradeLevel,
+      role,
+      academicLevel,
       email,
       phone,
       password
     } = req.body;
+
+    if (role !== 'STUDENT') {
+      return res.status(400).json({ message: "Inscription directe disponible uniquement pour les eleves." });
+    }
+
+    const parsedAcademicLevel = parseAcademicLevel(academicLevel);
+    if (!parsedAcademicLevel) {
+      return res.status(400).json({ message: 'Niveau academique invalide.' });
+    }
 
     const normalizedEmail = normalizeEmail(email);
 
@@ -145,22 +197,37 @@ async function register(req, res, next) {
     const passwordHash = await bcrypt.hash(password, 10);
     const { plainToken, tokenHash, tokenExpiry } = createEmailVerificationToken();
 
-    const student = await prisma.student.create({
-      data: {
-        firstName,
-        lastName,
-        sex,
-        dateOfBirth: new Date(dateOfBirth),
-        school,
-        gradeLevel,
-        email: normalizedEmail,
-        phone: phone || null,
-        passwordHash,
-        role: 'STUDENT',
-        emailVerified: false,
-        verificationToken: tokenHash,
-        tokenExpiry
-      }
+    const student = await prisma.$transaction(async (tx) => {
+      const created = await tx.student.create({
+        data: {
+          firstName,
+          lastName,
+          sex,
+          dateOfBirth: new Date(dateOfBirth),
+          school,
+          gradeLevel,
+          email: normalizedEmail,
+          phone: phone || null,
+          passwordHash,
+          role: 'STUDENT',
+          emailVerified: false,
+          verificationToken: tokenHash,
+          tokenExpiry,
+          level: mapAcademicLevelToEducationLevel(parsedAcademicLevel)
+        }
+      });
+
+      await tx.studentProfile.create({
+        data: {
+          userId: created.id,
+          level: parsedAcademicLevel
+        }
+      });
+
+      return tx.student.findUnique({
+        where: { id: created.id },
+        include: { studentProfile: true }
+      });
     });
 
     try {
@@ -202,7 +269,8 @@ async function login(req, res, next) {
     const student = await prisma.student.findFirst({
       where: {
         OR: [{ email: emailIdentifier || normalizedIdentifier }, { phone: normalizedIdentifier }]
-      }
+      },
+      include: { studentProfile: true }
     });
 
     if (!student) {
@@ -269,7 +337,10 @@ async function acceptTeacherInvite(req, res, next) {
         data: { used: true, usedAt: new Date() }
       });
 
-      return created;
+      return tx.student.findUnique({
+        where: { id: created.id },
+        include: { studentProfile: true }
+      });
     });
 
     const tokenJwt = generateToken(teacher);

@@ -1,6 +1,27 @@
 const bcrypt = require('bcryptjs');
 const prisma = require('../../config/prisma');
-const { normalizeLevelInput, toApiLevel } = require('../utils/level');
+const { toApiLevel } = require('../utils/level');
+const ACADEMIC_LEVEL_TO_API = {
+  LEVEL_9E: '9e',
+  NSI: 'NSI',
+  NSII: 'NSII',
+  NSIII: 'NSIII',
+  NSIV: 'NSIV',
+  UNIVERSITAIRE: 'Universitaire'
+};
+const ACADEMIC_LEVEL_TO_DB = {
+  '9e': 'LEVEL_9E',
+  nsi: 'NSI',
+  nsii: 'NSII',
+  nsiii: 'NSIII',
+  nsiv: 'NSIV',
+  universitaire: 'UNIVERSITAIRE'
+};
+
+function parseAcademicLevel(value) {
+  if (typeof value !== 'string') return null;
+  return ACADEMIC_LEVEL_TO_DB[value.trim().toLowerCase()] || null;
+}
 
 function toProfile(student) {
   return {
@@ -11,7 +32,7 @@ function toProfile(student) {
     phone: student.phone,
     address: student.address,
     role: student.role,
-    level: toApiLevel(student.level),
+    level: student.studentProfile ? ACADEMIC_LEVEL_TO_API[student.studentProfile.level] : toApiLevel(student.level),
     photoUrl: student.photoUrl,
     darkMode: student.darkMode,
     school: student.school,
@@ -21,7 +42,10 @@ function toProfile(student) {
 
 async function getMyProfile(req, res, next) {
   try {
-    const student = await prisma.student.findUnique({ where: { id: req.user.id } });
+    const student = await prisma.student.findUnique({
+      where: { id: req.user.id },
+      include: { studentProfile: true }
+    });
 
     if (!student) {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
@@ -37,7 +61,10 @@ async function updateMyProfile(req, res, next) {
   try {
     const { phone, email, address, password, level } = req.body;
 
-    const existing = await prisma.student.findUnique({ where: { id: req.user.id } });
+    const existing = await prisma.student.findUnique({
+      where: { id: req.user.id },
+      include: { studentProfile: true }
+    });
     if (!existing) {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
     }
@@ -67,17 +94,36 @@ async function updateMyProfile(req, res, next) {
       data.passwordHash = await bcrypt.hash(password, 10);
     }
 
+    let desiredAcademicLevel = null;
     if (level !== undefined) {
-      const parsed = normalizeLevelInput(level);
-      if (!parsed) {
+      if (existing.role !== 'STUDENT') {
+        return res.status(400).json({ message: 'Niveau academique reserve aux eleves.' });
+      }
+
+      desiredAcademicLevel = parseAcademicLevel(level);
+      if (!desiredAcademicLevel) {
         return res.status(400).json({ message: 'Niveau invalide.' });
       }
-      data.level = parsed;
     }
 
-    const updated = await prisma.student.update({
-      where: { id: existing.id },
-      data
+    const updated = await prisma.$transaction(async (tx) => {
+      await tx.student.update({
+        where: { id: existing.id },
+        data
+      });
+
+      if (desiredAcademicLevel) {
+        await tx.studentProfile.upsert({
+          where: { userId: existing.id },
+          create: { userId: existing.id, level: desiredAcademicLevel },
+          update: { level: desiredAcademicLevel }
+        });
+      }
+
+      return tx.student.findUnique({
+        where: { id: existing.id },
+        include: { studentProfile: true }
+      });
     });
 
     return res.json({ message: 'Profil mis a jour.', profile: toProfile(updated) });

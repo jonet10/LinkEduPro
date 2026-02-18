@@ -72,6 +72,15 @@ enum EducationLevel {
   UNIVERSITE @map("Universite")
 }
 
+enum AcademicLevel {
+  LEVEL_9E      @map("9e")
+  NSI
+  NSII
+  NSIII
+  NSIV
+  UNIVERSITAIRE @map("Universitaire")
+}
+
 enum ContentType {
   QUIZ     @map("quiz")
   PDF      @map("pdf")
@@ -135,8 +144,21 @@ model Student {
   focusSongListens FocusSongListen[]
   focusStatistics FocusStatistic[]
   passwordResetCodes PasswordResetCode[]
+  studentProfile StudentProfile?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+}
+
+model StudentProfile {
+  id        Int           @id @default(autoincrement())
+  userId    Int           @unique @map("user_id")
+  level     AcademicLevel
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  user      Student       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([level])
+  @@map("student_profiles")
 }
 
 model Subject {
@@ -851,4 +873,28 @@ model FocusStatistic {
   @@unique([userId, date])
   @@index([date])
   @@map("focus_statistics")
+}
+
+model Exam {
+  id        Int            @id @default(autoincrement())
+  subject   String
+  year      Int
+  level     AcademicLevel
+  questions ExamQuestion[]
+
+  @@index([level])
+  @@index([subject])
+  @@map("exams")
+}
+
+model ExamQuestion {
+  id           Int    @id @default(autoincrement())
+  examId       Int    @map("exam_id")
+  questionText String @map("question_text")
+  topic        String
+  exam         Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@index([topic])
+  @@index([examId])
+  @@map("exam_questions")
 }
