@@ -228,7 +228,7 @@ export default function HeaderNav() {
           <div className="relative">
             <button
               type="button"
-              className="relative rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+              className="relative rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5 md:px-3"
               onClick={() => {
                 setIsNotifOpen((v) => !v);
                 setIsQuickMenuOpen(false);
@@ -237,6 +237,7 @@ export default function HeaderNav() {
               title="Notifications"
             >
               <span className="text-base leading-none" aria-hidden="true">🔔</span>
+              <span className="hidden md:inline">Notification</span>
               {unreadCount > 0 ? (
                 <span className="absolute -right-2 -top-2 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -335,6 +336,26 @@ export default function HeaderNav() {
           <Link href="/login" className="hover:text-brand-700">Connexion</Link>
         )}
 
+        <div className="hidden lg:flex lg:items-center lg:gap-3">
+          {isAuthed ? (
+            <>
+              <Link href="/" className="hover:text-brand-700">🏠 Accueil</Link>
+              <Link href="/focus" className="hover:text-brand-700">🎧 Focus</Link>
+              <Link href="/study-plans" className="hover:text-brand-700">🗂️ Plans</Link>
+              <Link href="/subjects" className="hover:text-brand-700">📘 Matières</Link>
+              <Link href="/progress" className="hover:text-brand-700">📈 Progrès</Link>
+              <Link href="/library" className="hover:text-brand-700">📚 Bibliothèque</Link>
+              <Link href="/blog" className="hover:text-brand-700">📝 Blog</Link>
+              {canSeeProbableExercises ? (
+                <Link href="/probable-exercises" className="hover:text-brand-700">🎯 Exercices probables</Link>
+              ) : null}
+              {canSeeGlobalAdminDashboard ? (
+                <Link href="/admin/super-dashboard" className="hover:text-brand-700">🛠️ Dashboard</Link>
+              ) : null}
+            </>
+          ) : null}
+        </div>
+
         {isAuthed ? (
           <div className="relative" ref={quickMenuRef}>
             <button
@@ -381,6 +402,9 @@ export default function HeaderNav() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="mx-auto mb-4 h-1.5 w-16 rounded-full bg-brand-100" />
+                <div className="mb-3 flex justify-center">
+                  <img src="/logo.png" alt="Logo" className="h-14 w-14 rounded-xl object-cover shadow-sm" />
+                </div>
                 <div className="mb-4 flex justify-end">
                   <button type="button" className="rounded-md border border-brand-100 px-3 py-1.5 text-sm" onClick={() => setIsMobileMenuOpen(false)}>
                     ✕
@@ -410,7 +434,7 @@ export default function HeaderNav() {
         : null}
 
       {isAuthed ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[70] flex justify-center pb-3 md:hidden" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+        <div className="pointer-events-none fixed bottom-0 right-0 z-[70] pb-3 pr-4 md:hidden" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
           <button
             type="button"
             className="pointer-events-auto rounded-full bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-xl"
