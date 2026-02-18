@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import SmartSearchSection from '@/components/search/SmartSearchSection';
 
 const SLIDES = [
   {
@@ -110,6 +111,10 @@ export default function HomeCarousel({ isAuthed = false }) {
                 Connexion
               </Link>
             </div>
+          ) : null}
+
+          {!isAuthed ? (
+            <SmartSearchSection className="mt-6 border border-white/35 bg-white/90 backdrop-blur" />
           ) : null}
 
           <div className="mt-8 grid gap-3 md:grid-cols-3">
