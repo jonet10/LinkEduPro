@@ -81,6 +81,11 @@ enum AcademicLevel {
   UNIVERSITAIRE @map("Universitaire")
 }
 
+enum ConversationType {
+  PRIVATE @map("private")
+  GLOBAL  @map("global")
+}
+
 enum ContentType {
   QUIZ     @map("quiz")
   PDF      @map("pdf")
@@ -146,6 +151,8 @@ model Student {
   focusSongListens FocusSongListen[]
   focusStatistics FocusStatistic[]
   passwordResetCodes PasswordResetCode[]
+  sentMessages Message[] @relation("MessageSender")
+  conversationParticipants ConversationParticipant[]
   studentProfile StudentProfile?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -842,6 +849,47 @@ model PasswordResetCode {
   @@index([email, createdAt])
   @@index([studentId, createdAt])
   @@map("password_reset_codes")
+}
+
+model Conversation {
+  id          Int                       @id @default(autoincrement())
+  type        ConversationType
+  privateKey  String?                   @unique @map("private_key")
+  targetLevel AcademicLevel?            @map("target_level")
+  createdAt   DateTime                  @default(now()) @map("created_at")
+  messages    Message[]
+  participants ConversationParticipant[]
+
+  @@index([type, createdAt])
+  @@index([targetLevel])
+  @@map("conversations")
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversationId Int          @map("conversation_id")
+  senderId       Int          @map("sender_id")
+  content        String
+  createdAt      DateTime     @default(now()) @map("created_at")
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         Student      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([senderId, createdAt])
+  @@map("messages")
+}
+
+model ConversationParticipant {
+  id             Int          @id @default(autoincrement())
+  conversationId Int          @map("conversation_id")
+  userId         Int          @map("user_id")
+  lastReadAt     DateTime?    @map("last_read_at")
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           Student      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId, lastReadAt])
+  @@map("conversation_participants")
 }
 
 model FocusSong {

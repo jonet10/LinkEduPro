@@ -101,6 +101,21 @@ const reviewLibraryBookSchema = Joi.object({
   status: Joi.string().valid('APPROVED', 'REJECTED').required()
 });
 
+const privateMessageSchema = Joi.object({
+  recipientId: Joi.number().integer().positive().required(),
+  content: Joi.string().trim().min(1).max(5000).required()
+});
+
+const globalMessageSchema = Joi.object({
+  content: Joi.string().trim().min(1).max(5000).required(),
+  audience: Joi.string().valid('ALL', 'LEVEL').default('ALL'),
+  level: Joi.when('audience', {
+    is: 'LEVEL',
+    then: Joi.string().valid('9e', 'NSI', 'NSII', 'NSIII', 'NSIV', 'Universitaire').required(),
+    otherwise: Joi.forbidden()
+  })
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -115,5 +130,7 @@ module.exports = {
   quizQuerySchema,
   submitQuizSchema,
   createLibraryBookSchema,
-  reviewLibraryBookSchema
+  reviewLibraryBookSchema,
+  privateMessageSchema,
+  globalMessageSchema
 };
