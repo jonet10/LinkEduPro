@@ -8,7 +8,7 @@ import { apiClient } from '@/lib/api';
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
     try {
       const data = await apiClient('/auth/forgot-password/request', {
         method: 'POST',
-        body: JSON.stringify({ phone: phone.trim() })
+        body: JSON.stringify({ email: email.trim() })
       });
       setInfo(data.message || 'Code envoye.');
       if (data.devCode) {
@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
       const data = await apiClient('/auth/forgot-password/reset', {
         method: 'POST',
         body: JSON.stringify({
-          phone: phone.trim(),
+          email: email.trim(),
           code: code.trim(),
           newPassword
         })
@@ -76,21 +76,22 @@ export default function ForgotPasswordPage() {
         <form onSubmit={requestCode} className="space-y-3">
           <input
             className="input"
-            placeholder="Numero de telephone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            type="email"
+            placeholder="Adresse email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
           <button className="btn-primary w-full" disabled={loading}>
-            {loading ? 'Envoi...' : 'Envoyer le code SMS'}
+            {loading ? 'Envoi...' : 'Envoyer le code email'}
           </button>
         </form>
       ) : (
         <form onSubmit={resetPassword} className="space-y-3">
-          <input className="input" value={phone} disabled />
+          <input className="input" value={email} disabled />
           <input
             className="input"
-            placeholder="Code SMS (6 chiffres)"
+            placeholder="Code email (6 chiffres)"
             value={code}
             onChange={(e) => setCode(e.target.value)}
             required
@@ -125,4 +126,3 @@ export default function ForgotPasswordPage() {
     </section>
   );
 }
-
