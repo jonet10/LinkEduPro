@@ -4,8 +4,22 @@ import { useEffect, useRef, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 
+function extractYouTubeVideoId(url) {
+  if (!url) return null;
+  const raw = String(url).trim();
+  const match = raw.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? match[1] : null;
+}
+
+function getYouTubeEmbedUrl(videoId, autoplay = false) {
+  return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1&autoplay=${autoplay ? 1 : 0}`;
+}
+
 export default function FocusMusicPlayer() {
   const audioRef = useRef(null);
+  const youtubeRef = useRef(null);
   const [tracks, setTracks] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -19,6 +33,7 @@ export default function FocusMusicPlayer() {
   const [editTitle, setEditTitle] = useState('');
   const [editUrl, setEditUrl] = useState('');
   const [editCategory, setEditCategory] = useState('');
+  const [youtubeEmbedUrl, setYoutubeEmbedUrl] = useState('');
 
   useEffect(() => {
     const token = getToken();
@@ -47,14 +62,40 @@ export default function FocusMusicPlayer() {
   }, [volume]);
 
   const currentTrack = tracks[currentIndex] || null;
+  const youtubeVideoId = extractYouTubeVideoId(currentTrack?.url);
+  const isYouTubeTrack = Boolean(youtubeVideoId);
 
   useEffect(() => {
-    if (!audioRef.current || !currentTrack) return;
+    if (!currentTrack) return;
+
+    if (isYouTubeTrack) {
+      setYoutubeEmbedUrl(getYouTubeEmbedUrl(youtubeVideoId, isPlaying));
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.removeAttribute('src');
+      }
+      return;
+    }
+
+    setYoutubeEmbedUrl('');
+    if (!audioRef.current) return;
     audioRef.current.src = currentTrack.url;
     if (isPlaying) {
       audioRef.current.play().catch(() => setIsPlaying(false));
     }
-  }, [currentTrack, isPlaying]);
+  }, [currentTrack, isPlaying, isYouTubeTrack, youtubeVideoId]);
+
+  function sendYouTubeCommand(command) {
+    if (!youtubeRef.current || !youtubeRef.current.contentWindow) return;
+    youtubeRef.current.contentWindow.postMessage(
+      JSON.stringify({
+        event: 'command',
+        func: command,
+        args: []
+      }),
+      '*'
+    );
+  }
 
   async function logListen(songId) {
     const token = getToken();
@@ -71,7 +112,20 @@ export default function FocusMusicPlayer() {
   }
 
   async function onPlay() {
-    if (!audioRef.current || !currentTrack) return;
+    if (!currentTrack) return;
+    if (isYouTubeTrack) {
+      if (youtubeVideoId) {
+        if (!youtubeEmbedUrl) {
+          setYoutubeEmbedUrl(getYouTubeEmbedUrl(youtubeVideoId, true));
+        } else {
+          sendYouTubeCommand('playVideo');
+        }
+      }
+      setIsPlaying(true);
+      logListen(currentTrack.id);
+      return;
+    }
+    if (!audioRef.current) return;
     try {
       await audioRef.current.play();
       setIsPlaying(true);
@@ -82,12 +136,22 @@ export default function FocusMusicPlayer() {
   }
 
   function onPause() {
+    if (isYouTubeTrack) {
+      sendYouTubeCommand('pauseVideo');
+      setIsPlaying(false);
+      return;
+    }
     if (!audioRef.current) return;
     audioRef.current.pause();
     setIsPlaying(false);
   }
 
   function onStop() {
+    if (isYouTubeTrack) {
+      sendYouTubeCommand('stopVideo');
+      setIsPlaying(false);
+      return;
+    }
     if (!audioRef.current) return;
     audioRef.current.pause();
     audioRef.current.currentTime = 0;
@@ -260,17 +324,30 @@ export default function FocusMusicPlayer() {
         </form>
       ) : null}
 
-      <audio
-        ref={audioRef}
-        onEnded={() => {
-          const hasNext = currentIndex + 1 < tracks.length;
-          if (hasNext) {
-            setCurrentIndex((prev) => prev + 1);
-          } else {
-            setIsPlaying(false);
-          }
-        }}
-      />
+      {isYouTubeTrack && youtubeEmbedUrl ? (
+        <div className="overflow-hidden rounded-lg border border-brand-100">
+          <iframe
+            ref={youtubeRef}
+            title={currentTrack?.title || 'YouTube Focus'}
+            src={youtubeEmbedUrl}
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowFullScreen
+            className="h-56 w-full"
+          />
+        </div>
+      ) : (
+        <audio
+          ref={audioRef}
+          onEnded={() => {
+            const hasNext = currentIndex + 1 < tracks.length;
+            if (hasNext) {
+              setCurrentIndex((prev) => prev + 1);
+            } else {
+              setIsPlaying(false);
+            }
+          }}
+        />
+      )}
     </article>
   );
 }
