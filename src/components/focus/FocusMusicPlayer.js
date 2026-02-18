@@ -36,6 +36,9 @@ export default function FocusMusicPlayer() {
   const [editUrl, setEditUrl] = useState('');
   const [editCategory, setEditCategory] = useState('');
   const [youtubeEmbedUrl, setYoutubeEmbedUrl] = useState('');
+  const currentTrack = tracks[currentIndex] || null;
+  const youtubeVideoId = extractYouTubeVideoId(currentTrack?.url);
+  const isYouTubeTrack = Boolean(youtubeVideoId);
 
   useEffect(() => {
     const token = getToken();
@@ -66,10 +69,6 @@ export default function FocusMusicPlayer() {
     if (!audioRef.current) return;
     audioRef.current.volume = volume;
   }, [volume, isYouTubeTrack]);
-
-  const currentTrack = tracks[currentIndex] || null;
-  const youtubeVideoId = extractYouTubeVideoId(currentTrack?.url);
-  const isYouTubeTrack = Boolean(youtubeVideoId);
 
   useEffect(() => {
     if (!currentTrack) return;

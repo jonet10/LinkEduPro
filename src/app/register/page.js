@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
-import { setAuth } from '@/lib/auth';
 import { getDepartments, getCommunes, getSchools } from '@/lib/schools';
 
 const initialState = {
@@ -24,6 +23,8 @@ const initialState = {
 export default function RegisterPage() {
   const [form, setForm] = useState(initialState);
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
+  const [devToken, setDevToken] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -55,6 +56,8 @@ export default function RegisterPage() {
   const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setInfo('');
+    setDevToken('');
     setLoading(true);
 
     const chosenSchool = form.schoolFromList || form.school;
@@ -85,8 +88,11 @@ export default function RegisterPage() {
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      setAuth(data.token, data.student);
-      router.push('/subjects');
+      setInfo(data.message || 'Compte cree. Verifiez votre email avant connexion.');
+      if (data.devVerificationToken) {
+        setDevToken(data.devVerificationToken);
+      }
+      setTimeout(() => router.push('/login'), 1200);
     } catch (err) {
       setError(err.message || "Erreur d'inscription");
     } finally {
@@ -144,11 +150,13 @@ export default function RegisterPage() {
         />
 
         <input className="input" name="gradeLevel" placeholder="Niveau / Classe" value={form.gradeLevel} onChange={onChange} required />
-        <input className="input" type="email" name="email" placeholder="Email (optionnel)" value={form.email} onChange={onChange} />
+        <input className="input" type="email" name="email" placeholder="Email" value={form.email} onChange={onChange} required />
         <input className="input" name="phone" placeholder="Téléphone (optionnel)" value={form.phone} onChange={onChange} />
         <input className="input md:col-span-2" type="password" name="password" placeholder="Mot de passe" value={form.password} onChange={onChange} required />
 
         {error ? <p className="md:col-span-2 text-sm text-red-600">{error}</p> : null}
+        {info ? <p className="md:col-span-2 text-sm text-green-600">{info}</p> : null}
+        {devToken ? <p className="md:col-span-2 text-xs text-brand-700">Token de verification (dev): {devToken}</p> : null}
 
         <button className="btn-primary md:col-span-2" type="submit" disabled={loading}>
           {loading ? 'Inscription...' : 'Créer mon compte'}
