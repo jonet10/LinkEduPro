@@ -48,7 +48,12 @@ app.use((req, res) => {
 
 app.use((error, req, res, next) => {
   console.error(error);
-  res.status(500).json({ message: 'Erreur serveur interne.' });
+  const status = Number(error?.status) || 500;
+  const isProd = process.env.NODE_ENV === 'production';
+  const message = isProd
+    ? 'Erreur serveur interne.'
+    : (error?.message || 'Erreur serveur interne.');
+  res.status(status).json({ message });
 });
 
 module.exports = app;

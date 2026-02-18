@@ -130,7 +130,17 @@ async function register(req, res, next) {
       return { student: created, verificationToken: issued.token };
     });
 
-    await sendVerificationEmail({ to: normalizedEmail, token: verificationToken });
+    try {
+      await sendVerificationEmail({ to: normalizedEmail, token: verificationToken });
+    } catch (mailError) {
+      console.error('Email verification send failed on register:', mailError);
+      return res.status(503).json({
+        message: "Compte cree, mais l'email de verification n'a pas pu etre envoye. Utilisez 'Renvoyer email'.",
+        code: 'EMAIL_SERVICE_UNAVAILABLE',
+        requiresEmailVerification: true,
+        email: normalizedEmail
+      });
+    }
 
     const response = {
       message: 'Compte cree. Verifiez votre email avant de vous connecter.',
@@ -297,7 +307,15 @@ async function resendVerificationEmail(req, res, next) {
     }
 
     const { token } = await issueEmailVerificationToken(student.id, student.email);
-    await sendVerificationEmail({ to: student.email, token });
+    try {
+      await sendVerificationEmail({ to: student.email, token });
+    } catch (mailError) {
+      console.error('Email verification resend failed:', mailError);
+      return res.status(503).json({
+        message: "Service email indisponible pour le moment. Reessayez plus tard.",
+        code: 'EMAIL_SERVICE_UNAVAILABLE'
+      });
+    }
 
     if (process.env.NODE_ENV !== 'production' && (process.env.EMAIL_PROVIDER || 'mock').toLowerCase() === 'mock') {
       return res.json({ ...genericResponse, devVerificationToken: token });
