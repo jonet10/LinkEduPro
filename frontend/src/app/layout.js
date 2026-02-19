@@ -4,6 +4,7 @@ import Image from 'next/image';
 import HeaderNav from '@/components/HeaderNav';
 import ThemeInit from '@/components/ThemeInit';
 import Footer from '@/components/Footer';
+import SplashScreenGate from '@/components/SplashScreenGate';
 
 export const metadata = {
   metadataBase: new URL('https://linkedupro-2.onrender.com'),
@@ -43,6 +44,7 @@ export default function RootLayout({ children }) {
     <html lang="fr">
       <body className="flex min-h-screen flex-col">
         <ThemeInit />
+        <SplashScreenGate />
         <header className="border-b border-brand-100 bg-white/80 backdrop-blur">
           <nav className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
             <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3 text-xl font-bold text-brand-700 md:static md:translate-x-0" aria-label="Accueil LinkEduPro">
