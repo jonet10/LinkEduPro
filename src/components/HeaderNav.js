@@ -498,57 +498,60 @@ export default function HeaderNav() {
           )
         : null}
 
-      {isAuthed ? (
-        <div
-          className="z-[80] border-t border-slate-800 bg-[#0a1427]/95 text-slate-200 backdrop-blur md:hidden"
-          style={{
-            position: 'fixed',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingBottom: 'env(safe-area-inset-bottom)'
-          }}
-        >
-          <nav className="grid grid-cols-5 gap-1 px-2 py-2">
-            <Link href="/" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
-              <div className="text-lg">🏠</div>
-              <div>Accueil</div>
-            </Link>
-            <Link href="/messages" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/messages') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
-              <div className="text-lg">💬</div>
-              <div>Messages</div>
-            </Link>
-            <Link href="/progress" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/progress') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
-              <div className="relative text-lg">
-                🔔
-                {unreadCount > 0 ? (
-                  <span className="absolute -right-2 -top-1 rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                ) : null}
-              </div>
-              <div>Activite</div>
-            </Link>
-            <Link href="/search" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/search') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
-              <div className="text-lg">🔎</div>
-              <div>Recherche</div>
-            </Link>
-            <button
-              type="button"
-              className={`rounded-lg px-1 py-1 text-center text-[11px] ${isMobileMenuOpen ? 'bg-white/15 text-white' : 'text-slate-300'}`}
-              onClick={() => {
-                setIsMobileMenuOpen(true);
-                setIsNotifOpen(false);
-                setIsQuickMenuOpen(false);
+      {mounted && isAuthed
+        ? createPortal(
+            <div
+              className="z-[80] border-t border-slate-800 bg-[#0a1427]/95 text-slate-200 backdrop-blur md:hidden"
+              style={{
+                position: 'fixed',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                paddingBottom: 'env(safe-area-inset-bottom)'
               }}
-              aria-label="Ouvrir Plus"
             >
-              <div className="text-lg">⋯</div>
-              <div>Plus</div>
-            </button>
-          </nav>
-        </div>
-      ) : null}
+              <nav className="grid grid-cols-5 gap-1 px-2 py-2">
+                <Link href="/" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
+                  <div className="text-lg">🏠</div>
+                  <div>Accueil</div>
+                </Link>
+                <Link href="/messages" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/messages') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
+                  <div className="text-lg">💬</div>
+                  <div>Messages</div>
+                </Link>
+                <Link href="/progress" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/progress') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
+                  <div className="relative text-lg">
+                    🔔
+                    {unreadCount > 0 ? (
+                      <span className="absolute -right-2 -top-1 rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div>Activite</div>
+                </Link>
+                <Link href="/search" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/search') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
+                  <div className="text-lg">🔎</div>
+                  <div>Recherche</div>
+                </Link>
+                <button
+                  type="button"
+                  className={`rounded-lg px-1 py-1 text-center text-[11px] ${isMobileMenuOpen ? 'bg-white/15 text-white' : 'text-slate-300'}`}
+                  onClick={() => {
+                    setIsMobileMenuOpen(true);
+                    setIsNotifOpen(false);
+                    setIsQuickMenuOpen(false);
+                  }}
+                  aria-label="Ouvrir Plus"
+                >
+                  <div className="text-lg">⋯</div>
+                  <div>Plus</div>
+                </button>
+              </nav>
+            </div>,
+            document.body
+          )
+        : null}
     </>
   );
 }
