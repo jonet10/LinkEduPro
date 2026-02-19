@@ -9,7 +9,7 @@ import { getStudent, getToken, isNsivStudent } from '@/lib/auth';
 export default function SubjectsPage() {
   const [subjects, setSubjects] = useState([]);
   const [canSeeProbableExercises, setCanSeeProbableExercises] = useState(false);
-  const [isNsivStudent, setIsNsivStudent] = useState(false);
+  const [isNsivSectionVisible, setIsNsivSectionVisible] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -21,7 +21,7 @@ export default function SubjectsPage() {
       return;
     }
     const isNsiv = isNsivStudent(student);
-    setIsNsivStudent(Boolean(isNsiv));
+    setIsNsivSectionVisible(Boolean(isNsiv));
     setCanSeeProbableExercises(student?.role !== 'STUDENT' || isNsiv);
 
     apiClient('/subjects', { token })
@@ -40,7 +40,7 @@ export default function SubjectsPage() {
           <Link href="/probable-exercises" className="btn-primary mt-4 inline-block">Voir la rubrique</Link>
         </article>
       ) : null}
-      {isNsivStudent ? (
+      {isNsivSectionVisible ? (
         <article className="card mb-4">
           <h2 className="text-xl font-semibold text-brand-900">Rubriques NSIV</h2>
           <p className="mt-2 text-sm text-brand-700">
