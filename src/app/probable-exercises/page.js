@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
+import Link from 'next/link';
 
 export default function ProbableExercisesPage() {
   const [items, setItems] = useState([]);
@@ -153,6 +154,19 @@ export default function ProbableExercisesPage() {
                       <div className="mt-2 rounded border border-brand-100 bg-brand-50 px-2 py-2">
                         <p className="text-[11px] font-semibold text-brand-900">Exercice reel (extrait)</p>
                         <p className="text-xs text-brand-700">{topicItem.sampleQuestion}</p>
+                      </div>
+                    ) : null}
+                    {(topicItem.sources || []).length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {topicItem.sources.map((source) => (
+                          <Link
+                            key={`${subjectItem.subject}_${topicItem.topic}_${source.fileName}`}
+                            href={`/exam-viewer?file=${encodeURIComponent(source.fileName)}`}
+                            className="btn-secondary !px-3 !py-1 text-xs"
+                          >
+                            Ouvrir PDF
+                          </Link>
+                        ))}
                       </div>
                     ) : null}
                     <div className="mt-2 flex flex-wrap items-center gap-2">
