@@ -18,6 +18,7 @@ export default function HeaderNav() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [student, setStudent] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileNotifOpen, setIsMobileNotifOpen] = useState(false);
   const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -79,6 +80,7 @@ export default function HeaderNav() {
       setIsNotifOpen(false);
       setIsQuickMenuOpen(false);
       setIsMobileMenuOpen(false);
+      setIsMobileNotifOpen(false);
       return;
     }
 
@@ -208,8 +210,28 @@ export default function HeaderNav() {
     setIsQuickMenuOpen(false);
     setIsNotifOpen(false);
     setIsMobileMenuOpen(false);
+    setIsMobileNotifOpen(false);
     router.push('/login');
   };
+
+  useEffect(() => {
+    if (!isMobileNotifOpen || !mounted) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    function onKeyDown(event) {
+      if (event.key === 'Escape') {
+        setIsMobileNotifOpen(false);
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isMobileNotifOpen, mounted]);
 
   async function toggleDarkMode() {
     const next = !darkMode;
@@ -259,6 +281,8 @@ export default function HeaderNav() {
       setNotifError(e.message || 'Erreur notifications');
     }
   }
+
+  const dashboardHref = canSeeGlobalAdminDashboard ? '/admin/super-dashboard' : '/progress';
 
   return (
     <>
@@ -498,6 +522,51 @@ export default function HeaderNav() {
           )
         : null}
 
+      {mounted && isAuthed && isMobileNotifOpen
+        ? createPortal(
+            <div className="fixed inset-0 z-[91] bg-[#060f1f]/70 backdrop-blur-sm md:hidden" onClick={() => setIsMobileNotifOpen(false)}>
+              <div
+                className="absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-2xl border-t border-brand-100 bg-white p-4"
+                style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-base font-semibold text-brand-900">Notifications</p>
+                  <div className="flex items-center gap-3">
+                    <button className="text-xs text-brand-700 hover:underline" onClick={markAllRead}>
+                      Tout marquer lu
+                    </button>
+                    <button type="button" className="rounded-md border border-brand-100 px-2 py-1 text-xs" onClick={() => setIsMobileNotifOpen(false)}>
+                      Fermer
+                    </button>
+                  </div>
+                </div>
+                {notifLoading ? <p className="text-xs text-brand-700">Chargement...</p> : null}
+                {notifError ? <p className="text-xs text-red-600">{notifError}</p> : null}
+                <div className="space-y-2">
+                  {notifications.slice(0, 25).map((n) => (
+                    <button
+                      key={n.id}
+                      className={`w-full rounded-md border px-3 py-2 text-left text-xs ${
+                        n.isRead ? 'border-brand-100 bg-white text-brand-700' : 'border-brand-500 bg-brand-50 text-brand-900'
+                      }`}
+                      onClick={() => {
+                        if (!n.isRead) markOneRead(n.id);
+                      }}
+                    >
+                      <p className="font-semibold">{n.title}</p>
+                      <p className="mt-1">{n.message}</p>
+                      <p className="mt-1 text-[11px] opacity-80">{new Date(n.createdAt).toLocaleString()}</p>
+                    </button>
+                  ))}
+                  {notifications.length === 0 && !notifLoading ? <p className="text-xs text-brand-700">Aucune notification.</p> : null}
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
+
       {mounted && isAuthed
         ? createPortal(
             <div
@@ -519,7 +588,17 @@ export default function HeaderNav() {
                   <div className="text-lg">💬</div>
                   <div>Messages</div>
                 </Link>
-                <Link href="/progress" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/progress') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
+                <button
+                  type="button"
+                  className={`rounded-lg px-1 py-1 text-center text-[11px] ${isMobileNotifOpen ? 'bg-white/15 text-white' : 'text-slate-300'}`}
+                  onClick={() => {
+                    setIsMobileNotifOpen(true);
+                    setIsMobileMenuOpen(false);
+                    setIsQuickMenuOpen(false);
+                    setIsNotifOpen(false);
+                  }}
+                  aria-label="Ouvrir Activite"
+                >
                   <div className="relative text-lg">
                     🔔
                     {unreadCount > 0 ? (
@@ -529,16 +608,17 @@ export default function HeaderNav() {
                     ) : null}
                   </div>
                   <div>Activite</div>
-                </Link>
-                <Link href="/search" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/search') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
-                  <div className="text-lg">🔎</div>
-                  <div>Recherche</div>
+                </button>
+                <Link href={dashboardHref} className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, dashboardHref) ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
+                  <div className="text-lg">📊</div>
+                  <div>Dashboard</div>
                 </Link>
                 <button
                   type="button"
                   className={`rounded-lg px-1 py-1 text-center text-[11px] ${isMobileMenuOpen ? 'bg-white/15 text-white' : 'text-slate-300'}`}
                   onClick={() => {
                     setIsMobileMenuOpen(true);
+                    setIsMobileNotifOpen(false);
                     setIsNotifOpen(false);
                     setIsQuickMenuOpen(false);
                   }}
