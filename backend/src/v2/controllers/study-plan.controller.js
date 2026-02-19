@@ -6,8 +6,11 @@ function toApiStudyPlan(plan) {
     id: plan.id,
     level: toApiLevel(plan.level),
     subject: plan.subject,
+    chapterOrder: plan.chapterOrder,
     title: plan.title,
     description: plan.description,
+    notes: plan.notes,
+    exercises: plan.exercises,
     createdBy: plan.creator
       ? {
           id: plan.creator.id,
@@ -25,8 +28,11 @@ async function createStudyPlan(req, res, next) {
       data: {
         level: normalizeLevelInput(req.body.level),
         subject: req.body.subject ? req.body.subject.trim() : null,
+        chapterOrder: req.body.chapterOrder ?? null,
         title: req.body.title,
         description: req.body.description,
+        notes: req.body.notes ? req.body.notes.trim() : null,
+        exercises: req.body.exercises ? req.body.exercises.trim() : null,
         createdById: req.user.id
       },
       include: {
@@ -59,7 +65,7 @@ async function listStudyPlans(req, res, next) {
           select: { id: true, firstName: true, lastName: true, role: true }
         }
       },
-      orderBy: { id: 'desc' }
+      orderBy: [{ subject: 'asc' }, { chapterOrder: 'asc' }, { id: 'asc' }]
     });
     return res.json({ plans: plans.map(toApiStudyPlan) });
   } catch (error) {
@@ -102,7 +108,10 @@ async function upsertPersonalStudyPlan(req, res, next) {
 
 async function getMyStudyPlan(req, res, next) {
   try {
-    const student = await prisma.student.findUnique({ where: { id: req.user.id } });
+    const student = await prisma.student.findUnique({
+      where: { id: req.user.id },
+      include: { studentProfile: true }
+    });
     if (!student) {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
     }
@@ -120,7 +129,7 @@ async function getMyStudyPlan(req, res, next) {
             select: { id: true, firstName: true, lastName: true, role: true }
           }
         },
-        orderBy: { id: 'desc' }
+        orderBy: [{ subject: 'asc' }, { chapterOrder: 'asc' }, { id: 'asc' }]
       }),
       prisma.personalStudyPlan.findFirst({
         where: { userId: req.user.id },
@@ -165,8 +174,11 @@ async function updateStudyPlan(req, res, next) {
       data: {
         level: req.body.level !== undefined ? normalizeLevelInput(req.body.level) : undefined,
         subject: req.body.subject !== undefined ? (req.body.subject ? req.body.subject.trim() : null) : undefined,
+        chapterOrder: req.body.chapterOrder !== undefined ? (req.body.chapterOrder ?? null) : undefined,
         title: req.body.title !== undefined ? req.body.title : undefined,
-        description: req.body.description !== undefined ? req.body.description : undefined
+        description: req.body.description !== undefined ? req.body.description : undefined,
+        notes: req.body.notes !== undefined ? (req.body.notes ? req.body.notes.trim() : null) : undefined,
+        exercises: req.body.exercises !== undefined ? (req.body.exercises ? req.body.exercises.trim() : null) : undefined
       },
       include: {
         creator: {

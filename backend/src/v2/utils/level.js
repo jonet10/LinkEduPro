@@ -16,6 +16,15 @@ const PRISMA_TO_API_LEVEL = {
   UNIVERSITE: 'Universite'
 };
 
+const ACADEMIC_TO_EDUCATION_LEVEL = {
+  LEVEL_9E: 'LEVEL_9E',
+  NSI: 'NS1',
+  NSII: 'NS2',
+  NSIII: 'NS3',
+  NSIV: 'TERMINALE',
+  UNIVERSITAIRE: 'UNIVERSITE'
+};
+
 function normalizeLevelInput(value) {
   if (!value || typeof value !== 'string') return null;
   const raw = value.trim();
@@ -39,6 +48,11 @@ function toApiLevel(prismaValue) {
 }
 
 function resolveStudentLevel(student) {
+  const academic = student?.studentProfile?.level;
+  if (academic && ACADEMIC_TO_EDUCATION_LEVEL[academic]) {
+    return ACADEMIC_TO_EDUCATION_LEVEL[academic];
+  }
+
   if (student?.level) {
     return student.level;
   }
