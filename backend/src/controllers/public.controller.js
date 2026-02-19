@@ -1,5 +1,7 @@
 const prisma = require('../config/prisma');
 const { Prisma } = require('@prisma/client');
+const path = require('path');
+const fs = require('fs');
 
 function getLimit(value, fallback = 6) {
   const parsed = Number(value);
@@ -116,6 +118,7 @@ async function listProbableExercises(req, res, next) {
     let commentCountRows = [];
     let commentRows = [];
     let myLikeRows = [];
+    let sourceRows = [];
 
     // Social data is optional until migration is deployed.
     try {
@@ -175,6 +178,17 @@ async function listProbableExercises(req, res, next) {
       myLikeRows = [];
     }
 
+    try {
+      sourceRows = await prisma.$queryRaw(
+        Prisma.sql`
+          SELECT subject, topic, file_name AS "fileName"
+          FROM probable_exercise_sources
+        `
+      );
+    } catch (_) {
+      sourceRows = [];
+    }
+
     const likeMap = new Map();
     likeRows.forEach((row) => likeMap.set(topicKey(row.subject, row.topic), Number(row.likes)));
 
@@ -203,6 +217,15 @@ async function listProbableExercises(req, res, next) {
     const myLikes = new Set(
       (myLikeRows || []).map((row) => topicKey(row.subject, row.topic))
     );
+    const sourcesMap = new Map();
+    for (const row of sourceRows) {
+      const key = topicKey(row.subject, row.topic);
+      if (!sourcesMap.has(key)) sourcesMap.set(key, []);
+      sourcesMap.get(key).push({
+        fileName: row.fileName,
+        url: `/public/exam-pdfs/${encodeURIComponent(row.fileName)}`
+      });
+    }
 
     const bySubject = new Map();
     for (const row of rows) {
@@ -218,7 +241,8 @@ async function listProbableExercises(req, res, next) {
         likes: likeMap.get(key) || 0,
         commentsCount: commentCountMap.get(key) || 0,
         comments: commentsMap.get(key) || [],
-        likedByMe: myLikes.has(key)
+        likedByMe: myLikes.has(key),
+        sources: sourcesMap.get(key) || []
       });
     }
 
@@ -231,6 +255,29 @@ async function listProbableExercises(req, res, next) {
       level: 'NSIV',
       items
     });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function streamExamPdf(req, res, next) {
+  try {
+    const raw = String(req.params.fileName || '').trim();
+    const fileName = decodeURIComponent(raw);
+    const safeName = path.basename(fileName);
+    if (!safeName || safeName !== fileName) {
+      return res.status(400).json({ message: 'Nom de fichier invalide.' });
+    }
+
+    const examDir = path.resolve(__dirname, '../../../Examen Physiques');
+    const filePath = path.join(examDir, safeName);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'PDF introuvable.' });
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${safeName}"`);
+    return fs.createReadStream(filePath).pipe(res);
   } catch (error) {
     return next(error);
   }
@@ -339,6 +386,7 @@ module.exports = {
   getPublicBlogPost,
   listProbableExercises,
   toggleProbableExerciseLike,
-  addProbableExerciseComment
+  addProbableExerciseComment,
+  streamExamPdf
 };
 
