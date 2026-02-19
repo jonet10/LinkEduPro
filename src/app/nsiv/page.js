@@ -1,0 +1,108 @@
+"use client";
+
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getStudent, getToken, isNsivStudent } from '@/lib/auth';
+
+const WEEKLY_PLAN = [
+  { week: 'Semaine 1', chimie: 'M1', physique: 'M1', focus: 'Bases + revision active' },
+  { week: 'Semaine 2', chimie: 'M2', physique: 'M2', focus: 'Exercices de calcul' },
+  { week: 'Semaine 3', chimie: 'M3', physique: 'M3', focus: 'Methodologie + recap' },
+  { week: 'Semaine 4', chimie: 'M4', physique: 'M4', focus: 'Serie d\'applications' },
+  { week: 'Semaine 5', chimie: 'M5', physique: 'M5', focus: 'Problemes types bac' },
+  { week: 'Semaine 6', chimie: 'M6', physique: 'M6', focus: 'Consolidation des notions' },
+  { week: 'Semaine 7', chimie: 'M7', physique: 'M7', focus: 'Revision ciblee' },
+  { week: 'Semaine 8', chimie: 'M8', physique: 'M8', focus: 'Simulation bac + correction' }
+];
+
+export default function NsivPage() {
+  const router = useRouter();
+  const [ready, setReady] = useState(false);
+
+  const student = useMemo(() => getStudent(), []);
+  const token = useMemo(() => getToken(), []);
+  const nsivAccess = isNsivStudent(student);
+
+  useEffect(() => {
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    if (!nsivAccess) {
+      router.push('/subjects');
+      return;
+    }
+    setReady(true);
+  }, [token, nsivAccess, router]);
+
+  if (!ready) {
+    return <p>Chargement de l'espace NSIV...</p>;
+  }
+
+  return (
+    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+      <section className="card">
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Terminale</p>
+        <h1 className="mt-2 text-3xl font-black text-brand-900">Espace NSIV</h1>
+        <p className="mt-2 text-sm text-brand-700">
+          Rubriques organisees pour preparer le bac: cours structures, exercices probables et progression hebdomadaire.
+        </p>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Link href="/study-plans?subject=Chimie" className="card hover:bg-brand-50">
+          <h2 className="text-xl font-semibold text-brand-900">Chimie NSIV</h2>
+          <p className="mt-2 text-sm text-brand-700">Chapitres ordonnes, notes de cours et exercices.</p>
+        </Link>
+        <Link href="/study-plans?subject=Physique" className="card hover:bg-brand-50">
+          <h2 className="text-xl font-semibold text-brand-900">Physique NSIV</h2>
+          <p className="mt-2 text-sm text-brand-700">Progression complete avec contenu par chapitre.</p>
+        </Link>
+        <Link href="/probable-exercises" className="card hover:bg-brand-50">
+          <h2 className="text-xl font-semibold text-brand-900">Exercices probables</h2>
+          <p className="mt-2 text-sm text-brand-700">Sujets les plus frequents analyses a partir des epreuves.</p>
+        </Link>
+        <Link href="/focus" className="card hover:bg-brand-50">
+          <h2 className="text-xl font-semibold text-brand-900">Focus</h2>
+          <p className="mt-2 text-sm text-brand-700">Sessions Pomodoro et musique de concentration.</p>
+        </Link>
+        <Link href="/library" className="card hover:bg-brand-50">
+          <h2 className="text-xl font-semibold text-brand-900">Bibliotheque</h2>
+          <p className="mt-2 text-sm text-brand-700">Supports PDF et ressources de revision.</p>
+        </Link>
+        <Link href="/progress" className="card hover:bg-brand-50">
+          <h2 className="text-xl font-semibold text-brand-900">Mon progres</h2>
+          <p className="mt-2 text-sm text-brand-700">Suivi des performances et points a renforcer.</p>
+        </Link>
+      </section>
+
+      <section className="card">
+        <h2 className="text-xl font-semibold text-brand-900">Plan de progression recommande (8 semaines)</h2>
+        <p className="mt-2 text-sm text-brand-700">Ordre recommande pour avancer en Chimie et Physique sans sauter les bases.</p>
+        <div className="mt-4 overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="border-b border-brand-100 text-left">
+                <th className="px-2 py-2 font-semibold text-brand-900">Periode</th>
+                <th className="px-2 py-2 font-semibold text-brand-900">Chimie</th>
+                <th className="px-2 py-2 font-semibold text-brand-900">Physique</th>
+                <th className="px-2 py-2 font-semibold text-brand-900">Objectif</th>
+              </tr>
+            </thead>
+            <tbody>
+              {WEEKLY_PLAN.map((row) => (
+                <tr key={row.week} className="border-b border-brand-100">
+                  <td className="px-2 py-2 font-medium text-brand-900">{row.week}</td>
+                  <td className="px-2 py-2 text-brand-700">{row.chimie}</td>
+                  <td className="px-2 py-2 text-brand-700">{row.physique}</td>
+                  <td className="px-2 py-2 text-brand-700">{row.focus}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  );
+}
