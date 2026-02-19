@@ -282,7 +282,10 @@ export default function HeaderNav() {
     }
   }
 
-  const dashboardHref = canSeeGlobalAdminDashboard ? '/admin/super-dashboard' : '/progress';
+  const dashboardHref = '/admin/super-dashboard';
+  const mobileFourthTabHref = canSeeGlobalAdminDashboard ? dashboardHref : '/search';
+  const mobileFourthTabLabel = canSeeGlobalAdminDashboard ? 'Dashboard' : 'Recherche';
+  const mobileFourthTabIcon = canSeeGlobalAdminDashboard ? '📊' : '🔎';
 
   return (
     <>
@@ -376,6 +379,16 @@ export default function HeaderNav() {
         ) : (
           <Link href="/login" className="hover:text-brand-700">Connexion</Link>
         )}
+
+        {isAuthed ? (
+          <button
+            type="button"
+            className="hidden rounded-md border border-red-200 px-3 py-1.5 text-red-600 hover:bg-red-50 md:inline-flex"
+            onClick={onLogout}
+          >
+            Deconnexion
+          </button>
+        ) : null}
 
         {isAuthed ? (
           <div className="relative hidden md:block" ref={quickMenuRef}>
@@ -609,9 +622,9 @@ export default function HeaderNav() {
                   </div>
                   <div>Activite</div>
                 </button>
-                <Link href={dashboardHref} className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, dashboardHref) ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
-                  <div className="text-lg">📊</div>
-                  <div>Dashboard</div>
+                <Link href={mobileFourthTabHref} className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, mobileFourthTabHref) ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
+                  <div className="text-lg">{mobileFourthTabIcon}</div>
+                  <div>{mobileFourthTabLabel}</div>
                 </Link>
                 <button
                   type="button"

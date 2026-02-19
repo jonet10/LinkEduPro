@@ -142,7 +142,14 @@ export default function Footer() {
             <h3 className={styles.title}>Contact</h3>
             <ul className={styles.list}>
               <li><a className={styles.link} href="mailto:infolinkedupro@gmail.com">infolinkedupro@gmail.com</a></li>
-              <li><a className={styles.link} href="tel:+50938073835">+50938073835</a></li>
+              <li>
+                <a className={`${styles.link} ${styles.whatsappLink}`} href="https://wa.me/50938378375" target="_blank" rel="noreferrer noopener">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.whatsappIcon}>
+                    <path fill="currentColor" d="M20.5 3.5A11 11 0 0 0 3.3 17.1L2 22l5.1-1.3A11 11 0 1 0 20.5 3.5Zm-8.52 17a9.05 9.05 0 0 1-4.6-1.26l-.33-.2-3.03.78.8-2.95-.22-.35a9 9 0 1 1 7.38 3.98Zm4.95-6.77c-.27-.13-1.58-.78-1.83-.87-.24-.09-.42-.13-.6.14-.18.26-.69.87-.84 1.05-.15.17-.31.2-.58.07-.27-.14-1.12-.41-2.14-1.3-.8-.71-1.34-1.58-1.5-1.84-.16-.26-.02-.4.12-.53.12-.12.27-.31.4-.47.13-.16.18-.27.27-.44.09-.18.04-.33-.02-.47-.07-.13-.6-1.46-.83-2-.22-.53-.44-.46-.6-.46h-.5c-.18 0-.47.07-.71.33-.24.27-.93.9-.93 2.2 0 1.29.95 2.54 1.08 2.71.13.18 1.86 2.84 4.51 3.98.63.27 1.13.43 1.52.55.64.2 1.22.17 1.68.1.51-.08 1.58-.65 1.8-1.27.22-.62.22-1.15.15-1.27-.07-.11-.24-.17-.51-.31Z" />
+                  </svg>
+                  +50938378375
+                </a>
+              </li>
               <li><span className={styles.contactText}>Port-au-Prince, Haiti</span></li>
             </ul>
 
