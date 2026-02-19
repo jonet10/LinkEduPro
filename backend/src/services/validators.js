@@ -116,6 +116,25 @@ const globalMessageSchema = Joi.object({
   })
 });
 
+const catchupSessionCreateSchema = Joi.object({
+  title: Joi.string().trim().min(3).max(180).required(),
+  subject: Joi.string().trim().min(2).max(120).required(),
+  description: Joi.string().trim().max(5000).allow('', null),
+  meetUrl: Joi.string().uri().pattern(/^https:\/\/meet\.google\.com\/.+/i).required(),
+  startsAt: Joi.date().iso().required(),
+  endsAt: Joi.date().iso().required()
+});
+
+const catchupSessionUpdateSchema = Joi.object({
+  title: Joi.string().trim().min(3).max(180),
+  subject: Joi.string().trim().min(2).max(120),
+  description: Joi.string().trim().max(5000).allow('', null),
+  meetUrl: Joi.string().uri().pattern(/^https:\/\/meet\.google\.com\/.+/i),
+  startsAt: Joi.date().iso(),
+  endsAt: Joi.date().iso(),
+  isActive: Joi.boolean()
+}).min(1);
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -132,5 +151,7 @@ module.exports = {
   createLibraryBookSchema,
   reviewLibraryBookSchema,
   privateMessageSchema,
-  globalMessageSchema
+  globalMessageSchema,
+  catchupSessionCreateSchema,
+  catchupSessionUpdateSchema
 };
