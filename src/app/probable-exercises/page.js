@@ -149,6 +149,12 @@ export default function ProbableExercisesPage() {
                     <p className="font-semibold text-brand-900">{topicItem.topic}</p>
                     <p className="text-xs text-brand-700">Apparitions: {topicItem.frequency}</p>
                     <p className="text-xs text-brand-700">Classification: {topicItem.classification}</p>
+                    {topicItem.sampleQuestion ? (
+                      <div className="mt-2 rounded border border-brand-100 bg-brand-50 px-2 py-2">
+                        <p className="text-[11px] font-semibold text-brand-900">Exercice reel (extrait)</p>
+                        <p className="text-xs text-brand-700">{topicItem.sampleQuestion}</p>
+                      </div>
+                    ) : null}
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <button
                         type="button"
