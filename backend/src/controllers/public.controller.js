@@ -99,7 +99,11 @@ async function listProbableExercises(req, res, next) {
         SELECT
           e.subject AS subject,
           q.topic AS topic,
-          COUNT(*)::int AS frequency
+          COUNT(*)::int AS frequency,
+          COALESCE(
+            MAX(CASE WHEN q.question_text ILIKE '%.pdf' THEN NULL ELSE q.question_text END),
+            MAX(q.question_text)
+          ) AS sample_question
         FROM exam_questions q
         INNER JOIN exams e ON e.id = q.exam_id
         WHERE e.level = CAST('NSIV' AS "AcademicLevel")
@@ -210,6 +214,7 @@ async function listProbableExercises(req, res, next) {
         topic: row.topic,
         frequency: Number(row.frequency),
         classification: classifyFrequency(Number(row.frequency)),
+        sampleQuestion: row.sample_question || null,
         likes: likeMap.get(key) || 0,
         commentsCount: commentCountMap.get(key) || 0,
         comments: commentsMap.get(key) || [],
