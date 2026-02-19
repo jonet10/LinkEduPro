@@ -44,8 +44,8 @@ export default function RootLayout({ children }) {
       <body className="flex min-h-screen flex-col">
         <ThemeInit />
         <header className="border-b border-brand-100 bg-white/80 backdrop-blur">
-          <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-            <Link href="/" className="flex items-center gap-3 text-xl font-bold text-brand-700" aria-label="Accueil LinkEduPro">
+          <nav className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+            <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3 text-xl font-bold text-brand-700 md:static md:translate-x-0" aria-label="Accueil LinkEduPro">
               <Image src="/logo.png" alt="Logo LinkEduPro" width={62} height={62} priority />
             </Link>
             <HeaderNav />
