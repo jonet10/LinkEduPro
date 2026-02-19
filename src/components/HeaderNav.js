@@ -499,7 +499,7 @@ export default function HeaderNav() {
         : null}
 
       {isAuthed ? (
-        <div className="fixed inset-x-0 bottom-0 z-[80] border-t border-slate-800 bg-[#0a1427]/95 text-slate-200 backdrop-blur md:hidden" style={{ paddingBottom: 'max(0.35rem, env(safe-area-inset-bottom))' }}>
+        <div className="fixed inset-x-0 bottom-0 z-[80] border-t border-slate-800 bg-[#0a1427]/95 text-slate-200 backdrop-blur md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
           <nav className="mx-auto grid max-w-md grid-cols-5 gap-1 px-2 py-2">
             <Link href="/" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
               <div className="text-lg">🏠</div>
