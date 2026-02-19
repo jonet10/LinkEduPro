@@ -2,6 +2,14 @@ const TOKEN_KEY = 'linkedupro_token';
 const STUDENT_KEY = 'linkedupro_student';
 const DARK_MODE_KEY = 'linkedupro_dark_mode';
 
+const LEVEL_TO_ACADEMIC = {
+  NS1: 'NSI',
+  NS2: 'NSII',
+  NS3: 'NSIII',
+  Terminale: 'NSIV',
+  Universite: 'Universitaire'
+};
+
 function applyTheme(enabled) {
   if (typeof document === 'undefined') return;
   document.documentElement.classList.toggle('dark', Boolean(enabled));
@@ -37,6 +45,24 @@ export function getStudent() {
   if (typeof window === 'undefined') return null;
   const raw = localStorage.getItem(STUDENT_KEY);
   return raw ? JSON.parse(raw) : null;
+}
+
+export function normalizeAcademicLevel(student) {
+  if (!student) return null;
+
+  const direct = typeof student.academicLevel === 'string' ? student.academicLevel.trim() : '';
+  if (direct) return direct;
+
+  const fallback = typeof student.level === 'string' ? student.level.trim() : '';
+  if (!fallback) return null;
+
+  return LEVEL_TO_ACADEMIC[fallback] || fallback;
+}
+
+export function isNsivStudent(student) {
+  if (!student || student.role !== 'STUDENT') return false;
+  const level = normalizeAcademicLevel(student);
+  return level === 'NSIV';
 }
 
 export function getDarkMode() {

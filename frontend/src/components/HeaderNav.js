@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
-import { clearAuth, getDarkMode, getStudent, getToken, setDarkModePreference } from '@/lib/auth';
+import { clearAuth, getDarkMode, getStudent, getToken, isNsivStudent, setDarkModePreference } from '@/lib/auth';
 import { apiClient } from '@/lib/api';
 import { resolveMediaUrl } from '@/lib/media';
 
@@ -162,7 +162,7 @@ export default function HeaderNav() {
   }, [isMobileMenuOpen, mounted]);
 
   const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
-  const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || student?.academicLevel === 'NSIV');
+  const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const avatarUrl = avatarBroken ? null : resolveMediaUrl(student?.photoUrl);
 
   const desktopMenuItems = useMemo(() => {

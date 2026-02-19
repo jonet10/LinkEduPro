@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api';
-import { getToken, getStudent } from '@/lib/auth';
+import { getToken, getStudent, isNsivStudent } from '@/lib/auth';
 import HomeCarousel from '@/components/HomeCarousel';
 import VerifiedTestimonials from '@/components/VerifiedTestimonials';
 
@@ -121,6 +121,31 @@ export default function HomePage() {
           <Link href="/progress" className="btn-secondary">Voir mes progrès</Link>
         </div>
       </div>
+
+      {isNsivStudent(student) ? (
+        <div className="card">
+          <h2 className="text-xl font-semibold text-brand-900">Rubriques NSIV</h2>
+          <p className="mt-2 text-sm text-brand-700">Acces direct aux rubriques principales de Terminale.</p>
+          <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
+              <p className="font-semibold text-brand-900">Espace NSIV</p>
+              <p className="mt-1 text-sm text-brand-700">Tableau complet des rubriques et progression.</p>
+            </Link>
+            <Link href="/study-plans?subject=Chimie" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
+              <p className="font-semibold text-brand-900">Chimie NSIV</p>
+              <p className="mt-1 text-sm text-brand-700">Plan complet par chapitres.</p>
+            </Link>
+            <Link href="/study-plans?subject=Physique" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
+              <p className="font-semibold text-brand-900">Physique NSIV</p>
+              <p className="mt-1 text-sm text-brand-700">Plan complet par chapitres.</p>
+            </Link>
+            <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
+              <p className="font-semibold text-brand-900">Exercices probables</p>
+              <p className="mt-1 text-sm text-brand-700">Sujets recurrents du Bac NSIV.</p>
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       {error ? <p className="text-red-600">{error}</p> : null}
 
