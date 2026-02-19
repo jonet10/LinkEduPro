@@ -8,6 +8,12 @@ import { clearAuth, getDarkMode, getStudent, getToken, setDarkModePreference } f
 import { apiClient } from '@/lib/api';
 import { resolveMediaUrl } from '@/lib/media';
 
+function isActivePath(pathname, href) {
+  if (!pathname) return false;
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export default function HeaderNav() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [student, setStudent] = useState(null);
@@ -19,12 +25,12 @@ export default function HeaderNav() {
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifError, setNotifError] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const [isAvatarOpen, setIsAvatarOpen] = useState(false);
   const [avatarBroken, setAvatarBroken] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const avatarRef = useRef(null);
   const quickMenuRef = useRef(null);
+  const notifRef = useRef(null);
+  const mobilePanelRef = useRef(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -36,8 +42,8 @@ export default function HeaderNav() {
       setAvatarBroken(false);
       setDarkMode(typeof currentStudent?.darkMode === 'boolean' ? currentStudent.darkMode : getDarkMode());
     };
-    refresh();
 
+    refresh();
     window.addEventListener('storage', refresh);
     window.addEventListener('auth-changed', refresh);
     return () => {
@@ -82,19 +88,6 @@ export default function HeaderNav() {
   }, [isAuthed]);
 
   useEffect(() => {
-    if (!isAvatarOpen) return undefined;
-
-    function onClickOutside(event) {
-      if (avatarRef.current && !avatarRef.current.contains(event.target)) {
-        setIsAvatarOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, [isAvatarOpen]);
-
-  useEffect(() => {
     if (!isQuickMenuOpen) return undefined;
 
     function onClickOutside(event) {
@@ -107,6 +100,104 @@ export default function HeaderNav() {
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, [isQuickMenuOpen]);
 
+  useEffect(() => {
+    if (!isNotifOpen) return undefined;
+
+    function onClickOutside(event) {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setIsNotifOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [isNotifOpen]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen || !mounted) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    function onKeyDown(event) {
+      if (event.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const panel = mobilePanelRef.current;
+      if (!panel) return;
+
+      const focusables = panel.querySelectorAll(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+
+      if (!focusables.length) return;
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    const panel = mobilePanelRef.current;
+    const autofocusTarget = panel?.querySelector('button, a[href]');
+    if (autofocusTarget) autofocusTarget.focus();
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isMobileMenuOpen, mounted]);
+
+  const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
+  const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || student?.academicLevel === 'NSIV');
+  const avatarUrl = avatarBroken ? null : resolveMediaUrl(student?.photoUrl);
+
+  const desktopMenuItems = useMemo(() => {
+    if (!isAuthed) return [];
+    return [
+      { href: '/', label: 'Accueil', icon: '🏠' },
+      { href: '/focus', label: 'Focus', icon: '🎧' },
+      { href: '/study-plans', label: 'Plans', icon: '🗂️' },
+      { href: '/subjects', label: 'Matieres', icon: '📘' },
+      { href: '/progress', label: 'Progres', icon: '📈' },
+      { href: '/library', label: 'Bibliotheque', icon: '📚' },
+      { href: '/blog', label: 'Blog', icon: '📝' },
+      ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : []),
+      ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
+    ];
+  }, [isAuthed, canSeeProbableExercises, canSeeGlobalAdminDashboard]);
+
+  const mobileStudyItems = useMemo(
+    () => [
+      { href: '/subjects', label: 'Matieres', icon: '📘' },
+      { href: '/focus', label: 'Focus', icon: '🎧' },
+      { href: '/study-plans', label: 'Plans', icon: '🗂️' },
+      { href: '/progress', label: 'Progres', icon: '📈' },
+      ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : [])
+    ],
+    [canSeeProbableExercises]
+  );
+
+  const mobileToolItems = useMemo(
+    () => [
+      { href: '/library', label: 'Bibliotheque', icon: '📚' },
+      { href: '/blog', label: 'Blog', icon: '📝' },
+      { href: '/search', label: 'Recherche', icon: '🔎' }
+    ],
+    []
+  );
+
   const onLogout = () => {
     clearAuth();
     setIsAuthed(false);
@@ -114,8 +205,8 @@ export default function HeaderNav() {
     setDarkMode(false);
     setNotifications([]);
     setUnreadCount(0);
-    setIsAvatarOpen(false);
     setIsQuickMenuOpen(false);
+    setIsNotifOpen(false);
     setIsMobileMenuOpen(false);
     router.push('/login');
   };
@@ -169,32 +260,12 @@ export default function HeaderNav() {
     }
   }
 
-  const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
-  const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || student?.academicLevel === 'NSIV');
-  const initials = `${(student?.firstName || '').charAt(0)}${(student?.lastName || '').charAt(0)}`.toUpperCase() || 'U';
-  const avatarUrl = avatarBroken ? null : resolveMediaUrl(student?.photoUrl);
-
-  const menuItems = useMemo(() => {
-    if (!isAuthed) return [];
-    return [
-      { href: '/', label: 'Accueil', icon: '🏠' },
-      { href: '/focus', label: 'Focus', icon: '🎧' },
-      { href: '/study-plans', label: 'Plans', icon: '🗂️' },
-      { href: '/subjects', label: 'Matières', icon: '📘' },
-      { href: '/progress', label: 'Progrès', icon: '📈' },
-      { href: '/library', label: 'Bibliothèque', icon: '📚' },
-      { href: '/blog', label: 'Blog', icon: '📝' },
-      ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : []),
-      ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
-    ];
-  }, [isAuthed, canSeeProbableExercises, canSeeGlobalAdminDashboard]);
-
   return (
     <>
       <div className="flex items-center gap-2 text-sm">
         <button
           type="button"
-          className="rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+          className="hidden rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:inline-flex"
           onClick={toggleDarkMode}
           title={darkMode ? 'Desactiver le mode sombre' : 'Activer le mode sombre'}
           aria-label={darkMode ? 'Desactiver le mode sombre' : 'Activer le mode sombre'}
@@ -210,12 +281,12 @@ export default function HeaderNav() {
             title="Messagerie"
           >
             <span className="text-base leading-none" aria-hidden="true">💬</span>
-            <span>Messagerie</span>
+            <span>Message</span>
           </Link>
         ) : null}
 
         {isAuthed ? (
-          <div className="relative hidden md:block">
+          <div className="relative hidden md:block" ref={notifRef}>
             <button
               type="button"
               className="relative rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
@@ -227,7 +298,7 @@ export default function HeaderNav() {
               title="Notifications"
             >
               <span className="text-base leading-none" aria-hidden="true">🔔</span>
-              <span className="hidden md:inline">Notification</span>
+              <span>Notification</span>
               {unreadCount > 0 ? (
                 <span className="absolute -right-2 -top-2 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -278,50 +349,6 @@ export default function HeaderNav() {
             <span className="text-base leading-none" aria-hidden="true">👤</span>
             <span>Profil</span>
           </Link>
-        ) : null}
-
-        {isAuthed ? (
-          <div className="relative hidden md:block" ref={avatarRef}>
-            <button
-              type="button"
-              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-brand-100 bg-white/90 text-xs font-semibold text-brand-700 hover:bg-brand-50"
-              onClick={() => {
-                setIsAvatarOpen((v) => !v);
-                setIsQuickMenuOpen(false);
-              }}
-              title="Profil utilisateur"
-              aria-label="Profil utilisateur"
-            >
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Photo de profil"
-                  className="h-full w-full object-cover"
-                  onError={() => setAvatarBroken(true)}
-                />
-              ) : (
-                <span>{initials}</span>
-              )}
-            </button>
-
-            {isAvatarOpen ? (
-              <div className="absolute right-0 z-50 mt-2 w-52 rounded-lg border border-brand-100 bg-white p-2 shadow-xl">
-                <Link href="/profile" className="block rounded-md px-3 py-2 text-sm hover:bg-brand-50" onClick={() => setIsAvatarOpen(false)}>
-                  Voir profil
-                </Link>
-                <Link href="/profile?edit=1" className="block rounded-md px-3 py-2 text-sm hover:bg-brand-50" onClick={() => setIsAvatarOpen(false)}>
-                  Modifier profil
-                </Link>
-                <button
-                  type="button"
-                  className="mt-1 block w-full rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-                  onClick={onLogout}
-                >
-                  Deconnexion
-                </button>
-              </div>
-            ) : null}
-          </div>
         ) : (
           <Link href="/login" className="hover:text-brand-700">Connexion</Link>
         )}
@@ -334,7 +361,6 @@ export default function HeaderNav() {
               onClick={() => {
                 setIsQuickMenuOpen((v) => !v);
                 setIsNotifOpen(false);
-                setIsAvatarOpen(false);
               }}
               aria-label="Menu"
               title="Menu"
@@ -343,10 +369,10 @@ export default function HeaderNav() {
             </button>
 
             {isQuickMenuOpen ? (
-              <div className="absolute right-0 z-50 mt-2 hidden w-64 rounded-xl border border-brand-100 bg-white p-3 shadow-xl md:block">
+              <div className="absolute right-0 z-50 mt-2 w-64 rounded-xl border border-brand-100 bg-white p-3 shadow-xl">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Navigation</p>
                 <div className="grid grid-cols-1 gap-1">
-                  {menuItems.map((item) => (
+                  {desktopMenuItems.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
@@ -365,53 +391,106 @@ export default function HeaderNav() {
 
       {mounted && isAuthed && isMobileMenuOpen
         ? createPortal(
-            <div className="fixed inset-0 z-[80] bg-[#041d39]/70 backdrop-blur-sm md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+            <div className="fixed inset-0 z-[90] bg-[#060f1f]/70 backdrop-blur-sm md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
               <div
-                className="absolute inset-x-0 bottom-0 rounded-t-3xl border-t border-brand-100 bg-white px-5 pb-8 pt-5"
-                style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
+                ref={mobilePanelRef}
+                className="absolute inset-0 overflow-y-auto bg-[#081223] text-white"
+                style={{ animation: 'mobilePlusFade 200ms ease' }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="mx-auto mb-4 h-1.5 w-16 rounded-full bg-brand-100" />
-                <div className="mb-3 flex justify-center">
-                  <img src="/logo.png" alt="Logo" className="h-14 w-14 rounded-xl object-cover shadow-sm" />
-                </div>
-                <div className="mb-4 flex justify-end">
-                  <button type="button" className="rounded-md border border-brand-100 px-3 py-1.5 text-sm" onClick={() => setIsMobileMenuOpen(false)}>
+                <div className="mx-auto flex w-full max-w-md items-center justify-between px-5 pb-3 pt-6">
+                  <div className="flex items-center gap-3">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt="Photo profil"
+                        className="h-12 w-12 rounded-full border border-white/20 object-cover"
+                        onError={() => setAvatarBroken(true)}
+                      />
+                    ) : (
+                      <img src="/logo.png" alt="Logo" className="h-12 w-12 rounded-full border border-white/20 object-cover" />
+                    )}
+                    <div>
+                      <p className="text-xs text-slate-300">Mon espace</p>
+                      <p className="text-lg font-bold">{student?.firstName || 'Utilisateur'}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="rounded-md border border-white/25 px-3 py-1.5 text-sm hover:bg-white/10"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    aria-label="Fermer"
+                  >
                     ✕
                   </button>
                 </div>
-                <div className="grid grid-cols-4 gap-2">
-                  <Link href="/messages" className="rounded-xl border border-brand-100 px-3 py-3 text-center text-xl font-medium" onClick={() => setIsMobileMenuOpen(false)} aria-label="Messagerie" title="Messagerie">
-                    💬
-                  </Link>
-                  {menuItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="rounded-xl border border-brand-100 px-3 py-3 text-center text-xl font-medium"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      aria-label={item.label}
-                      title={item.label}
-                    >
-                      {item.icon}
-                    </Link>
-                  ))}
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <Link
-                    href="/profile"
-                    className="rounded-xl border border-brand-100 px-3 py-2 text-center text-sm font-medium"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    👤 Profil
-                  </Link>
-                  <button
-                    type="button"
-                    className="rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-600"
-                    onClick={onLogout}
-                  >
-                    ⎋ Déconnexion
-                  </button>
+
+                <div className="mx-auto w-full max-w-md px-5 pb-28" style={{ animation: 'mobilePlusSlide 220ms ease' }}>
+                  <section className="rounded-2xl border border-white/10 bg-[#0b1830] p-4">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-300">Etudes</p>
+                    <div className="space-y-1">
+                      {mobileStudyItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-white/10"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <span>{item.icon} {item.label}</span>
+                          <span className="text-slate-400">›</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="mt-3 rounded-2xl border border-white/10 bg-[#0b1830] p-4">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-300">Outils</p>
+                    <div className="space-y-1">
+                      {mobileToolItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-white/10"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <span>{item.icon} {item.label}</span>
+                          <span className="text-slate-400">›</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="mt-3 rounded-2xl border border-white/10 bg-[#0b1830] p-4">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-300">Compte</p>
+                    <div className="space-y-1">
+                      <Link
+                        href="/profile"
+                        className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-white/10"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <span>👤 Profil</span>
+                        <span className="text-slate-400">›</span>
+                      </Link>
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-white/10"
+                        onClick={toggleDarkMode}
+                      >
+                        <span>{darkMode ? '☀️ Mode clair' : '🌙 Mode sombre'}</span>
+                        <span className="text-slate-400">›</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-red-300 hover:bg-red-500/10"
+                        onClick={onLogout}
+                      >
+                        <span>⎋ Deconnexion</span>
+                        <span className="text-red-300">›</span>
+                      </button>
+                    </div>
+                  </section>
+
+                  <p className="mt-4 text-center text-xs text-slate-400">LinkEduPro Mobile Navigation v1</p>
                 </div>
               </div>
             </div>,
@@ -420,17 +499,17 @@ export default function HeaderNav() {
         : null}
 
       {isAuthed ? (
-        <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-brand-100 bg-white/95 backdrop-blur md:hidden" style={{ paddingBottom: 'max(0.35rem, env(safe-area-inset-bottom))' }}>
+        <div className="fixed inset-x-0 bottom-0 z-[80] border-t border-slate-800 bg-[#0a1427]/95 text-slate-200 backdrop-blur md:hidden" style={{ paddingBottom: 'max(0.35rem, env(safe-area-inset-bottom))' }}>
           <nav className="mx-auto grid max-w-md grid-cols-5 gap-1 px-2 py-2">
-            <Link href="/" className={`rounded-lg px-1 py-1 text-center text-[11px] ${pathname === '/' ? 'bg-brand-50 text-brand-900' : 'text-brand-700'}`}>
+            <Link href="/" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
               <div className="text-lg">🏠</div>
               <div>Accueil</div>
             </Link>
-            <Link href="/messages" className={`rounded-lg px-1 py-1 text-center text-[11px] ${pathname === '/messages' ? 'bg-brand-50 text-brand-900' : 'text-brand-700'}`}>
+            <Link href="/messages" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/messages') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
               <div className="text-lg">💬</div>
               <div>Messages</div>
             </Link>
-            <Link href="/progress" className={`rounded-lg px-1 py-1 text-center text-[11px] ${pathname === '/progress' ? 'bg-brand-50 text-brand-900' : 'text-brand-700'}`}>
+            <Link href="/progress" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/progress') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
               <div className="relative text-lg">
                 🔔
                 {unreadCount > 0 ? (
@@ -439,21 +518,21 @@ export default function HeaderNav() {
                   </span>
                 ) : null}
               </div>
-              <div>Activité</div>
+              <div>Activite</div>
             </Link>
-            <Link href="/search" className={`rounded-lg px-1 py-1 text-center text-[11px] ${pathname === '/search' ? 'bg-brand-50 text-brand-900' : 'text-brand-700'}`}>
+            <Link href="/search" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/search') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
               <div className="text-lg">🔎</div>
               <div>Recherche</div>
             </Link>
             <button
               type="button"
-              className="rounded-lg px-1 py-1 text-center text-[11px] text-brand-700"
+              className={`rounded-lg px-1 py-1 text-center text-[11px] ${isMobileMenuOpen ? 'bg-white/15 text-white' : 'text-slate-300'}`}
               onClick={() => {
                 setIsMobileMenuOpen(true);
                 setIsNotifOpen(false);
-                setIsAvatarOpen(false);
                 setIsQuickMenuOpen(false);
               }}
+              aria-label="Ouvrir Plus"
             >
               <div className="text-lg">⋯</div>
               <div>Plus</div>
