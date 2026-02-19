@@ -54,6 +54,18 @@
   text-decoration: none;
 }
 
+.whatsappLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.whatsappIcon {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: #25d366;
+}
+
 .link:hover,
 .bottomLink:hover {
   color: #0a6fbe;
