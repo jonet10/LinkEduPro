@@ -117,3 +117,64 @@ body {
     transform: translateY(0);
   }
 }
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(31, 95, 168, 0.55), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(14, 27, 45, 0.85), transparent 45%),
+    #071021;
+}
+
+.splash-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.splash-logo {
+  animation: splashPulse 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 8px 24px rgba(77, 167, 255, 0.35));
+}
+
+.splash-title {
+  color: #e8f2ff;
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.splash-loader {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(191, 220, 255, 0.35);
+  border-top-color: #4da7ff;
+  border-radius: 999px;
+  animation: splashSpin 0.8s linear infinite;
+}
+
+@keyframes splashPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.96;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes splashSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
