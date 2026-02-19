@@ -6,6 +6,21 @@ import { apiClient } from '@/lib/api';
 import { getStudent, getToken, setAuth } from '@/lib/auth';
 import { resolveMediaUrl } from '@/lib/media';
 
+const ACADEMIC_LEVEL_OPTIONS = ['9e', 'NSI', 'NSII', 'NSIII', 'NSIV', 'Universitaire'];
+const LEGACY_TO_ACADEMIC = {
+  NS1: 'NSI',
+  NS2: 'NSII',
+  NS3: 'NSIII',
+  Terminale: 'NSIV',
+  Universite: 'Universitaire'
+};
+
+function normalizeAcademicLevel(value) {
+  if (!value) return '';
+  if (ACADEMIC_LEVEL_OPTIONS.includes(value)) return value;
+  return LEGACY_TO_ACADEMIC[value] || '';
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -16,7 +31,7 @@ export default function ProfilePage() {
   const [editMode, setEditMode] = useState(false);
 
   const [profile, setProfile] = useState(null);
-  const [form, setForm] = useState({ email: '', phone: '', address: '', password: '' });
+  const [form, setForm] = useState({ email: '', phone: '', address: '', password: '', level: '' });
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
   const [avatarBroken, setAvatarBroken] = useState(false);
@@ -40,7 +55,8 @@ export default function ProfilePage() {
           email: p.email || '',
           phone: p.phone || '',
           address: p.address || '',
-          password: ''
+          password: '',
+          level: normalizeAcademicLevel(p.academicLevel || p.level)
         });
       })
       .catch((e) => setError(e.message || 'Erreur de chargement du profil'))
@@ -119,6 +135,9 @@ export default function ProfilePage() {
         phone: form.phone || null,
         address: form.address || null
       };
+      if (profile.role === 'STUDENT' && form.level) {
+        payload.level = form.level;
+      }
 
       if (form.password.trim()) {
         payload.password = form.password;
@@ -139,6 +158,8 @@ export default function ProfilePage() {
           ...student,
           email: data.profile.email,
           phone: data.profile.phone,
+          academicLevel: data.profile.academicLevel || normalizeAcademicLevel(data.profile.level),
+          level: data.profile.level,
           darkMode: data.profile.darkMode,
           photoUrl: data.profile.photoUrl
         });
@@ -159,7 +180,8 @@ export default function ProfilePage() {
       email: profile.email || '',
       phone: profile.phone || '',
       address: profile.address || '',
-      password: ''
+      password: '',
+      level: normalizeAcademicLevel(profile.academicLevel || profile.level)
     });
     setSelectedPhoto(null);
     setPhotoPreview('');
@@ -235,6 +257,22 @@ export default function ProfilePage() {
               disabled={!editMode}
             />
           </div>
+          {profile.role === 'STUDENT' ? (
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium">Niveau academique</label>
+              <select
+                className="input"
+                value={form.level}
+                onChange={(e) => onChangeField('level', e.target.value)}
+                disabled={!editMode}
+              >
+                <option value="">Selectionner un niveau</option>
+                {ACADEMIC_LEVEL_OPTIONS.map((level) => (
+                  <option key={level} value={level}>{level}</option>
+                ))}
+              </select>
+            </div>
+          ) : null}
         </div>
 
         {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
