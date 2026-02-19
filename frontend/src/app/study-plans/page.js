@@ -5,6 +5,14 @@ import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 
 const LEVELS = ['9e', 'NS1', 'NS2', 'NS3', 'Terminale', 'Universite'];
+const ACADEMIC_TO_LEVEL = {
+  NSI: 'NS1',
+  NSII: 'NS2',
+  NSIII: 'NS3',
+  NSIV: 'Terminale',
+  Universitaire: 'Universite',
+  '9e': '9e'
+};
 
 function parseChapterOrder(plan) {
   if (Number.isInteger(plan?.chapterOrder)) return plan.chapterOrder;
@@ -124,8 +132,21 @@ export default function StudyPlansPage() {
     setError('');
     try {
       if (student?.role === 'STUDENT') {
-        const data = await apiClient('/v2/study-plans/my', { token });
-        setPlans(data.plans || []);
+        try {
+          const data = await apiClient('/v2/study-plans/my', { token });
+          setPlans(data.plans || []);
+        } catch (_) {
+          // Fallback for environments where /my fails due to backend/runtime mismatch.
+          const fallbackLevel =
+            ACADEMIC_TO_LEVEL[student?.academicLevel] ||
+            (typeof student?.level === 'string' ? student.level : '') ||
+            '';
+          const query = new URLSearchParams();
+          if (fallbackLevel) query.set('level', fallbackLevel);
+          const data = await apiClient(`/v2/study-plans${query.toString() ? `?${query.toString()}` : ''}`, { token });
+          setPlans(data.plans || []);
+          setError('Le chargement automatique a échoué; mode de secours activé.');
+        }
       } else {
         const query = new URLSearchParams();
         if (filterLevel) query.set('level', filterLevel);
