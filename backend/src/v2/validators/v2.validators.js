@@ -1,6 +1,7 @@
 const Joi = require('joi');
 
 const levelSchema = Joi.string().valid('9e', 'NS1', 'NS2', 'NS3', 'Terminale', 'Universite');
+const academicLevelSchema = Joi.string().valid('9e', 'NSI', 'NSII', 'NSIII', 'NSIV', 'Universitaire');
 const contentTypeSchema = Joi.string().valid('quiz', 'pdf', 'video', 'revision');
 const contentStatusSchema = Joi.string().valid('draft', 'pending', 'approved', 'rejected');
 
@@ -9,7 +10,7 @@ const updateProfileSchema = Joi.object({
   email: Joi.string().email({ tlds: { allow: false } }).allow(null, ''),
   address: Joi.string().trim().max(255).allow(null, ''),
   password: Joi.string().min(8).max(128),
-  level: levelSchema.optional()
+  level: academicLevelSchema.optional()
 }).min(1);
 
 const darkModeSchema = Joi.object({
@@ -49,8 +50,11 @@ const reviewContentSchema = Joi.object({
 const createStudyPlanSchema = Joi.object({
   level: levelSchema.required(),
   subject: Joi.string().trim().max(120).allow(null, ''),
+  chapterOrder: Joi.number().integer().min(1).max(500).optional(),
   title: Joi.string().trim().min(3).max(180).required(),
-  description: Joi.string().trim().min(10).max(5000).required()
+  description: Joi.string().trim().min(10).max(5000).required(),
+  notes: Joi.string().trim().min(3).max(20000).allow(null, ''),
+  exercises: Joi.string().trim().min(3).max(20000).allow(null, '')
 });
 
 const upsertPersonalStudyPlanSchema = Joi.object({
@@ -70,8 +74,11 @@ const studyPlanParamsSchema = Joi.object({
 const updateStudyPlanSchema = Joi.object({
   level: levelSchema.optional(),
   subject: Joi.string().trim().max(120).allow(null, ''),
+  chapterOrder: Joi.number().integer().min(1).max(500).optional(),
   title: Joi.string().trim().min(3).max(180).optional(),
-  description: Joi.string().trim().min(10).max(5000).optional()
+  description: Joi.string().trim().min(10).max(5000).optional(),
+  notes: Joi.string().trim().min(3).max(20000).allow(null, ''),
+  exercises: Joi.string().trim().min(3).max(20000).allow(null, '')
 }).min(1);
 
 const createLevelQuizSchema = Joi.object({

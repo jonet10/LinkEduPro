@@ -37,6 +37,7 @@ function isSameDay(a, b) {
 }
 
 function toProfile(student) {
+  const academicLevel = student.studentProfile ? ACADEMIC_LEVEL_TO_API[student.studentProfile.level] : null;
   return {
     id: student.id,
     firstName: student.firstName,
@@ -45,7 +46,8 @@ function toProfile(student) {
     phone: student.phone,
     address: student.address,
     role: student.role,
-    level: student.studentProfile ? ACADEMIC_LEVEL_TO_API[student.studentProfile.level] : toApiLevel(student.level),
+    academicLevel,
+    level: academicLevel || toApiLevel(student.level),
     photoUrl: student.photoUrl,
     darkMode: student.darkMode,
     school: student.school,
