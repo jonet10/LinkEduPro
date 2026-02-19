@@ -58,15 +58,20 @@ async function listStudyPlans(req, res, next) {
       where.subject = { contains: req.query.subject.trim(), mode: 'insensitive' };
     }
 
-    const plans = await prisma.studyPlan.findMany({
-      where,
-      include: {
-        creator: {
-          select: { id: true, firstName: true, lastName: true, role: true }
-        }
-      },
-      orderBy: [{ subject: 'asc' }, { chapterOrder: 'asc' }, { id: 'asc' }]
-    });
+    let plans = [];
+    try {
+      plans = await prisma.studyPlan.findMany({
+        where,
+        include: {
+          creator: {
+            select: { id: true, firstName: true, lastName: true, role: true }
+          }
+        },
+        orderBy: [{ subject: 'asc' }, { chapterOrder: 'asc' }, { id: 'asc' }]
+      });
+    } catch (_) {
+      plans = [];
+    }
     return res.json({ plans: plans.map(toApiStudyPlan) });
   } catch (error) {
     return next(error);
@@ -108,10 +113,16 @@ async function upsertPersonalStudyPlan(req, res, next) {
 
 async function getMyStudyPlan(req, res, next) {
   try {
-    const student = await prisma.student.findUnique({
-      where: { id: req.user.id },
-      include: { studentProfile: true }
-    });
+    let student;
+    try {
+      student = await prisma.student.findUnique({
+        where: { id: req.user.id },
+        include: { studentProfile: true }
+      });
+    } catch (_) {
+      // Fallback for environments where student_profiles relation is not yet available.
+      student = await prisma.student.findUnique({ where: { id: req.user.id } });
+    }
     if (!student) {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
     }
@@ -121,21 +132,22 @@ async function getMyStudyPlan(req, res, next) {
       return res.status(400).json({ message: 'Niveau utilisateur non defini.' });
     }
 
-    const [plans, personalStudyPlan] = await Promise.all([
-      prisma.studyPlan.findMany({
-        where: { level },
-        include: {
-          creator: {
-            select: { id: true, firstName: true, lastName: true, role: true }
-          }
-        },
-        orderBy: [{ subject: 'asc' }, { chapterOrder: 'asc' }, { id: 'asc' }]
-      }),
-      prisma.personalStudyPlan.findFirst({
-        where: { userId: req.user.id },
-        orderBy: { id: 'desc' }
-      })
-    ]);
+    const plansPromise = prisma.studyPlan.findMany({
+      where: { level },
+      include: {
+        creator: {
+          select: { id: true, firstName: true, lastName: true, role: true }
+        }
+      },
+      orderBy: [{ subject: 'asc' }, { chapterOrder: 'asc' }, { id: 'asc' }]
+    }).catch(() => []);
+
+    const personalPlanPromise = prisma.personalStudyPlan.findFirst({
+      where: { userId: req.user.id },
+      orderBy: { id: 'desc' }
+    }).catch(() => null);
+
+    const [plans, personalStudyPlan] = await Promise.all([plansPromise, personalPlanPromise]);
 
     return res.json({
       level: toApiLevel(level),
