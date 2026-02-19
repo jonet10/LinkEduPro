@@ -163,6 +163,7 @@ export default function HeaderNav() {
 
   const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
   const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
+  const canSeeCatchup = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const avatarUrl = avatarBroken ? null : resolveMediaUrl(student?.photoUrl);
 
   const desktopMenuItems = useMemo(() => {
@@ -171,6 +172,7 @@ export default function HeaderNav() {
       { href: '/', label: 'Accueil', icon: '🏠' },
       { href: '/focus', label: 'Focus', icon: '🎧' },
       { href: '/study-plans', label: 'Plans', icon: '🗂️' },
+      ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
       { href: '/subjects', label: 'Matieres', icon: '📘' },
       { href: '/progress', label: 'Progres', icon: '📈' },
       { href: '/library', label: 'Bibliotheque', icon: '📚' },
@@ -178,17 +180,18 @@ export default function HeaderNav() {
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : []),
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
     ];
-  }, [isAuthed, canSeeProbableExercises, canSeeGlobalAdminDashboard]);
+  }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard]);
 
   const mobileStudyItems = useMemo(
     () => [
       { href: '/subjects', label: 'Matieres', icon: '📘' },
       { href: '/focus', label: 'Focus', icon: '🎧' },
       { href: '/study-plans', label: 'Plans', icon: '🗂️' },
+      ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
       { href: '/progress', label: 'Progres', icon: '📈' },
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : [])
     ],
-    [canSeeProbableExercises]
+    [canSeeCatchup, canSeeProbableExercises]
   );
 
   const mobileToolItems = useMemo(

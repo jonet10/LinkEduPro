@@ -67,6 +67,10 @@ export default function NsivPage() {
           <h2 className="text-xl font-semibold text-brand-900">Focus</h2>
           <p className="mt-2 text-sm text-brand-700">Sessions Pomodoro et musique de concentration.</p>
         </Link>
+        <Link href="/rattrapage" className="card hover:bg-brand-50">
+          <h2 className="text-xl font-semibold text-brand-900">Rattrapage Google Meet</h2>
+          <p className="mt-2 text-sm text-brand-700">Sessions planifiees par professeur ou admin.</p>
+        </Link>
         <Link href="/library" className="card hover:bg-brand-50">
           <h2 className="text-xl font-semibold text-brand-900">Bibliotheque</h2>
           <p className="mt-2 text-sm text-brand-700">Supports PDF et ressources de revision.</p>

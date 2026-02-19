@@ -82,6 +82,10 @@ export default function SubjectsPage() {
               <p className="font-semibold text-brand-900">Focus & entrainement</p>
               <p className="mt-1 text-sm text-brand-700">Sessions de concentration et suivi quotidien.</p>
             </Link>
+            <Link href="/rattrapage" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
+              <p className="font-semibold text-brand-900">Rattrapage Google Meet</p>
+              <p className="mt-1 text-sm text-brand-700">Cours de rattrapage planifies pour NSIV.</p>
+            </Link>
           </div>
         </article>
       ) : null}
