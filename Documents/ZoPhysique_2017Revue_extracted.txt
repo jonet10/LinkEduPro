@@ -1,0 +1,2569 @@
+Remerciements
+Mes remerciements d’une façon particulièrement vont aux personnes suivantes :Mme Kenia Béralus, Henier Gédéon, David Saint-Louis, Jonet Jean François, Lumarc Guitho, Felix Mérise, Mulphar Macéan, Beauplan Wilbert, Variste Stanley , Midy Michelet, Britus Benitho, Laurore Everlonsky, Entête de Saint Domingue,Bateau Evenscia,John Vancol,Pierre Erick,Roland Clerger,Brunord Clerger...d’une façon ou d’une autre qui ont contribué à la réalisation de cette œuvre.
+« Les défis sont faits pour être relevés »
+Préface
+Les matières chiffrées créent le plus souvent chez l’élève haïtien appréhension, hésitation panique même. Tout cela est dû à des méthodes inadaptées et des exposées incompréhensibles.
+Frantzo Jean François ; éducateur de carrière quoique Jeune, soucieux de ce problème ; a décidé de mettre ses expériences pédagogiques au service des élèves de la terminale II en vue d’un meilleur apprentissage de la physique.
+Dans ce manuel, la physique, au lieu d’être un casse-tête chinois pour l’apprenant devient un délice parce que la clarté, la concision et la précision sont au rendez-vous.
+Je souhaite que cet ouvrage découlant de ma plume habile et bien documentée rencontre un chaleureux accueil parmi les élèves, les écoles avisées et surtout les enseignants à qui incombe la responsabilité de former la matière grise de l’homme.
+Comme toute œuvre humaine n’est pas parfaite, c’est pourquoi je réclame de vos conseils surtout à ceux qui auront à utiliser cet ouvrage tout en me signalant de vos remarques. Je vous remercie à l’avance,Bonne déléctation. Bonne Besogne à toutes et à tous.
+CHAPITRE 1
+POINTS ESSENTIELS
+Magnétisme
+Aimants
+Types d’aimants
+Formes d’aimants
+Séparation des pôles d’un aimant
+Loi de Charles Augustin de Coulomb
+Propriétés des aimants
+Champ Magnétique
+Vecteur induction Magnétique
+Caractéristiques du vecteur induction magnétique
+Intensité de l’induction magnétique
+Champ Magnétique uniforme
+Spectre magnétique
+Flux d’induction uniforme à travers une surface plane
+Champ magnétique terrestre
+Questions de cours
+Exercices
+Magnétisme
+Définitions
+Magnétisme : Le magnétisme est l’étude des aimants et de leurs propriétés.
+Aimant: un aimant est un corps qui a la propriété d’attirer de la limaille de fer ou des substances férromagnétiques .
+Types d’aimants : on distingue deux types d’aimants.
+Les aimants naturels
+Les aimants artificiels
+Aimants naturels : Les aimants naturels ou pierres d’aimant qui proviennent de la magnétite ou minerai naturel de fer (Fe3O4) ou d’autres métaux et leurs alliages (Fer, Nickel, Cobalt).
+Aimants artificiels : Les aimants artificiels ou barreaux d’acier qui, après avoir été soumis à un traitement convenable, peuvent se comporter comme des aimants naturels.
+NB : On peut obtenir un aimant artificiel soit par frottement, soit par action d’un courant électrique.
+Formes d’aimants : On distingue plusieurs formes d’aimants.
+Les aimants en barres ou barreaux aimantés
+Les aimants en U ou en fer à cheval
+Les aimants en aiguille ou losange ou aiguille aimantée ou boussole
+Les disques
+Les bandes magnétiques ou tapes.
+Pôles d’un aimant : Quelque soit la forme d’un aimant, plongé dans la limaille de fer les grains métalliques adhérent par plaques qui forment des houppes aux extrémités.
+NB : Un aimant présent deux régions ou extrémités actives et une région neutre.
+Les aimants naturels sont constitués d'oxyde de fer de formule Fe3O4
+Région active : La région active est la région qui attire la limaille de fer.
+Région neutre : La région neutre est celle qui n’attire pas la limaille de fer.
+Remarque : Deux pôles de même nom se repoussent alors que deux pôles de noms contraires s’attirent.
+Séparation des pôles d’un aimant
+IL est impossible de séparer les pôles d’un aimant. En coupant un aimant en deux parties, on obtient deux aimants complets. En recommençant la même opération sur chaque aimant, obtient quatre aimants complets. En conclusion les pôles d’aimant sont inséparables.
+Loi de Charles Augustin de Coulomb
+1876425426085F=K.mm'd2
+00F=K.mm'd2
+La force attractive ou répulsive entre deux masses magnétiques ponctuelles est proportionnelle à ces masses et inversement proportionnelle au carré de leur distance. Elle est donnée par la relation :
+NB : Dans le système international le milieu interposé est le vide ou l’air k=10-7
+179768519050F=10-7mm'd2
+00F=10-7mm'd2
+La formule devient :
+Notations
+F : Force attractive ou répulsive en Newton
+m, m’ : masses magnétiques en unités SI
+d : distance des pôles en mètres
+k : un facteur qui dépend des unités choisies
+Remarques :
+Si m &gt; 0 et m’ &gt; 0 (répulsion)
+Si m&lt;0 et m’&lt;0(répulsion)
+Si m&gt;0 et m’&lt;0 (Attraction)
+Si m=m’ les 2 masses sont identiques alors F=K.m2d2 dans ce cas, il ya répulsion.
+A noter que : Lorsque la distance varie : Fd2=F’d’2
+Propriétés des aimants
+Un aimant possède deux pôles : un pole Nord et un pole Sud.
+Les pôles d’un aimant exercent des actions magnétiques les uns sur les autres. F=mB
+Les pôles d’un aimant sont inséparables.
+Champ Magnétique on entend par champ magnétique de l’aimant, la région de l’espace où l’aimant exerce son action. En d’autres termes on appelle champ magnétique toute région ou toute zone de l’espace dans laquelle s’exercent des actions magnétiques.
+Production du champ magnétique : Le champ magnétique peut être produit par des aimants ou par le passage du courant électrique dans un conducteur.
+NB : Le champ magnétique est caractérisé en chaque point par le vecteur inducteur B (Beta).
+Vecteur induction Magnétique : on entend par vecteur induction magnétique en un point le vecteur qui représente la force qui s’exercerait sur l’unité de masse magnétique Nord placé au point considéré.
+Caractéristiques du vecteur induction magnétique
+Le vecteur induction magnétique est caractérisé par :
+Une origine
+Une direction
+Un sens
+Une intensité (un module)
+Intensité de l’induction magnétique
+L’induction magnétique créée en un point A par une masse magnétique ponctuelle est donnée par la formule : B=Fm' avec F=m'B
+NB :L’intensité de l’induction magnétique est mesurée à l’aide d’un Tesla-mètre.
+Notations
+B : Intensité du vecteur induction magnétique en tesla
+F : Intensité de la force magnétique en Newtons
+m’ : masse magnétique du point considéré en unités SI
+Calcul de la force magnétique en un point A
+Le point A est situé sur le prolongement du segment SN.
+4993005-3810FR=FN-FS
+00FR=FN-FS
+La force magnétique résultante au point A est donnée par la relation
+Rappel : Deux pôles de même nom se repoussent, deux pôles de nom contraires d’attirent.
+Notations
+FR : Force magnétique résultante créée au point A en Newtons.
+FN : Force produite au point A par le pole sud de l’aimant en Newtons.
+FS : Force produite au point A par le pole Nord de l’aimant en Newtons.
+Le point A est situé sur la médiatrice du segment SN.
+Les triangles ABC et ASN étant semblables.
+19716755715FR=FN×SNAN
+00FR=FN×SNAN
+Thalès nous donne :FRFN=SNAN=&gt;
+Notations
+FR : Force magnétique résultante au point considéré
+SN : Longueur de l’aimant en mètres
+AN : Distance du pôle nord au point A en mètres.
+Champ Magnétique uniforme : un champ magnétique est uniforme lorsque, dans la région de l’espace considéré, tous les vecteurs inductions sont équipollents, c’est-à-dire même direction, même sens et même intensité.
+NB : Un champ magnétique est uniforme dans l’entre fer d’un aimant à fer à cheval, au voisinage de la terre et au centre d’une bobine parcourue par un courant électrique.
+Moment magnétique d’un aimant : on appelle moment magnétique d’un aimant le produit de la masse magnétique par la distance des pôles. Le moment magnétique a pour formule : M=m×L
+Notations
+M : Moment magnétique de l’aimant en unités SI
+m’ : Masse magnétique de l’aimant en unités SI
+L : Longueur de l’aimant en mètres.
+NB:Un magnétomètre c est un appareil qui mesure le moment magnétique.
+Couple magnétique : Lorsqu’un aimant droit est placé dans un champ magnétique uniforme, il est soumis à un couple magnétique de moment C. le moment du couple est donné par relation : C=MBsin∝
+Notations
+C : moment du couple en Newtons mètres (N.m)
+∝: Angle que fait l’axe de l’aimant avec les lignes d’inductions.
+B : intensité de l’induction magnétique en tesla.
+Remarques importantes :
+Si ∝=900 =&gt; sin900=1, le couple est maximum, la formule devient : Cmax=MB. L’aimant est placé perpendiculairement aux vecteurs inductions.
+Si ∝=0 =&gt; sin0=0, le couple magnétique est nul C=0, l’aimant est placé parallèlement aux vecteurs inductions.
+Démontrer que : C=MBsin∝
+On sait que C=F×d
+F1=mB et F2=-mB étant les force exercées en N et S.
+Elles sont égales en valeur absolue. Le triangle SNA
+étant rectangle en A.
+sin∝=NASN=&gt;NA=SNsin∝=Lsin∝
+2329815150495C=MBsin∝
+00C=MBsin∝
+Il vient alors :C=mB×Lsin∝
+comme :M=m×L on a alors C.Q.F.D
+Lignes d’induction magnétique : on appelle ligne d’induction magnétique une ligne qui, en chacun de ses points, est tangente au vecteur induction magnétique de ce point.
+NB : Les lignes de champ du champ magnétique d’un aimant droit vont du pôle nord de l’aimant vers son pôle sud.
+Spectre magnétique : c’est un dessin formé par les grains de limaille de fer soumis à l’action d’un champ magnétique.
+Un spectre magnétique est un ensemble de lignes d’induction magnétique.
+Flux d’induction magnétique : on appelle flux d’induction magnétique l’ensemble de ligne d’induction qui traverse un élément de surface placé dans un champ magnétique.
+Flux-mètre : Le flux-mètre est l’appareil qui mesure le flux d’induction magnétique.
+Flux d’induction uniforme à travers une surface plane
+3196590232410φ=βScos∝.
+00φ=βScos∝.
+Le flux d’induction à travers une surface plane, placée dans un champ magnétique uniforme a pour expression :
+Notations
+φ : Flux d’induction à travers une surface en weber (Wb)
+β : Intensité du champ uniforme en tesla ou weber par mètre carré.
+∝ : Angle que fait la normale à la surface avec la direction des lignes d’induction.
+3077210155575φ=βS
+00φ=βS
+NB
+Si ∝=0 =&gt;cos∝=1, le flux est maximum
+L’élément de surface est placé perpendiculairement aux lignes d’induction.
+Si ∝=90 =&gt;cos∝=0, le flux est nul φ=0
+L’élément de surface est placé parallèlement aux lignes d’induction
+Remarques :
+Si la surface est en mètre carré et B en tesla, le flux d’induction d’exprime en weber.
+Si la surface est en Cm2 et B en Gauss, le flux d’induction s’exprime en Maxwell (Mx).
+1 tesla = 104Gauss =&gt; 1Gauss=10-4tesla
+1 weber=108Mx =&gt; 1Mx=10-8Wb.
+Définition légale du Tesla et du Weber
+Tesla : Le tesla est l’induction magnétique uniforme qui, répartie sur une surface 1 m2, produit à travers cette surface un flux magnétique de 1 weber.
+Weber : Le weber est le flux magnétique à travers une surface de 1 m2 normale aux lignes de champ d’un champ magnétique uniforme d’intensité 1 tesla.
+Champ magnétique terrestre
+On appelle champ magnétique terrestre un champ immense qui englobe la terre. On dit champ magnétique terrestre ou bouclier terrestre.
+NB : L’induction magnétique terrestre en un lieu a deux composantes : une composante horizontale (B0) et une composante verticale (Bv).
+Le triangle GB0B étant rectangle en B0, Pythagore nous donne : B2=B02+Bv2 =&gt;B=B02+Bv2
+cos∝=B0B=&gt;B=B0cos∝
+tg∝=BvB0=&gt;Bv=B0tg∝
+NB : La composante horizontale mesure à paris est de l’ordre B0=20 micro tesla.
+Inclinaison magnétique : On appelle inclinaison magnétique l’angle que fait le vecteur champ magnétique terrestre avec sa composante horizontale.
+Déclinaison magnétique : On appelle déclinaison magnétique l’angle que fait le méridien magnétique avec le méridien géographique.
+Méridien magnétique : on appelle méridien magnétique d’un lieu le plan vertical qui contient la vectrice induction magnétique terrestre.
+Force magnétique: force exercée par un aimant.
+Induction magnétique: force agissant sur la masse magnétique +1
+A noter que : L’inclinaison est positive dans l’hémisphère Nord et négative dans l’hémisphère sud.
+Questions de cours
+Complétez les phrases suivantes par les mots convenables:
+1)Les aimants naturels sont constitués d'...............de formule........................
+2)Deux pôles d'aimant de .............se repoussent tandis que deux pôles de...........s' attirent.
+3)on entend par........l'endroit où l’aimant exerce son action magnétique.
+4) Un............est un appareil qui mesure les inductions magnétiques.
+5) L’ensemble des lignes de champ magnétique à travers une surface définit..............
+6) Dans une région où règne un champ magnétique uniforme, les lignes de champ sont des................
+7)L' appareil qui mesure le flux d’induction magnétique s’appelle............
+8) L’inclinaison est........... dans l'hémisphère nord et.......... dans l'hémisphère sud.
+9)L' angle formé par le plan du méridien magnétique s' appelle...........
+10)Le produit de la masse magnétique d'un aimant par la distance des pôles s’appelle.........
+Applications
+Deux pôles d’aimants de masses magnétiques respectives 30 unités SI et -20unités SI sont placés à une distance d=10cm l'un de l’autre. Calculer l'intensité de la force. Y-a-t-il répulsion ou attraction?
+Réponse:, 6mN; Attraction
+Une masse magnétique m est placée à 1 dm d’une autre masse magnétique 2fois plus grande. Ces masses se repoussent avec une force F=8mN. Trouver les valeurs de ces masses.
+Réponses: m=20 Unités SI m'=40 Unités SI ou m=-20 Unités SI m'=-40 Unités SI
+Un pôle nord de masse magnétique 25 unités SI est placé à 5 cm d’un pôle sud de masse magnétique -15 unités SI. Calculer en Newton de la force qui exerce entre ces deux pôles.
+Réponse : 15x10-3 N.
+Deux pôles d’aimants se repoussent avec une force d’intensité F=4x10-3 Newton. Que devient cette force si on réduit de moitié la distance entre ces pôles ?
+Réponse : 16x10-3 N.
+Deux pôles de masse magnétiques identiques, placés à 4 cm l’un de l’autre, se repoussent avec une force de 25x10-3 Newtons. Calculer leurs masses magnétiques.
+Réponse : 20 unités SI
+La résultante de deux champs magnétiques de directions perpendiculaires vaut 44μT. Si le module de l’un est 28μT alors quel est le module de l’autre ?
+Réponse : 34μT
+Dans un aimant droit, les pôles sont supposés réduits à deux points S et N distants 30 cm, de masses magnétiques +5 unités SI et -5 unités SI. On désigne par O le milieu du segment SN. Calculer l’intensité de la force résultante des actions de ces masses sur une masse magnétique +1 placé en un point A.
+Situé sur la droite SN, à 24 cm de O.
+Situé sur la médiatrice du segment SN, à 24 cm de O.
+Réponses : 1) 0,058x10-3 N.2) 0,0065x10-3 N.
+Soit un aimant rectiligne SN de longueur 8 cm de masse magnétique 50 unités SI. En un point A situé à 3 cm de cet aimant et sur sa médiatrice on place l’extrémité nord d’une petite aiguille aimantée de masse magnétique +2 unités SI.
+Calculer :
+La force résultante exercée par l’aimant sur la masse magnétique en A.
+L’intensité du champ magnétique au point A
+Le moment magnétique de l’aimant.
+Réponses : 1) 6,4x10-3 N2) 3,2 mT3) 4 Unités SI
+Une aiguille aimantée horizontale, de moment magnétique 0,2 A.m2, est perpendiculaire au plan du méridien magnétique. A quel couple est elle soumise ?
+Si les pôles de l’aiguille sont distants de 5 cm, quelle est la valeur des forces qui s’exercent sur ces pôles ?.
+Réponses : C=4x10-6 N.mF=8x10-5 N.
+Une aiguille aimantée est soumise aux actions conjointes de deux aimants perpendiculaires l’un à l’autre ; le premier vertical d’induction 60μT et le second horizontale d’induction 80μT.
+Calculer :
+L’induction résultante qui s’oriente l’aiguille.
+La direction de l’aiguille, en degrés, minutes et secondes.
+Réponses : 1) 100μT2) 36052’9’’
+Un carton rectangulaire de 8 cm de long et de 5 cm de large est placé perpendiculairement aux lignes d’induction d’un champ magnétique uniforme d’intensité 4 mT. Calculer le flux d’induction à travers le carton.
+On place maintenant dans le même champ une aiguille aimantée perpendiculairement aux ligne d’induction. La distance entre les pôles de l’aiguille étant 5 cm et sa masse magnétique m=10 unités SI. Calculer le moment du couple agissant sur m.
+Réponses : φ=16μWb; C=2×10-3unités SI
+Dans l’entrefer d’un aimant en fer à cheval, on place une petite surface circulaire de 6 cm de rayon. Le champ est considéré comme uniforme et l’induction a pour valeur 20 μT. Que vaut le flux qui travers la surface :
+Quand elle est perpendiculaire aux lignes d’induction ?
+Quand elle est parallèle aux lignes d’induction ?
+Si la normale à la surface formait un angle de 30 degrés avec la direction des lignes d’induction ?.
+Réponses : 1) φ=0,226μWb 2) φ=0Wb 3) φ=195μWb CHAPITRE 2
+POINTS ESSENTIELS
+Electromagnétisme
+Champ magnétique produit par un courant
+Expérience d’Oersted
+Intensité de l’induction au point A d’un courant rectiligne
+Champ Magnétique D’un Courant Circulaire
+Champ magnétique crée par un solénoïde (bobine longue)
+Champ magnétique crée par une bobine torique
+Bobine à spires jointives ou enroulements serrés
+Résistance électrique d’un fil ou d’une bobine
+Déviation d’une aiguille aimantée à l’intensité d’une bobine
+Flux d’induction magnétique à travers une bobine
+Moment magnétique d’une bobine
+Moment du couple magnétique d’une bobine
+Exercices
+ELECTROMAGNETISME
+CHAMP MAGNETIQUE PRODUIT PAR UN COURANT
+Définition : On appelle électromagnétisme la partie de la physique qui étudie les champs magnétiques produits par les courants électriques mais aussi toutes les interactions entre aimants et courant. Autrement dit l’électromagnétisme est la partie de la physique ayant pour l’objet l’étude des propriétés magnétiques du courant électrique et de leurs applications.
+Expérience d’Oersted
+Une aiguille aimantée, mobile sur un pivot vertical, placé parallèlement à un fil conducteur dévie dès qu’il est le siège d’un courant. La découverte de cette propriété est dûe aux travaux du physicien Danois Hans Christian OERSTED (21 Juillet 1820)
+Conclusion : Les courants engendrent des champs magnétiques à proximité des conducteurs qu’ils traversent.
+Sens du vecteur induction magnétique
+Le sens de l’induction magnétique produite par un courant dépend du sens du courant électrique. Tout changement du courant électrique entraine un changement de l’induction.
+Pour préciser le sens du vecteur induction magnétique, on utilise les règles suivantes :
+La règle de l’observateur d’ampère
+La règle du tire-bouchon de Maxwell
+La règle de la main droite
+Règle de l’observateur d’ampère : Le sens des lignes de champ est tel qu’un observateur placé le long du fil de façon que le courant lui entre par les pieds et lui sorte par la tête voit les lignes d’induction orientées vers sa gauche.
+Règle de la main droite : La main droite entourant le fil de façon que le pouce indique le sens du courant, le sens des lignes de champ est donné par l’orientation des autres doigts.
+Règle du tire-bouchon de Maxwell : Le sens des lignes de champ d’induction est celui dans lequel il faut tourner un tire-bouchon pour qu’il progresse dans le sens du courant.
+Intensité de l’induction au point A d’un courant rectiligne
+2806700416560B=2I×10-7d.
+00B=2I×10-7d.
+L’intensité de l’induction produite par un courant rectiligne en un point A est proportionnelle à l’intensité du courant et inversement proportionnelle à la distance du point au fil. Elle est donnée par la relation
+2122805437515β'=2nI×10-7d
+00β'=2nI×10-7d
+NB : Si le courant rectiligne est obtenu en groupant en faisceau n fils rectilignes parcourus, dans le même sens, par la même intensité à la distance d du faisceau. L’induction précédente devient :β'=nβ=&gt;
+Bon à savoir : Les lignes d’induction produite par un courant rectiligne sont des cercles circulaires et centrés sur le fil.
+Notations
+B : Induction magnétique au point considéré en tesla
+I : Intensité en ampère
+N : Nombre de conducteur
+d : Distance du point considère au conducteur en mètres
+Champ Magnétique D’un Courant Circulaire
+Etude d’une bobine : une bobine est constituée d’un enroulement de fil conducteur sur un cylindre de rayon r.
+Cas d’une bobine plate : On appelle bobine plate ou circulaire toute bobine dont le diamètre est supérieur à la longueur. Autrement dit : une bobine est dite plate si la longueur de l’enroulement L est faible devant le rayon.
+2838450399415B=4πNI×10-7Db ou B=2πNI×10-7Rb
+00B=4πNI×10-7Db ou B=2πNI×10-7Rb
+L’intensité de l’induction produite au centre de la bobine est proportionnelle à l’intensité du courant, proportionnelle au nombre de spires et inversement proportionnelle au diamètre ou rayon. Elle a pour formule : avec Db=2Rb
+Le sens des lignes de champ permet de définir les deux faces de la bobine
+Face nord : On appelle face nord la face par laquelle sortent les lignes de champ
+Face sud : On appelle face sud la face par laquelle entrent les lignes de champ.
+Spire : On appelle spire tout tour de fil
+Champ magnétique crée par un solénoïde (bobine longue)
+102235825500B=4πNI×10-7Lb ou B=4πN1I×10-7 avec N1=NLb
+00B=4πNI×10-7Lb ou B=4πN1I×10-7 avec N1=NLb
+Un solénoïde est une bobine longue qu’on obtient en enroulement sur un support cylindrique N spires circulaires de fils conducteur dont la longueur est supérieure à son diamètre. L’intensité de l’intensité du courant, proportionnelle au nombre de spires et inversement proportionnelle à sa longueur. Elle est donnée par la relation :
+Démontrer que, dans un solénoïde B=10-74π×I×Cdf
+On sait que: B=10-74πNILb or N=n×C avec n=Lbdf donc :N=C×Lddf
+Il devient: B=10-7×4π×C×Ldt×ILb après avoir simplifié par Lb on a: B=10-74π×I×Cdf C.Q.F.D
+Notations
+B : Intensité magnétique au centre de la bobine en tesla
+N : Nombre total de spire ou nombre de tours de fils
+Rb : Rayon de la bobine en mètres
+Db : Diamètre de la bobine en mètres
+Lb : Longueur dey la bobine en mètres
+NI : Nombre d’ampères-tours
+N1 : Nombre de spires par mètre de longueur
+NB:Le sens des lignes d induction à l intérieur d un solénoïde est donné par la régle du tire-bouchon de Maxwell.
+Champ magnétique crée par une bobine torique
+Bobine torique : une bobine torique est une bobine qui à la forme d’une couronne cylindrique. Elle a deux diamètres.
+Un diamètre intérieur
+Un diamètre extérieur
+L’intensité de l’induction magnétique d’une bobine torique est proportionnelle à l’intensité du courant, proportionnelle au nombre de spires et inversement proportionnelle à sa longueur. Elle a pour formule : B=4πNI×10-7Lb avec Lb=πDm.
+Le diamètre moyen de cette bobine se calcule ainsi :Dm=Dex+Dim2
+Le diamètre de cette bobine se calcule ainsi : Db=Dex-Dim2.
+Notations
+Dm : Diamètre moyen de la bobine en mètres
+Dex : Diamètre extérieur de la bobine en mètres
+Db : Diamètre de la bobine en mètres
+Lb : Longueur moyenne de la bobine en mètre
+Bobine à spires jointives ou enroulements serrés
+Une bobine est dite à spires jointives ou enroulements serrés lorsque le diamètre du fil se confond avec son épaisseur. Le nombre total de spires est donné par la formule : N=n x c.Pour calculer le nombre de spires par couche plusieurs cas sont à envisager :
+Si le fil est recouvert d’un isolant (e≠0) on a : n=Lbdex avec dex=df+2e
+Si l’épaisseur de l’isolant est négligeable (le fil est dénudé) on a : n=Lbdf avec df=dex
+Notations
+n: Nombre de spires par couche
+C : nombre total de couche
+dex : Diamètre extérieur du fil utilisé pour réaliser la bobine
+df : Diamètre intérieur du fil utilisé pour réaliser la bobine
+Résistance électrique d’un fil ou d’une bobine
+La résistance électrique d’un fil homogène, de section constante et de température uniforme est :
+Proportionnelle à sa longueur
+Inversement proportionnelle à sa section
+Variable avec la nature du conducteur
+Elle est donnée par la relation :Rf ou Rb=ρ×Lfsf
+NB : Pour trouver la longueur du fil trois cas peuvent se présenter :
+Si les spires sont circulaires (bobine) on a :Lf=NπDb ou N×L1
+Si les spires sont rectangulaires on a:Lf=NP avec P=L+l×2 ou P=2(L+l)
+Si les spires sont carrées on a : Lf=NP avec P=C×4 ou P=4C
+La surface du fil a pour formule : Sf=0,785df2
+Déviation d’une aiguille aimantée à l’intensité d’une bobine
+Soit une aiguille aimantée, mobile autour d’un pivot vertical, placée à l’intérieur d’une bobine. Lorsque le courant ne passe pas, l’aiguille prend la direction de la composante horizontale. Quand le courant passe, elle s’oriente suivant la direction de la résultante de l’induction créée par le courant. La direction est donnée par la relation : Tgα=BB0
+Flux d’induction magnétique à travers une bobine
+4425950208280φ=NBScosα
+00φ=NBScosα
+Le flux d’induction magnétique à travers une bobine qui comporte N spires parcourues par un courant d’intensité I est donné par la relation :
+4923155219075 φ=NBS.
+00 φ=NBS.
+NB : Le flux d’induction est maximum lorsque les lignes d’induction entrent normalement par la face sud de la bobine. La formule précédente devient
+980440193040φ=BS
+00φ=BS
+Le flux d’induction à travers une section droite ou dans une spire de la bobine a pour formule :
+La surface de la bobine se calcule ainsi :Sb=0,785db2
+Moment magnétique d’une bobine
+Le moment magnétique d’une bobine est donné par la relation :M=IS
+NB : Si la bobine comporte N spires le moment devient : M=NIS
+Moment du couple magnétique d’une bobine
+Le moment du couple d’une bobine a pour formule C=MBsinα
+Notations
+M : moment magnétique de l’aimant en A.m2
+I : intensité du courant en A
+S : section de la bobine en m2
+Questions de cours
+Complétez les phrases suivantes par les mots convenables.
+1)On ne peut pas réaliser l'expérirnce d'œrsted avec un courant...........mais plutôt avec un courant.............
+2)L'expérience d'œrsted a permis de découvrir la propriété...........du courant électrique qui crée autour du fil conducteur un.........
+3)Une bobine dont la longueur est supérieure à son diamètre est appelée..........ou..........
+4)Le module du champ magnétique crée par un courant qui parcourt un fil rectiligne est directement proportionnel à.............. du courant et inversement proportionnel à................
+5)Dans un solénoïde parcouru par un courant électrique les lignes d induction sortent par la............ et entrent par la face..........
+6)La règle du tire-bouchon de Maxwell permet...................
+7) Une bobine formée d’un ensemble de spires enroulées sur une couronne cylindrique porte le nom de...........
+8) Le sens des lignes d’induction à l’intérieur d’un solénoïde est donné par la règle du.....................
+Une bobine de longueur 40cm comprend 320 spires. On y lance un courant de 2A. a)Quelle est l'intensité de l'induction magnétique créée au centre de cette bobine supposée longue? b) Les spires sont jointives et faites d'un fil 2,5mm de diamètre comporte -t-elle de couches?
+Réponses: a)B=2mt b) n=2 couches
+Un solénoïde porte 20 tours de fil par centimètre parcourus par un courant de 10 A .Chaque spire a une surface de 100cm2.Calculer: a)l'intensité de l'induction magnétique au centre du solénoïde. b) le flux magnétique à travers le solénoïde. Réponses :a) B=25,12mT b)ø=0,502Wb
+Calculer l’induction magnétique produite par un courant de 25 ampères dans chacun des cas suivant :
+A 2cm d’un fil droit
+Au centre d’une bobine plate de 40 spires t de 2cm de diamètre
+En un point situe à l’intérieur d’un solénoïde de diamètre 2 cm et dont l’enroulement comporte 50 tours par centimètre
+Réponses : a) 250 μT b) 62.8 mT c) 157mT
+Un solénoïde de longueur 50cm comprend 50 spires de diamètre moyen 10cm en une seule couche. a) Calculer l'intensité du champ magnétique crée à l'intérieur du solénoïde par un courant de 10A.
+b) Quel est le flux propre à travers la bobine.
+c)Quel est la longueur de l'enroulement de la bobine?
+Réponses: a)B=12,56mT b)ø=0,049 wb c) Lf=157m
+Une bobine longue de 2.5 cm de rayon et 50 cm de longueur porte 3 couches de fil comprenant 300 spires chacune. Le bobinage est réalisé avec un fil de 2.7 μ.Ω.cm de résistivité. Calculer :
+La résistance électrique du fil
+Le flux d’induction magnétique à travers la bobine lorsqu’on y fait passer un courant de 5 A
+Réponses : a) R = 1.9 Ω b) 19.96 mW
+Une bobine est forme de 800 spires jointives en fil de cuivre, en 2 couches. Le diamètre du fil utilise est 0.8 mm et sa résistivité électrique 1.6μΩ.cm. l’isolant en paraffine est de 110mm d’épaisseur. La section de cette bobine est 19.625 cm2.
+Calculer la résistance de cette bobine
+On branche la bobine aux bornes d’un générateur ayant une f.é.m 15 volts et une résistance intérieure 1 ohm
+Calculer le flux d’induction magnétique à travers une section droite de la bobine
+Déterminer la d.d.p aux bornes de la bobine.
+Réponses : 1) R = 4Ω 2) a) 14.8μWb b) 12V
+7) Un fil de cuivre de 392.5 m de longueur et de 2 mm de diamètre formé d’un solénoïde de 3m de longueur et de 5 cm de rayon ; la résistivité du cuivre est 1.6 x 10-8μ.m. on applique aux extrémités du fil une d.d.p de 20V.
+Quelle est l’intensité de l’induction magnétique β crée au centre de la bobine ?
+Quelle est la chaleur dégagée par minute dans la bobine ?
+Dans une deuxième expérience un courant constant traverse cette bobine en série avec un voltamètre a sulfate de cuivre la flux mesure dans la bobine est 25μWb. Quelle est la masse de cuivre déposée au bout de 10minutes ?
+Réponses: 1) a) 5.23mT b) 2870.81 cal 2) 1.92mg
+Une bobine en forme de tore a les caractéristiques suivantes : diamètre intérieure Di = 260mm diamètre intérieure De = 340 mm nombre de spires N =1200 spires courant d’intensité I = 2.5A
+Calculer :
+Le diamètre moyen de la bobine
+L’intensité du champ magnétique sur chacune des trois circonférences : intérieure, moyenne, extérieure.
+Le flux d’induction total à travers la bobine en admettant que l’intensité du champ sur la circonférence moyenne est la même en tout point
+Réponses : 300mm ; 4.62mT ; 4mT ; 3.53mT ; 6.02mWb
+On constitue un circuit en mettant en série, au moyen de conducteur de résistance négligeable, une pile de f.é.m. E et de résistance intérieure r et un solénoïde de 50cm de longueur de 5cm de diamètre et de résistance égale a 10 ohms. L’intensité du courant est de 0.1A et l’induction magnétique créée au centre de la bobine a pour intensité β = 0.375 x 10-4T .on donne la resistivite du fil 1,6micro ohm.cm
+Calculer le nombre de spires par centimètre de longueur du solénoïde et le diamètre du fil cylindrique de cuivre utilisé pour le bobiner régulièrement sur toute sa longueur.
+On branche en dérivation entre les extrémités du solénoïde un fil dont la résistance est égale à celle du solénoïde ; dans ces conditions l’intensité du champ produit par le courant dans le solénoïde est réduite au 79 de sa valeur initiale. Calculer E et r
+Réponses : 3 spires/cm 0.21mm 1.46v 4.6Ω
+Un circuit comprend un générateur de f.é.m. E = 12 volts et de résistance intérieure r = 2 ohms, un électrolyseur contenant de l’eau acidulée avec électrodes en platine de f.c.é.m. E’ = 2 volts et de résistance intérieure r’ = 10 ohms, une bobine formée par 50m de fil conducteur de 0.1 mm2 de section.
+Calculer la résistance totale du circuit. La résistivité du fil est 1.6 x 10-6Ω. Cm
+Calculer l’intensité du courant
+Calculer le volume du gaz libère en 50 minutes a la cathode de l’électrolyseur.
+Calculer la puissance électrique totale consommée dans l’électrolyseur
+La bobine comprend 100 spires reparties sur 15 cm. Calculer l’intensité de l’induction créée en son centre. Que devient cette induction au centre si l’on comprimait le solénoïde de façon à en faire une bobine plate.
+Reponses: 20 ohms 0.5A 174.09cm3 3.5W 0.418mT 0.39mT
+Un solénoïde 40 cm de longueur comporte 750 spires régulièrement enroules et traverse par un courant de 2 Ampères la section d’une spire est de 10cm2 on demande de calcule :
+l’intensité du champ magnétique a l’intérieure du solénoïde
+Calculer le flux φ1a travers une section droite de la bobine et quel est le flux total φt à travers du solénoïde ?
+2) Que devient ß, φtquand on double le nombre de spires du solénoïde
+Réponses :ß=4.71 mt φ =47.1 μWsb φt =3,53 mWb
+Quand on double deux nombres de spires l’induction devient 2 fois plus grandes
+ß’=9.42 mT, Le flux est doublé ( φ =9.42 ) et le flux total devient 4 fois plus grand (φt =14.13mwb)
+On réalise un solénoïde en enroulant 4 couches de fil nickel chrome de 0.8mm de diamètre sur un cylindre isolant de 5 cm de diamètre et 50 cm de longueur. Les spires ne sont pas jointives, il ya 8 spires par couches et par centimètre.
+Calculer le nombre de spires de la bobine, la longueur fil de nickel-chrome ainsi que sa résistance sachant que la résistivité de cet alliage est ρ = 10-6Ω.m
+On branche cette bobine aux bornes d’un générateur de f.é.m. E = 25V et de résistance négligeable
+Quelle est l’intensité du courant ?
+En déduire la valeur du champ magnétique au centre de ce solénoïde.
+L’axe du solénoïde étant oriente perpendiculairement au plan du méridien magnétique terrestre et en on centre est placée, sur un pivot, une petite aiguille alimentée. Déterminer :
+L’angle de déviation de l’aiguille alimentée lorsqu’on laisse passer le courant.
+L’intensité du champ résultant qui oriente l’aiguille aimantée
+On donne : composante horizontale du champ magnétique terrestre 20μT
+Réponses : 1600 spires 251,2m 500Ω 20 x 10-5 TμΩ.cm
+CHAPITRE 3
+POINTS ESSENTIELS
+Aimantation du fer et de l’acier
+Classification des matériaux magnétiques
+Intensité d’aimantation
+Température de pierre Marie de Curie
+Perméabilité magnétique
+Perméabilité magnétique du fer
+Electro-aimant
+Applications des électro-aimants
+Exercices
+Aimantation du fer et de l’acier
+Lorsque le fer et l’acier sont placés dans un champ magnétique d’un courant ou d’un aimant, ils peuvent s’aimanter soit par frottement, contact ou par induction. L’aimantation du fer est temporaire et celle de l’acier est permanente.
+Aimant temporaire : c’est un aimant qui ne peut pas attirer la limaille de fer après retrait de l’influence magnétique.
+Aimant permanent : c’est un aimant qui garde la propriété d’attirer la limaille de fer après retrait de l’influence magnétique.
+Classification des matériaux magnétiques
+On classifie les matériaux magnétiques selon leur perméabilité relative en plusieurs catégories, ce sont :
+Les substances diamagnétiques
+Les substances paramagnétiques
+Les substances amagnétiques
+Les substances ferromagnétiques
+Les substances ferrimagnétiques
+Bon à savoir:
+Les substances diamagnétiques sont repoussées faiblement par un aimant.
+Une substance diamagnétique est une substance qui, placée dans un champ magnétique prend une aimantation de sens opposé au sens du champ inducteur.
+Les substances paramagnétiques sont attirées faiblement par un aimant même très puissant.
+Les substances ferromagnétiques s’aimantent fortement.
+Le fer, la fonte, le cobalt et l’acier sont des substances ferromagnétiques.
+Intensité d’aimantation
+On appelle intensité d’aimantation le quotient du moment magnétique par l’unité de volume. Elle est donnée par la relation :J=MV.
+Notations
+J : intensité d’aimantation en ampère par mètre (A/m)
+M : moment magnétique de l’aimant en A.m2.
+V : Volume de l’élément ferromagnétique en m3.
+Définitions
+Hystérésis : L’hystérésis est un retard de l’aimantation d’un matériau magnétique par rapport à forte d’aimantation.
+Champ rémanent: on appelle champ rémanent le champ plus ou moins grand que garde un materiau après la suppression du champ inducteur.
+Champ coercitif : on appelle champ coercitif l’induction qu’il faut appliquer à une substance aimantée pour faire disparait le champ rémanent.
+Température de curie: La température de cure (pierre curie) est la temperature à laquelle un materiau perd son aimantation spontanée.
+Perméabilité magnétique : La perméabilité magnétique est la propriété que possède un matériau de se laisser traverser par un flux magnétique.
+NB : La perméabilité magnétique d’un matériau ferromagnétique n’est pas constante, elle est grande quand l’induction est faible et diminue quand l’induction augmente.
+Perméabilité relative : La perméabilité relative est le rapport de la perméabilité d’une substance et de la perméabilité du vide. Elle est donnée par la relation : μr=μμ0=&gt; μ=μr×μ0
+Notations
+μr : Perméabilité relative
+μ : Perméabilité du corps considéré
+μ0 : Perméabilité du vide.
+NB : dans le système international μ0=4π×10-7
+Perméabilité magnétique du fer
+Lorsqu’on introduit un noyau de fer dans un champ magnétique les lignes d’induction modifient, l’induction magnétique a pour formule : μr=BB0 =&gt;B=μrμ0
+Notations
+μr : Perméabilité relative du fer
+B : Champ magnétique du noyau de fer en tesla
+B0 : Induction magnétique sans le noyau
+Induction magnétique d’un solénoïde placé dans l’air ou vide
+Elle est donnée par la relation :B0=μ0H=&gt;B0=4πNI×10-7Lb avec H=NILb
+H : Vecteur-excitation magnétique en ampère-tour par mètre (A.tr/m)
+NB : Le flux magnétique a pour formule :φ=μrφ0
+Electro-aimant
+On entend par électro-aimant tout dispositif qui comprend du fer autour duquel des spires conductrices s’enroulent où l’on peut faire passer du courant.
+Electro-aimant porteur
+On appelle force portante d’un électro-aimant la force minimale capable d’arracher l’armature de son noyau. Elle est donnée par la relation :F=107B2S18π .
+NB : Si le noyau de l’électro-aimant à la forme d’un aimant d un aimant en fer a cheval. La force portante de l electro aimant est deux fois plus grande, puisque les deux pôles interviennent, la formule précédente devient. F=107B2S8π avec S=2S1.
+Notations
+F : Force portante pôle de l’électro-aimant en Newtons
+B : Induction magnétique créée dans le noyau en tesla.
+S1 : Surface de contact de l’armature avec l’un des pôles en m2
+S : Surface de contact de l’armature avec les deux pôles en m2
+Applications des électro-aimants
+Les électro-aimants sont utilisés :
+Pour porter des poids
+Pour produire des champs magnétiques intensités
+Pour provoquer les déplacements intermittentes et transmettre des signaux à distance
+NB : La sonnerie électrique est une application des électro-aimants.
+Le relais électromagnétique est une application des électro aimants
+Les appareils de levage sont une application des électro-aimants
+Les disjoncteurs sont une application des électro- aimants
+Définitions
+Circuit magnétique : On appelle circuit magnétique l’ensemble de milieux qui constitue un circuit fermé et qui peut-être le siège d’un flux magnétique.
+Force magnétomotrice : La force magnétomotrice est le produit du nombre de spires d’une bobine par l’intensité dans ces spires. Elle a pour formule : F=NI
+Reluctance magnétique : la reluctance magnétique est le quotient de la force magnétomotrice par le flux induction magnétique. Elle est donnée par la relation : Rm=Fφ
+NB : La reluctance peut-être égale à la formule suivante Rm=Lbμb elle s’exprime en (A.tr/wb).
+Perméance : La perméance est la facilité avec laquelle une substance magnétique se laisse traverser par les lignes d’induction. La perméance c’est l’inverse de la reluctance.
+Questions de cours
+Complétez les phrases suivantes par les mots convenables.
+1)L'intensité d'aimantation d'un barreau aimanté est le............du barreau par l'unité de..........
+2)L'introduction d'une substance ferromagnétique dans une bobine parcourue par un courant constant fait augmenter..........et..........
+3)La sonnerie électrique est une application des..............
+4)La force minimale capable d'arracher l'armature d'un électro-aimant de son noyau s'appelle.......
+5)Une substance qui,placée dans un champ magnétique ,prend une aimantation de sens opposé au sens du champ inducteur est dite..............
+6)Le champ magnétique qui fournit aux matériaux de l' aimantation s'appelle..........
+7)L aimantation qui persiste dans un matériau lorsqu’on supprime le champ magnétissant est appelée...............
+8)Le flux magnétique à travers un circuit fermé est le quotient de la.............par la............
+9)Le retard d aimantation d un matériau magnétique par rapport à la forte d aimantation s’appelle...........
+10)on appelle........... l’ensemble des milieux constituant un circuit fermé et pouvant etre le siège d’un flux magnétique.
+11)Le champ qui fait disparaitre le champ rémanent s’appelle............
+APPLICATIONS
+Un courant d'intensité I crée une force portante F=200N dans un électro-aimant. Que devient cette force si on double l'intensité du courant? Réponse'=800N( elle devient quatre fois plus grande?
+Un courant d’intensité I=0,1A est créé à l’intérieur d un solénoïde de 50m de long et résistance 10Ω,une induction magnétique 37,5x10-6T.
+Calculer le nombre de spires dans la bobine.
+Calculer dans les cas suivants le flux magnétique à travers une section droite du solénoïde de diamètre 5cm.
+Quand il est vide
+Quand il contient un noyau de fer de perméabilité magnétique 200.
+Quelle est, dans ce dernier cas, la force portante de l’électro-aimant ainsi constitué?
+Le noyau d’un électro-aimant en fer a cheval à 4cm de diamètre. On suppose que chaque branche de l’électro-aimant a une longueur de 40cm et comportant 100tours de fil de cuivre et un noyau de fer doux de perméabilité μr = 1000. La résistance du fil des deux bobines est de 20 ohms et on y envoie un courant de 2A. les pôles sont réunis par une armature de fer dont on suppose la reluctance est négligeable. On demande de calculer :
+La force portante de cet aimant
+La force magnétomotrice
+La puissance dépensée dans l’appareil.
+Réponses: a) 40kgf b) 400 A.tr c) 80W
+Une bobine de 100 cm de longueur et 3 cm de diamètre est construite de 1.6μΩ. Cm de résistivité et de 0.4mm de rayon, recouverte d’un isolant de 0.1mm d’épaisseur on veut produire à l’intérieure de la bobine un champ d’induction magnétique avec un courant de 5mA
+Calculer :
+Le nombre total de spires sachant que la bobine porte 8 couches de spires jointives
+Le flux d’induction à travers la bobine
+La d.d.p aux bornes de la bobine.
+Que devient le flux si on introduit dans la bobine un noyau de fer de permittivité relative μr = 350.
+Réponses: a) 8000 spires b) 0,283mwb c) 120mV d) 99,05mWb
+Un électro-aimant en fer a cheval à une longueur moyenne de 1m, on veut que la force portante soit de 1000N
+Quelle est l’intensité de l’induction magnétique dans la bobine sachant que la surface du contact d’un des pôles de l’électro-aimant avec l’armature considérée comme uniforme égale a 10 cm2 ?
+Quel doit être le nombre d’ampère tours nécessaires en admettent pour l’induction calculée une perméabilité relative μr = 1600
+Si le courant admissible a pour une intensité 2A, quel est le nombre de spires de l’enroulement ?
+Réponses : a) 1,12T b) 557 A.tr c) 279 spires.
+On dispose deux solénoïdes S1et S2 de façons que leurs centres coïncident et que leurs axes OX et OY soient rectangulaires et situe dans un même plan horizontal. Le solénoïde S1 a une longueur de 75cm et contient 300 spires de résistance totale égale a 1 ohm ; le solénoïde S2 a une longueur de 10cm et contient 200 spires, de résistance totale égale a 100 ohms. On place au point O une aiguille aimantée NS, mobile autour d’un axe vertical un dispositif spécial permet de la soustraire sous l’action du champ magnétique terrestre créé par les des solénoïdes.
+Quelles directions prend l’aiguille aimantée lorsqu’on fait passer un courant dans le solénoïde S1 seul, puis dans le solénoïde S2 seul ?
+Quelles sont les intensités de l’induction magnétique en 0 lorsqu’on fait passer un courant de 1A dans le solénoïde S1 seul puis S2 seul ?
+Calculer les excitations magnétiques de S1 et S2 ?
+On réunit les extrémités du solénoïde S2 aux bornes A et B d’une pile P ; on réunit aux mêmes bornes les extrémités du solénoïde S1, en intercalant dans le circuit une résistance inconnue R. on constate que l’aiguille aimantée fait un angle de 60 degrés avec l’axe OX de S1
+Déterminer le rapport I2I1 des courants dans les deux bobines et la valeur de la résistance r?
+Réponses : a) L’aiguille prend la direction du champ magnétique crée a l’intérieure de S1 c.à.d. suivant l’axe OX ; l’aiguille prend la direction du champ magnétique crée a l’intérieur de S2 c.à.d. suivant l’axe OY b) 0.502mT ; 2.51mT c) 4 A.tr/cm ; 20 A.tr/cm 2) 0.346 ; 33.6Ω
+CHAPITRE 4
+POINTS ESSENTIELS
+Action d’un champ magnétique sur un courant
+Détermination de la force électromagnétique
+Discussion de la formule de Laplace
+Règle des trois doigts de la main droite
+Applications de la loi de Laplace ou de la force électromagnétique
+Travail des forces électromagnétiques
+Exercices
+Action d’un champ magnétique sur un courant
+Force électromagnétique : On appelle force de Laplace ou force électromagnétique la force qui nait de l’action d’un champ magnétique sur un conducteur parcouru par un courant électrique.
+Etude expérimentale : Entre les deux pôles d’un aimant en fer à cheval, plaçons un fil conducteur OA, rigide, relié à une source de courant. Nous constatons que :
+Le fil conducteur reste fixe quand il est traversé par un courant.
+Quand le courant passe le fil est déplacé de sa position initiale
+Le déplacement change de sens si l’on inverse le sens du courant ou les pôles de l’aimant.
+En retirant l’aimant, le conducteur étant toujours traversé par le courant aucune action n’est observée.
+Détermination de la force électromagnétique
+Loi de Laplace : Tout élément conducteur de longueur L, parcouru par un courant I et placé dans un champ magnétique uniforme de vecteur induction B, est soumis à une force électromagnétique F, définir par :
+Son point d’application (appliqué au milieu de l’élément conducteur)
+Sa direction (La perpendiculaire au plan défini par l’élément conducteur et le vecteur inducteurs).
+3067050386715F=BILsinα
+00F=BILsinα
+Son sens (lié aux sens du courant et du vecteur induction par la règle de l’observateur d’Ampère au la règle de la main droite).
+Son intensité donné par la formule :
+Notations
+F : Force électromagnétique en Newton.
+B : Induction magnétique en tesla.
+I : Intensité du courant en Ampères.
+L : Longueur de l’élément conducteur en mètres.
+α : Angle formé par la direction des lignes d’induction avec celle du courant.
+Discussion de la formule de Laplace
+4038600430530F=BIL.
+00F=BIL.
+Si l’angle α formé par la direction des lignes d’induction et celle du courant est nul : α =0, alors la force est nulle F=0 avec sinα =0
+Si α =900=&gt;sin900=1, alors la force est maximale
+Règle des trois doigts de la main droite
+Le pouce placé le long de l’élément conducteur dans le sens du courant et l’index indiquant la direction et le sens du courant du vecteur induction. Le majeur, tendu perpendiculairement aux deux autres doigts indique la direction et le sens de la force électromagnétique.
+Applications de la loi de Laplace ou de la force électromagnétique
+Les applications de la loi de Laplace sont :
+La roue de Barlow
+La balance de Cotton
+Les appareils de mesure
+1- La roue de Peter Barlow : Description
+La roue de Peter Barlow est un disque de cuivre mobile sur un axe horizontale 0 est placé entre les branches d’un aimant en fer à cheval dont l’induction est perpendiculaire au plan disque.
+Le bord inferieur du disque trempe légèrement du mercure et permet un contact électrique. Le courant arrive par le mercure et repart par l’axe de la roue. La force électromagnétique F est donnée par la relation : F=BIRsinα
+Comme α=900=&gt;F=BIR R=rayon du disque (OA=R)
+Fonctionnement : Au passage du courant, un rayon OA se comporte comme un élément placé dans un champ magnétique. Il se déplace sous l’action d’une force électromagnétique F. un autre prend sa place et subit la même action ainsi de suite. Il en résulte alors un mouvement de rotation continue de la roue.
+Bon à savoir :
+La roue de Barlow transforme l’énergie éclectique en énergie mécanique
+La roue de Barlow est un petit moteur électrique
+La roue de Barlow est une application de la loi de Laplace.
+La balance de Cotton est une application de la loi de Laplace.
+2- La balance de Cotton
+Définition : La balance de Cotton est un appareil qui sert à mesurer l’intensité d’un champ magnétique uniforme.
+Description : Elle est constituée par un fléau coudé mobile autour d’un axe horizontal O. Quand on fait passer un courant dans le circuit, il existe sur BC, la longueur l une force électromagnétique d’intensité :F=BIL dont l’action est contre balancée par des masses qu’on ajoute sur l’autre plateau de poids :P=m×g. L’équation d’équilibre F×OM=P×ON or B=BIL=&gt; BIL×d=P×d'=&gt;B=PIL×d'd' NB : si d=d’ or on a :B=PIL.
+Travail des forces électromagnétiques
+Cas d’un élément de courant
+3276600418465W=Iφ
+00W=Iφ
+Le travail de la force électromagnétique applique à un élément de courant, qui se déplace et coupe le flux d’induction est proportionnel à l’intensité du courant et au flux coupé par l’élément de courant. Il est donné par la relation :
+Démonstration
+Soit deux barres horizontales, rectilignes, parallèles, conductrices : NM et PQ. Disposons en forme de pont perpendiculaire aux barres, un conducteur rectiligne cylindrique AB et plaçons le dans un champ magnétique uniforme de vecteur induction B verticale.
+Quand un courant I est lancé dans le circuit la tige AB roule sur ses supports sous l’action de la force électromagnétiqueF. Evaluons le travail de cette force quand son point d’application se déplace de O en O’ :w=F×OO'
+=&gt;w=F×d or F=BIL alors w=BILd
+Le produit L×d represente la surface balayée par le conducteur AB dans son deplacement. Par suite W=BIS.
+189547513970W=Iφ
+00W=Iφ
+Comme φ=Bs donc C.Q.F.D
+Cas de la roue de Barlow : Le travail de la force électromagnétique, appliquée au milieu du rayon OA, par rapport à l’axe de la roue est donnée par l’expression : W=nBIπR2 ou W=nBIS ou W=nφI
+Démonstration : On sait que : w=F×d
+34391605715F=BIRsinα
+00F=BIRsinα
+La force électromagnétique F est donnée par :
+Comme α=900=&gt;F=BIR
+Le déplacement du point d’application « d » de la force F est :
+d=2π×Mo (la force étant appliquée au milieu M du rayon OA)
+=&gt;d=2π×R2=&gt;d=πR (pour un tour de disque).
+Pour n tous le disque, on a : d=nπR
+Portons (2) et (3) dans 1
+W=BIR×nπR=&gt;W=nBIπR2 or S=πR2=&gt;W=nBIS
+13989051905W=nφI.
+00W=nφI.
+Comme : φ=BS=&gt; C.Q.F.D
+Cas d’un circuit entier : Le travail des forces électromagnétiques d’un circuit entier est donné par la relation : W=I(φ2-φ1).
+Loi de Maxwell : Lorsqu’un circuit se déplace dans un champ magnétique, le travail des forces électromagnétiques qui s’exercent sur lui est égal au produit de l’intensité du courant par la variation de flux qui le traverse.
+Règle du flux maximum : Si un circuit est parcouru par un courant électrique est situé dans un champ magnétique, sa position d’équilibre stable est obtenue lorsque le flux d’induction magnétique entrant par la force sud est maximum.
+Questions de cours
+COMPLETEZ LES PHRASES SUIVANTES PAR LES MOTS CONVENABLES.
+1)La force electromagnétique ou force de Laplace est née l action d un.............sur un............
+2) La roue de barlow est une application de la loi de..................
+3)La règle des trois doigts de la main droite permet ..........
+4)La machine qui transforme l énergie................en énergie..............c est la roue de barlow.
+5)La force qui déplace un élément de courant placé dans un champ magnétique est appelée................et son module est donné par la formule....................
+6)L'appareil qui utilise la force de Laplace pour mesurer l'intensité d'un champ magnétique uniforme s'appelle.........................
+7)La force electromagnétique caractérise l action champ magnétique uniforme sur......................
+8)Le galvanomètre à cadre mobile est une application de la loi de.................
+9)Tout conducteur électrique placé dans un champ magnétique parcouru par un courant électrique est soumis à....................
+10)Le travail éffectué par les forces électromagnétiques est proportionnels à..................et au.............
+Exercices
+Un conducteur de 3m de longueur parcouru par un courant de 200A et placé dans un champ magnétique d’intensité 0.5 tesla. Calculer la force qui agit sur ce conducteur
+Lorsqu’il est perpendiculaire aux lignes d’induction magnétique
+Lorsqu’il fait avec les lignes d’inductions un angle de 300
+Réponses: a) 300N b) 150N
+Le rayon d’une roue de Barlow de valeur r = 10cm, est supposé situé tout entier dans un champ magnétique uniforme normal à ce rayon et d’intensité B= 0.02 tesla ; sachant que la roue fait 90 tours par minute et que la puissance mécanique développe par la force électromagnétique qui fait tourne la roue vaut 2.4 X 10-3 watts. Calculer l’intensité du courant qui alimente la roue et la valeur de la force électromagnétique appliquée au rayon.
+Réponses : a) 2.54 A ; 5.1 X 10-3 N
+Dans un champ magnétique uniforme horizontal, d’induction B= 0.1 tesla, on place normalement aux lignes d’induction le disque de cuivre d’une roue de Barlow de rayon R= 10cm, alimente par un courant d’intensité I= 16 A. le disque tourne a la vitesse angulaire constante 6 tours/seconde. Calculer la puissance et la f.c.é.m. du moteur.
+Réponses : a) 0.3w 19mV
+Une bobine longue de 30cm est formée de 6 couches de fil conducteur isolé de 0.5 mm de diamètre, en spires jointives dont le diamètre moyen est de 4 cm ; elle est parcourue par un courant de 3A.
+Quel est le moment magnétique de cette bobine ?
+Si on la dispose perpendiculaire au méridien magnétique quelle est la valeur du couple qu’exerce sur elle le champ magnétique terrestre ? composante horizontale du champ terrestre B0 = 20 micro tesla
+Si on suppose que les forces de ce couple s’exercent aux extrémités de la bobine, quelle est leur valeur ?
+Quel est le travail des forces électromagnétiques lorsque la bobine passe de la position précédente à sa position d’équilibre ?.
+Réponses: a) 13.4A.m2 b) 27 X 10-5N c) 0.09 gf d) 0.27mj
+CHAPITRE 5
+POINTS ESSENTIELS
+Action mutuelle de deux courants rectilignes parallèles
+Courants rectilignes parallèles de sens contraires
+Galvanomètre à cadre mobile
+Calcul du couple électromagnétique et du couple de torsion
+Galvanomètre à champ radial
+Sensibilité du galvanomètre radial
+Déviation du cadre par la méthode de Poggendorff
+Exercices
+Action mutuelle de deux courants rectilignes parallèles
+On considère8 deux conducteurs rectilignes, parallèles placés à la distance « d » l’un de l’autre. Ils sont parcourus par des courants d’intensité respectives I1 et I2. Examinons le cas où les courants sont de même sens.
+Le courant I1 crée une induction B1 au voisinage du conducteur « b » de formule : B1=2I1×10-7d. D’après la loi de Laplace le conducteur «b» est soumis à une force F2 dont la valeur est F2=B1I2L=&gt;F2=2I1I2×10-7Ld
+NB : Si les deux courants I1 et I2 sont égaux, la force F2 est : F2=2×10-7I2Ld.
+Conclusion : Deux courants rectilignes parallèles de même sens s’attirent.
+NB : Un raisonnement analogue au précédent permet de déterminer la force F1 qu’exerce le courant I2 sur le conducteur « a ». on a : F1=B2I1L or B2=2×10-7I2d=&gt;F1=2×10-7I1I2Ld.
+Courants rectilignes parallèles de sens contraires
+Supposons maintenant que l’un des courants change de sens, le courant I1, par exemple, cela entraine simultanément :
+Le changement de sens de F1 (puisque I1 est renversé)
+Le changement de sens de F2 (puisque B1 change de sens)
+Les forces F1 et F2 sont maintenant deux forces répulsives égales et opposées : F1=F2=2×10-7I1I2Ld.
+Définition légale de l’ampère : Dans l’expressionF1=F2=2×10-7I1I2Ld, faisons I1=I2=1A et l=d=1m, nous trouvons:F1=F2=2×10-7N.
+D’où. L’ampère est l’intensité d’un courant constant qui, passant dans deux conducteurs rectilignes, parallèles de longueur infinie, de section négligeable, placés à 1m l’un de l’autre, produirait entre ces conducteurs une force de 2×10-7N par mètre de longueur.
+Conclusion : Deux courants rectilignes parallèles de sens contraires se repoussent.
+Good to know
+Entre deux courants parallèles et de sens contraires s’exerce une force répulsive
+Entre deux courants parallèles et de même sens s’exerce une force attractive.
+Galvanomètre à cadre mobile
+Définition : Un galvanomètre à cadre mobile est un appareil basé sur la loi de Laplace et servant à déceler le passage d’un courant de très faible intensité dans un circuit.
+Calcul du couple électromagnétique et du couple de torsion
+La figure ci-contre représente le cadre rectangulaire et mobile d’un galvanomètre de N spires. Lorsque le courant d’intensité I passe, les bords verticaux AB et CD sont sollicités par les forces électromagnétiques F et F' égales et de sens contraires, appliquées aux milieux O et O’ de ces cotés. Elles forment donc un couple dont le moment est M=NFd où d=OO'.
+D’après la loi de Laplace F=BIL où L=AB donc on a:M=NBILd. Le produit S=L×d represente la surface du cadre rectangulaire. M=NBIS .
+Par ailleurs, le moment du couple de torsion du fil est proportionnel à l’angle de rotation θ du cadre et à la constante de torsion de l’ensemble des fils K et K’ Donc M'=Cθ
+1043940199390θ=NBSC×I
+00θ=NBSC×I
+A l’équilibre du cadre on a : M’=M
+Cθ=NBIS=&gt;.
+Notations
+M : moment du couple électromagnétique en Newton-mètre
+M’ : moment du couple de torsion en Newton-mètre
+C : constante de torsion des fils en Newton-mètre/radian
+θ : Dérivation du cadre en radian
+Galvanomètre à champ radial
+Définition : Un galvanomètre est à champ radial lorsque les lignes de champ se dirigent suivant les rayons d’un anneau circulaire.
+Sensibilité du galvanomètre radial
+La sensibilité du galvanomètre est le quotient de la déviation du cadre et l’intensité du courant. δ=θI=&gt;δ=NBIS×ICI=&gt;δ=NBSC.
+NB : La sensibilité s’exprime en radian/ampère.
+Déviation du cadre par la méthode de Poggendorff
+La méthode de Poggendorff est une méthode optique utilisée pour mesurer les déviations.
+Le triangle MS1S2 nous donne : tg2α=dD d’après Kepler :tg2α=2α. on a alors : α=d2D.
+Notations
+α : Rotation du cadre en radian.
+D : Distance du miroir à la règle en mètre.
+D : Déplacement de l’image sur la règle en mètre.
+Questions de cours
+Complétez les phrases suivantes par les mots convenables.
+1) Deux courants rectilignes parallèles de.......... s’attirent.
+2) Deux courants rectilignes parallèles de..........se repoussent.
+3) Entre deux courants parallèles et sens contraires s’exerce une force............
+4) La sensibilité du galvanomètre est le quotient de la................par...............
+5) L'ampère est l’intensité d’un courant constant qui, passant dans deux conducteurs
+rectilignes, parallèles de longueur infinie, de section négligeable placés à..........l’un de l’autre, produirait entre ces conducteurs une force de............par mètre de longueur.
+6) L appareil qui utilise l’action d’un champ magnétique sur un courant pour mesurer des courants de très faible intensité s’appelle............
+7) Entre deux courants parallèles et de même sens s’exerce une force.........
+8) La méthode optique utilisée pour mesurer les déviations s’appelle..............
+Applications
+Deux conducteurs rectilignes parallèles L1 et L2 de longueur 50cm sont situes 30mm l’une de l’autre. Ils portent respectivement deux courants 30A et 25A, en sens contraires.
+Quelles est la force mutuelle entre les fils ?
+Calculer l’induction magnétique produite au voisinage de chacun d’eux. Faites une figure montrant les sens des courants, des vecteurs indictions et des forces électromagnétiques.
+Réponses : a) 2.5 X 10-3 b) 20 X 10-5 T c) 16.9 X 10-5 T
+Un galvanomètre est constitue d’un cadre rectangulaire de 2cm de largeur 3cm de longueur suspendu a un fil de torsion vertical. La cadre comporte 200 spires les bordes verticaux au cadre peuvent tourner autour de l’axe forme par le fil de torsion dans un entre fer constitue par un cylindre de fer doux entoure par les pôles N et S d’un aimant. L’intensité du champ qui baigne le cadre est égale à 0.1 tesla.
+On veut que le cadre dévie d’un angle de 60 degrés pour un courant de 50 mA. Quel doit être le moment du couple de torsion pour une rotation de 1 degré ?
+Déterminer en mm2 la section du fil constituant le cadre pour que sa résistance soit de 1ohm, la résistivité est égale à 1.6 micro ohm cm
+Réponses: a) 10-5 N.m b) 0.32mm2
+Un circuit électrique comprend :
+Une source dont la F.E.M est de 2 volts et la résistance intérieure 0.3 ohm.
+Des fils de connexion dont la résistance totale est 0.2 ohm.
+Un galvanomètre dont la résistance est 499.5 ohms. Quelle serait, dans ces conditions l’intensité du courant ?
+b) On shunte le galvanomètre par un fil de cuivre de 50 m de longueur et de 2mm2 de section. La résistivité de ce cuivre est 2 μΩcm. Quelle sera l’intensité du courant qui traverse alors le galvanomètre
+c) Ce galvanomètre est a cadre mobile ; le cadre a 5 X 6 cm et porte 100 tours de fil. Le champ d’inductions de l’aimant est de 24 mT, le couple de torsion du fil 7.2 (gp X cm) par radian. Quelle sera le déplacement de l’index lumineux sur une échelle placée à 1 m de distance
+On donne 1kgp=9.8N
+Réponses : a) 4mA b) 2mA c) 40mm
+Une bobine de 125mm de longueur, comprend 200 spires régulièrement espacées de 2 cm de diamètre, formées d’un fil de cuivre de 0.5 mm de diamètre et de résistivité 1.6 X10-6Ωcm. Quelle est la résistance de la bobine ?
+On y fait passer un courant qui, en 10 minutes, dépose 134mg d’Argent sur la cathode, dans une électrode de nitrate d’argent. Quelles sont l’intensité de ce cornant et la valeur du champ d’induction magnétique crée dans la bobine
+Une petite aimant est maintenu horizontal par un fil sans torsion au centre de la bobine, dont l’axe horizontal est perpendiculaire au plan méridien magnétique, il porte un petit miroir concave, vertical, disposé de manière à observer les rotations de l’aimant ; par déplacement de l’image d’un filament lumineux sur une règle placée à 1 m. Quelle est l’intensité du courant capable, en traversant la bobine, de produire un déplacement de 1 mm de l image sur sur la règle ?on donne Ag=108; n=1
+composante horizontale du champ d’induction terrestre 20 micro tesla
+Réponses : a) 1 Ω b) 0.19A ; 0.4 mT c) 5mA
+CHAPITRE 6
+POINTS ESSENTIELS
+Induction électromagnétique
+Production d’un courant induit par déplacement et sans déplacement.
+Roue de faraday
+Sens du courant induit
+Force électromotrice d’induction /formule de faraday
+Loi fondamentale de l induction
+Exercices
+Induction électromagnétique
+Définition : On appelle induction électromagnétique le procède par lequel on arrive à produire le courant induit dans un circuit par la variation d’un champ magnétique.
+Courant induit : c’est un courant crée par la variation de flux dans un circuit.
+Flux induit: C est le flux produit par un courant induit
+Flux inducteur: C est le flux produit dont la variation crée une f.é. m induite.
+Production d’un courant induit par déplacement et sans déplacement.
+La production d’un courant induit dans une bobine peut se faire :
+Par déplacement d’un aimant
+Par déplacement d’une des bobines
+Sans déplacement de bobines.
+Roue de faraday
+La roue de Michael Faraday présente la même structure que la roue de Peter Barlow à la seule différence, le générateur est remplacé par un galvanomètre. Si on laisse tourner la roue, l’aiguille du galvanomètre dévie, ce qui prouve l’existence d’un courant induit.
+NB : La roue de faraday est un appareil capable de transformer l’énergie mécanique en énergie électrique.
+Sens du courant induit
+Loi d’Heinrich Lens : Le sens du courant induit est tel que, par ses effets, il s’oppose toujours à la cause qui donne naissance.
+Force électromotrice d’induction /formule de faraday
+Définition : La force électromotrice induite est la f.é.m. qui prend naissance dans un circuit par la variation de flux.
+La F.é.m. induite moyenne est proportionnelle à la variation de flux et inversement proportionnelle à la durée de cette variation de flux. Elle est donnée par la formule :E=∆φ∆t avec ∆φ=φ2-φ1 et ∆t=t2-t1
+φ1 : C’est flux qui prend naissance dans la petite bobine lorsqu’on fait passer un premier courant dans la grande bobine.
+φ2 : c’est le flux qui prend naissance petite bobine lorsqu’on fait passer un deuxième courant dans la grande bobine.
+Calcul φ1 et φ2
+φ1=N'BS'φ2=N'B'S' avec B'B=I'I ou φ2φ1=I2φ1
+NB : Si on coupe le courant dans la grande bobine on a : I’=0, B’=0 et φ2=0 or ∆φ=φ2-φ1=&gt;∆φ=0-φ1
+∆φ=-φ1 On a alors e=-∆φ∆t=&gt;e=φ1∆t
+Si on inverse le courant dans la grande bobine on a : ∆φ=2φ1=&gt;e=2φ1∆t.
+Démontrer que : E=∆φ∆t
+On sait que ce circuit est le siège d’une f.é.m. induite E. en effet, pour vaincre la force électromagnétique il faut fournir au système de l’énergie mécanique qui est transformée en énergie électrique. Soit ∆φ la variation de flux dans le circuit, l’énergie mécanique fournie est :W=I∆φ
+L’énergie électrique produit pendant l’intervalle de temps ∆t est :W'=EI∆t
+En négligeant les pertes d’énergies
+W=W’
+Soit I∆φ=EI∆φ
+Simplifions par I
+∆φ=E∆t=&gt;E=∆φ∆t C.Q.F.D
+NB : Toute variation de flux à travers un circuit fermé donne naissance à une f.é.m. induite et un courant induit qui durent le temps de la variation de flux.
+Le courant est un courant temporaire
+F.é.m. induite instantanée
+La f.é.m. induite instantanée est proportionnelle à la dérivée du flux inducteur par rapport au temps.La loi fondamentale de l induction est ainsi formulée :e=dφdt.
+Démonstration
+Le travail des forces électromagnétiques dans le cas d’un circuit entier a pour expression :∆w=∆φI.
+Divisions les deux membres par ∆t
+∆w∆t=∆φI∆t or P=∆w∆t=&gt;P=∆φI∆t
+Lorsque ∆t tend vers zéro, ∆φ∆t a pour limite la dérivée ∆φ∆t du flux par rapport au temps : La puissance instantanée est alors :P=∆φ∆t×I
+Supposons qu’il s’agisse de la roue de Barlow. D’après le principe de la conservation de l’énergie, la puissance de l’appareil représente la puissance empruntée au courant en dehors de l’effet joue. Il en résulte une f.c.é.m. telle que. P=eI
+En comparant les relations (1) et (2) on obtient
+24701508890e=-∆φ∆t
+00e=-∆φ∆t
+eI=∆φ∆t×I=&gt;e=∆φ∆t D’après Lenz : C.Q.F.D
+F.é.m. dans un élément de circuit
+Un conducteur rectiligne MN, de longueur L, qui se déplace horizontalement de vitesse constante V dans un champ magnétique uniforme B est siège d’une force électromotrice d’expression : e=BvLV avec Bv=Bsini
+Démonstration :e=BLV
+Le flux coupé par la barre MN=L qui se déplace pendant l’intensité ∆t de sa position MN en M’N’ est ∆φ=BS.
+B est l’intensité du champ uniforme S=MN×M'N' représente l’aire de la surface balayée par l’élément, comme la barre se déplace à la vitesse constante V. le déplacement pendant le temps ∆t donc s=LV.∆t et
+-674370256540e=BLV
+00e=BLV
+∆φ=BL.Vφt. La f.é.m. induite dans la barre est : e=∆φ∆t=&gt;e=BLV∆t∆t
+=&gt; C.Q.F.D
+NB : Puisque le conducteur se déplace en balayant les lignes d’induction du champ magnétique donc : Bv=B.
+Intensité induite
+L’intensité du courant est donné par la loi de Pouillet simple : I=E∈R.
+Quantité d’électricité induite
+La quantité d’électricité induite est proportionnelle à la variation du flux d’induction, elle est indépendante de la durée de la variation du flux induction. Elle a pour formule :Q=∆φ∆t
+Démonstration
+On sait que la quantité d’électricité induite a pour formule :Q=I∆t or I=ER
+=&gt;Q=ER×∆t comme E=∆φ∆t on a:Q=∆φ∆t×∆tR on obtient Q=∆φR.
+Galvanomètre balistique : est un appareil qui sert à mesurer de petites quantités d’électricité induite.
+Courants de Foucault : Les courants de Foucault sont des courants induits qui prennent naissance dans une masse métallique en mouvement dans un champ magnétique, ils ont fondamentalement deux effets : échauffement et freinage.
+NB : Les courants de Foucault, à travers leurs effets, présentent un inconvénient qui est l’échauffement par effet joule par contre, ils peuvent être mis à profit lorsqu’ils sont provoqués par un mouvement de rotation en donnant lieu à des forces de ralentissement ou Freinage.
+Questions de cours
+COMPLETEZ LES PHRASES SUIVANTES PAR LES MOTS CONVENABLES.
+1) Le courant induit est un courant....................
+2) Dans la roue de Faraday, l’énergie mécanique est transformée en ...............c’est un..........
+3) L appareil qui permet de mesurer une quantité d’électricité induite s’appelle.............
+4) Toute masse conductrice en mouvement dans un champ magnétique uniforme développe des courants induits appelés ......................
+5) Le phénomène d’induction crée à travers un circuit fermé une quantité d’électricité induite qui est proportionnelle à la....................et inversement proportionnelle à la..............
+6) Le fréinage électromagnétique est une application de.................
+Exercices
+Sur un cadre rectangulaire de 20mm sur 30mm, sont enroules 500tours de fil cylindrique, en cuivre 0.2 mm de diamètre (résistivité du cuivre : 1.7 x 10-8Ω.m). ce cadre est place dans l’entrefer d’un électro-aimant ou le champ est uniforme, perpendiculairement au vecteur induction magnétique dont l’intensité est0.5 tesla
+Déterminer la résistance du cadre
+Calculer le flux magnétique produit par l’électro-aimant a travers le cadre
+En agissant sur un rhéostat convenablement place, on ramène a zéro en 10 seconde, l’intensité du courant dans l’électro-aimant. L’induction dans l’entre-fer décroit de façon linéaire. Calculer alors la f.é.m. induite moyenne qui prend naissance dans le cadre et l’intensité du courant dans le cadre
+Réponses : R = 27 Ω ; φ = 0.15Wb ; E = 15mV ; i = 0.56mA
+Un courant d’intensité I = 5A traverse un solénoïde comportant 2 couches de fil de diamètre 1 mm calculer l’intensité du champ β crée dans cette bobine. On met à l’intérieure de ce solénoïde une 2eme bobine de section 2cm2 formée de 100 spires, la résistance de la 2eme bobine est R2 = 2Ω. Calculer la f.é.m. induite qui prend naissance dans cette bobine, l’intensité du courant induit ainsi que la quantité d’électricité induite lorsqu’on ramène le courant de 5A a 1A en 210 de seconde dans le solénoïde.
+Réponses : β = 12.56mT ; e = 1mV ; i = 0.5mA ; Q= 0.1mC
+a) Dans un solénoïde comprenant 9 spires par cm, on fait passer un courant de 6.4A. Déterminer l’intensité du champ magnétique au centre du solénoïde. Prendre 4π= 12.5
+b) Dans la partie centrale du solénoïde on dispose une petite bobine de même axe que le solénoïde, de 4cm2 de section et comportant 400 tours de fil dont les extrémités sont reliées a un galvanomètre formant ainsi un circuit ferme dont la résistance est 3Ω. Calculer le flux d’induction magnétique embrase par la petite bobine.
+c) On coupe le courant dans le solénoïde en 0.4 seconde. Déterminer :
+La force électromotrice induite produite dans la petite bobine
+L’intensité du courant induit indique par le galvanomètre
+Réponses : β = 7.2mT ; φ = 1.15mWb ; e = 2.8mV ; i = 0.93mA
+On enroule 1884m de fil de cuivre sur un cylindre isolant ayant 10cm de diamètre et 3m de longueur dans lequel on fait passer un courant de 2A. on demande :
+Le nombre total de spires de la bobine obtenue :
+L’intensité de l’induction magnétique créée au centre 0 de cette longue bobine.
+La résistance de la bobine sachant que le fil utilise a pour diamètre 2mm (résistivité du cuivre 1.6 x 10-8Ω.m)
+On place au centre 0 de cette longue bobine, une petite bobine ayant 2000 spires de section chacune 5cm2. Les axes des deux bobines sont confondus. Quelle est la f.é.m. induite qui prend naissance dans la petite bobine quand on coupe brusquement le courant dans la longue bobine en 110 seconde ?
+Réponses : 6000 spires ; 5.024mT ; 9.6Ω ; φ1 = 5.024mWb ; 0.05V
+La bobine d’un électro-aimant a 20 cm de longueur ; elle contient 120 spires enroulées sur un noyau de 5 cm de diamètre. Le courant d’excitation est 16A.
+Calculer le flux d’induction à travers une section du noyau dans les deux hypothèses suivantes :
+Noyau en font ; de perméabilité μ1 = 65
+Noyau en fer doux ; de perméabilité relative μ2 = 220
+On enroule sur le noyau 20 spires de conteur ; on ramène le courant de 16A à 0 en 120 de seconde. Calculer dans les deux hypothèses précédentes la f.é.m. d’induction moyenne induite dans le fil.
+Réponses : 1.54mWb ; 5.21mWb ; 0.615V ; 2.07V
+On réalise une bobine creuse de 10cm de diamètre et 3m de longueur en enroulant régulièrement 2826m de fil de cuivre dans lequel on fait passer un courant de 1A. calculer l’intensité de l’induction magnétique au centre de la bobine
+On place à l’intérieure de la bobine une petite bobine ayant 1000 spires de 10cm2 de section.
+Quelle est la f.é.m. induite dans la petite si on fait passer un courant de 1A a 2.5A en 110 de seconde le courant dans la grande bobine ?
+Quelle est l’indication d’un milliampèremètre mis en série avec la petite bobine sachant que la résistance de l’ensemble est de 7Ω.
+Réponses :a) β=3,77mTb) e=56,55V ? c) I= 8mA
+On relie les bornes d’une génératrice de F.é.m. constante E=40 volts et de résistance in terne r= 1 ohm un solénoïde de longueur 50 cm comprend 400 spires. Régulièrement enroulées sur toute la longueur.
+Calculer l’induction magnétique crée à l’intérieur du solénoïde.
+A l’intérieur du solénoïde, on dispose une bobine dont les spire sont perpendiculaire à l’axe du solénoïde. Le diamètre utile de la bobine est 10 cm et comporte 100 spires.
+Quel est le flux magnétique embrassé par la bobine.
+On interrompe brusquement le courant qui parcourt le solénoïde de 4 à zéro en 1100 de seconde. Quelle est la F.é.m. induite développé dans la bobine.
+Réponses : 1) B= 4mT 2) ɸ= 3,14 mWb b) E= 314mv
+Un générateur de f.é.m. 24 volts de résistance interne 1.5Ω alimente un solénoïde comportant 400 spires de diamètre 5 cm. Cette bobine comporte 2 couches spires jointives. Le diamètre du fil utilisé pour faire le bobinage est de 0.8 mm et sa résistivité électrique 2 μΩcm. L’axe de cette bobine est perpendiculaire au méridien magnétique terrestre. En son centre, on place une petite aiguille aimantée.
+calculer :
+La résistance de cette bobine ;
+L’intensité du champ magnétique crée par le courant au centre du solénoïde puis l’angle de déviation de l’aiguille aimantée par rapport au méridien magnétique terrestre .On donne la composante horizontale du champ magnétique terrestre : Bo=20μT
+Le flux magnétique à travers toute la bobine
+On enlève l’aiguille à l’intérieur de la bobine et on y introduit un noyau de fer de perméabilité magnétique 320. Déterminer la valeur de la force portante de l’électro-aimant ainsi constitué.
+On coupe ensuite brusquement le courant dans le circuit en 120 de seconde. Calculer la f.é.m. qui prend naissance dans la bobine.
+Réponses : 1. a) Rb=2,5Ω b) B=18.84 mT ; ά= 900 C) ɸ= 14,79 mWb
+F= 28125N E=94,6 Volts
+1-Un solénoïde (S) de diamètre 4cm, de longueur 40 cm, comporte de 200 spires. Elles sont enroulées sur un noyau de fer doux de perméabilité magnétique relative 900, et parcourues par un courant de 10A. Calculer l’intensité du champ magnétique dans le noyau.
+2. On dispose autour du solénoïde (S) dans la région médiane, une petite bobine b de même axe que s, constituée de 25 spires. Elle est cout –circuitée sur un galvanomètre et la résistance de l’ensemble est 2,5 ohms. On coupe le courant dans S en 150 de seconde. Calculer :
+a) L’intensité du courant induit qui parcourt l’enroulement de b .
+b) La quantité d’électricité induite dans son circuit
+3) Cette quantité d’électricité étant la charge prise par un condensateur de capacité 27μF qu’on a ensuite déchargé 100 fois de suite dans un calorimètre contenant de la glace fondante de chaleur de fusion 80cal/g . Calculer la masse de la glace qui fond.
+Réponses : 1. B=5,625T 2) i=3,55A b) q=71mc 3) m=27,9 g
+Un solénoïde comporte 1000 spires uniformément enroulées sur un manchon de longueur 40 cm et de section 20cm2.
+1) Donner les caractéristiques du champ magnétique ß crée à l’intérieur du solénoïde par le passage d’un courant de 10A dans les spires.
+2) Calculer le module de ce champ et le flux magnétique à travers ce solénoïde.
+3) On enroule 200 spires au tour et au centre du solénoïde. C’est spires sont fermées sur un galvanomètre constituant ainsi un nouveau circuit ferme dont la résistance est 20Ω. On ouvre brusquement le circuit du solénoïde à un 1100 de seconde. Calculer la f.é.m. induite et l’intensité du courant induite qui prennent naissance dans le nouveau circuit.
+Réponses :1) Le champ est uniforme a l’intérieur de la bobine, les lignes de champ sont parallèles a l’intérieur de la bobine. 2) β=31,4mT; φ=6,28mWb 3) E=1.256 volts, I=62.5 mA
+Un solénoïde comportant 100 spires par mètre est parcouru par un courant d’intensité I=10A.A l’intérieur du solénoïde, on introduit une bobine plate de N=400 spires ayant chacune une surface de 14 cm2. On la relie à un milliampèremètre. La résistance totale de ce circuit est R=10Ω. Calculer le flux magnétique a travers la bobine plate.
+On fait ensuite varier l’intensité du courant dans le solénoïde suivant la loi :
+I(t)= 10-2.5t2 0≤t≤2 s
+Calculer la f.é.m. induite instantanée qui prend naissance dans la bobine plate
+Réponses :1)ß=1.256 mt 2)E=+35×10-5t pour t=0 =&gt;E=0 v pour t= 2 s=&gt;E= 70×10-5 v
+un circuit comprenant en série, un générateur de f.é.m. 12 volts et de résistance intérieur 0,2Ω, un électrolyseur a nitrate d’agent de résistance 2Ω, un rhéostat a curseur de résistance maximal 25Ω et un solénoïde de longueur 50 cm comportant 500 spires de 5 cm de diamètre, bobiné avec un fil de 1 mm de diamètre.
+Quelle est la résistivité du fil si la résistance du solénoïde est 1,6Ω?
+Quel est l’intensité du courant, la résistance du rhéostat étant maximale?
+Quelle est la valeur de l’induction magnétique a l’intérieur du solénoïde?
+A l’intérieur du solénoïde, on place une deuxième bobine de même axe, comportant 200 spires, de résistance 12Ω ; la section de la bobine est 6,5 cm2. Elle est court-circuitée sur elle même. On manœuvre brusquement le curseur du rhéostat de façon a faire passer sa résistance à zéro en 16100de seconde. On demande:
+La f.é.m. induite dans la deuxième bobine;
+La quantité d’électricité induite dans cette bobine
+Réponses : 1) p= 1,6uΩcm 2)I=0,42A 3)B=0,52mT 4)a)E=2,8mV b) q=37,45uWbρ=1,6μΩcm 2) 0,42A 3) β=527,5μT 4) E=0,43mV Q=5,75μC
+CHAPITRE 7
+POINTS ESSENTIELS
+Auto-induction
+Self-inductance
+Inductance propre d’un solénoïde sans le noyau de fer
+Calcul de l’inductance avec le noyau de fer
+Force électromotrice auto-induite
+Force électromotrice auto-induite moyenne
+Définition légale du Henry
+Force électromotrice auto-induite instantanée
+Constante de temps
+Energie électromagnétique
+Exercices
+Auto-induction
+Définition : On appelle auto-induction la production d’une force électromotrice dans un circuit par la variation du courant qui parcourt le même circuit.
+Courant auto-induit: c est un courant crée par une variation du flux propre.
+Flux propre: c est le flux produit à travers un circuit par le champ magnétque de ce circuit ou par le courant qui y circule.
+Self-inductance : On appelle self inductance la propriété qu’à un circuit électrique de s’opposer à tout changement de courant dans le circuit. Elle joue le rôle de stabilisateur. La self inductance peut aussi se définir comme étant le quotient du flux d’induction et de l’intensité du courant. Elle est donnée par la relation :L=φI.
+Inductance propre d’un solénoïde sans le noyau de fer
+L’inductance d’un solénoïde sans noyau de fer qui compote N spires de surface unitaire, repartie sur une longueur totale, a pour expression :
+L=10-74πN2SLb ou L=10-7Lf2Lb .
+Démonstration
+On sait que le flux d’induction total, à travers le solénoïde est :
+φ=NBS or B=10-74πNILb=&gt;
+φ=NS×10-74πNILb=&gt;φ=10-74πN2SLbI (1)
+Egalons cette relation à la formule :
+169545019050L=10-74πN2SLb
+00L=10-74πN2SLb
+φ=LI (2)
+LI=10-74πN2SLbI=&gt; C.Q.F.D
+3978910180340L=10-7Lf2Lb
+00L=10-7Lf2Lb
+Comme S=πD24=&gt;L=10-7×4πN2πD2Lb
+L=10-7N2π2D2Lb or Lf=NπD=&gt;Lf2=N2π2D2 donc: C.Q.F.D
+Calcul de l’inductance avec le noyau de fer
+Lorsque le solénoïde contient un noyau de fer, l’inductance est alors donnée par la relation : L'=μrL ou L=10-74πN2SLbμr
+Force électromotrice auto-induite
+La f.é.m. auto-induite est la f.é.m. qui prend naissance dans un circuit électrique par la variation du courant électrique qui parcourt le même circuit.
+Force électromotrice auto-induite moyenne
+La f.é.m. auto-induite moyenne est proportionnelle à la variation de l’intensité du courant et inversement proportionnelle à la durée de cette variation de flux. Elle est donnée par la formule :E=L∆I∆t avec ∆I=I2-I1
+ou E=-L∆I∆t .
+Démonstration
+On sait que : L=φI
+A toute variation de l’intensité du courant correspond une variation de flux.
+L=∆φ∆I
+Divisons les deux membres par ∆t
+L∆t=∆φ∆t×∆I=&gt;L×∆I∆t=φ∆t
+812800113030E=L∆I∆t
+00E=L∆I∆t
+Posons :
+∆φ∆t=E=&gt; C.Q.F.D
+Remarques :
+Toute variation de l’intensité du courant dans un circuit donne une force électromotrice auto-induite.
+La force électromotrice auto-induite est le produit de l’inductance par le quotient de la variation de l’intensité du courant et la durée de cette variation.
+Définition légale du Henry
+Le Henry est l’inductance d’un circuit traversé par un flux de 1 weber quand il est parcouru par un courant de 1 ampère.
+Le Henry est l’inductance d’un circuit dans lequel une force électromotrice de 1 volt est produite quand le courant qui parcourt ce circuit subit une variation uniforme de 1 ampère par seconde.
+Force électromotrice auto-induite instantanée
+Définition : La f.é.m. induite instantanée est le produit de l’inductance par la dérivée de l’intensité du courant par rapport au temps. Elle est proportionnelle à la dérivée de l’intensité du courant par rapport au temps. Elle a pour formule :e=-Ldidt
+Démonstration
+On sait que :φ=LI
+A toute variation de l’intensité du courant correspond une variation de flux :
+∆φ=L∆I
+Divisons les deux membres par ∆t
+∆φ∆t=L∆I∆t
+Comme E=∆φ∆t=&gt;E=L∆I∆t
+D’après Lenz. Faraday on a :E=-L∆I∆t
+419100236220e=-Ldidt
+00e=-Ldidt
+Si ∆t tend vers 0, la limite ∆I∆t tend vers didt
+Donc C.Q.F.D
+Notations
+L : Coefficient d’auto-induction en Henry
+E : Force électromotrice d’auto-induite moyenne en volt
+∆I : Variation du courant en ampères
+∆t : Variation de la durée en secondes
+e : force électromotrice d’auto-induction instantanée en volts
+didt : Dérivée de l’intensité par rapport au temps.
+Energie électromagnétique
+Energie électromagnétique en magasinée par une bobine parcourue par un courant est donnée par la relation W=12LI2
+Questions de cours
+COMPLETEZ LES PHRASES SUIVANTES PAR LES MOTS CONVENABLES.
+1) Une bobine longue a pour inductance 0,5H. Si l'on double le nombre de ses spires sans modifier sa longueur, l'inductance devient........................
+2) Toute variation de l’intensité du courant dans un circuit donne...................
+Applications
+1) Une bobine longue comporte N spires jointives et pour inductance 0,25H.Que devient cette inductance lorsqu’on:
+a)Double le nombre de spires.
+b) introduit un barreau de fer de perméabilité μ=60 dans le solénoïde.
+Réponses: a)L= 1H b) L=15H
+2-Aux bornes d'une bobine d'inductance 30mH de résistance 8Ω, un générateur de courant délivre une intensité qui varie selon l'expression=0,05 +4t; 0&lt;t&lt;5s
+1) Calculer la force électromotrice d'induction dans cette bobine
+2) Quelle est la constante de temps du circuit constitué par cette bobine.
+Réponses:1) e=0,12V 2) t=3,75s
+3-Un générateur de f.é.m. 5 volts de résistances intérieures 1.44 ohms alimente un solénoïde a spires jointives comportant 2 couches de 400 spires chacune :La bobine est enroulée sur une longueur de 40 cm. Chaque spires présente une longueur de 15.7 cm.si la résistivité du fil est 1.6 alors calculer:
+a)la longueur de fil utilise pour faire la bobine
+b)la résistance de la bobine et son inductance
+c)le flux magnétique a travers la bobine.
+2) On met en dérivation avec la bobine un moteur de résistance 4 ohms qui ne fournit aucun travail utile et on place a l’intérieur de la bobine une petite aiguille aimantée mobile au tour d’un axe verticale calculer dans ce ca : la déviation de l’aiguille aimantée sachant que la bobine est perpendiculaire au méridien magnétique terrestre. On donne la composante horizontale du champ terrestre : B=20 micro tesla.
+Réponses: a) Lf=125,6m b) Rb=2,56 ohms ;L=3,94mH C)ɸ=4,925mWb 2)ά=89 degrés
+4-Un circuit comporte un générateur de f.é.m. E= 15V de résistance nulle. Ce générateur est relie a une bobine d’inductance L= 15mH et de résistance R= 10Ω un interrupteur permet d’ouvrir ou de fermer le circuit. On ferme le circuit en 2.5 secondes, l’intensité du courant débite par le générateur passe alors de 0 à sa valeur maximale 1.5 A d’une façon linéaire.
+Déterminer la F.é.m. d’auto-induction qui prend naissance dans le circuit
+Calculer l’énergie emmagasinée dans la bobine lorsque l’intensité du courant atteint sa valeur maximale.
+Réponses : a) E = 9mV b) W = 17 m
+5-Un solénoïde comprend 1000 spires de section moyenne S = 15 cm2 enroulées régulièrement sur une longueur l = 40cm
+un courant d’intensité I = 0.6 A circule dans ce conducteur.
+Calculer :
+L’intensité du champ magnétique à l’intérieure du solénoïde
+L’inductance propre L du solénoïde
+L’intensité du courant dans le solénoïde devient nulle en 0,04 seconde. Calculer la valeur de la F.é.m. auto-induite qui prend naissance dans le solénoïde.
+Réponses : 1) B = 1,884mT L = 4,71mH 2) E = 70,65mV
+6-Un circuit électrique comporte un générateur de F.é.m. E = 15v et de résistance interne nulle. Ce générateur est relie a une bobine d’inductance L = 1.5 x10-2H et de résistance R = 10Ω. Un interrupteur permet d’ouvrir ou de fermer le circuit. On ferme le circuit en 2.5 secondes. L’intensité du courant alors de 0 a sa valeur maximale d’une façon linéaire.
+Calculer l’intensive du courant débité par le générateur
+Quelle est l’énergie emmagasinée dans la bobine lorsque l’intensité du courant atteint sa valeur maximale ?
+Déterminer la F.é.m. auto induite qui prend naissance dans le circuit a sa fermeture :
+En utilisant a formule e = -L ΔIΔt
+En utilisant la formule e = -Ldidt
+Réponses: a) I = 1.5A b) W = 16,875mj c) 1) E = - 9mV 2) E = -9mV
+7-Un solénoïde de 1 m de longueur est formé d’une seule couche de spires jointives de 10 cm de diamètre faites d’un fil conducteur de 1 mm de diamètre et de résistivité 1.6μΩ. Cm. On demande
+La résistance R du solénoïde
+Son inductance L
+La f.é.m. auto-induite dont il est le siège, lorsqu’il est parcouru par un courant i = 10-7t ou t représente le temps exprime en seconde
+Réponses : Rb = 6.4Ω, L = 9.89mH ; e = 69m
+8-Un solénoïde de 40cm de longueur, de 10cm de diamètre et comportant, une seule couche de 1200 spires est parcouru par un courant de 10 ampères
+Calculer :
+L’intensité du champ magnétique à l’intérieure du solénoïde.
+L’inductance propre du solénoïde
+Déterminer la valeur de la f.é.m. auto induite qui prend naissance dans le solénoïde dans le cas suivants :
+Lorsqu’on coupe brusquement le courant de 10A en 1/100 seconde
+Lorsque l’enroulement du solénoïde est parcouru par un courant variable d’intensité i = 20-5t
+Réponses : 37.68mT ; L = 35.5 mH ; E = 35.5V ; e = 177,5m
+9-Une barre de cuivre PP’ de longueur de 6cm, est posée perpendiculairement sur les deux rails horizontaux, parallèle, conducteur, distants de 4cm, reliés aux bornes d’un générateur délivrant une intensité de 10 A. Le circuit est placé dans un champ uniforme B= 20 μT, dont la direction est normale au plan des rails.
+Préciser sur un schéma, le sens du courant pour que la barre glisse vers la droite.
+Calculer la valeur de la force électromagnétique appliquée sur la barre.
+Calculer le travail de cette force lorsque la barre s’est déplacée de 6cm .
+Si ce déplacement s’est fait à la vitesse de 3cm par seconde, trouver la valeur de la f.é.m. auto-induite qui apparait.
+Réponses : F= 12mN w= 0,72 mj E= 36μV
+10-Un solénoïde de 1m de longueur est forme par une seule couche de spires jointives de 10cm de diamètre faites d’un fil de 2 mm de diamètre et de résistivité ῥ=1.6×10-8 ῼm on demande :
+a) La résistance du fil de la bobine
+b) L’inductance de la bobine. Prendre 4π=12.5
+c) L’expression de la f.é.m. auto induction dont elle est le siège lorsqu’elle est parcourue par un courant d’intensité i= 3-5t2 où t représente le temps exprime en s
+Réponses : R=0.8ῼ L=2.46mH e=24.6t
+CHAPITRE 8
+POINTS ESSENTIELS
+Production d’une f.é.m. alternative
+Alternateurs
+Relation entre la fréquence et la vitesse de la machine
+Exercices
+Production d’une f.é.m. alternative
+Considérons un cadre conducteur qui comporte N spires, qui tourne à une vitesse constance dans le champ magnétique autour d’un axe xx’ contenu dans son plan lorsque les lignes d’induction sont parallèles, le flux est maximum. Ce flux a pour expression : φ=NBS.
+A la date t, le flux a pour valeur φ=NBScosα or α=wt, le flux étant variable, il créé une f.e.m induite qui a pour formule e=-dφdt or φ=NBScoswt
+=&gt;dφdt=-NBSwsinwt donc e=NBSwsinwt
+NB : une bobine qui tourne à vitesse constant dans un champ magnétique uniforme est le siège d’une f.é.m. alternative d’expression.e=Emaxsinwt avec
+Emax=NBSw
+Alternateurs
+Les alternateurs sont des appareils, producteur de courant alternatif. On distingue les alternateurs :
+Monophasé
+Biphasé
+Triphasé
+NB : un alternateur industriel comprend deux parties essentielles : un inducteur et un induit.
+Inducteur est encore appelé induit mobile ou rotor et l’induit est appelé induit fixe ou star.
+NB : un alternateur est basé sur le principe de la production d’une force électromotrice alternative dans un circuit induit fixe.
+Relation entre la fréquence et la vitesse de la machine
+La fréquence et la vitesse de la machine sont liées par la relation :F=nP
+Pour une période tournant dans un champ magnétique :F=n
+n : vitesse ou nombre de tours par seconde
+Pour un alternateur possédant plusieurs paires de pôle dont le rotor tourne à une vitesse on a : F=nP
+Remarque : la fréquence est égale à la vitesse lorsqu’on n’a pas le nombre de paires de pôle. Elle est ainsi égale à la vitesse divisée par 60 lorsqu’on donne la vitesse en tours par mètre :F=V60.
+Exercices
+Une bobine de 5 spires a une section de 20 cm2 elle tourne à raison de 3000 tours par minute dans un champ magnétique de 1 tesla à l’axe de rotation.
+Calculer :
+La valeur efficace de la force électromotrice induite
+L’expression du courant instantanée produit par cette force électromotrice induite dans un solénoïde fixe ayant une résistance R=0,157Ω et un coefficient de self L=0,5mH.
+La quantité de chaleur dégagé par minute dans le solénoïde dont on déterminera le nombre de spire sachant qu’il a une section moyenne de 12 cm2 et une longueur de 6 cm.
+Réponses : E=2,22 voltsi=14,1sin (314t-π4) Q=224 Cal N=141 spires
+Une spire circulaire de rayon 3 cm peut tourner autour d’un diamètre vertical dans un champ magnétique horizontal d’induction B=0,5 tesla supposer uniforme. La vitesse de rotation est maintenue constante égale à 50 tours par seconde.
+Donner l’expression de f.é.m. induite en fonction du temps (on suppose l’induction perpendiculaire au plan de la spire à l’origine de temps)
+Calculer la valeur efficace de l’intensité du courant produit dans la spire, si celle-ci est faite d’un fils de cuivre de diamètre 1mm ; la résistivité du cuivre est de 1,6×10-8Ω.m
+Calculer la puissance dissipée en chaleur
+Réponses : a) E=0,44368sin314t b) I=81,7Ac) P=25,6 W
+3-Un solénoïde assez long, comportant 1000 spires par mètre chacune de rayon 5cm et est parcouru par un courant continu d intensité I=4 ampéres.
+Une bobine circulaire plate de même axe que le solénoîde et comportant 100spires, entoure la région centrale du solénoïde. Determiner:
+a)l' intensité du champ magnétique dans la région centrale du solénoïde;
+b)le flux magnétique inducteur à travers la bobine plate
+c)la valeur de la f. é. m induite qui prend naissance dans la bobie plate lorsqu on coupe brusquement le courant dans le solénoïde en 1/20 seconde.
+2)On fait maintenant circuler dans le solénoïde un courant variable d'intensité i=0,1cos(1000t). Déterminer:
+a)l'expréssion du champ magnétique à l intérieur du solénoïde
+b)l'expréssion de l'intensité du courant dans la bobine plate constituant un circuit fermé de résistance 0,2Ω.
+Réponses: 1) B=5mT ø=3,925microweberE=78,5mV 2)i=0,1256x10-3cos1000t e=0,49sin1000t
+CHAPITRE 9
+POINTS ESSENTIELS
+Condensateurs
+Rôle d’un condensateur
+Charge et décharge
+Comportement d’un condensateur au passage du courant continu ou alternatif.
+Capacité d’un condensateur
+Types de condensateurs
+Tension de rupture ou de claquage
+Energies D’un Condensateur
+Champ électrique à l’intérieure d’un condensateur
+Unités de champ électrique
+Groupement des Condensateurs
+Densité volumique d’un condensateur plan
+Autres types de condensateurs
+Exercices
+Condensateurs
+Définition : Un condensateur est un appareil formé de deux plaques métalliques conductrices parallèles en regard l’une de l’autre séparées par un isolant appelé diélectrique.
+Rôle d’un condensateur
+Le rôle d’un condensateur est d’emmagasiner de l’énergie, c’est pourquoi on dit condensateur ou réservoir d’électricité.
+Charge et décharge
+Pour charger un condensateur, on branche ses bornes à la source d’énergie quand le générateur débite on dit que le condensateur est charge et quand le condensateur débite dans un circuit ou dans un autre condensateur on dit qu’il se décharge.
+NB : En charge le condensateur se comporte comme un récepteur et à décharge comme un générateur.
+NB: Avant la charge les armatures d'un condensateur plan sont vierges ou neutres et les armatures d' un condensateur plan charge sous une tension constante portes des charges de signes contraires (positives et negatives)
+Comportement d’un condensateur au passage du courant continu ou alternatif.
+Un condensateur ne laisse pas passer le courant continu et laisse passer le courant alternatif, c’est-à-dire il bloque le courant continu et laisse passer le courant alternatif.
+Capacité d’un condensateur
+La capacité d’un condensateur est le quotient de la charge emmagasinée sur l’une des armatures par la tension de décharge entre ses armatures. Elle est donnée par la relation C=QU=&gt;Q=CU et s’exprime en Farad.
+FARAD
+Le Farad est la capacité d’un condensateur que consomme un charge de 1 coulomb lorsque le d.d.p est de 1 volt.
+Elastance
+L’élastance est l’inverse de la capacité. Elle s’exprime en daraf.
+Autres unités de la capacité
+Le microfarad = 10-6 F= 1 UF
+Le nano Farad = 10 -9 = 1 nF
+Le Picofarad = 10 -12 = 1 PF
+Types de condensateurs
+En général, il existe trois types de condensateurs :
+Condensateur fixe
+Condensateur variable
+Condensateur électrolytique ou polarisé
+Du point de vue morphologique, il existe trois types de condensateurs de forme différente.
+Condensateur plan
+Condensateur sphérique
+Condensateur cylindrique
+Condensateur plan
+Un condensateur plan est l’ensemble forme de deux plaques conductrices planes en regard l’une de l’autre et séparées par un diélectrique, l’air en général. C’est le plus simple des condensateurs, sa capacité est :
+Proportionnelle à la surface de chaque armature
+Inversement à la distance des armatures
+Variable avec la nature de l’isolant
+Elle a pour formule : C=ε0kse ou C=KS36πe×109 avec ε0=136π×109=8,85×10-12
+Notations
+K : constante diélectrique
+S : surface en regard des armatures en mètre carres ((m2)
+e : épaisseur ou l’écartement des armatures en mètres (m)
+335216520002500Ƹ0 : primitivité du vide en farad par mètre. (F̷/m)
+NB : Si les armatures sont séparées par une couche d’air on prend : K = 1
+Si l’on remplace l’air par un autre isolant on obtient une nouvelle capacité par la formule :C'=C×K.
+NB:Lorsqu on double l'isolant de l'épaisseur entre les armatures d'un condensateur la capacité devient deux fois plus petite c est á dire C'=C/2
+Tension de rupture ou de claquage
+Définition : La tension de rupture ou des claquage est celle qui est appliquée aux bornes d’un condensateur est capable de perforer le diélectrique, et mettre le condensateur hors de service .
+NB : En soumettant un condensateur à une tension supérieure à celle qu’il peut supporter sans être détérioré, on l’expose à un phénomène appelé claquage ou le condensateur est claqué.
+Tension de service
+La tension de service est celle qui s applique aux bornes du condensateur fait fonctionner normalement le condensateur.
+Rigidité diélectrique
+La rigidité diélectrique est la valeur maximum du champs électrique que peut supporter un diélectrique sans qu’une étincelle se produise entre les armatures .Elle s’exprime en volts par mètre (v/m).
+Energies D’un Condensateur
+En fonction de la charge Q et de la tension de charge U
+Elle est proportionnelle à la charge Q et la tension de charge U ; elle est donne par la relation suivante : W = ½ QU avec Q en coulomb et U en volts W en joules
+En fonction de la charge Q et de la capacité C Elle est donnée par la relation suivante W=12Q2C avec : Q en coulomb et C en Farad W en joules.
+En fonction de la tension de charge U et de la capacité C
+Elle est donnée par la relation suivante W = ½ CU2 avec C en Farad et U en volts W en joules.
+Champ électrique à l’intérieure d’un condensateur
+Le champ électrique, c’est le quotient de la charge U par l’écartement des plaques .On le désigne par E tel que : E=Ue ou E=Ud U=E×e ou U=E×d
+Unités de champ électrique
+Le champ électrique s’exprime en volts /mètre (v/m) avec U en volts et en mètre ou en N/C avec E= F/Q. (F en newton et Q en coulomb)
+Démonstration de la formule : E=Ue
+Aux bornes d’une source de tension continue U, plaçons un condensateur .Lorsque le courant est établi, on observe a l’intérieure du condensateur la présence d’une charge électrique Q qui se déplace de A vers B sans l’action d’une force électrique : F=Q×E.
+Désignons par W=F×d le travail effectue par cette force comme d=AB=e, on a : W=F×e alors W=Q×E×e (1)
+On sait que : K
+L’énergie qu’il faut fournir à ce condensateur est : W=U×Q (2)
+Ecrivons les deux valeurs de W sont égales :
+Q×E×e=U×Q alors
+Démonstration de la formule W = ½ QU
+Aux deux extrémités d’un générateur de résistance négligeable (r = 0), plaçons un condensateur c .Quand le courant est lance, le générateur fournit une énergie totale répartie en énergie calorifique dans les fils de connexion et en en régie disponible aux bornes du condensateur c’est-a –dire : WF = Wfils +WC
+A noter que : wfils = WC
+WSource = Wc + Wc WSource = 2WC ou WSource = E×Q .Puisque r = 0, on a : E = U =&gt; WC=UQ2
+NB. : Q=CU=&gt;Wc=12U×CU=&gt;Wc=12CU2
+De même : U=QC=&gt;Wc=12Q×QC=&gt;W=Q22C ou W=12CU2
+Groupement des Condensateurs
+Groupement en cascade ou en série
+Plaçons en série ou en cascade trois condensateurs de capacité respective C1 C2 C3
+Puisqu’ils sont disposes en série la charge Q est commune .Dans ce cas, la tension aux bornes de l’ensemble est égale à la somme des tensions de chacun des condensateurs, c’est-a-dire :
+U = U1+U2+U3 (1)
+Posons : Q = CU, d’où U = Q/C
+De même : U1 = Q/C1,U2 = Q /C3 et U3 = Q/C3
+Remplaçons U1,U2,U3 et U par leur valeur équivalente dans (1)
+QC=QC1+QC2+QC3 =&gt; 1C=1C1+1C2+1C3
+Ce que l’on peut énoncer : L’inverse de la capacité équivalente à un ensemble de condensateur en série est égal à la somme des inverses des capacités de chacun d’eux.
+Remarque : Dans le cas de deux condensateurs en série, la capacité du système s’écrit : CS=C1×C2C1+C2
+Dans le cas de trois condensateurs en série, la capacité du système s’écrit : Cs=C1×C2×C3C1×C2+C1×C3+C2×C3
+NB. : Si les condensateurs places en série sont identiques de capacité unitaire C, la capacité équivalente ou du système s’écrit : Cs=Cn avec n = nombre de condensateurs.
+Dans l’association des condensateurs en série les inverses des capacités s’additionnent.
+groupement en surface ou en parallèle
+Plaçons en parallèle trois condensateurs de capacités respectives C1, C2, C3. Puisqu’ils sont placés en parallèles, la tension de charge U est commune. Dans ce cas la charge Q prise par l’ensemble est égale à la somme des charges prises par chacun des condensateurs, c’est-à-dire Q = Q1 +Q2 +Q3 (1)
+Posons : Q = CU
+De même Q1= C1U, Q2= C2U et Q3 = C3U
+Remplaçons Q, Q1, Q2 et Q3 dans la relation (1)
+CU = C1U+C2U+C3U en factorisant :
+CU = (C1+C2 +C3) U
+Divisons toute l’équation par U
+NB. Dans l’association des condensateurs en parallèles les capacités s’additionnent.
+Remarque :Dans le groupement de condensateurs identiques en parallèles, la capacité équivalente s’écrit Ce = nC1
+N : nombre de condensateur
+C1 : Capacité
+Groupement de condensateurs identiques égales mises en parallèles (groupement mixte) p élément par
+168846557150p elements par série
+00p elements par série
+974725-37465000
+2136140362585m:nbre de séries
+00m:nbre de séries
+197231019875500Soit n condensateur identiques disposés en m série de p éléments chacune .Dans ce cas le mode de groupement, la capacité du système s’écrit : Ceq=mCp
+Démonstration : Les condensateurs étant identiques, on a C1 = C2 = C3= C4 =C5 = C
+Dans la première branche : Ceq1=Cp
+Dans la deuxième branche : Ceq2=Cp
+Ceq=Ceq1+Ceq2=Cp+Cp=&gt;Ceq=2Cp Or m=2
+Donc : Ceq=mC1P
+Calcul le mode de groupement
+Pour calculer le mode de groupement, on applique les deux formules suivantes.
+n=m×p (1)Ceq=mC1P (2)
+Remarques:
+Si m = 1 et p≠1 , groupement en série
+Si m ≠ 1 et p = 1 , groupement en parallèles
+Si m ≠ 1 et p ≠ 1 , groupement mixte
+Notation
+n = nombre total de condensateurs disponibles
+M : nombre de séries ou branches
+P : nombre d’éléments par série
+C : capacité d’un condensateur
+Energie emmagasinée par un condensateur en fonction du champ électrique et de son volume d’air.
+L’énergie emmagasinée par un condensateur plan en fonction du champ électrique et de son volume d’air est :
+a) Proportionnelle au carré du volume du champ électrique.
+b) Proportionnelle au volume d’air
+c)Dépend du coefficient de permittivité du vide cette loi se traduit par la relation : W=12E2×V×ε0
+Démonstration
+Posons : W : ½ CU2 avec C=ε0×Se
+W=12ε0×Se×E×e2=&gt;W=12ε0×Se×E2×e2
+=&gt;W=12ε0×S×E2×e mais S×e=V la relation precedent devient W=12ε0E2V.
+Densité volumique d’un condensateur plan
+En fonction de l’énergie et du volume d’air
+La densité volumique d’un condensateur plan est :
+Proportionnelle à l’énergie emmagasinée par le condensateur
+inversement proportionnelle a son volume d’air. Elle s’exprime en joules/m3 et est donne par la formule : d=WV avec W en joules et V en m3.
+En fonction du champ magnétique et de la permittivité du vide.
+Cette densité
+Est proportionnelle au carré du champ électrique
+Dépend du coefficient de permittivité du vide. Elle est donnée par la formule suivante : d=12E2.ε0
+Autres types de condensateurs
+La bouteille de Leyde
+Description : La bouteille de Leyde est constituée par un flacon de verre représentant l’isolant .ce flacon est rempli de clinquant ou feuilles métalliques formant l’armature interne .Le clinquant est relié à une tige de laiton en forme cygne .La surface utile de la bouteille est donnée par la formule suivante :
+Stot = Sfond+Slat.
+Stot=πd24+πdh avec Sfond=πd24 et Slat=πdh
+Cette formule devient Stot=πR2+2πh avec Sfond=πR2 et Slat=2πrh, car
+R=d2 ou d=2r
+Notations
+d : diamètre intérieure de la bouteille en mètre
+R : rayon intérieur de la bouteille en mètre
+h : hauteur de l’isolant dans la bouteille en mètre.
+Les condensateurs variables
+Ce genre de condensateur comporte une série de lames fixes entre lesquelles s’engagent des lames mobiles semi-circulaires. Dans ce cas, le nombre de plaques est donnée par la relation suivante : np= nf+ nm
+Pour trouver le nombre de condensateurs, on applique la formule suivante nc= np-1
+np : nombre de plaques
+nf : nombre de lames fixes
+nm : nombre de lames mobiles
+nc : nombre de condensateurs
+Calcule de la capacité maximale d’un condensateur variable
+Pour calculer la capacité maximale, on applique : Cmax = Cmin(n-1)
+Pour trouver Cmin, on fait le rapport CC' dans certains cas CminC'=ss'×e'e avec S=πR22 (demi-circulaire)
+n : nombre total de lames (fixes et mobiles)
+Cmin : capacité d’un condensateur
+Cmax : capacité maximale
+Charge et décharge d’un condensateur 2eme série d’expériences
+Plaçons un condensateur C1 aux bornes d’une tension U. Ce condensateur reçoit une charge électrique : Q1 = C1 U
+Disposons en parallèle un autre condensateur C2 a l’état neutre, c’est-a-dire non chargé avec le premier .Dans ces conditions, le premier condensateur décharge dans le second. Pour calculer la tension d’équilibre, c’est-à-dire la tension aux bornes de la dérivation, on pose : Udér=QtCt avec Qt=Q1=C1U
+Car Q2=0 Edér=Q1C1+C2
+Autres expériences : aux bornes d’une tension U plaçons un condensateur C1, ce condensateur reçoit une charge électrique Q1= C1U
+Aux bornes d’une tension U’, plaçons un autre condensateur C2, il reçoit une charge électrique Q2= C2U
+Dans une dernière expérience, aux bornes d’une tension U, plaçons en parallèle ces deux condensateurs chargés. Dans ces conditions, pour calculer la tension aux bornes de la dérivation, on applique la formule suivante : Udér=QtCt=&gt;Udér=Q1+Q2C1+C1 avec Q1=C1U
+Et Q2=C2U'
+Etablir la formule Uder =Q1 + Q2C1 +C2
+Donnant la tension d’équilibre.
+Le système forme pa C1 et C2 charges constitue une batterie de condensateur, la charge de C1 est
+Q1 =C1Uder (1)
+La charge de C2 est Q2 =C2Uder (2)
+Additionnons membre à membre (1) et (2)
+Q1 + Q2 = C1Uder + C2 Uder
+Factorisons par Uder
+Q1 + Q2 = Uder(C1 + C2)
+46926563500Alors Uder= Q1+ Q2C1+C2
+Calcul de la perte d’énergie enregistrée au cours de la connexion de deux condensateurs chargées en parallèles
+On emploi la formule suivante w= (W1+W2)-Wt avec W1= ½ C1U2 ; W2 = ½ C2U2 ;
+Wt = ½ CtUdér2
+W1 : énergie du condensateur C1 sous la tension U1
+W2 : énergie du condensateur C2 sous la tension U2
+Wt : énergie emmagasinée par l’ensemble au cours de la connexion
+Remarque importante
+a)Si W1 +W2 &gt;Wt ou Wt &lt; W1+W2, il y a perte d’énergie .Cette perte est calculée par la formule suivante :
+Perte = (W1+W2)- Wt
+Si Wt= W1+W2,il y a conservation de l’énergie, on a alors enregistrée aucune perte d’énergie. la différence (W1+W2)-Wt est due à cause de la perte d’énergie dans les fils de jonction des deux condensateurs
+Cas où un condensateur décharge dans un fil plongé dans un calorimètre.
+Lorsqu’un condensateur décharge dans un fil plonge dans un calorimètre, il se produit parfois un équilibre thermique : Qa= Qc avec Qa= mcΘ et Qc = 0,24WC car WC = Wfil = RI2t, QC = 0,24WC
+Calcul du nombre de fois qu’il faut décharger un condensateur :
+Posons : n=QaQc avec Qa=mcθ et QC=0,24WC.
+Durée de décharge d’un condensateur dans un fil : T = 0,5Rc
+Démonstration
+Posons : Wfil = Wc
+RI2t=12CU2=&gt;RI2t=0,5CU2=&gt;
+RI2t=0,5(RI)2.C=&gt;RI2t=0,5R2I2c =&gt;
+Rt=0,5R2C=&gt;t=0,5RC C.Q.F.D
+Formule permettant de calculer la résistance de l’isolant d’un condensateur plan conducteur
+R=ρε0KC=&gt;RC=ρε0K
+C : capacité du conducteur plan en (F)
+ε0 : Permittivité relative du vide en (F/m)
+ρ : résistivité de l’isolant en ( Ω.m)
+k : constante diélectrique
+R : résistance de l’isolant. Ω
+Questions de cours
+Complétez les phrases suivantes par les mots convenables.
+Les deux plaques parallèles qui forment un condensateur sont appelées............et l'isolant qui les sépare est le...........
+Dans l'association des condensateurs en.........les inverses des capacités s'ajoutent tandisque dans l'association.......les capacités s'additionnent.
+Un condensateur est essentiellement composé de deux conducteurs portant des charges............et..........
+En dehors de sa période de charge ou décharge le condensateur bloque le...................
+Les armatures d un condensateur plan chargé sous une tension constante portent des charges..................
+Avant la charge les armatures d un condensateur sont...............
+La capacité d' un condensateur plan dont l'isolant est le vide est proportionnelle à ..................et inversement proportionnelle à...............de l'isolant.
+Pour obtenir une grande capacité équivalente on utilise le groupement en............
+Le farad est la capacité d'un condensateur qui prend une charge de........quand on établit une..........entre ses armatures.
+Le champ electrique E s exprime indifféremment en ...........ou...........
+La charge ou décharge d'un condensateur associé à une résistance ne sont..............
+Un condensateur branché sous une tension supérieure á celle qu'il peut supporter s'expose au...............
+La rigidité diélectrique est la valeur maximum de.........que peut supporter un diélectrique sans être détérioré.
+Un condensateur plan est celui dont les armatures sont............et...........
+Le montage en série de condensateurs permet d’obtenir une capacité plus.........que la plus.........des capacités associées
+Les armatures d’un condensateur sont séparées par...........appelées.............
+La tension qui, appliquée aux bornes d’un condensateur, fait jaillir entre les armatures une étincelle et met le condensateur hors d’usage est appelé...........
+Applications
+Un condensateur est formé de deux lames conductrices planes de surface 50cm2, séparées par un diélectrique d’épaisseur 0.8mm et de permittivité relative 2,5. Quelle est la capacité de ce condensateur ?
+Réponse : C = 138 PF
+Calculer la surface S des armatures en regard d’un condensateur à lame de papier paraffiné dont la capacité est 2μF, l’épaisseur du diélectrique est 0.1mm et sa constante diélectrique égale a 2.2
+Réponse : S = 10.3m2
+A) Calculer la surface des armatures d un condensateur plan de capacités 0,1µF dont le diélectrique a pour épaisseur 0,2mm et pour permittivité 8
+B) Calculer la charge prise et l’énergie emmagasinée par ce condensateur soumis à une tension constante de 300V.
+Réponses: a) S=0,28m2 b)q=30µC W=4,5mj
+4-On établit une tension U=1200V aux bornes d'un condensateur à lames d'air de capacité 0,050uF.Calculer la charge électrique et l'énergie emmagasinée dans le condensateur.
+On glisse entre les plaques de ce condensateur une lame de verre K= 4. Que devient la tension aux bornes du condensateur.
+On décharge le condensateur dans une résistance R=100Ω
+Calculer la durée de la décharge.
+Reponses:q=0,6mC;W=0,36joule ;U'=300V; T=0,2ms
+On établit une tension U= 600V aux bornes d’un condensateur C1 = 0.2μF. calculer la charge Q de ce condensateur ; si le courant de charge est 0.5A. calculer la durée de charge
+On décharge ce condensateur dans autre C2 pris à l’état neutre et de même capacité. Calculer la tension d’équilibre :
+Réponses : Q = 120μC t = 24 x 10-5s Udér = 300V
+Deux condensateurs C1=9µF et C2=6µF en série sont chargés sous la tension de 200V. Calculer:
+1) la capacité de l’ensemble
+2) la charge prise par chaque condensateur
+3) la tension aux bornes de C1 et l’énergie emmagasinée par C2.
+Réponses: 1) Céq=3,6µF 2) Q1=Q2=0,72mC 3)U1=80V W2=43,2mj
+Trois condensateurs de capacités respectives 4μF, 3μF et 2μF montés en série sont alimentes par une source de tension continue de 130volts.
+Calculer la charge prise par chaque condensateur
+Déterminer la d.d.p aux bornes de chaque condensateur
+Calculer la surface S des armatures du condensateur de capacité 4μF, de permittivité 2.5 et d’épaisseur 0.4mm
+Réponses : a) Q = 120 μC b) U1 = 30V, U2 = 40V et U3 = 60V c) S = 72.576m2
+On réalise, avec 12 condensateurs identiques, un groupement mixte constitue de m branches et de P éléments par branche.
+Comment faut-il associer les condensateurs pour obtenir une capacité totale de 1.5μF, sachant que chaque condensateur a une capacité de 2μF ? schéma.
+On applique une tension de 200volts aux bornes du groupement, calculer:
+La charge prise par le groupement
+Les d.d.p aux bornes de chaque condensateur
+Réponses : a) m = 3 P = 4 b) 1) 300μC 2) 50V
+A) On dispose d’une tension U=1000V pour charger un condensateur C=0,2µF. Calculer la charge électrique et l’énergie dans ce condensateur.
+B) On décharge ce condensateur dans un fil plongé dans 24grammes de pétrole, la chaleur massique C=0,5.Trouver le nombre de fois qu’il faut décharger le condensateur. Prendre ∅=20
+C) On met en parallèle avec C1 un 2eme condensateur variable C2.Calculer C2 dans les cas suivants:
+1) Lorsque la tension de la dérivation est fixée à 400V
+2) Lorsque la tension est fixée à 500V
+Réponses: Q=0,2mC; W=0,1j; n=100fois ; C2=0,3µF; C2=0,2µF
+Un condensateur peut être assimilé à deux feuilles métalliques séparées par un isolant d’épaisseur 0.25mm et permittivité égale à 4, la surface utile des feuilles métalliques étant de 25m2
+1) Quelle est la capacité de ce condensateur ? En associant 10 condensateur analogies en parallèles, quelle est la capacité de la batterie obtenue ?
+2) Cette batterie de condensateurs, chargée à chaque fois sous la tension de 1000volts est déchargée 100 fois de suite dans une résistance plongée dans un calorimètre contenant 200g d’un liquide de chaleur massique 0.5. Quelle est l’élévation de température du liquide si les pertes dans les fils de jonction s’élèvent à 50%
+Réponses : 1) C = 3.53μF C = 35.3μF 2) θ= 2011c
+Une bouteille de Leyde de surface 576cm2, dont le verre à 2m d’épaisseur, est assimilable à un condensateur plan. La permittivité relative du verre est 6.28 ce condensateur est chargé sous 50KV. On le décharge dans une résistance de 1 kΩ et l’on admet que la tension moyenne de décharge est 20KV
+Quelle est la durée de la décharge ?
+A quelle température peut être porte le métal si elle est faite de 2mg d’un métal de chaleur spécifique 0.08cal.g-1 0C-1 ?
+On charge la bouteille sous 250KV ; l’isolant est perfore et la décharge dure 0.1μs. quelle est la puissance moyenne mis en jeu durant cette décharge ? quelle est la quantité d’électricité utilise ? on donne 1cal = 4j
+Réponses : a) 5μs b) 3125 0C c) 500 x 106W 0.4mC
+1) Un condensateur de capacité 0,6uF est formé de 2 lames métalliques séparées par un isolant K=2,2 d'épaisseur 0,1mm. Calculer la surface de ces lames.
+2) On considère un autre condensateur 0,8uF.
+a) On les met successivement en série puis en parallèle.
+b) On se sert d'une tension de 600V pour alimenter les deux montages. Calculer dans chaque cas, l'énergie totale emmagasinée dans les condensateurs.
+3) Le condensateur C1 est chargé seul sous 600V, puis, il est relié aux bornes de C2 non chargé. Quelle sera la tension d'équilibre du système?
+4) Si les pertes d'énergie enregistrées au 3è) pouvaient être utilisées à faire fondre la glace de chaleur de fusion 80cal/g, quelle serait la masse de glace fondue à supposer qu’on ait renouvelé l’expérience 100 fois.
+Réponses: 1) S=3m2; 2) a) W=61,7mj b) W'=252mj 3)U'=257V 4)18,4mg
+CHAPITRE 10
+POINTS ESSENTIELS
+Courant alternatif
+Caractéristique du courant alternatif
+Graphe du courant sinusoïdal
+Notion d’alternance définition
+Fréquence du courant alternatif
+Pulsation du courant alternatif
+Intensités en courant alternatif
+Applications
+COURANT ALTERNATIF
+Caractéristique du courant alternatif:
+Un courant alternatif est un courant électrique périodique qui change régulièrement de sens deux(2) fois par période et qui transporte alternativement la même quantité d’électricité à chaque alternance.
+C’est aussi un courant sinusoïdal qui varie à chaque instant. On s’en sert dans les installations électriques des maisons et usines industrielles.
+Un courant périodique : est dit alternatif lorsque la valeur moyenne dans le temps est nulle.
+Un courant alternatif : Est dit sinusoïdal lorsque l’intensité est une fonction sinusoïdale du temps.
+Une Sinusoïde: est une représentation graphique des variations de l'intensité instantanée d'un courant alternatif sinusoïdal.
+Courant sinusoïdal : Le plus simple des courants alternatifs est le courant sinusoïdal. un tel courant est caractérisé par son intensité maximum et sa période, son intensité est de la forme : i=Imsin(wt+φ)
+Notation :
+i : intensité instantanée
+W : pulsation ou vitesse angulaire (en radians par secondes)
+(Wt+φ):phase an l’instant t.
+Courant rédressé: c est un courant alternatif unidirectionnel
+Courant variable: c est un courant dont l intensité est une fonction du temps
+Un rédresseur:c'est un appareil qui transforme le courant alternatif en courant continu.
+Un onduleur ou inverter: c est appareil qui transforme le courant continu en courant alternatif.
+φ: Phase a l’origine ou phase au point t=0
+Graphe du courant sinusoïdal
+Par un choix convenable de l’origine du temps, on a
+φ=0.A ce moment, on a :i=Imsinwt
+Posons :wt=θ=&gt;i= Imsin 0
+Faisons varier θ entre 0 et 2π.
+θ=0 ;i=Imsin0 =&gt;i =0.D’ou :A(0,0)
+θ=π2 :i=Imsinπ2 =&gt;i =Im.D’ou : B(π2 ,Im)
+θ=π:i=Imsinπ=&gt; i=0. D’où : C (π,0)
+θ=3π2 :i=Imsin3π2 =&gt;i =Im.D’ou : D(3π2 ,Im)
+θ=2π:i=Imsin2π=&gt; i=0. D’où : E (2π,0)
+Notion d’alternance définition: on appelle alternance l’intervalle de temps qui sépare deux changements de sens consécutifs du courant.
+Une alternance correspond à une demi-période. Deux alternances donnent une période. La période du courant sinusoïdal est donnée par : T=2πw avec : w: pulsation du courant
+Période: on appelle période, la durée d une oscillation. Elle est aussi l'inverse de la fréquence. Elle est donne par la relation: T=1F
+Oscillation: une oscillation c est une fluctuation ou un mouvement périodique.
+Fréquence du courant alternatif :
+On appelle fréquence d’un C.A le nombre de périodes par seconde. Elle est égale à l’inverse de la période c’est-a-dire F= 1T ; elle s’exprime en Hertz avec T en seconde.
+Les multiples de Hertz sont :
+Le Kilohertz (KHZ)=103HZ
+Le Mégahertz (MHZ=106HZ
+Le gigahertz(GHZ)=109HZ
+NB : On dit : Hertz on cycles par seconde.
+Fréquence-mètre : c’est l’appareil qui mesure la fréquence du courant.
+La fréquence du courant utilisé en Amérique est 60 Hertz et celle utilisé en Europe est 50Hertz.
+Pour une fréquence de 60 Hertz l’alternateur effectué 120 alternances ou changements par seconde et pour une fréquence de 50Hertz, il éffectue 100 alternances ou chargements par seconde.
+Pulsation du courant alternatif : on appelle pulsation du courant alternatif l’angle décrit par seconde. Elle est encore appelée vitesse angulaire et s’exprime en radians par seconde. Elle est liée à la fréquence et à la période par : w=2πf ou w=2πT
+Notation :
+W : pulsation du courant ou vitesse angulaire
+F : fréquence du courant
+T : période du courant
+INTENSITES EN COURANT ALTERNATIF
+Intensité Instantanée : elle est notée i : c’est la valeur que prend le courant à chaque instant t : i =f(t)
+L’expression mathématique de l’intensité instantanée s’écrit : i=Imsinwt ou i=Ie2 sinwt avec Im=Ie2.
+Intensité éfficace : elle est notée Ie : c’est l’intensité d’un courant continu qui, passant dans le même conducteur pendant le même temps, y produirait le même dégagement de chaleur par effet joule. on l’appelle encore intensité moyenne et on la mesure à l’aide d’un ampèremètre thermique. On s’en sert dans les installations électriques.
+Intensité maximale :
+Elle est notée Im : c’est la plus grande valeur que peut prendre le courant instantané. Elle est encore appelle ‘’Amplitude’’
+L’intensité efficace et l’intensité maximale sont liées par la relation suivante : Ie=Im2ou Im=Ie2
+Démontrer que: Ie=Im2
+Soit un circuit comprenant une résistance pure parcourue par un courant sinusoïdal i=ImsinWt
+R
+L’énergie électrique par effet de joule dans R pendant un intervalle de temps ∆t est: ∆W=Ri2∆t=&gt;
+∆W=R(ImsinWt)2∆t
+∆W=RIm2sin2Wt.∆t on sait que:sin2x=12-12 cos2x=&gt;
+Sin2Wt=12-12cos2Wt
+Donc: ∆W=RIm212-12 cos2Wt.∆t pour une période la valeur de cos2Wt=0, en raison de la symétrie de la courbe pa rapport a l’axe du temps. D’où ∆W=RIm22 . ∆t (1)
+Par définition ∆W=RIe2∆t (2)
+Comparons (1)et (2)
+RIm22 . ∆t=RIe2∆t=&gt;
+Ie2=Im22 donc : Ie=Im22=&gt;Ie=Im2 C.Q.F.D
+Tension En Courant Alternatif : Entre deux points A et B d’une portion de circuit parcourut alternatif sinusoïdal. Il existe une DDP également alternative de même pulsation que le courant. L’expression mathématique de cette DDP instantanée s’écrit : U=Umsinwt ou U=Ue2sinwt avec Um=Ue2
+La tension efficace Ue et la tension maximale Um sont lies par la relation : Ue=Um2 ou Um=ue2
+Etablir la formule Um = Ue√2 ou Ue =Um√2 qui lie la valeur efficace Ue d’une tension sinusoïdale U et son amplitude de Um
+R
+Aux bornes d’un conducteur ohmique de résistance R connue, établissons une tension alternative sinusoïdale de valeurs efficace et maximum connues Ue et Um.
+Les intensités efficace et maximale Ie et Im du courant dans le conducteur vérifient les relations:
+Ue = RIe (1) Um = RIm (2)
+On a alors : UmUe = RImRIe ==&gt; UmUe = ImIe
+149542522796500Comme le courant est sinusoïdal
+UmUe = 2 Donc Um =Ue2 ou Ue =Um√2
+NB : Dans le cas où le circuit comprend un self pure ou une capacité, on peut trouver un déphasage entre l’intensité instantanée et la tension instantanée du même courant.
+NB : L’intensité maximale est mesurée à l’aide d’un oscilloscope cathodique et la tension efficace à l’aide d’un voltmètre thermique.
+Good to know
+L’intensité moyenne d’un courant alternatif:
+Imoy=2Imπ
+Quantité d’électricité moyenne pendant une alternance
+Qmoy=Im×∆t et ∆t=2Imπ×T2=&gt;
+Qmoy=2Imπ×2πw2=&gt; Qm=2Imπ×2π2w
+Qmoy=2ImW
+Constante de temps d’un circuit R-C
+T=R.C.
+Questions de cours
+Complétez les phrases suivantes par les mots convenables.
+Un courant dont l'intensité est une fonction sinusoïdale du temps est appelé...........
+Un courant dont l'intensité est une fonction du temps est appelé..........
+La durée d'une oscillation s’appelle.........
+Le courant alternatif peut recharger une batterie d'accumulateurs si dans le circuit qu'il alimente on insère un.......électrique.
+L'intensité d'un courant alternatif redressé est............ou......
+L'amplitude ou l'intensité maximum d'un courant alternatif se mesure á l'aide d'un..............
+L'intervalle de temps qui sépare deux changements de sens consécutifs d'un courant alternatif s'appelle......
+Pendant une période, la quantité d'électricité transportée par un courant alternatif sinusoïdal est.............
+On appelle courant alternatif tout courant périodique dont la période se décompose.................
+Le courant alternatif est produit par des générateurs appelés............
+La durée d'une alternance s'appelle...........
+Les alternances d’un courant alternatif sinusoïdal sont.................et leur valeur commune est égale á...........
+Applications
+L'expression mathématique de l'intensité instantanée d'un courant alternatif sinusoïdal est: i=4√2sin(314t +ø) où ø représente la phase à l'origine.
+Préciser la valeur de l'intensité éfficace, de la pulsation et de la fréquence.
+Calculer ø, sachant qu'à l'instant t=0 ,i prend la valeur 4A
+Quelle est, en joule, la quantité de chaleur dégagée par ce courant dans un fil de résistance 15Ω en 5 joules?
+Réponses: a) Ie=4A w=314ra/s F=50Hz b)π4 Q=17224,8 Cal
+Une résistance R=10Ω parcourue par un courant alternatif : i=!28,2 sin314t.
+calculer la fréquence du courant, sa période et son intensité éfficace .
+Quelle est en kilocalories la quantité de chaleur dégagée dans en 10Ω
+Quelle est la quantité d'électricité qui passe dans un pendant une alternance?
+On fait passer maintenant Ce même courant dans un voltmètre à l'eau acidulée et électrode de platine .Calculer le volume gazeux recueilli par minute à l'une des électrodes.
+Réponses : F=50Hz T=0,02 s Ie=20A
+Un courant alternatif d'intensité i=2,4cos100пt traverse un conducteur ohmique de résistance 130Ω.On demande:
+a) l'intensité éfficace du courant.
+b) la fréquence du courant.
+c) la tension éfficace
+d) l'énergie consommée par minute.
+Réponses: a) Ie=1,7A b) f=50Hz c)Ue=221V d)W=22542j
+Une tension U=100sin⁡(314t-π6) est établie aux bornes d’un circuit,
+Indiquer:
+Son Amplitude
+Sa phase
+Sa phase a l’origine
+Sa pulsation
+Sa période et sa fréquence
+Sa valeur à l’instant t=0 Seconde.
+Réponses: a) 100 voltsb) 314t-π6 c) -π6 d) 314rad/s
+e) T=0,02seconde; F=50 Hz f) u=-12Um
+Un courant alternatif a pour intensité i=20sin⁡(314t+π4)
+Déterminer:
+L’intensité de ce courant a l’instant t=1200 seconde
+L’instant, au cours de la première seconde de son passage, auquel son intensité instantanée positive est égale a son intensité maximum.
+Calculer la quantité d’électricité moyenne pendant une alternance.
+Réponses: 1) i=102=14,1A 2) t=1400 seconde 3) Q=0,127 coulomb
+Une résistance branchée sur un secteur alternatif est parcourue par un courant sinusoïdal dont l’intensité maximale est 2A et la fréquence 50Hz. Calculer :
+la période
+sa pulsation
+donner l’expression de son intensité à l’ instant T.
+Réponses: a) T=0,02s b) W=314rad/sc) i=2sin314t
+Un courant d’intensité éfficace 10A a pour fréquence250π .Donner l’expression de son intensité instantanée.
+Réponse : i=102sin500t
+On fait passer dans un condensateur constitué par une résistance pure de valeur R=10Ω un courant alternatif de fréquence 50Hz et d’intensité efficace 3A. écrire l’équation qui donne à chaque instant la tension aux bornes de ce conducteur.
+Réponse : u=302sin314t
+Combien de fois un courant alternatif de fréquence 50Hz change de sens en 15 seconde ?
+Réponse : 20 fois
+Un courant alternatif a pour tension instantanée U=155,1 sin314t. Calculer sa tension efficace et sa fréquence.
+Réponses : Ue=110 VoltsF=50 Hertz
+8-Un courant alternatif sinusoïdal d amplitude 2A passe dans une résistance non inductive de 5Ω. Calculer: 1)L intensité moyenne pendant une alternance 2)L intensité éfficace du courant 3)La quantité de chaleur dégagée dans la résistance en 1mn.
+Réponses: 1) Imoy=1, 27A 2)Ie=1,41A 3) W=600jCHAPITRE 11
+POINTS ESSENTIELS
+Appareils utilises en courant alternatif
+Notion de déphasage
+Décalage horaire
+Diagramme de Fresnel (Charles augustin)
+Appareils en série ou circuits en série
+Notion d’impédance
+Loi d’ohm en courant alternatif
+calcul d’impédance
+Réactance (inductive et Capacitive)
+Conséquences de la résonance en série
+Réactance d'un circuit
+Mode de groupement dans un circuit R.L.C
+Calcul du rapport LC , exprimé en Henry par Farad (H/F)
+Applications
+Appareils utilisés en courant alternatif
+Résistance pure ou non-inductive
+Représentation :
+caractéristique : sa résistance R
+Bobine réelle : c’est une bobine qui contient une résistance et une inductance.
+représentation :
+caractéristiques : sa résistance Rb≠ 0 et son inductance lb≠0
+Self-pure : c’est une bobine qui n’a pas de résistance.
+Représentation
+Son inductance L, car Rb=0
+Condensateur :
+Représentation :
+Caractéristique : sa capacité C
+Les lampes ou ampoules électriques :
+Représentation : ou
+Caractéristique : leur résistance R
+Moteur électrique :
+Représentation :
+Caractéristique : un moteur électrique se comporte comme une bobine.
+Transformateur :
+Représentation :
+Rôle : un transformateur est un appareil qui permet de modifier la tension alternative d’un courant alternatif. il joue le rôle d’abaisseur ou d’élévateur de tension électrique.
+NB : on dit bobine réelle ou bobine complète.
+On dit self pure ou bobine incomplète ou self d’inductance ou self non-résistive ou bobine idéale.
+Notion de déphasage : Il arrive que dans certains cas l’intensité du courant est déphasée sur la tension. On dit alors que l’intensité du courant est en avance ou en retard déphasage par rapport à la tension.
+Décalage horaire :c est le temps qui correspond à un déphasage horaire
+Phase-mètre: un phase-mètre est un appareil qui mesure le déphasage en la tension et l’intensité.
+Origine déphase : L’origine de phase en courant alternatif est l’élément commun aux divers appareils du circuit. Elle est alors ou bien l’intensité du courant ou bien la tension.
+elle est l’intensité du courant si les appareils sont en série.
+elle est la tension si les appareils sont mis en parallèle.
+On représente l’origine déphase par une simple droite flèche à son extrémité droite
+Diagramme de Fresnel (Charles augustin) : Le diagramme de Fresnel c’est le mode de la représentation des appareils sur le circuit.
+Un diagramme de Fresnel est une figure géométrique, dans laquelle l’intensité du courant alternatif et les tensions aux bornes des appareils sont représentées par des vecteurs, en tenant compte de leurs relations de phases.
+Appareils en série ou circuits en série
+Fresnel d’une résistance pure : la d.d.p aux bornes d’une résistance pure est toujours en phase avec l’intensité du courant.
+Expression mathématique de l’intensité instantanée
+I=Imsinwt ou i=Ie√2sinwt avec Im=Ie√2
+Expression mathématique de la tension instantanée
+U=Umsinwt ou U=Ue√2sinwt avec Um=Ue√2
+Fresnel d’une bobine : la d.d.p aux bornes d’une bobine réelle est toujours en avance d’un angle aigu φb sur l’intensité du courant.
+L’expression de l’intensité et de la tension
+si on prend comme référence l’intensité on a :i=Imaxsinwt u=Umaxsin(wt+φb
+si on prend comme référence la tension on a :i=Imaxsin(wt-φb)U=maxsinwt
+Fresnel d’une self pure : La d.d.p aux bornes d’une self pure est toujours en quadrature avance d’un angle π2 sur l’intensite du courant
+Équation horaire de l’intensité et de la tension
+En prenant l’intensité comme référence on a :
+i=Imsinwt u=Umsin(wt+π2
+En prenant la tension comme référence on a:
+i=Imsin(wt-π2u=Umsinwt
+Fresnel d’un condensateur : La ddp aux bornes d’un condensateur est toujours en quadrature retard d’un angle π2 sur l’intensité.
+Équations horaires de l’intensité et de la tension
+Si on prend comme référence l’intensité on a :
+i=Imsinwt u=Umsin(wt-π2
+Si on prend comme référence la tension on a:
+i=Imsin(wt+π2u=Umsinwt
+Moteur en marche : la d.d.p aux borne d’un moteur en marche est toujours en avance de déphase d’un angle aigu φ sur l’intensite du courant.
+i=Imsinwt U=Umsin(wt+φ) i : comme référence
+I=Imsin(wt-φ)U=Umsinwt u : comme référence
+Notion d’impédance: on définit l’impédance comme la résistance qu’un circuit propose au passage du courant. On la désigne par Z et on l’exprime en ohms.
+Admittance : c’est l’inverse de l’impédance.
+Calcul de l’impédance
+Impédance d’une résistance pure : l’impédance d’une résistance pure est égale à la résistance. ZR=R
+Impédance d’un sel pure : l’impédance d’une self pure est égale au produit de l’inductance par la pulsation ZL=LW
+L : Inductance en Henry (Joseph Henry)
+Impédance d’un condensateur : L’impédance d’un condensateur est égale au produit de l’inverse de la capacité par la pulsation.ZC=1CW
+C : capacité du condensateur en farad
+Loi d’ohm en courant alternatif
+La loi d’ohm en courant alternatif es traduit par : Ue=ZIe
+Ue : tension efficace aux bornes du secteur.
+Z : Impédance du circuit.
+Ie : Intensité efficace qui parcourt le circuit.
+Tension aux bornes d’une résistance pure :
+762635191770UR=RIe
+00UR=RIe
+La d.d.p aux bornes d’une résistance pure est égale au produit de la résistance par l’intensité.
+5168265195580UL=ZtIe
+00UL=ZtIe
+3928110195580UL=LWIe
+00UL=LWIe
+Tension aux bornes d’une self pure : La d.d.p aux bornes d’une self pure est égale au produit de l’impédance (réactance) par l’intensité. ou
+4657090195580UC=IeCW
+00UC=IeCW
+Tension aux bornes d’un condensateur : La d.d.p aux bornes d’un condensateur est égale au produit de l’impédance (capacitance) par l’intensité. ou
+3937003175UC=ZCIe
+00UC=ZCIe
+Démontrer que : Ue=IeCW ou Z=1CW (pour un condensateur) soit un condensateur C alimente par un courant alternatif de pulsation W et de tension éfficace Ue.
+Lorsque le courant est lancé, le condensateur se charge, q=i.dt i=qdt or q=C.U on a:i=c(dudt). Rappel; dans un condensateur i=Imsin(Wt+π2) et U=UmsinWt
+Cherchons dudt
+dudt=UmWcosWt, posonscos=sin⁡(Wt+π2) alors dudt=UmWsin(Wt+π2)
+On a :i=C×dudt; ImsinWt+π2=C. UmWsin(Wt+π2)
+Im=C.UmW
+Comme : Ie=Ie2 et Ue=Ue2
+Ie=CWUe
+Ue=IeCW
+Or Ue=ZIe donc
+ZIe=IeCW d’où
+Z=1CW
+Démontrer que Ue=LWIe Ou Z=LW
+-22225163830Soit une inductance pure parcourut par un courant sinusoïdal i=ImWt
+Ce circuit est le siège d’une F.é.m. auto induite tel que: e=-Ldidt, la ddp instantanée est opposée a la F.é.m.: U=-e=&gt;
+U=Ldidt =&gt;U=LImWcosWt
+Posons CosWt=sinWt+π2donc:
+U=LImWsinWt+π2 (1)
+Exprimons U sous sa forme habituelle. On a : U=UmsinWt+π2 (2)
+Comparons (1) et (2)
+UmsinWt+π2 =LImWsinWt+π2=&gt;
+On sait que Um=Ue2 et Im=Ie2
+Alors: Ue2=LWIe2
+Simplifions par 2
+Ue=LWIe C.Q.F.D
+Comme Ue=ZIe alors ZIe=LWIe
+Donc Z=LW C.Q.F.D
+Calcul d’impédance d’une bobine réelle :
+Principe : on décompose la bobine en une résistance pure et une self pure (schémas suivants)
+Pour déterminer l’impédance de la bobine, on construit le diagramme de Fresnel en appliquant les règles de Fresnel pour chaque appareil.
+La d.d.p aux bornes de la résistance pure est toujours en phase avec l’intensité du courant.
+La d.d.p aux bornes de la self pure est en quadrature avance sur l’intensité du courant.
+La diagonale du rectangle OACB obtenue représente la d.d.p aux bornes de la bobine.
+Diagramme de Fresnel
+Calcul de Zb : impédance de la bobine.
+Le triangle OAC étant rectangle en A, Pythagore nous donne :OAC2+OA2ouUb2=Ur2+Uc2
+Il vient alors :(ZbIe)2=(RbIe)2+(LWIe)2 ==&gt;
+Zb2Ie2=Rb2Ie2 +(LW)2Ie2 ==&gt;
+Factorisons les deux membres par Ie2
+Zb2 Ie2 = Ie2 (Rb2 + (LW)2)
+Divisons les deux membres par Ie2
+2673350134620Zb=Rb2+(LW)2
+00Zb=Rb2+(LW)2
+Zb2Ie2Ie2 = Ie2(Rb2+(LW)2)Ie2
+Zb2=Rb2+(LW)2
+Facteur de puissance :
+Le facteur de puissance d’un circuit est un paramètre qui définit comment les appareils consomme de l’énergie électrique.
+Calcul du facteur de puissance : cosφb=0A0C==&gt;
+Cosφb=RbIeZbIe==&gt; Cosφb=RbZb
+Calcul de la tangente de déphasage : tgφb=AC0A ==&gt;
+Tgφb=LwIeRbIe ==&gt; Tgφb=LwRb
+Puissance moyenne ou réelle ou active :
+2095563500P=RbIe2 ou P=UeIecosφb
+00P=RbIe2 ou P=UeIecosφb
+Démonstration
+Démontrer que: P=UeIecosφ
+Considérons un circuit électrique alternatif. Les valeurs instantanées de i et u sont:
+i=ImsinWt et u=UmsinWt+φ l’energie ∆t fournie pendant ∆t est ∆W=ui∆t=&gt;
+∆W=ImsinWt.UmsinWt+φ.∆t
+∆W=UmImsinWt.sin⁡Wt+φ.∆t on sait que : 2sinasinb=cosa-b-cos⁡(a+b)
+∆W=UmIm2cos⁡(Wt+φ-Wt)-cos⁡(Wt+φ+Wt)∆t
+∆W=UmIm2cosφ-cos⁡(2Wt+φ)∆t
+La valeur moyenne cos(2Wt+φ)=0, en raison de la symétrie de la courbe par rapport a l’axe du temps.
+Donc: ∆W=UmIm2cosφ.∆t =&gt;
+∆W=Um2×Im2cosφ.∆t t =&gt;
+∆W=UeIecosφ∆t On sait que: P=∆W∆t=&gt;P=UeIecos.∆t∆t d’où
+P=UeIecosφ C.Q.F.D
+La puissance réactive est donnée par la relation: P=UeIesinφ
+NB : Le facteur de puissance peut se définir comme étant le rapport de la puissance réelle la puissance apparente.
+A noter que : La puissance réelle s’exprime en Watt ; la puissance apparente s’exprime en Volt-ampère (VA) et la puissance réactive s’exprime en Volt-ampère réactif (VA réactif)
+La puissance réactive s'exprime en volt-ampère réactif (VA réactif)
+Résistance pure et bobine placées en série :
+Pour déterminer l’impédance du circuit, on construit le diagramme de Fresnel par les règles de Fresnel.
+La D.D.P aux bornes de la résistance pure est en phase avec l’intensité du courant.
+On sait que la bobine est décompose en une résistance pure et d’une self pure.
+La d.d.p aux bornes de la self pure est en quadrature avance sur l’intensité du courant.
+On obtient alors un rectangle OABC dont la diagonale représente la d.d.p aux bornes du circuit.
+Calcul de l’impédance du circuit : Zt=εR2+(LW)2
+OAB étant un triangle rectangle en A, on a :
+OB2=OA2+AB2==&gt; (εRIe)2+(LWIe)2 ==&gt;
+4317365144145Zt=ΣR2+(LW)2
+00Zt=ΣR2+(LW)2
+Z2tI2e=εR2I2e+(LW)2I2e
+Factorisons par I2e : Z2tI2e=I2e(εR2+(LW)2)==&gt;Z2t=εR2+(LW)2d’où
+4730750194945Cosφt=ΣRZt
+00Cosφt=ΣRZt
+C.Q.F .D
+Calcul du facteur de puissance du circuit : COSφt=OAOB =&gt; COSφt=εRIeZtIe =&gt;
+Calcul la tangente de déphase du circuit : Tgφt=OAOB =εRIeZtIe =&gt; Tgφt=LWεR .Par le sinus, on a :
+12801607620Sinφe=LWZt
+00Sinφe=LWZt
+sinφt=ABOB =LWIeZtIe =&gt;
+Tension instantanée du circuit et l’intensité instantanée
+a)I=ImsinWt Umsin(Wt+φt) I=Imsin(Wt-φtUmsinwt
+Puissance réelle ou moyenne du circuit
+P=RtIt2 ou P=UeIecosφt
+Puissance apparente du circuit : P=ZtIe2
+Résistance pure et condensateur en série ou (circuit R.C)
+2282190309245Rappel: Un condensateur n’a pas de résistance
+00Rappel: Un condensateur n’a pas de résistance
+Diagramme de Fresnel
+OAC étant un triangle rectangle en A, on a
+OC2 = OA2 + AC2 =&gt; Zt2Ie2 = R2 + Ie2C2W2=&gt;
+288036016510Zt=R2+1(CW)2
+00Zt=R2+1(CW)2
+Factorisons par Ie2
+Zt2Ie2 = Ie2(R2 + 1(CW)2) =&gt; Zt2= R2+ 1(CW)2=&gt;
+456501593980Cosφt=RZt
+00Cosφt=RZt
+Calcul du facteur de puissance du circuit : Cosφt=OAOC = COSφt=RIeZtIe =&gt;
+482663588900Tgφt=1RCW
+00Tgφt=1RCW
+Calcul la tangente de déphase du circuit : Tgφt=ACOA =IeCWRIe =&gt; =IeCW×1RIe=&gt;
+Expression mathématique de l’intensité et de la tension du circuit :
+a)i=ImsinWt+φt u=UmsinWt i=ImsinWtu=UmsinWt-φt
+Résistance pure et self pure en série ou (circuit R.L.)
+Diagramme de Fresnel
+OAC étant un triangle rectangle en A, on a
+OC2 = OA2 + AC2 =&gt; Zt2Ie2 = R2 + (LW)2Ie2 =&gt;
+Factorisons par Ie2
+Zt2Ie2 = Ie2(R2 + (LW)2) =&gt;
+Simplifions par Ie2
+Zt2 = R2 + (LW)2 d’où
+-69859525Zt = R2+(LW)2
+00Zt = R2+(LW)2
+C.Q.F.D
+Facteur de puissance du circuit
+1139190-55880Cosφt=RZt
+00Cosφt=RZt
+COSφt = RIeZtIe =&gt;
+969010245745Tgφt= LWR
+00Tgφt= LWR
+Tangente de déphasage
+Tgφt= LWIeRIe =&gt;
+Expressions mathématiques de i et de U
+i=Im sinWtu=Umsin(Wt+φt) i=Imsin(Wt-φt)u=Um sinwt
+Bobine et condensateur en série
+Aux bornes d’un secteur alternatif de tension efficace Ue et d’intensité efficace Ie, on dispose en série une bobine réelle de résistance R et d’inductance L et un condensateur de capacité C (fig. ci-contre). L’impédance du circuit est donnée par le diagramme de Fresnel.
+Trois cas sont à envisager successivement:
+1er cas : LW&gt;1CW
+Lorsque la réactance (LW) est supérieure à la capacitance1CW, le circuit est dit « inductif ». Dans ce cas, l’impédance du circuit est donnée par la formule : Zt = R2+(LW-1CW )2
+Démonstration par : construction de Fresnel
+308102020320AB=UL=LWIeAD=UC=IeCWAC=LWIe- IeCW
+OA=RIe
+i est en retard et u en avance de phase
+00AB=UL=LWIeAD=UC=IeCWAC=LWIe- IeCW
+OA=RIe
+i est en retard et u en avance de phase
+OAC étant un triangle en A, on a :
+OC2 = OA2 + AC2 =&gt; Zt2Ie2 = Rb2Ie2 + Ie2 (LW - 1CW )2
+Factorisons par Ie2
+Zt2Ie2 = [Rb2 + (LW - 1CW)2]2 =&gt;
+166941555880Zt = R2+(LW-1CW )2
+00Zt = R2+(LW-1CW )2
+Simplifions par Ie2
+Zt2 = Rb2 + (LW - 1CW)2 =&gt; C.Q.F.D
+1736725251460COSφt=RZt
+00COSφt=RZt
+Facteur de puissance du circuit.
+COSφt=OAOC =&gt; COSφt=RIeZtIe =&gt;
+1894205161925sinφt=LW-1CWZt
+00sinφt=LW-1CWZt
+Par le sinus on a
+sinφt= ACOC =Ie(LW-1CW) ZtIe =&gt;
+La tangente de déphasage du circuit.
+Tgφt= ACOC =(LW-1CW)IeRbIe =&gt; Tgφt=LW-1CWRb .
+Puissance moyenne ou réelle du circuit
+P = UeIe cosφt ou P=U2RZt2
+Démonstration : on sait que P = UeIecoφt
+149415536195000 Or cosφt = RZt et I = UZt donc
+P = U x UZt x RZt =&gt; P = U2RZt2 C.Q.F.D
+Puissance apparente : P = ZtIe2
+2eme cas : LW&lt; 1CW
+Lorsque LW est inferieur a 1CW ou (1CW &gt; LW), l’effet de la capacitance emporte sur celui de la reactance. Alors, le circuit est « capacitif ». Son impédance est donnée par la formule suivante
+8191512700Zt = R2+(1CW-LW )2
+00Zt = R2+(1CW-LW )2
+2305685285115AB=LWIeAD=IeCW AC= IeCW –LWIe=Ie (1CW- LW)OC=Ue=ZtIe
+i est en avance et u est en retard de phase
+OAC étant un triangle rectangle en A, on a :
+OC2 = OA2 +AC2 =&gt; Zt2Ie = Rb2Ie2 + Ie2 (1CW - LW)
+Factorisons par Ie
+Zt2Ie2 = Ie2 (Rb2 + (1CW – LW)2) =&gt; Zt2 = Rb2 + (1CW - LW)2
+D’où
+00AB=LWIeAD=IeCW AC= IeCW –LWIe=Ie (1CW- LW)OC=Ue=ZtIe
+i est en avance et u est en retard de phase
+OAC étant un triangle rectangle en A, on a :
+OC2 = OA2 +AC2 =&gt; Zt2Ie = Rb2Ie2 + Ie2 (1CW - LW)
+Factorisons par Ie
+Zt2Ie2 = Ie2 (Rb2 + (1CW – LW)2) =&gt; Zt2 = Rb2 + (1CW - LW)2
+D’où
+Démonstration par la construction de Fresnel
+273621542545Zt = R2+(1CW-LW )2
+00Zt = R2+(1CW-LW )2
+Facteur de puissance du circuit.
+Cosφt = RbZt ou sinφt = 1CW -LWZt
+Tangente de déphasage de circuit
+Tgφt = 1CW -LW Rb
+3eme cas : LW = 1CW ou LCW2 = 1 (condition de résonance)
+Lorsque LW est égal à 1CW, l’effet de la réactance compense celui de l capacitance. Alors le circuit est dit « résistif » on en résonance. Dans ce cas, son impédance est égale à la résistance de la bobine c’est-à-dire Zt = Rb
+Construction de Fresnel
+2748280245745OA=Ur=RI AC=UL=LWIe AD=UC= IeCWAD=AC
+i est en phase avec u
+00OA=Ur=RI AC=UL=LWIe AD=UC= IeCWAD=AC
+i est en phase avec u
+NB: La résonance est un phénomène qui se produit dans un circuit RLC, en série ou en parallèle où les effets de la bobine sont exactement compensés par ceux du condensateur.
+Conséquences de la résonance en série
+Il y a résonance en série lorsque :
+L’intensité du courant est en phase avec la tension
+L’effet de l’inductance compense celui de la capacitance (LW = 1CW)
+L’impédance du circuit est minimale et égale à la résistance de la bobine (Zt = Rb ou Zt=Rb+R)
+Le facteur de puissance du circuit est égale a l’unité (Cosφt = 1)
+L’angle de déphasage est nul (φt = 0)
+L’intensité efficace du courant est maximale
+La puissance réelle est égale à la puissance apparente.
+Circuit comprenant une résistance pure et une bobine en série (cas particulier)
+La tension du secteur se calcule par la construction du Fresnel en appliquant le théorème de Pythagore généralisé
+Construction de Fresnel
+D’après Pythagore on a : Ue2 = UR2 + Ub2 – 2URUbCos(π – φb)
+3627120106680Ue2=UR2+Ub2+2URUbcosφb
+00Ue2=UR2+Ub2+2URUbcosφb
+Or Cos (π – φb ) = - cosφb d’où
+Ue2 = UR2 + Ub2 – 2URUb – Cosφb
+Facteur de puissance du circuit
+Cosφt =UR + UbCosφbUe ou Cosφt=ΣRZt avec Z = ƐR2+(LW)2
+Circuit comportant une capacité et une bobine en série (cas particulier)
+La tension du secteur se calcule par la construction de Fresnel
+-13436601785620Pythagore nous donne : Ue2 = Ub2 +Uc – 2UbUcCos(π2- φb)
+00Pythagore nous donne : Ue2 = Ub2 +Uc – 2UbUcCos(π2- φb)
+1595120327025Ue2=Ub2+UC2-2UbUCsinφb
+00Ue2=Ub2+UC2-2UbUCsinφb
+or Cos (π2 - φb) = sinφb d’ou
+Facteur de puissance du circuit
+Cosφt = UbCosφbUe ou cosφt = RbZt
+Formule de Thomson (cas de résonance en série)
+Pour calculer la fréquence du courant dans le cas de résonance, on applique la formule de Thomson suivante :
+F = 12π LC
+Démonstration : T =2π LC
+A la résonance l’effet de l’inductance et l’effet de la capacitance se compensent : UL = UC =&gt;
+LWIe = IeCW =&gt; en simpifiant pae Ie on obtient
+LW = 1CW =&gt; LCW2 = 1 =&gt; W2 = 1LC
+W = 1LC 1 or W = 2πT 2
+Egalons (1) et(2)
+904240-27305 T = 2πLC
+00 T = 2πLC
+2πT = 1LC =&gt;
+1496060290195F = 12ð LC
+00F = 12ð LC
+Inversons les deux membres :
+1T = 12π LC or 1T = F =&gt; C.Q.F.D
+Mode de groupement dans un circuit R.L.C
+Si l’on a sur un circuit un condensateur C1 disposé en série avec une bobine et que l’on introduit dans ce circuit un deuxième condensateur C2 accusant un cas de résonance, pour savoir comment placer le second condensateur, on calcule d’abord la capacité du système, c’est-à-dire ; LCsW2 = 1 =&gt; Cs = 1LW2
+2431415467995C2=C1 X CsC1- Cs
+00C2=C1 X CsC1- Cs
+Si Cs &lt; C1, on dit que les deux condensateurs sont placés en série c’est-à-dire : 1Cs= 1C1+1C2 =&gt;
+1C2= 1Cs- 1C1 =&gt; 1C2= C1-CsC1 X Cs ou
+1205865244475C2 = Cs – C1
+00C2 = Cs – C1
+Si Cs &gt; C1, on dit que les deux condensateurs sont placés en parallèle, c’est-à-dire : Cs = C1 + C2
+Calcul du rapport LC , exprimé en Henry par Farad (H/F)
+Méthode de calcul
+2777490271145LC=LW x Zc
+00LC=LW x Zc
+On pose
+LC=LWCW =&gt; LC=LW x1CW =&gt;
+Zt = Rb2+(LW-1CW) 2
+Elevons les deux membres au carré
+Zt2 = (Rb2+(LW-1CW) 2 or (a)2 = a
+Zt2 = Rb2+(LW-1CW) 2 or (a – b )2 = a2 – 2ab + b2
+Zt2 = Rb2 + (LW)2 – 2LW x 1CW + 1(CW)2 =&gt;
+Zt2 = Rb2 + (LW)2 – 2 LWCW + 1(CW)2 =&gt;
+Zt2 = Rb2 + (LW)2 – 2 LC + 1(CW)2 or Rb2 + L2W2 = Zb2 et 1(CW)2 = Zc2
+Il vient alors
+Zt2 = Zb2 – 2LC + Zc2 =&gt; Zt2 – Zb2 – Zc2 = - 2LC
+16719551905LC = Zb2+ Zc2- Zt22
+00LC = Zb2+ Zc2- Zt22
+LC = Zt2-Zb2- Zc2-2 =&gt;
+Calcul de la réactance LW à partir de l’impédance
+Zt2 = Rb2 + L2W2 – 2LW x 1CW + 1C2W2 comme
+Zb2 = Rb2 + L2W2 ; Zc = 1CW ; 1C2W2= Zc2
+1733550274955LW = Zb2+ Zc2- Zt22Zc
+00LW = Zb2+ Zc2- Zt22Zc
+Zt2 = Zb2 – 2Lw x Zc + Zc2 =&gt; Zt2 – Zb2 – Zc2 = -2LW x Zc
+LW = Zt2- Zb2- Zc2-2Zc
+Questions de cours
+Complétez les phrases suivantes par les mots convenables.
+L'inverse de l'impédance s’appelle..........
+Le produit de la tension éfficace U aux bornes d'un dipôle par l'intensité éfficace I est appelé.........
+Une bobine inductive parcourue par un courant alternatif se comporte comme............
+La fréquence et la pulsation à la résonance d'intensité sont indépendantes de.............du circuit.
+Le déphasage ø entre la tension alternative aux bornes d'un condensateur et l'intensité du courant dans le circuit est égal á..............
+Dans une portion de circuit constituée d'une bobine idéale.............est en quadrature avance sur..............
+La réactance inductive est le produit de.........par..........du courant alternatif qui parcourt la bobine.
+Dans un circuit R-L-C série, lorsque LW&gt;1CW, le circuit est dit à charge..........dans ce cas l'intensité du courant est en..........de phase sur la tension.
+Un circuit R-L-C en série, est à charge capacitive si......... Dans ce cas la tension est........... sur la tension.
+Le déphasage ø entre la tension alternative aux bornes d’un conducteur ohmique et l'intensité du courant dans le circuit est égal à................
+Dans un circuit R-L-C et à la résonance d’intensité, les effets...........et...............se compensent.
+11)Dans un circuit R-L-C en série, si l’effet de l’inductance est prépondérant alors le circuit est dit........ ..........
+A la résonance dans un circuit série R-L-C l'amplitude de l’intensité et sa valeur éfficace sont...........alors que l’intensité et la tension aux bornes du circuit sont............
+Un circuit composé d'un condensateur de capacité C chargé initialement et mis en série avec une bobine d’auto induction L et de résistance négligeable est le siège..................de période To=................
+Applications
+Un condensateur de 25 μf est monté en serie avec une resistance de 50Ω. On applique aux bornes l’ensemble une tension alternative sinusoidale de valeur efficace 12 volts, de fréquence 60 Hz.
+Calculer l’impédance du circuit
+L’expression instantanée de l’intensité et de la tension.
+Réponses: 1) 117,34 Ω 2) i=0,12sin376,8t; u=122sin⁡(376,8t-1,12)
+Une self pure de 5 mH est reliée a une tension sinusoïdale de valeur efficace 25 volts , 400 Hz.
+Calculer la réactance de la self
+Calculer l’intensité efficace du courant qui parcourt la self.
+Ecrire l’équation horaire de l’intensité et de la tension
+Réponses: 1) 12,56Ω2) 2A3)i=22sin2512t; u=252sin(2512t+π2)
+Un condensateur de capacité 40μf est relié a une tension sinusoidale efficace 30 volts, 400 Hz.
+Calculer la réactance du condensateur
+Calculer du courant parcourant le condensateur.
+Donner l’équation horaire de l’intensité et de la tension.
+Réponses : 1) Zc=9,95≅10Ω 2) Ie=3A 3) i=32sin⁡(2512t+π2) u=302sin2512t
+4-
+Un circuit comprend, en série, un alternateur, un condensateur de capacité C et une bobine réelle, de résistance ohmique R et d’inductance L. un ampèremètre thermique, placé dans le circuit, marque 1.6A. la d.d.p mesurée à l’aide d’un voltmètre thermique est :
+Aux bornes du condensateur : 40 volts
+Aux bornes de la bobine : 72 volts
+Aux bornes de l’alternateur : 51.2 volts
+On demande alors
+La valeur du rapport LC exprimee en henry/farad
+La réactance et la résistance ohmique de la bobine
+La puissance moyenne de l’alternateur fournie au circuit ainsi que sa puissance apparente. En déduire le facteur de puissance du circuit
+Réponses : a) LC= 813 henrys/farad 2) LW = 32.52 ohms et Rb = 31.1 ohms 3) P= 79.6 W et Papp = 81.92volts/ampères cosφ = 0.97
+On dispose d’une source fournissant une tension sinusoïdale de valeur efficace 10 volts et de pulsation W = 500 rd/s
+Aux bornes de la source, on branche une bobine de résistance R = 3 ohms et d’inductance L = 8mH
+Quelle est l’impédance de la bobine
+Quel est le facteur de puissance de la bobine
+On monte un condensateur en série avec la bobine précédente. La tension efficace aux bornes de la source étant toujours 10 volts, celle mesurée aux bornes de la bobine 15 volts. Trouver :
+L’intensité efficace du courant
+L’impédance du l’ensemble
+La capacité du condensateur. Interpréter graphiquement les deux solutions obtenues.
+Reponses: 1) a) Zb = 5Ω b) cosφ = 0.6 2) a) Ie = 3A b) Zt = 3.33Ω c) C’ = 762.7 μF
+C’’ = 367.3 μF
+On maintient entre les bornes d’une prise de courant une d.d.p sinusoïdale de valeur efficace 120 volts et de fréquence 50 Hz
+Quelle est l’expression mathématique de cette différence de potentiel, en supposant qu’elle est nulle à l’instant choisi pour origine des temps ?
+On branche sur cette prise de courant une bobine dont la résistance est 100 ohms et l’inductance 0.318 henry. Calculer l’impédance de la bobine, l’intensité efficace du courant qui la parcourt, le déphasage entre l’intensité et la tension aux bornes de la prise en utilisant la construction de Fresnel. Donner l’expression mathématique de l’intensité du courant en fonction du temps.
+Réponses : a) u = 1202sin314t ; b) Zb = 141Ω ≅ 100 2Ω
+If = 0.85 A ; φ = 45 Degres; i = 0.852 sin(314t - π4)
+Un circuit comprend, en série, un alternateur, une bobine sans inductance, de résistance 20 ohms et une bobine réelle dont la résistance ohmique R et l’inductance L sont inconnues. La d.d.p mesurée à l’aide d’un voltmètre thermique est :
+Aux bornes de la lampe : 40 volts
+Aux bornes de la bobine : 72 volts
+Aux bornes de l’alternateur : 100 volts
+On demande
+L’intensité du courant
+La résistance de la bobine et sa réactance
+La puissance absorbée par la lampe, par la bobine et la puissance de l’alternateur
+Le facteur de puissance du circuit
+Réponses : 1) Ie = 2A 2) Rb = 20.1 Ω et LW = 29.97 Ω 3) PL = 80W, Pb = 80W, Pt =160W 4) Cosφ = 0.8
+A) Une bobine alimentée sous une tension continue de 120 volts parcourue par un courant de 4A, quand on lui applique une tension alternative de valeur efficace 120 volts et de fréquence 50Hz, elle est parcourue par un courant de 2A. calculer la résistance et l’inductance de la bobine.
+B) En série avec la bobine, on monte un condensateur de capacité 40μF et on alimente l’ensemble sous 120 volts efficaces. Calculer l’intensité efficace du courant et le facteur de puissance du circuit
+C) On veut obtenir l’intensité maximum efficace dans le circuit précédent en associant un deuxième condensateur au précédent. Comment le placer et quelle doit être sa capacité
+N.B Schéma.
+Réponses : A) Rb = 30Ω et L = 165 mH B) Ie = 2,93A et cosφ = 0.734 C) C1 et C2 doivent être en parallèle et C2 = 21.4 μF
+Une tension sinusoïdale de valeur efficace Ue de fréquence F= 50 Hz est imposée entre deux points A et B d’un circuit comprenant, en série, en résistor de résistance R = 20Ω, une inductance pure d’impédance Z1 = 30Ω et en condensateur d’impédance Z2 = 40Ω. Impédance mesurées a la fréquence du secteur. L’intensité efficace du courant dans le circuit est Ie = 1.5A
+Déterminer la tension sinusoïdale de valeur efficace Ue ainsi que le facteur de puissance du circuit.
+Tout en maintenant une tension sinusoïdale de valeur efficace Ue entre les bornes du circuit on change la fréquence. Elle devient F’ = 100Hz. Calculer dans ces conditions, l’intensité efficace I’ du courant dan le circuit ainsi que le nouveau facteur de puissance.
+Réponses : u = 33.452sin314t et i = 1.52 sin(314t + 0.46) cosφ = 0.896 I’ = 0.60A cosφ’ = 0.447
+On soumet un conducteur ohmique de résistance R et un condensateur de capacité C, montés en série, à une d.d.p alternative sinusoïdale de valeur efficace Ue = 120V, de fréquence F = 50Hz. Un ampèremètre thermique branché sur le circuit indique une intensité I = 2.4A et un voltmètre thermique branché aux bornes du conducteur ohmique indique une tension U1 = 96V
+Déterminer :
+L’impédance du circuit et la valeur de la résistance R
+La capacité du condensateur et la tension efficaces à ses bornes
+Le déphasage φ de i sur u et l’équation horaire de i si la phase de u est 314t radians.
+Réponses : Z= 50Ω ; R= 40Ω ; C= 106.15μF; Uc = 72V; φ= 0.64rd;
+i= 2.42sin(314t + 0.64)
+Une résistance non-inductive de R= 60Ω est mise en série avec un condensateur de capacité C. l’intensité du courant qui traverse ces deux appareils est I = 1A quand la tension aux bornes du circuit constitué est 120V et la fréquence F=50Hz. Déterminer :
+Les tensions partielles UR aux bornes de la résistance et UC aux bornes du condensateur
+La capacité C du condensateur
+L’intensité instantanée i du courant si u = UmsinWt et le décalage horaire entre i et u
+Réponses: a) UR = 60V ; UC = 603 V b) C = 30.68μF c) i = 2sin(100πt + π3). Le décalage horaire est θ=1300 seconde.
+Aux bornes d’une source de tension alternative sinusoïdale de valeur efficace 120 v et fréquence 50Hz. On monte en série une bobine (R, L) et un condensateur de capacité C. L’intensité du courant est 4A. Les tensions efficaces aux bornes de la bobine et du condensateur sont respectivement 100 v et 80 v
+Calculer :
+La réactance de la bobine
+Capacité du condensateur
+L’inductance et la résistance de la bobine
+Faire la construction de Fresnel indiquant les tensions efficaces et l’intensité du courant.
+Calculer la puissance consommée par chaque appareil et celle fournie par le secteur.
+Réponses : LW= 3,125Ω 2) C= 159μF L= 10 mH, Rb= 25Ω Pc= 400 w , Pc=0 Pt= 400 w
+AUX bornes d’une source de tension alternative sinusoïdale de valeur efficace 220 volts et de pulsation w= 200 rad/s . On dispose en série une résistance pure R= 50Ω et une bobine de résistance 30Ω et d’impédance 60Ω.
+Calculer :
+La réactance de la bobine et son inductance ?
+Quelle est l’impédance du circuit ?
+Les tensions aux bornes de la bobine et la résistance ?
+Représenter sur un diagramme de Fresnel.
+L’intensité du courant et les tensions efficaces aux bornes des différents appareils du circuit.
+Quelle doit être la capacité d’un condensateur à mettre en série avec l’ensemble (résistance ; bobine) pour que l’intensité du courant soit en phase avec la tension aux bornes de la source ?
+Calculer alors la tension efficace aux bornes de chaque appareil.
+Réponses : a) LW= 51,96 ohms , L=259,8 mH b) Zt= 95,39 ohms b) Uc=138 Volts , Ur= 115volts 3) C= 96,2 μF ; Ur=137,5 volts ; Ub=165 volts ; Uc= 142,9 volts
+Une bobine alimentée sous une tension continue de 120 volts est parcourue par un courant de 4A. Elle est parcourue par un courant de 2 A quand on lui applique une tension alternative de valeur efficace 120 volts à la fréquence de 50Hz. Sous la même tension alternative 120 volts, un condensateur est parcouru par un courant de 1,5 A.
+Calculer la résistance de la bobine et son inductance et la capacité du condensateur.
+On monte la bobine et le condensateur en série sous la tension alternative de 120 volts de fréquence 50 Hz. Calculer : l’intensité efficace du courant et la tension aux bornes de chacun des deux appareils.
+Donner l’expression de l’intensité instantanée dans la bobine et dans le condensateur.
+Réponses : 1) Rb= 30 ohms , L= 165 mH , C= 40μF 2) i= 2,93 A , Ub= 175,4 V , Uc= 233,28 V
+3) Ib= 2,93√2sin(314t-π3) ; ic= 2.93√2sin( 314t+π2)
+Une tension alternative de valeur instantanée U=120√2sin125t alimente un circuit comprenant en série une bobine réelle de résistance R=60 ohms et d’inductance L=0.64 H et un condensateur C1 =40μF
+Calculer :
+L’impédance totale du circuit et l’intensité efficace du courant.
+L’expression mathématique du courant en fonction du temps
+Comment peut-on placer un deuxième condensateur C2 avec le premier pour que l’impédance du circuit soit minimale ? Calculer C 2 et l’intensité efficace dans les différentes parties du circuit.
+Réponses : 1) Zt= 134,16 ohms ; Ie= 0.9 A 2) i= 0,9√2sin(125t+1,1 ) 3) En parallèle , C2=60 μF ; I=2 A ; I1=0.8 A ; I2= 1,2 A
+Une bobine de résistance 100 ohms et d’inductance 0.1 H parcourue par un courant sinusoïdale de fréquence f. Le facteur puissance de cette bobine est 0.3 . Calculer :
+L’impédance de la bobine
+La pulsation et la fréquence du courant
+On place en suite en série avec la bobine un condensateur, afin de ramener le facteur de puissance à 0,95 pour la fréquence trouvée.
+Déterminer les valeurs possibles de la capacité de ce condensateur.
+La valeur efficace de la tension de l’ensemble étant 120 volts
+Calculer la tension de la bobine
+Ecrire l’équation horaire de la tension du circuit pour la valeur de C la plus petite sachant que i= Imsiwt
+Réponses : Z=333 ohms ; W= 3176 rad/s ; f= 505,8 Hz ; C=1,105 μF; C’=0.898 μF ; Ub= 379,6 volts ; u=120√2sin(3176t-0,32)
+Entre deux points A et B est établie une d.d.p alternative sinusoïdale :u=Um sin wt de fréquence 50 Hz et de valeur efficace 120 volts.
+A et B sont relies par une chaine conductrice constituée d’un condensateur de capacités variable C, d’une bobine réelle B et d’une résistance non inductive R=60 ohms.
+On donne à C la valeur d’un C’= 318μF et on constate que l’intensité efficace atteint sa plus grande valeur qui est 1.5 A. calculer :
+La réactance Lw, l’inductance L, la résistance Rb de la bobine, l’impédance Zb de la bobine et son facteur de puissance.
+On donne à C la valeur de C’’ =C'2.Déterminer :l’impédance du circuit, l’intensité du courant et l’expression mathématique de l’intensité instantanée
+Réponses :Lw=10ohmsL=32 mHRb=20 ohms Zb=22.36 ohms cosɸ=0.89 Zt=80.62 ohms I=1.48 A ; i=1,482sin⁡(314t+0,73)
+Dans un circuit RLC série, la tension efficace fournie par une source alternative est Ue=120 volts et la fréquence est f= 200π Hz . Un voltmètre mesure la tension aux bornes du conducteur ohmique et indique 50 volts. Sachant que L=0,2 H et C=20μF. On demande :
+L’intensité du courant
+La résistance du conducteur ohmique
+La tension aux bornes du conducteur ohmique
+De construire le diagramme de Fresnel
+Rep : a) I= 2,42 A b) R=20,66 ohms C) Ul=193,6 volts Uc=302,5 volts
+Une d.d.p de valeur instantanée u=141 sin(376.8 t +π3) est utilisée pour alimenter en série.
+A) Une bobine de résistance 50ῼ, d’inductance (L).
+B) Un condensateur de capacité 100 μF sachant qu’a la date t=0 l’intensité est nulle, calculer :
+1) L’impédance du circuit
+2) La valeur de l’inductance
+3) La d.d.p aux bornes de chaque élément
+4) La puissance réelle du circuit.
+Représenter sur un même diagramme les différentes tensions du circuit
+Réponses : Z=100ῼ L=0.3 H UB=123.5 volts UC= 26.53 volts P=50watt
+1) Calculer la capacité d’un condensateur dont l’énergie emmagasinée W vaut 4.13 × 10-7j lorsque la tension a ses bornes est U= 5 volt . que valent dans ce cas les charges portées par les armatures ?
+On dispose maintenant d’un générateur délivrant une tension sinusoïdale U = 5√2cosWt , on applique cette tension successivement aux bornes
+D’un condensateur ohmique de résistance R
+D’un autre condensateur de capacité C
+Lorsque la fréquence f est 500 Hz on constate que l’intensité efficace est la même dans les trois cas vaut 50mA. Calculer R, L et C
+Les trois éléments du circuit précédent (R, L, C) sont associes en série aux bornes du générateur. Calculer
+L’impédance du circuit forme
+L’intensité efficace du courant qui parcourt ce circuit.
+Réponses : 1) C = 33.04 nF ; Q = 165,2 nC ; Q’ = -165,2 nC
+2) R =100Ω ; L = 0.032 H ; C = 3,18μF
+3) Z = 100Ω ; Ie = 0.05 A
+Entre deux point A et B on dispose en série une bobine de résistance R = 20Ω, d’inductance L= 0.1 H et un condensateur de capacité C. on établit entre A et B une différence de potentiel sinusoïdale de pulsation Wo = 500 rd.s-1 et de tension efficace U = 40 v
+Calculer la capacité C, sachant que la tension instantanée entre A et B est en phase avec l’intensité dans le circuit. Quelle est dans ces conditions la puissance consommée entre A et B ?
+On maintient U== 40 v mais on alimente le circuit par un courant de pulsation variable W on poise X = WW0 . quelles sont les valeurs de X pour lesquelles la puissance moyenne dissipe est la moitier de la puissance calculée précédemment ?
+En déduire les valeurs correspondantes de la pulsation et de la fréquence du courant.
+Réponses: a)C=40uf P=80w b) x=0,82 et x=1,22 ,f=65,28Hz et f=97,13Hz
+CHAPITRE 12
+POINTS ESSENTIELS
+Courants dérivés
+Conducteurs placés en dérivation ou en parallèle
+Propriétés ou principes du montage en parallèle
+Loi des tensions
+Principes particuliers
+Conséquences de la résonance en parallèle
+Circuit bouchon
+Caractéristiques du circuit bouchon
+Applications
+Courants dérivés
+Conducteurs placés en dérivation ou en parallèle
+2519680123825On dit que des conducteurs sont montés en parallèle ou en dérivation lorsqu’ils partent tous d’un même point A et aboutissent à un même point B. (fig. ci-contre)
+00On dit que des conducteurs sont montés en parallèle ou en dérivation lorsqu’ils partent tous d’un même point A et aboutissent à un même point B. (fig. ci-contre)
+Les points A et B sont appelés points ou nœuds de la dérivation.
+Propriétés ou principes du montage en parallèle
+Les intensités des courants traversant les conducteurs ont même fréquence que la tension d’alimentation
+Si l’une des branches est constituée par une self pure ou une capacité, l’intensité efficace du courant dans l’ensemble n’est pas égale à la somme des intensités dans les différentes branches, c’est-à-dire :
+47752043815It ≠ IL + IR + IC
+00It ≠ IL + IR + IC
+4017010200660it = ib + iR + iC
+00it = ib + iR + iC
+Par contre, l’intensité instantanée dans l’ensemble est égale à la somme des intensités dans chacune des branches, c’est – à– dire
+Cependant, si toutes les branches sont constituées uniquement par des résistances pures (fig. ci-contre) l’intensité efficace totale est égale a la somme des intensités chacun des tronçons, c’est – à – dire :
+Ie = I1 + I2 + I3
+Loi des tensions:
+La d.d.p aux bornes de plusieurs tronçons placés en parallèle est la même quelque soit le tronçon considéré ; cette d.d.p est également alternative et de même que celle de la source
+Principes particuliers
+L’origine de phase est la tension.
+Fresnel d’une résistance Pure :
+L’intensité du courant traversant une résistance pure est toujours en phase avec la tension.
+i=ImsinWtu=UmsinWt
+Fresnel d’une bobine réelle :
+L’intensité du courant traversant une bobine est toujours en retard de phase d’un angle φb par rapport à la tension.
+309562565405i=Imsin(Wt-φb)u=Umsin(Wt+ φb)
+00i=Imsin(Wt-φb)u=Umsin(Wt+ φb)
+Fresnel d’une self pure :
+L’intensité du courant traversant une self pure ou une inductance pure est toujours en quadrature retard d’un angle π2 sur la tension.
+306705032385i=Imsin(Wt- π2)u=Umsin(Wt+ π2)
+00i=Imsin(Wt- π2)u=Umsin(Wt+ π2)
+Fresnel d’un condensateur
+L’intensité du courant traversant un condensateur est toujours en quadrature avance d’un angle π2 sur la tension.
+28860751114425i=Imsin(Wt- π2)u=Umsin(Wt+ π2)
+00i=Imsin(Wt- π2)u=Umsin(Wt+ π2)
+N.B Lorsqu’il y a résonance, l’intensité du courant total se confond avec la tension. Autrement dit : l’intensité du courant et la tension sont en phase
+A noter:
+le facteur de puissance du circuit ne se calcule plus à partir de la formule cosφt = RtZt mais par le diagramme de Fresnel.
+Il n’existe pas de formule directe pour calculer l’impédance du circuit si ce n’est que Zt =UIt
+Dans la condition d’en parallèle, Zt est max
+Lorsqu’il y a résonance en parallèle, on calcule l’inductance de la bobine par la formule suivante
+L = C x Zb2 ou C = LZb2 (condition de resonance)
+Circuit comportant une résistance pure et une bobine en parallèle
+246697551435 Aux bornes d’un secteur alternatif de tension efficace Ue, on dispose en parallèle ou en dérivation une résistance pure et une bobine. Pour calculer l’intensité totale It du courant et le facteur de puissance cosφt du circuit, on construit le diagramme de Fresnel en appliquant les méthodes suivantes :
+00 Aux bornes d’un secteur alternatif de tension efficace Ue, on dispose en parallèle ou en dérivation une résistance pure et une bobine. Pour calculer l’intensité totale It du courant et le facteur de puissance cosφt du circuit, on construit le diagramme de Fresnel en appliquant les méthodes suivantes :
+On choisit comme origine de phase la tension
+L’intensité du courant traversant la résistance pure est en phase avec la tension
+L’intensité du courant traversant la bobine est en retard de phase d’un angle φb sur l’intensité
+Enfin on construit le parallélogramme OABC dont la diagonale OC représente l’intensité du courant principal
+Diagramme de Fresnel
+Calcul de Ie
+Considérons, pour cela, le triangle quelconque OAC (fig. pré.). Dans un triangle quelconque, n’importe quel côté au carré est égal à la somme des carrés des autres côtés moins 2 fois leur produit par le cosinus de l’angle qu’ils forment entre eux, c’est-à-dire.
+OC2 = OA2+AC2-2(OA X AC)COSA
+Or A = cos(π - φb) = - cosφb =&gt;
+Ie2=IR2+Ib2-2IRIb(-cosφb) =&gt; Ie2=IR2+Ib2+2IRIbcosφb
+5251456350Ie= IR2+Ib2+2IRIbcosφb
+00Ie= IR2+Ib2+2IRIbcosφb
+Calcul le facteur de puissance du circuit cosφb
+Considérons les triangles rectangles OCB et ABC rectangles en C. alors : cosφt=OCOB (1)
+Cosφb = ACAB 2 comme :
+OC = OA + AC L’équation 1 devient : OA + AC = OBcosφb (3)
+Remplaçons AC par sa valeur dans la relation (3)
+2442845352425cosφt= IR+IbcosφbIe
+00cosφt= IR+IbcosφbIe
+OA + ABcosφb = OBcosφt =&gt; cosφt = OA +ABcosφbOB
+Or OA = IR , OB = Ib et OB = Ie d’où
+Circuit comportant une résistance pure et une self pure en parallèle
+Ie = Intensité du courant principal (par le diagramme de Fresnel)
+IR = Intensité du courant dan la résistance pure (en phase avec la tension)
+IL = Intensité du courant dans la self (en quadrature retard par rapport a u)
+Diagramme de Fresnel
+Calcul de Ie, l’intensité du courant principal.
+le triangle OAC étant rectangle en A. Pythagore nous donne :
+312547064770Ie=IR2+IL2
+00Ie=IR2+IL2
+OC2= OA2+AC2 =&gt; Ie2=IR2+IL2 =&gt;
+Calcul de cosφt, le facteur de puissance du circuit
+Triangle considère : le même que précédemment.
+156273543180cosφt =IRIe
+00cosφt =IRIe
+Cosφt = OAOC =&gt;
+Equation horaire de l’intensité et de la tension instantanées du circuit i=Ie2sin⁡(Wt-φt)u=Ue2sin⁡(Wt+φt)
+Circuit comprenant une résistance pure et une capacité (condensateur) en parallèle
+22955258255Ie : intensité principale (par le diago.)
+IR : intensité dans la résistance pure (en phase avec la tension)
+IC : intensité du courant dans le condensateur (en quadrature avance sur la tension)
+00Ie : intensité principale (par le diago.)
+IR : intensité dans la résistance pure (en phase avec la tension)
+IC : intensité du courant dans le condensateur (en quadrature avance sur la tension)
+Diagramme de Fresnel
+Calcul de Ie, l’intensité du courant principal
+Triangle considère : OAC, rectangle en A. Pythagore s’écrit :
+270256017145Ie=IR2+IC2
+00Ie=IR2+IC2
+OC2=OA2+AC2 =&gt; Ie2=IR2+IC2 =&gt;
+Calcul de facteur de puissance du circuit
+121475517145cosφt = IRIe
+00cosφt = IRIe
+Cosφt = OAOC =&gt;
+Equation horaire de l’intensité et de la tension instantanées du circuit
+i=Ie2sin⁡(Wt+φt)u=Ue2sin⁡(Wt-φt)
+Bobine et condensateur en parallèle.
+229552586995Ie : intensité du courant principal (diago.)
+Ib : intensité dans la bobine (en retard de phase par rapport a la tension)
+Ic : intensité dans le condensateur (en quadrature avance sur la tension)
+00Ie : intensité du courant principal (diago.)
+Ib : intensité dans la bobine (en retard de phase par rapport a la tension)
+Ic : intensité dans le condensateur (en quadrature avance sur la tension)
+Pour le calcul de Ie et cosφt, on envisagera successivement trois cas.
+1er cas : Ib &gt;Ic
+3143250172085Ue =ZbIb =&gt; Ib = UeZb
+Ue = ZcIc =&gt; Ic = UeZc
+on sait que cosφb=RbZb
+Calcul de Ie ou It
+Triangle considère : OAD, triangle quelconque
+00Ue =ZbIb =&gt; Ib = UeZb
+Ue = ZcIc =&gt; Ic = UeZc
+on sait que cosφb=RbZb
+Calcul de Ie ou It
+Triangle considère : OAD, triangle quelconque
+Diagramme
+OD2 =OA2+AD2-2(OA X 汜D)cosA =&gt; Ie2=Ib2+Ic2-2IbIccosA
+2211070293370Ie = Ib2+Ic2-2IbxIcsinöb
+00Ie = Ib2+Ic2-2IbxIcsinöb
+Or A=(π2-φb) =&gt; cosA=cosπ2-φb=sinφb d’ou
+Ie2=Ib2+Ic2-2(IbxIc)sinφb
+Avec sinφb=1-cosφb2 car cos2x + sin2x = 1
+Calcul de cosφt, le facteur de puissance du circuit
+Les triangles rectangles OCD et OCA nous donnent :
+Cosφt = OCOD =&gt; OC = OD cosφt 1
+Cosφb = OCOA =&gt; OC = OA cosφb 2
+En comparant 1 et 2
+716280308610cosφt = IbcosφbIe
+00cosφt = IbcosφbIe
+OD Cosφt = OA Cosφb =&gt; Cosφt = OACosφbOD or OA= Ib et OD = Ie
+D’ou
+2eme cas. Ib &lt; Ic
+2419350-205740Calcul de Ie
+Triangle quelconque considère : ODA
+OD2=OA2+AD2-2(OAXAD)sinφb
+Ie2=Ib2+Ic2-2IbXIcsinφb
+00Calcul de Ie
+Triangle quelconque considère : ODA
+OD2=OA2+AD2-2(OAXAD)sinφb
+Ie2=Ib2+Ic2-2IbXIcsinφb
+Diagramme de Fresnel
+2726055909955Ie=Ib2+Ic2-2IbXIcsinφb
+00Ie=Ib2+Ic2-2IbXIcsinφb
+Calcul de cosφt
+Triangle rectangle ODC : OC = OD cosφt (1)
+Triangle rectangle OCA : OC = OA cosφb (2)
+369125562865cosφt = IbcosφbIe
+00cosφt = IbcosφbIe
+Comparons (1) et (2)
+OD cosφt = OA cosφb =&gt; cosφt = OAcosφbOD D’ou
+3eme cas. Ib = Ic (Résonance en parallèle)
+2419350153035OB=AD= IC
+OA=BD= Ib Ic = Ibsinφb Ie et u sont en phase
+Calcul de Ie dans le triangle rectangle ODB
+BD2=OB2+ OD2 =&gt; Ib2=Ic2+Ie2
+00OB=AD= IC
+OA=BD= Ib Ic = Ibsinφb Ie et u sont en phase
+Calcul de Ie dans le triangle rectangle ODB
+BD2=OB2+ OD2 =&gt; Ib2=Ic2+Ie2
+Diagramme de Fresnel
+16046451470660Ie = Ib2-Ic2
+00Ie = Ib2-Ic2
+Ie2=Ib2-Ic2 =&gt; D’où
+Conséquences de la résonance en parallèle
+L’impédance du circuit est maximale
+L’intensité du circuit est minimale
+L’intensité est en phase avec la tension
+Le facteur de puissance du circuit est égal à l’unité
+L’angle de déphasage du circuit est nul
+N.B : Dans ce cas, la capacité du condensateur se calcule par la relation : C =LZb2 ou L= C x Zb2
+Démonstration de la formule : C =LZb2
+Posons : Ic = Ibsinφb de même :
+Ic = UcZc =&gt; Uc = ZcIc =&gt; Uc = Ic x 1CW =&gt; Ic = UcCW
+Ib = UbZb et sinφb = LWZb
+2647950194310C =LZb2
+00C =LZb2
+Remplaçons Ic, Ib et sinφb dans Ic = Ibsinφb :
+UCW = UZbXLWZb =&gt; UCW = ULWZb2 =&gt; C.Q.F.D
+Circuit bouchon
+Définition : un circuit – bouchon est un montage formé d’une inductance pure et d’un condensateur placés en parallèle et ajustés de manière qu’il y ait résonance. Dans ce cas, l’intensité du courant principal est nulle
+Caractéristiques du circuit bouchon
+Dans le circuit bouchon, l’impédance de l’inductance est égale à celle de la capacitance c’est-a-dire LW = 1CW
+Démonstration cette relation en passant par la résonance en parallèle.
+Posons : Zb2×C=L ou Zb2×CW=LW 1
+On sait que :Zb2=Rb2+(LW)2 or, Rb=0 (inductance pure)
+La relation (1) s’écrit alors :
+LW2×CW=LW →LW×CW=1 d'ou LW=1CW C.Q.F.D
+Dans un circuit –bouchon, l’intensité de l’inductance est égale à celle de la capacité c’est- à-dire : IL=IC avec IL=UeZL et IC=UeZC (Ue etant commune) → IL=IC
+Dans un circuit-bouchon, l’intensité du courant principal est nulle. Le diagramme de Fresnel est de la forme suivante.
+3221355285115Ie = IL + IC = - IC + IC =&gt; Ie = 0
+00Ie = IL + IC = - IC + IC =&gt; Ie = 0
+Applications
+A) Une bobine de self et de résistance 10 ohms est reliée à deux bornes A et B maintenues par le réseau sous une tension alternative u = 2002sin 314t. la bobine étant plongée dans un calorimetre, il se degage 143000 calories en 5 minutes. Quelle est l’intensité efficace du courant ?
+Donner l’expression de l’intensité en fonction du temps t.
+B) En parallèle avec la bobine, entre les mêmes bornes A et B, on dispose une lampe sans self, de résistance égale à 100 ohms. Donner l’expression de l’intensité dans la lampe en fonction du temps. Quelle est l’intensité efficace du courant total fourni par le réseau entre les bornes A et B
+Réponses : Ie = 102A i = 20sin (314t -π4) Ie = 15,6A
+On applique aux bornes d’une résistance R = 6 ohms et d’inductance L = 0.00810 H, une tension efficace alternative U= 110 volts, de frequence 50Hz.
+Calculer l’impédance Z de la bobine, son facteur de puissance et l’intensité du courant qui la traverse
+On met en série avec la bobine un condensateur de capacité C. Calculer C pour que l’intensité du courant soit maximale ? quelles sont alors les tensions aux bornes de la bobine et du condensateur (diagramme de Fresnel)
+On garde le même condensateur, on le met en dérivation aux bornes d’une bobine d’impédance 16Ω et résitance 8Ω sous une tension de 110 volts. Calculer l’intensité du courant dans chacune des branches et l’intensité dans le circuit principal (diagramme de Fresnel)
+Réponses: a) Zb = 10Ω ; cosφb = 0.6 ; Ib = 11.05A b) C = 401μF Uc = 146V Ub = 182.4V c) Ib = 6.87A ; Ic = 13.8A I = 8.6A
+On maintient entre les bornes d’une prise de courant une d.d.p sinusoïdale de valeur efficace Ue = 220volts de fréquence 50Hz
+Dans une première expérience, on branche une bobine B sur cette prise de courant, l’intensité efficace du courant est Ie = 2A et la quantité de chaleur dégagée est 13200 joules par la minute. Calculer
+Le facteur de puissance de cette bobine
+Sa résistance
+Son inductance
+Quelle est la capacité du condensateur faut-il placer en série avec la bobine B pour que l’intensité du courant soit maximale ?
+Dans une seconde expériences la bobine B étant enlevée, on branche en série avec le condensateur C précédent une résistance R non inductive de 55 ohms calculer l’impédance du circuit
+Dans une troisième expérience la résistance R= 55 ohms est montée en parallèle aux bornes du condensateur C. déterminer l’intensité du courant principal.
+Réponses: a) cosφb=0.5 Rb = 55Ω L= 0.3H b) C = 33.5μF c) Z = 110Ω d) I = 4.6A
+1- Une bobine a une résistance R = 100Ω et une inductance L. elle est soumise à une tension sinusoïdale de fréquence 50Hz. De valeur efficace 127volts et l’intensité efficace du courant qui traverse cette bobine est 1.1A. Calculer :
+L’impédance de la bobine et la valeur de l’impédance
+Le facteur de puissance du circuit et le déphasage entre la tension u et l’intensité i
+2- On met en série avec la bobine un condensateur de capacité C et constate que le déphasage entre u et i est nul. Calculer
+La valeur de C
+L’intensité du courant dans le circuit
+3- on relève le condensateur C, on place en parallèle avec la bobine un condensateur parfait de capacité C’
+Déterminer sa valeur pour que Ic’ = Ib’
+Réaliser le diagramme de Fresnel des intensités calculer l’intensité du courant principal
+Réponses : Z = 115.4Ω cosφ = 0.866 L = 0.18H φ = π6
+C = 5.63mF I = 1.27A I = Ib = I’c = 1.1A
+1- Une bobine de self de résistance 10 ohms est reliée a deux bornes A et B maintenues par un réseau sous une tension alternative u = 2002sin314t (en volts)
+La bobine étant plongée dans un calorimètre ; il se dégage 143 kcal en 5mn. Quelle est l’intensité efficace du courant ? Donner l’équation horaire de l’intensité
+2- En parallèle avec la bobine, entre les mêmes branches A et B, on dispose une lampe sans self de résistance égale a 100 ohms.
+Quelle est l’intensité du courant total
+Donner l’expression mathématique de l’intensité totale en fonction du temps
+Réponses : 1) 14.1A ; 14.12sin(314t - π4) 2) 15.5A ; 15.52sin(314t – 0.69)
+1- On établit aux bornes d’une bobine une d.d.p efficace de U= 220volts. L’intensité du courant est 2.20 ampères et la quantité de chaleur dégagée est 3473 calories par minute. La fréquence du courant est 50Hz. Calculer :
+Le déphasage du courant sur la tension
+Le coefficient d’auto – induction de la bobine de longueur 80cm, de diamètre 8 cm
+Le nombre de spires de cette bobine sans fer
+2- Quel condensateur faut-il placer en série avec la bobine pour que le courant soit maximal. Calculer alors la d.d.p aux bornes de la bobine et aux bornes du condensateur
+3- On enlève le condensateur et l’on met un autre de 0.5μF en parallèle avec la bobine. Calculer
+Les intensités dans la bobine, dans le condensateur et l’intensité totale.
+Réponses : 1) a) φb = 600 ou π3 b) 276mH c) N= 5915spires 2) C= 36.7μF Ub = 440V Uc= 382V 3) Ib = 2.2A Ic = 34.5mA I = 2.17A
+CHAPITRE 13
+POINTS ESSENTIELS
+Transformateur
+Différentes sortes de transformateurs
+Rapport de transformation
+Rendement d’un transformateur
+Applications
+Transformateur
+Définition : Un transformateur est un appareil qui sert à modifier le voltage du courant. Autrement dit un transformateur est un appareil qui permet d’élever ou d’abaisser la valeur efficace d’une tension alternative sinusoïdale. Il est formé de deux enroulements : primaires et secondaires sépares par un isolant
+FONCTIONNEMENT DE TRANSFORMATEUR,A VIDE OU A CHARGE
+1)Un transformateur fonctionne à vide quand le secondaire est ouvert.
+2)Un transformateur fonctionne à charge quand le secondaire est fermé par des appareils d utilisation.
+REMARQUE: Un transformateur est un quadripolaire.
+Différentes sortes de transformateurs
+On distingue plusieurs sortes de transformateurs :
+Transformateur abaisseur ou sousvolteur ou encore dévolteur
+Transformateur élévateur ou survolteur
+N.B. on a un abaisseur de tension si et seulement si :
+U2 &lt; U1 ; N2 &lt; N1 ; I1 &gt; I2
+On a un élévateur si et seulement si :
+U2 &gt; U1 ; N2 &gt; N1 ; I1 &lt; I2
+Rapport de transformation
+3739515233045m = U2U1
+00m = U2U1
+Définition 1 : On appelle rapport de transformation m, le quotient de la tension aux bornes du secondaire a la tension aux bornes du primaire. D’où
+3385820187960m = N2N1
+00m = N2N1
+Définition 2 : On appelle rapport de transformation m, le rapport du nombre de spires au secondaire au nombre de spires au primaire. D’où
+2082165207645m = I1I2
+00m = I1I2
+Définition 3 : On appelle rapport de transformation m, le rapport du courant au primaire au courant au secondaire. D’où
+Conclusion : m = U2U1= N2N1= I1I2
+Remarque :
+Si m &gt; 1, le transformateur élève la tension
+Si m &lt; 1, le transformateur abaisse la tension
+4204335200025U2U1= N2N1
+00U2U1= N2N1
+Première loi : Les tensions aux bornes du secondaire et du primaire sont directement proportionnelles aux nombre de spires correspondantes on a :
+2797810224790U2U1= I1I2
+00U2U1= I1I2
+Deuxième loi : Les tensions aux bornes du secondaire et du primaire sont inversement proportionnelles aux courants. On a :
+3217545236855 N2N1= I1I2
+00 N2N1= I1I2
+Troisième loi : Les nombres de spires aux bornes du secondaire et du primaire sont inversement proportionnels aux courants. On a :
+Rendement d’un transformateur
+3442335273685n = P2P1
+00n = P2P1
+On appelle rendement d’un transformateur, le rapport entre la puissance utile aux bornes du secondaire et la puissance fournie au primaire.
+Applications
+Les deux enroulements d’un transformateur comprennent l’un 3000 spires et l’autre 750 spires. La tension aux bornes du primaire est égale à 100V. sachant le transformateur est utilisé comme élévateur de tension. Calculer U2 dans le secondaire.
+Réponse : U2 = 400V
+Un transformateur abaisseur de tension diminue le voltage de 2400V à 1200V. la puissance de sortie est de 9000W et le rendement total du transformateur est de 92%. L’enroulement primaire a 400 tours.
+Combien de tours la bobine du secondaire contient-elle ?
+Quelle est la puissance d’entrée ?
+Quelle est le courant dans chacune des bobines ?
+Réponses: a) 200 spires b) 9.8 KW c) Ip = 4.1A 7.5A
+Questions de cours
+Choisir La Bonne Réponse
+1) 20 condensateurs identiques á C1=0,5uf forment une batterie de 0,4uf quand ils sont groupés en:
+A) série B) parallèle
+C) 4séries de 5 condensateurs D) 5séries de 4 condensateurs
+2) L intervalle de temps qui sépare deux changements de sens consécutif du courant alternatif s appelle:
+A) Pulsation B) période C) alternance D) fréquence
+3) Le cadre d un galvanomètre de dimension 6cm par 4cm porte 100 tours de fils de section 0,1mm2 et de résistivité 1,6uΩcm alors sa résistance est:
+A) 32Ω B) 16Ω C)3,2Ω D)1,6Ω
+4) La période d un courant alternatif qui change de sens 100fois par période est:
+A) 0,01s B) 0,2s C)0,02s D)0,1s
+5) L’intensité d un courant alternatif a pour expression i=3sin314t alors l intensité efficace est:
+A) 3A B) 3√2A C) 1,5√2A D)2√3A
+6) Un électro-aimant a une force portante F=500N. Si on double l intensité alors la force devient:
+A) 500N B) 1000N C) 2000N D) 125N
+7) La durée d une oscillation s appelle:
+A) période B) Fréquence C) Alternance D) Pulsation
+8) La fréquence du courant en Amérique est 60Hz alors sa pulsation est:
+A) 314rd/s B) 376rd/s C)376,8rd/s D) 120rd/s
+9) La fonte, le fer et le cobalt sont:
+A) Des substances paramagnétiques B) substances Ferromagnétiques
+C) substances Amagnétiques
+10) Un oscilloscope cathodique mesure:
+A) intensité efficace B) Amplitude C) fréquence D) période
+Réponses 1) C 2) C 3) C 4)C 5)C 6) C 7)A 8)C 9)B 10)B
+COMPLETER LES PHRASES SUIVANTES PAR LES MOTS CONVENABLES:
+1) Les lignes de champ d un champ magnétique produit par un courant à travers une bobine longue se dirigent de la face.........................................................................................à la face…………………...........................................................................à l extérieur de la bobine.
+2) Deux ou plusieurs condensateurs en parallèle sont soumis à la même...................................... et chacun porte une charge........................................................................ à sa capacité.
+3) Le....................................................................... est un courant unidirectionnel; tandis que le............................................................ est un courant variable qui change d intensité à chaque instant et de sens périodiquement.
+4) La capacité d un condensateur plan est..................................................................... à l aire des armatures et...................................................................... à la distance des plaques qui les sépare.
+5) Un................................................... transforme le courant continu en courant alternatif tandis que les..................................................... Transforment le courant alternatif en courant continu.
+6) La puissance réelle s exprime en............................................... alors que la puissance apparente s’exprime en..........................................................................
+7) Le champ immense qui englobe la terre s appelle......................................................................
+8) La machine productrice du courant alternatif s appelle............................................................
+9) En charge le condensateur joue le rôle............................................... et á décharge il joue le rôle....................................................................................................................................................................
+10) On dit pulsation ou.................................................... et elle s exprime en.....................................
+11) Les aimants............................................................... sont connus depuis l antiquité ils sont issus d un minerai de fer appelé.......................................ou....................de formule chimique……..........
+12) D’après l expérience de l aimant brisé les pôles d un aimant sont………………………............. car il est impossible d isoler........................................................................... d un aimant
+13) Dans la région centrale d un solénoïde les lignes d inductions sont pratiquement.................................................................................................................................................
+Réponses: 1)Nord, sud 2)tension, proportionnelle 3)redressé, alternatif 4) proportionnelle, inversement proportionnelle 5) Onduleur(inverter), rédesseurs 6)watt, volt ampère 7)champ magnétique terrestre 8)alternateur 9) récepteur, générateur 10)pulsation ou vitesse angulaire 11) artificiels, magnétite ou pierres d aimants, Fe3O4 12)inséparables, les pôles 13)des droites parallèles
+COMPLETER:
+1) La roue de Barlow est un...........................................................................
+2) Dans la région où les lignes d inductions sont parallèles, le champ magnétique est................
+3) L appareil qui mesure respectivement le flux magnétique, le moment magnétique, le champ magnétique............;............;............................................................................................................
+4) L induction magnétique terrestre en un lieu admet une..................................... et une…...............
+5) Le quotient de la puissance moyenne par la puissance apparente s appelle........
+6) La force qui nait de l action d un courant sur un conducteur parcouru par un courant est appelé................................................................................................................................................................
+7) La méthode d optique permettant de mesurer la déviation du cadre d un galvanomètre s’appelle.......... …………………………………………………………………………………..
+8) On appelle....................................................................un retard de l aimantation d un matériau magnétique par rapport à la forte aimantation
+9) Le champ qui persiste âpres avoir supprimé le champ inducteur est......................................
+10) Le produit de la tension efficace par l intensité efficace s appelle.........................................
+11) L’opposition qu’offre un circuit au passage du courant alternatif s appelle.......................
+12) On appelle..............................................................tout dispositif comprenant du fer autour duquel s’enroulent des spires conductrices ou l on peut faire passer du courant.
+13) Le fer, l acier, le cobalt et la fonte sont des...................................................................................
+14) Les substances qui se sont repoussées faiblement par un aimant s appellent.................
+15) Les substances qui se sont attirées faiblement par aimant même très puissant s’appellent…………………………………………………………………………………………………………………..
+16) Un....................................................................... est un élément capable de fournir de l énergie que par deux points tandis que un........................................................................ est élément capable de recevoir de l énergie que par deux points.
+17) Un....................................................................................................... élève la tension alternative alors qu’un…………………………………………………………………................ à baisse la tension alternative.
+18) L appareil servant à mesurer le déphasage entre l intensité et la tension s’appelle……………………………………………………………………………………………........ …………………..
+19) Un figure géométrique dans laquelle l intensité du courant et les tensions aux bornes des appareils sont représentées par des vecteurs en tenant compte de leurs relations de phase s appelle........... ………………………………………………………………………………………………….
+20) La température à laquelle un corps perd son aimantation spontanée s’appelle.............................................................................................................................................................
+Réponses: 1) Un petit moteur électrique 2) uniforme 3)Flux mètre, magnétomètre, tesla mètre 4)Une composante horizontale et une composante verticale 5)facteur de puissance du circuit 6)force électromagnétique 7)méthode de Poggendorff 8)Hystérésis 9)Champ rémanent 10)Puissance apparente 11)Impédance 12)Electro aimant 13)Substances ferromagnétiques 14)Substance diamagnétiques 15) Substances paramagnétiques 16) Dipôle actif, dipôle passif 17)Transformateur élévateur, transformateur abaisseur 18)Phasemètre 19)Diagramme de Fresnel 20)Température de curie
+Choisir la bonne réponse:
+1) un condensateur plan a une capacité de 80microfarad si l on remplace l isolant par un autre de permittivité K=3 La capacité devient:
+A) 80microfarad B) 160microfarad C) 240 microfarad D) 83 microfarad
+2) Deux condensateurs c1= 40microfarad et c2=60microfarad sont associes en parallèle alors la capacité du système est :
+A) 40microfarad B) 100microfarad C) 60microfarad D) 50 microfarad
+3) Lorsqu’on double la tension entre les armatures d un condensateur, l’énergie devient:
+A) 2 fois plus petite B)2 fois plus grande C) 4 fois plus grande C) 4 fois plus petite
+4) Un condensateur c1=0,6microfarad emmagasine 0,5mC est relie en parallèle avec un autre C2= 0,4microfarad alors la tension du système est:
+A) 50V B) 500V C) 5000V D) 50000V
+5) L inverse de la capacité s appelle :
+A) farad B) AdmittanceC) Elastance D) Capacitance
+Compléter les phrases suivantes par les mots convenables:
+1) L'intensité d’aimantation d un barreau aimanté est le…………………………............... du barreau par l'unité de................................................................................................................................
+2) La sensibilité d un galvanomètre à cadre mobile est le quotient de............................................... par................ ………………………………………………………………………………………………………………..
+3) On ne peut pas réaliser l expérience d œrsted avec un courant.............. …………….mais plutôt avec un................................................................................................................................................
+4) Toute région de l’espace dans laquelle les pôles d un aimant sont soumis à des forces magnétiques s appelle................................................................................................................................
+5)L appareil qui sert à mesurer le moment magnétique s appelle...............................................
+6) La méthode de Poggendorff permet de………………………………………………………..................
+7)L appareil qui sert à mesurer l intensité de l induction magnétique s appelle....................
+8)La roue de barlow est............................................................................................................................
+9)La règle des trois doigts de la main droite permet de………………………………………................
+10)un aimant naturel est un corps chimique composé appelé........................................... de formule............................................................................................................................................................
+7) La capacité s exprime en:
+A) Coulomb B) Farad C) Volt D) joule
+4) La règle de l observateur d ampère permet de.........
+6)Le plus simple des condensateurs s appelle: A) condensateur plan B) Condensateur spherique C) Condensateur cylindrique D)Bouteille de Leyde
+8)Les unites du champ electrique sont: A) watt et joule B) Volt/metre et Newton/coulomb C) Ampere et joule D) Amperetre metre carre
+9)Un condensateur dont ses armatures sont planes est un: A) condensateur B) un condensateur plan C) un condensateur au papier D) un condensateur au mica
+Réponse 21)même nom, noms contraires 22) Attractive, répulsive 23) 1metre carré, 1Weber 24) 1metre carré, 1Tesla 25)fluxmètre
+Réponses: 11)Courant variable 12)Volt/mètre ou Newton/coulomb 13)Pulsation 14)Oscilloscop cathodique 15)Moment magnétique 16)Champ électrique 17)Uniforme 18)Tension de service 19) -п/2 20) Daraf
+Choisir la bonne réponse:
+1)Les courants de foucault on deux effet fondamentaux:
+A) réchauffement et fréinage B) éffauchement et fréinage C) Ralentissement et fréinage
+2)Un condensateur plan de capacité 0,1microfarad est constitué de deux armatures en regard de 28,2 dm2 séparées par un diélectrique( K=8).1) L épasseur du diélectrique est :
+A) 0,02m B)0,2mm C)0,02um C)0,2nm 2)La charge prise par ce condensateur sous une tension U est 25microcoulomb. Alors cette tension est A) 250V B)2,5 v C) 4mv D)4V
+21) Deux poles d aimants de............. se repoussent alorsque deux poles de.......... S attirent.
+22) Entre deux courants rectilignes paralleles de meme sens il existe une force.......... Alorsqu entre deux courants rectilignes de sens contraires il existe une force............
+23)Le tesla est l induction magnetique uniforme qui, répartie sur une surface de........... Produirait à travers cette surface un flux de......... Weber.
+24)Le weber est le flux d induction magnetique à travers une surface de.. ... normale aux lignes de champ d un champ magnetique d intensite de.......
+25) L appareil servant à mesurer le flux magnetique s appelle......
+13)Le courant induit est courant............
+14)Les courants induits qui prennent naissance dans bloc métallique en mouvement s appelle............. 15)Dans un circuit RLC en serie lorsque l effet de l inductance compense celui de la capacitance alors le circuit est............
+16)La bouteille de Leyde est un...............
+17)La valeur maximum du champ electrique qu un diélectrique peut supportes sans qu une étincelle se produise entre les armatures s appelle..........
+18)Toute variation de flux dans un circuit fermé donne naissance à une............. et un............
+19)Le quotient de 2п/t s appelle..........
+20)Un courant produit par la variation de flux est un courant..........
+11)un courant qui varie en fonction du temps est un..............
+12)L’unité du champ électrique est............... ou................
+13)Le produit de 2п par la fréquence s appelle.......
+14) L appareil servant à mesurer l amplitude est...............
+15)LE produit la masse magnétique par la distance s appelle.........
+16)Le quotient du volume par l’écartement des plaques s appelle..........
+17)Dans l entrefer d un aimant en fer à cheval le champ est.............
+18)La tension qui fait fonctionner le condensateur est la.........
+19) Le déphase de l intensité par rapport à la tension aux bornes d un condensateur placé en série est.................
+20)L unite de l’élastine est............................
+Compléter les phrases suivantes par les mots convenables:
+1) L'intensité d’aimantations d un barreau aimanté est le..................... du barreau par l'unité de........................
+2) La sensibilité d un galvanomètre à cadre mobile est le quotient de................ par................
+3) On ne peut pas réaliser l expérience d œrsted avec un courant.............. mais plutôt avec un...........
+4) Toute région de l espace dans laquelle les pôles d un aimant sont soumis à des forces magnétiques s appelle............
+5) L appareil qui sert à mesurer le moment magnétique s appelle..............
+6) La méthode de Poggendorff permet de..................
+7) L appareil qui sert à mesurer l intensité de l induction magnétique s appelle...........
+8)La roue de Barlow est................
+9)La règle des trois doigts de la main droite permet de..................
+10)un aimant naturel est un corps chimique composé appelé................ de formule.................
+11)La roue de Barlow permet la conversion de l énergie............... en énergie..............
+12)Une bobine dont sa longueur(L) est supérieure à son diamètre est appelée................ ou................ 13)L introduction d une substance ferromagnétique dans une bobine parcourue par un courant electrique constant fait augmenter............. et.............
+14)La balance de coton est une...............
+15)L unité du champ magnétique est............. ou............. 16)La force minimale qu’il faut appliquer sur l armature d un électroaimant pour la séparer de son noyau s appelle............ 17)La sonnerie électrique est une..............
+18) Un ensemble de lignes qui traverse un élément de surface placée dans un champ magnétique s appelle.......
+19) L’appareil qui est basé sur la loi de Laplace servant à mesurer le passage de très faible intensité s appelle.........
+20) Le tire bouchon de maxwell permet de............
+1)reponses 11) electrique, mecanique 12) bobine longue ou solenoïde 13,)le champ et le flux 14)une application de la loi de Laplace 15) Tesla ou weber par metre carré 16) force portante 17) application des electroaimant 18) flux magnétique 19)galvanometre à cadre mobile 20)déceler le sens du vecteur induction magnétique
+Réponses: 1) magnétique, un champ magnétique 2)Série, plus petite 3)Aimant, fer à cheval, solénoïde 4)de l inductance et la capacitance 5)mécanique, électrique 6)Foucault 7)périodes par seconde 8)Tension de rupture 9)galvanomètre balistique 10)Transformateur 11)Alternateur 12) Lenz
+Compléter les espaces vides suivants par les mots convenables:
+1) L'inclinaison est................ dans l'hémisphère nord et.............. dans l'hémisphère sud.
+2) L'angle formé par le méridien magnétique et géographique s'appelle................
+3) La plus grande valeur que peut prendre le courant instantané est...............
+4) L'appareil servant à mesurer l induction magnétique uniforme s appelle............
+5) L'intervalle de temps qui sépare deux changements de sens consécutifs du courant porte le nom................
+6) L'angle que fait le champ magnétique terrestre avec sa composante horizontale s appelle........
+7) L inverse de la fréquence s appelle........
+8) Deux courants rectignes parallèles de............. S’attirent alors que deux courants rectilignes paralleles de........... Se repoussent
+9) L inverse de l impédance s appelle..........
+10)L inverse de la perméance s appelle............
+Réponses: 13)Temporaire 14)Courant de foucault 15) en résonance 16) Un condensateur 17)Rigidité diélectrique 18)une force electromotrice induite et un courant induit 19)pulsation 20)Courant induit
+Réponses des 10 premieres questions: 1)Positive et negative 2)Déclinaison magnétque 3) intensité maximale 4)Balance de cotton 5)Alternance 6)inclinaison magnétique 7)période 8) meme sens et sens contraire 9) Admittance 10)Réluctance
+Reponses des 10 premieres questions: 1)Le quotient du moment magnétique du barreau par l unite de volume 2)la déviation par l intensite du courant 3) alternatif, continu 4) Champ magnétique 5)magnetometre 6)mesurer la deviation des angles 7)Tesla mètre 8)une application de Laplace 9)préciser le sens de la force elecromagnetique 10)Oxyde magnetique, Fe3O4
+COMPLETER LES PHRASES SUIVANTES:
+1)L' expérience d'œrsted a permis de découvrir la propriété............ du courant électrique qui crée autour d un fil conducteur...............
+2)Lorsque des condensateurs sont placés en..........., la capacité équivalente de l ensemble est............ que la plus petite capacité de l association
+3) Dans l entrefer d un............. en............... et au centre d un................. le champ magnétique est uniforme
+4) Dans un circuit R-L-C et à la résonance les effets.................... et................ se compensent.
+5)La roue de faraday transforme l énergie............ en énergie..............
+6)Le fréinage électromagnétique est une application de.............
+7)La fréquence correspond au nombre de...........
+8)La tension qui perfore le diélectrique et met le condensateur hors d usage s appelle..............
+9) L appareil servant à mesurer de petites quantités d’électricité induite s appelle................
+10) L appareil qui modifie la tension alternative porte le nom de..............
+11) La machine productrice du courant alternatif s appelle.............
+12) Le sens du courant induit est tel que par ses effets il s oppose à la cause qui lui donne naissance est la loi de...........

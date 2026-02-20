@@ -121,6 +121,18 @@ const catchupSessionCreateSchema = Joi.object({
   subject: Joi.string().trim().min(2).max(120).required(),
   description: Joi.string().trim().max(5000).allow('', null),
   meetUrl: Joi.string().uri().pattern(/^https:\/\/meet\.google\.com\/.+/i).required(),
+  invitationScope: Joi.string().valid('GLOBAL', 'TEACHERS', 'TEACHER', 'SCHOOL').default('GLOBAL'),
+  targetSchool: Joi.when('invitationScope', {
+    is: 'SCHOOL',
+    then: Joi.string().trim().min(2).max(160).required(),
+    otherwise: Joi.string().trim().max(160).allow('', null)
+  }),
+  targetTeacherId: Joi.when('invitationScope', {
+    is: 'TEACHER',
+    then: Joi.number().integer().positive().required(),
+    otherwise: Joi.number().integer().positive().allow(null)
+  }),
+  invitationMessage: Joi.string().trim().max(1000).allow('', null),
   startsAt: Joi.date().iso().required(),
   endsAt: Joi.date().iso().required()
 });
@@ -130,6 +142,10 @@ const catchupSessionUpdateSchema = Joi.object({
   subject: Joi.string().trim().min(2).max(120),
   description: Joi.string().trim().max(5000).allow('', null),
   meetUrl: Joi.string().uri().pattern(/^https:\/\/meet\.google\.com\/.+/i),
+  invitationScope: Joi.string().valid('GLOBAL', 'TEACHERS', 'TEACHER', 'SCHOOL'),
+  targetSchool: Joi.string().trim().max(160).allow('', null),
+  targetTeacherId: Joi.number().integer().positive().allow(null),
+  invitationMessage: Joi.string().trim().max(1000).allow('', null),
   startsAt: Joi.date().iso(),
   endsAt: Joi.date().iso(),
   isActive: Joi.boolean()

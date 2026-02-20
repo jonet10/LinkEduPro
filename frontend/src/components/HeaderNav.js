@@ -166,6 +166,43 @@ export default function HeaderNav() {
   const canSeeCatchup = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const avatarUrl = avatarBroken ? null : resolveMediaUrl(student?.photoUrl);
 
+  function onBack() {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    router.push('/');
+  }
+
+  function resolveNotificationHref(notification) {
+    const entityId = notification?.entityId ? String(notification.entityId) : '';
+    if (notification?.entityType === 'CATCHUP_SESSION' && entityId) {
+      return `/rattrapage?session=${encodeURIComponent(entityId)}`;
+    }
+    if (notification?.entityType === 'Conversation' && entityId) {
+      return `/messages?conversation=${encodeURIComponent(entityId)}`;
+    }
+    if (notification?.entityType === 'Post' && entityId) {
+      return `/blog?post=${encodeURIComponent(entityId)}`;
+    }
+    if (notification?.entityType === 'LibraryBook') {
+      return '/library';
+    }
+    return '/messages';
+  }
+
+  async function onNotificationOpen(notification) {
+    if (!notification) return;
+    if (!notification.isRead) {
+      await markOneRead(notification.id);
+    }
+    setIsNotifOpen(false);
+    setIsMobileNotifOpen(false);
+    setIsQuickMenuOpen(false);
+    setIsMobileMenuOpen(false);
+    router.push(resolveNotificationHref(notification));
+  }
+
   const desktopMenuItems = useMemo(() => {
     if (!isAuthed) return [];
     return [
@@ -295,6 +332,15 @@ export default function HeaderNav() {
       <div className="flex items-center gap-2 text-sm">
         <button
           type="button"
+          className="hidden rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:inline-flex"
+          onClick={onBack}
+          title="Retour"
+          aria-label="Retour"
+        >
+          Retour
+        </button>
+        <button
+          type="button"
           className="hidden rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:inline-flex"
           onClick={toggleDarkMode}
           title={darkMode ? 'Desactiver le mode sombre' : 'Activer le mode sombre'}
@@ -354,7 +400,7 @@ export default function HeaderNav() {
                         n.isRead ? 'border-brand-100 bg-white text-brand-700' : 'border-brand-500 bg-brand-50 text-brand-900'
                       }`}
                       onClick={() => {
-                        if (!n.isRead) markOneRead(n.id);
+                        onNotificationOpen(n);
                       }}
                     >
                       <p className="font-semibold">{n.title}</p>
@@ -514,6 +560,14 @@ export default function HeaderNav() {
                       <button
                         type="button"
                         className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-white/10"
+                        onClick={onBack}
+                      >
+                        <span>↩ Retour</span>
+                        <span className="text-slate-400">›</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-white/10"
                         onClick={toggleDarkMode}
                       >
                         <span>{darkMode ? '☀️ Mode clair' : '🌙 Mode sombre'}</span>
@@ -567,7 +621,7 @@ export default function HeaderNav() {
                         n.isRead ? 'border-brand-100 bg-white text-brand-700' : 'border-brand-500 bg-brand-50 text-brand-900'
                       }`}
                       onClick={() => {
-                        if (!n.isRead) markOneRead(n.id);
+                        onNotificationOpen(n);
                       }}
                     >
                       <p className="font-semibold">{n.title}</p>

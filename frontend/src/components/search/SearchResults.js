@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import styles from './Search.module.css';
 
 function CategoryBlock({ title, rows, renderRow }) {
@@ -45,11 +46,13 @@ export default function SearchResults({ data, loading, error, query, onPageChang
             title="Cours"
             rows={data.results.courses}
             renderRow={(item) => (
-              <article key={`course_${item.id}`} className={styles.resultCard}>
-                <p className="font-semibold text-brand-900">{item.name}</p>
-                <p className="mt-1 text-sm text-brand-700">{item.description || 'Sans description.'}</p>
-                <p className={styles.meta}>Tags: {(item.tags || []).join(', ') || 'N/A'} | Tentatives: {item.attemptCount}</p>
-              </article>
+              <Link key={`course_${item.id}`} href={`/quiz/${item.id}`} className={styles.resultLinkCard}>
+                <article className={styles.resultCard}>
+                  <p className="font-semibold text-brand-900">{item.name}</p>
+                  <p className="mt-1 text-sm text-brand-700">{item.description || 'Sans description.'}</p>
+                  <p className={styles.meta}>Tags: {(item.tags || []).join(', ') || 'N/A'} | Tentatives: {item.attemptCount}</p>
+                </article>
+              </Link>
             )}
           />
 
@@ -57,11 +60,13 @@ export default function SearchResults({ data, loading, error, query, onPageChang
             title="Publications"
             rows={data.results.publications}
             renderRow={(item) => (
-              <article key={`pub_${item.id}`} className={styles.resultCard}>
-                <p className="font-semibold text-brand-900">{item.title}</p>
-                <p className="mt-1 text-sm text-brand-700">{item.excerpt || 'Publication éducative.'}</p>
-                <p className={styles.meta}>Auteur: {item.author?.firstName} {item.author?.lastName} | Likes: {item.likeCount}</p>
-              </article>
+              <Link key={`pub_${item.id}`} href={`/blog?post=${item.id}`} className={styles.resultLinkCard}>
+                <article className={styles.resultCard}>
+                  <p className="font-semibold text-brand-900">{item.title}</p>
+                  <p className="mt-1 text-sm text-brand-700">{item.excerpt || 'Publication éducative.'}</p>
+                  <p className={styles.meta}>Auteur: {item.author?.firstName} {item.author?.lastName} | Likes: {item.likeCount}</p>
+                </article>
+              </Link>
             )}
           />
 
@@ -69,11 +74,13 @@ export default function SearchResults({ data, loading, error, query, onPageChang
             title="Enseignants"
             rows={data.results.teachers}
             renderRow={(item) => (
-              <article key={`teacher_${item.id}`} className={styles.resultCard}>
-                <p className="font-semibold text-brand-900">{item.firstName} {item.lastName}</p>
-                <p className="mt-1 text-sm text-brand-700">École: {item.school || 'N/A'}</p>
-                <p className={styles.meta}>Niveau: {item.teacherLevel} | Réputation: {item.reputationScore}</p>
-              </article>
+              <Link key={`teacher_${item.id}`} href="/blog" className={styles.resultLinkCard}>
+                <article className={styles.resultCard}>
+                  <p className="font-semibold text-brand-900">{item.firstName} {item.lastName}</p>
+                  <p className="mt-1 text-sm text-brand-700">École: {item.school || 'N/A'}</p>
+                  <p className={styles.meta}>Niveau: {item.teacherLevel} | Réputation: {item.reputationScore}</p>
+                </article>
+              </Link>
             )}
           />
         </div>

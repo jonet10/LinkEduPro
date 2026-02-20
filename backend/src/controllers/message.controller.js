@@ -368,6 +368,19 @@ async function sendGlobalMessage(req, res, next) {
       return createdConversation;
     });
 
+    await prisma.userNotification.createMany({
+      data: uniqueRecipientIds
+        .filter((userId) => userId !== senderId)
+        .map((userId) => ({
+          userId,
+          type: 'GLOBAL_ANNOUNCEMENT',
+          title: 'Nouvelle annonce',
+          message: content.length > 160 ? `${content.slice(0, 157)}...` : content,
+          entityType: 'Conversation',
+          entityId: String(conversation.id)
+        }))
+    });
+
     return res.status(201).json({
       message: 'Annonce envoyee.',
       conversation: {

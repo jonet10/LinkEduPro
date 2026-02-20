@@ -4,6 +4,7 @@ const validate = require('../middlewares/validate');
 const { requireRoles } = require('../middlewares/roles');
 const {
   listCatchupSessions,
+  listTargetTeachers,
   createCatchupSession,
   updateCatchupSession,
   deleteCatchupSession
@@ -18,6 +19,7 @@ const router = express.Router();
 router.use(auth);
 
 router.get('/', listCatchupSessions);
+router.get('/teachers', requireRoles(['ADMIN', 'TEACHER']), listTargetTeachers);
 router.post('/', requireRoles(['ADMIN', 'TEACHER']), validate(catchupSessionCreateSchema), createCatchupSession);
 router.patch('/:id', requireRoles(['ADMIN', 'TEACHER']), validate(catchupSessionUpdateSchema), updateCatchupSession);
 router.delete('/:id', requireRoles(['ADMIN', 'TEACHER']), deleteCatchupSession);

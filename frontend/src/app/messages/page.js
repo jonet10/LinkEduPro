@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 
@@ -34,6 +34,7 @@ function conversationRecipientId(conversation, currentUserId) {
 
 export default function MessagesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [token, setToken] = useState(null);
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -64,6 +65,7 @@ export default function MessagesPage() {
     () => conversations.filter((c) => c.type === 'GLOBAL'),
     [conversations]
   );
+  const requestedConversationId = Number(searchParams.get('conversation') || 0);
 
   async function loadConversations(currentToken) {
     const data = await apiClient('/messages/conversations', { token: currentToken });
@@ -133,6 +135,13 @@ export default function MessagesPage() {
     if (!token || !selectedConversationId) return;
     loadConversationById(token, selectedConversationId);
   }, [token, selectedConversationId]);
+
+  useEffect(() => {
+    if (!requestedConversationId || !conversations.length) return;
+    if (conversations.some((conversation) => conversation.id === requestedConversationId)) {
+      setSelectedConversationId(requestedConversationId);
+    }
+  }, [requestedConversationId, conversations]);
 
   async function handleSendPrivate(event) {
     event.preventDefault();
