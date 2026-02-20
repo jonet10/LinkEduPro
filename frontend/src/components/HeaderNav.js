@@ -347,7 +347,7 @@ export default function HeaderNav() {
         </button>
       ) : null}
 
-      <div className="flex items-center gap-2 text-sm">
+      <div className="flex w-full items-center justify-end gap-2 text-sm md:w-auto md:justify-start">
         {showBackButton ? (
           <button
             type="button"
