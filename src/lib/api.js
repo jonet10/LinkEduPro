@@ -1,4 +1,7 @@
-﻿const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { clearAuth } from '@/lib/auth';
+import { clearSchoolAuth } from '@/lib/schoolAuth';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export async function apiClient(path, options = {}) {
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
@@ -17,6 +20,19 @@ export async function apiClient(path, options = {}) {
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
+    if (res.status === 401 && options.token && typeof window !== 'undefined') {
+      clearAuth();
+      clearSchoolAuth();
+
+      const currentPath = window.location.pathname || '';
+      const isSchoolArea = currentPath.startsWith('/school-management');
+      const loginPath = isSchoolArea ? '/school-management/login' : '/login';
+
+      if (currentPath !== loginPath) {
+        window.location.assign(loginPath);
+      }
+    }
+
     const error = new Error(data.message || 'Erreur API');
     error.status = res.status;
     error.code = data.code;
