@@ -329,6 +329,25 @@ export default function HeaderNav() {
 
   return (
     <>
+      <button
+        type="button"
+        className="absolute left-2 rounded-md border border-brand-100 bg-white/90 px-2 py-1 text-sm text-brand-900 shadow-sm hover:bg-brand-50 md:hidden"
+        onClick={onBack}
+        title="Retour"
+        aria-label="Retour"
+      >
+        <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+          <path
+            d="M15 18l-6-6 6-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
       <div className="flex items-center gap-2 text-sm">
         <button
           type="button"
