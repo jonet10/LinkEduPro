@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 import { resolveMediaUrl } from '@/lib/media';
@@ -43,6 +43,10 @@ export default function BlogPage() {
   const [openComments, setOpenComments] = useState({});
   const [commentsByPost, setCommentsByPost] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
+  const createGalleryInputRef = useRef(null);
+  const createCameraInputRef = useRef(null);
+  const editGalleryInputRef = useRef(null);
+  const editCameraInputRef = useRef(null);
 
   const token = useMemo(() => getToken(), []);
   const student = useMemo(() => getStudent(), []);
@@ -130,6 +134,13 @@ export default function BlogPage() {
       if (target === 'create') setUploadingCreateImage(false);
       if (target === 'edit') setUploadingEditImage(false);
     }
+  }
+
+  function onPickImage(target, source) {
+    if (target === 'create' && source === 'gallery') createGalleryInputRef.current?.click();
+    if (target === 'create' && source === 'camera') createCameraInputRef.current?.click();
+    if (target === 'edit' && source === 'gallery') editGalleryInputRef.current?.click();
+    if (target === 'edit' && source === 'camera') editCameraInputRef.current?.click();
   }
 
   async function createPost() {
@@ -385,12 +396,28 @@ export default function BlogPage() {
                 <input className="input" value={editForm.excerpt} onChange={(e) => setEditForm((prev) => ({ ...prev, excerpt: e.target.value }))} placeholder="Extrait" />
                 <div className="grid gap-2 md:grid-cols-2">
                   <input className="input" value={editForm.imageUrl} onChange={(e) => setEditForm((prev) => ({ ...prev, imageUrl: e.target.value }))} placeholder="Image URL" />
-                  <label className="rounded-lg border border-brand-100 px-3 py-2 text-sm text-brand-700">
-                    Importer image
-                    <input type="file" accept="image/*" className="mt-1 block w-full" onChange={(e) => uploadImage(e.target.files?.[0], 'edit')} />
-                  </label>
+                  <div className="space-y-2 rounded-lg border border-brand-100 px-3 py-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Photo</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" className="btn-secondary !px-3 !py-1 text-xs" onClick={() => onPickImage('edit', 'camera')}>
+                        Prendre une photo
+                      </button>
+                      <button type="button" className="btn-secondary !px-3 !py-1 text-xs" onClick={() => onPickImage('edit', 'gallery')}>
+                        Importer depuis l'appareil
+                      </button>
+                    </div>
+                    <input ref={editGalleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'edit')} />
+                    <input ref={editCameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'edit')} />
+                  </div>
                 </div>
                 {uploadingEditImage ? <p className="text-xs text-brand-700">Upload image...</p> : null}
+                {editForm.imageUrl ? (
+                  <img
+                    src={resolveMediaUrl(editForm.imageUrl)}
+                    alt="Aperçu image publication"
+                    className="max-h-56 w-full rounded-lg border border-brand-100 object-cover"
+                  />
+                ) : null}
                 <textarea className="input min-h-[120px]" value={editForm.content} onChange={(e) => setEditForm((prev) => ({ ...prev, content: e.target.value }))} placeholder="Contenu" />
 
                 <div className="grid gap-3 md:grid-cols-2">
@@ -488,12 +515,28 @@ export default function BlogPage() {
 
           <div className="grid gap-2 md:grid-cols-2">
             <input className="input" placeholder="Image URL (optionnel)" value={form.imageUrl} onChange={(e) => setForm((prev) => ({ ...prev, imageUrl: e.target.value }))} />
-            <label className="rounded-lg border border-brand-100 px-3 py-2 text-sm text-brand-700">
-              Importer image
-              <input type="file" accept="image/*" className="mt-1 block w-full" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
-            </label>
+            <div className="space-y-2 rounded-lg border border-brand-100 px-3 py-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Photo</p>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" className="btn-secondary !px-3 !py-1 text-xs" onClick={() => onPickImage('create', 'camera')}>
+                  Prendre une photo
+                </button>
+                <button type="button" className="btn-secondary !px-3 !py-1 text-xs" onClick={() => onPickImage('create', 'gallery')}>
+                  Importer depuis l'appareil
+                </button>
+              </div>
+              <input ref={createGalleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
+              <input ref={createCameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
+            </div>
           </div>
           {uploadingCreateImage ? <p className="text-xs text-brand-700">Upload image...</p> : null}
+          {form.imageUrl ? (
+            <img
+              src={resolveMediaUrl(form.imageUrl)}
+              alt="Aperçu image publication"
+              className="max-h-56 w-full rounded-lg border border-brand-100 object-cover"
+            />
+          ) : null}
 
           <textarea className="input min-h-[140px]" placeholder="Contenu de l’article" value={form.content} onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))} />
 
