@@ -118,7 +118,7 @@ async function sendPrivateMessage(req, res, next) {
     });
 
     return res.status(201).json({
-      message: 'Message envoye.',
+      message: 'Message envoyé.',
       data: {
         id: message.id,
         conversationId: message.conversationId,
@@ -382,7 +382,7 @@ async function sendGlobalMessage(req, res, next) {
     });
 
     return res.status(201).json({
-      message: 'Annonce envoyee.',
+      message: 'Annonce envoyée.',
       conversation: {
         id: conversation.id,
         type: conversation.type,

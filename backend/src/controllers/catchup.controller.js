@@ -17,7 +17,7 @@ async function ensureViewerAccess(user) {
   });
   if (!student) return { ok: false, status: 404, message: 'Utilisateur introuvable.' };
   if (!isNsivFromStudent(student)) {
-    return { ok: false, status: 403, message: 'Rattrapage reserve aux eleves NSIV.' };
+    return { ok: false, status: 403, message: 'Rattrapage réservé aux élèves NSIV.' };
   }
   return { ok: true };
 }
@@ -63,15 +63,15 @@ function buildInvitationMessage({
   const startLabel = new Date(startsAt).toLocaleString();
 
   if (invitationScope === 'TEACHERS') {
-    return `${teacherName} a planifie un rattrapage entre professeurs (${subject}) : "${title}" le ${startLabel}. Lien Meet: ${meetUrl}`;
+    return `${teacherName} a planifié un rattrapage entre professeurs (${subject}) : "${title}" le ${startLabel}. Lien Meet: ${meetUrl}`;
   }
   if (invitationScope === 'TEACHER' && targetTeacherName) {
-    return `${teacherName} invite ${targetTeacherName} a une session de rattrapage (${subject}) : "${title}" le ${startLabel}. Lien Meet: ${meetUrl}`;
+    return `${teacherName} invite ${targetTeacherName} à une session de rattrapage (${subject}) : "${title}" le ${startLabel}. Lien Meet: ${meetUrl}`;
   }
   if (invitationScope === 'SCHOOL' && targetSchool) {
-    return `${teacherName} organise une session de rattrapage NSIV pour l'ecole "${targetSchool}" (${subject}) : "${title}" le ${startLabel}. Lien Meet: ${meetUrl}`;
+    return `${teacherName} organise une session de rattrapage NSIV pour l'école "${targetSchool}" (${subject}) : "${title}" le ${startLabel}. Lien Meet: ${meetUrl}`;
   }
-  return `${teacherName} vous invite a une session de rattrapage NSIV (${subject}) : "${title}" le ${startLabel}. Lien Meet: ${meetUrl}`;
+  return `${teacherName} vous invite à une session de rattrapage NSIV (${subject}) : "${title}" le ${startLabel}. Lien Meet: ${meetUrl}`;
 }
 
 function buildRecipientsWhere({ invitationScope, targetSchool, targetTeacherId }) {
@@ -207,7 +207,7 @@ async function listTargetTeachers(req, res, next) {
     });
 
     if (!actor || !['ADMIN', 'TEACHER'].includes(actor.role)) {
-      return res.status(403).json({ message: 'Action non autorisee.' });
+      return res.status(403).json({ message: 'Action non autorisée.' });
     }
 
     const teachers = await prisma.student.findMany({
@@ -237,13 +237,13 @@ async function createCatchupSession(req, res, next) {
     const startsAt = new Date(req.body.startsAt);
     const endsAt = new Date(req.body.endsAt);
     if (!(startsAt instanceof Date) || Number.isNaN(startsAt.getTime())) {
-      return res.status(400).json({ message: 'Date de debut invalide.' });
+      return res.status(400).json({ message: 'Date de début invalide.' });
     }
     if (!(endsAt instanceof Date) || Number.isNaN(endsAt.getTime())) {
       return res.status(400).json({ message: 'Date de fin invalide.' });
     }
     if (endsAt <= startsAt) {
-      return res.status(400).json({ message: 'La fin doit etre apres le debut.' });
+      return res.status(400).json({ message: 'La fin doit être après le début.' });
     }
 
     const invitationScope = req.body.invitationScope || 'GLOBAL';
@@ -255,7 +255,7 @@ async function createCatchupSession(req, res, next) {
       : null;
 
     if (invitationScope === 'SCHOOL' && !resolvedTargetSchool) {
-      return res.status(400).json({ message: 'Ecole cible requise pour une invitation par ecole.' });
+      return res.status(400).json({ message: 'École cible requise pour une invitation par école.' });
     }
 
     let targetTeacher = null;
@@ -327,7 +327,7 @@ async function createCatchupSession(req, res, next) {
     }
 
     return res.status(201).json({
-      message: 'Session de rattrapage planifiee.',
+      message: 'Session de rattrapage planifiée.',
       id: createdId,
       notifiedCount: recipients.length
     });
@@ -354,14 +354,14 @@ async function updateCatchupSession(req, res, next) {
     const isAdmin = req.user.role === 'ADMIN';
     const isOwnerTeacher = req.user.role === 'TEACHER' && Number(existing.createdBy) === req.user.id;
     if (!isAdmin && !isOwnerTeacher) {
-      return res.status(403).json({ message: 'Action non autorisee.' });
+      return res.status(403).json({ message: 'Action non autorisée.' });
     }
 
     if (req.body.invitationScope === 'TEACHER' && !req.body.targetTeacherId) {
       return res.status(400).json({ message: 'Professeur cible requis pour ce scope.' });
     }
     if (req.body.invitationScope === 'SCHOOL' && !req.body.targetSchool) {
-      return res.status(400).json({ message: 'Ecole cible requise pour ce scope.' });
+      return res.status(400).json({ message: 'École cible requise pour ce scope.' });
     }
 
     const fields = [];
@@ -388,7 +388,7 @@ async function updateCatchupSession(req, res, next) {
       Prisma.sql`UPDATE nsiv_catchup_sessions SET ${Prisma.join(fields, Prisma.sql`, `)} WHERE id = ${sessionId}`
     );
 
-    return res.json({ message: 'Session mise a jour.' });
+    return res.json({ message: 'Session mise à jour.' });
   } catch (error) {
     return next(error);
   }
@@ -412,7 +412,7 @@ async function deleteCatchupSession(req, res, next) {
     const isAdmin = req.user.role === 'ADMIN';
     const isOwnerTeacher = req.user.role === 'TEACHER' && Number(existing.createdBy) === req.user.id;
     if (!isAdmin && !isOwnerTeacher) {
-      return res.status(403).json({ message: 'Action non autorisee.' });
+      return res.status(403).json({ message: 'Action non autorisée.' });
     }
 
     await prisma.$executeRaw(

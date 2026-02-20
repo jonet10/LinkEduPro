@@ -88,7 +88,7 @@ export default function RattrapagePage() {
           targetTeacherId: form.invitationScope === 'TEACHER' ? Number(form.targetTeacherId || 0) : null
         })
       });
-      setInfo('Rattrapage planifie.');
+      setInfo('Rattrapage planifié.');
       setForm({
         title: '',
         subject: 'Physique',
@@ -104,7 +104,7 @@ export default function RattrapagePage() {
       const data = await apiClient('/catchup', { token });
       setSessions(data.sessions || []);
     } catch (e2) {
-      setError(e2.message || 'Erreur creation rattrapage.');
+      setError(e2.message || 'Erreur création rattrapage.');
     } finally {
       setSaving(false);
     }
@@ -144,7 +144,7 @@ export default function RattrapagePage() {
           targetTeacherId: form.invitationScope === 'TEACHER' ? Number(form.targetTeacherId || 0) : null
         })
       });
-      setInfo('Rattrapage mis a jour.');
+      setInfo('Rattrapage mis à jour.');
       setEditingId(null);
       setForm({
         title: '',
@@ -161,7 +161,7 @@ export default function RattrapagePage() {
       const data = await apiClient('/catchup', { token });
       setSessions(data.sessions || []);
     } catch (e2) {
-      setError(e2.message || 'Erreur mise a jour.');
+      setError(e2.message || 'Erreur mise à jour.');
     } finally {
       setSaving(false);
     }
@@ -192,7 +192,7 @@ export default function RattrapagePage() {
       <div className="card">
         <h1 className="text-3xl font-bold text-brand-900">Rattrapage NSIV</h1>
         <p className="mt-2 text-sm text-brand-700">
-          Sessions de rattrapage planifiees via Google Meet pour les eleves NSIV.
+          Sessions de rattrapage planifiées via Google Meet pour les élèves NSIV.
         </p>
       </div>
 
@@ -203,23 +203,23 @@ export default function RattrapagePage() {
           </h2>
           <form className="mt-3 grid gap-3 md:grid-cols-2" onSubmit={onSubmitForm}>
             <input className="input" placeholder="Titre" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} required />
-            <input className="input" placeholder="Matiere (ex: Physique)" value={form.subject} onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))} required />
+            <input className="input" placeholder="Matière (ex: Physique)" value={form.subject} onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))} required />
             <input className="input md:col-span-2" placeholder="Lien Google Meet" value={form.meetUrl} onChange={(e) => setForm((p) => ({ ...p, meetUrl: e.target.value }))} required />
             <select className="input" value={form.invitationScope} onChange={(e) => setForm((p) => ({ ...p, invitationScope: e.target.value }))}>
               <option value="GLOBAL">Global</option>
               <option value="TEACHERS">Entre professeurs</option>
-              <option value="TEACHER">Professeur specifique</option>
-              <option value="SCHOOL">Ecole specifique</option>
+              <option value="TEACHER">Professeur spécifique</option>
+              <option value="SCHOOL">École spécifique</option>
             </select>
             {form.invitationScope === 'SCHOOL' ? (
-              <input className="input" placeholder="Ecole cible" value={form.targetSchool} onChange={(e) => setForm((p) => ({ ...p, targetSchool: e.target.value }))} required />
+              <input className="input" placeholder="École cible" value={form.targetSchool} onChange={(e) => setForm((p) => ({ ...p, targetSchool: e.target.value }))} required />
             ) : null}
             {form.invitationScope === 'TEACHER' ? (
               <select className="input" value={form.targetTeacherId} onChange={(e) => setForm((p) => ({ ...p, targetTeacherId: e.target.value }))} required>
                 <option value="">Choisir un professeur</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
-                    {teacher.firstName} {teacher.lastName} ({teacher.school || 'Sans ecole'})
+                    {teacher.firstName} {teacher.lastName} ({teacher.school || 'Sans école'})
                   </option>
                 ))}
               </select>
@@ -227,7 +227,7 @@ export default function RattrapagePage() {
             <input className="input" type="datetime-local" value={form.startsAt} onChange={(e) => setForm((p) => ({ ...p, startsAt: e.target.value }))} required />
             <input className="input" type="datetime-local" value={form.endsAt} onChange={(e) => setForm((p) => ({ ...p, endsAt: e.target.value }))} required />
             <textarea className="input md:col-span-2" placeholder="Description (optionnel)" value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
-            <textarea className="input md:col-span-2" placeholder="Message d'annonce personnalise (optionnel)" value={form.invitationMessage} onChange={(e) => setForm((p) => ({ ...p, invitationMessage: e.target.value }))} />
+            <textarea className="input md:col-span-2" placeholder="Message d'annonce personnalisé (optionnel)" value={form.invitationMessage} onChange={(e) => setForm((p) => ({ ...p, invitationMessage: e.target.value }))} />
             {!editingId ? (
               <button className="btn-primary md:col-span-2" disabled={saving}>{saving ? 'Enregistrement...' : 'Planifier'}</button>
             ) : (
@@ -252,7 +252,7 @@ export default function RattrapagePage() {
             {session.description ? <p className="mt-1 text-sm text-brand-700">{session.description}</p> : null}
             <p className="mt-1 text-xs text-brand-700">
               Audience: {session.invitationScope}
-              {session.targetSchool ? ` | Ecole: ${session.targetSchool}` : ''}
+              {session.targetSchool ? ` | École: ${session.targetSchool}` : ''}
               {session.targetTeacherName ? ` | Prof: ${session.targetTeacherName}` : ''}
             </p>
             {session.invitationMessage ? (
@@ -260,7 +260,7 @@ export default function RattrapagePage() {
                 {session.invitationMessage}
               </p>
             ) : null}
-            <p className="mt-2 text-sm text-brand-700">Debut: {new Date(session.startsAt).toLocaleString()}</p>
+            <p className="mt-2 text-sm text-brand-700">Début: {new Date(session.startsAt).toLocaleString()}</p>
             <p className="text-sm text-brand-700">Fin: {new Date(session.endsAt).toLocaleString()}</p>
             <a href={session.meetUrl} target="_blank" rel="noopener noreferrer" className="btn-primary mt-3 inline-block">
               Rejoindre Google Meet
@@ -273,7 +273,7 @@ export default function RattrapagePage() {
             ) : null}
           </article>
         ))}
-        {!loading && sessions.length === 0 ? <p className="text-sm text-brand-700">Aucune session planifiee pour le moment.</p> : null}
+        {!loading && sessions.length === 0 ? <p className="text-sm text-brand-700">Aucune session planifiée pour le moment.</p> : null}
       </div>
     </section>
   );

@@ -190,11 +190,11 @@ export default function StudyPlansPage() {
         token,
         body: JSON.stringify(normalizePayload(form))
       });
-      setInfo('Plan de cours cree.');
+      setInfo('Plan de cours créé.');
       setForm({ level: form.level, subject: '', chapterOrder: '', title: '', description: '', notes: '', exercises: '' });
       setPlans((prev) => [...prev, data.studyPlan]);
     } catch (e2) {
-      setError(e2.message || 'Erreur creation plan.');
+      setError(e2.message || 'Erreur création plan.');
     } finally {
       setSaving(false);
     }
@@ -234,9 +234,9 @@ export default function StudyPlansPage() {
       });
       setPlans((prev) => prev.map((p) => (p.id === planId ? data.studyPlan : p)));
       setEditingPlanId(null);
-      setInfo('Plan de cours mis a jour.');
+      setInfo('Plan de cours mis à jour.');
     } catch (e) {
-      setError(e.message || 'Erreur mise a jour plan.');
+      setError(e.message || 'Erreur mise à jour plan.');
     } finally {
       setUpdating(false);
     }
@@ -253,7 +253,7 @@ export default function StudyPlansPage() {
       });
       setPlans((prev) => prev.filter((p) => p.id !== planId));
       if (editingPlanId === planId) setEditingPlanId(null);
-      setInfo('Chapitre supprime.');
+      setInfo('Chapitre supprimé.');
     } catch (e) {
       setError(e.message || 'Erreur suppression plan.');
     }
@@ -264,7 +264,7 @@ export default function StudyPlansPage() {
       <section className="card space-y-2">
         <h1 className="text-2xl font-semibold text-brand-900">Plan de cours structure</h1>
         <p className="text-sm text-brand-700">
-          Choisis une matiere, puis un chapitre pour voir les notes de lecon et les exercices associes.
+          Choisis une matière, puis un chapitre pour voir les notes de leçon et les exercices associés.
         </p>
       </section>
 
@@ -277,13 +277,13 @@ export default function StudyPlansPage() {
                 <option key={lvl} value={lvl}>{lvl}</option>
               ))}
             </select>
-            <input className="input" placeholder="Matiere (ex: Chimie)" value={form.subject} onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))} required />
+            <input className="input" placeholder="Matière (ex: Chimie)" value={form.subject} onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))} required />
             <input className="input" placeholder="Ordre chapitre (ex: 1)" value={form.chapterOrder} onChange={(e) => setForm((p) => ({ ...p, chapterOrder: e.target.value }))} />
             <input className="input" placeholder="Titre chapitre" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} required />
             <textarea className="input md:col-span-2 min-h-[90px]" placeholder="Description courte" value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} required />
-            <textarea className="input md:col-span-2 min-h-[140px]" placeholder="Notes / lecons du chapitre" value={form.notes} onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))} />
+            <textarea className="input md:col-span-2 min-h-[140px]" placeholder="Notes / leçons du chapitre" value={form.notes} onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))} />
             <textarea className="input md:col-span-2 min-h-[140px]" placeholder="Exercices du chapitre" value={form.exercises} onChange={(e) => setForm((p) => ({ ...p, exercises: e.target.value }))} />
-            <button className="btn-primary md:col-span-2" disabled={saving}>{saving ? 'Creation...' : 'Ajouter chapitre'}</button>
+            <button className="btn-primary md:col-span-2" disabled={saving}>{saving ? 'Création...' : 'Ajouter chapitre'}</button>
           </form>
         </section>
       ) : null}
@@ -298,7 +298,7 @@ export default function StudyPlansPage() {
                 <option key={lvl} value={lvl}>{lvl}</option>
               ))}
             </select>
-            <input className="input" placeholder="Filtrer par matiere" value={filterSubject} onChange={(e) => setFilterSubject(e.target.value)} />
+            <input className="input" placeholder="Filtrer par matière" value={filterSubject} onChange={(e) => setFilterSubject(e.target.value)} />
             <button className="btn-secondary" onClick={loadPlans}>Appliquer</button>
           </div>
         </section>
@@ -309,7 +309,7 @@ export default function StudyPlansPage() {
 
       <section className="grid gap-4 lg:grid-cols-3">
         <article className="card lg:col-span-1">
-          <h2 className="mb-3 text-lg font-semibold text-brand-900">Matieres</h2>
+          <h2 className="mb-3 text-lg font-semibold text-brand-900">Matières</h2>
           {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
           {!loading && plansBySubject.length === 0 ? <p className="text-sm text-brand-700">Aucun plan disponible.</p> : null}
           <div className="space-y-2">
@@ -345,7 +345,7 @@ export default function StudyPlansPage() {
                 <p className="mt-1 line-clamp-2 text-sm text-brand-700">{plan.description}</p>
               </button>
             ))}
-            {!selectedSubjectPlans.length ? <p className="text-sm text-brand-700">Selectionne une matiere.</p> : null}
+            {!selectedSubjectPlans.length ? <p className="text-sm text-brand-700">Sélectionne une matière.</p> : null}
           </div>
         </article>
 
@@ -360,14 +360,14 @@ export default function StudyPlansPage() {
                   <option key={lvl} value={lvl}>{lvl}</option>
                 ))}
               </select>
-              <input className="input" value={editForm.subject} onChange={(e) => setEditForm((p) => ({ ...p, subject: e.target.value }))} placeholder="Matiere" />
+              <input className="input" value={editForm.subject} onChange={(e) => setEditForm((p) => ({ ...p, subject: e.target.value }))} placeholder="Matière" />
               <input className="input" value={editForm.chapterOrder} onChange={(e) => setEditForm((p) => ({ ...p, chapterOrder: e.target.value }))} placeholder="Ordre chapitre" />
               <input className="input" value={editForm.title} onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value }))} placeholder="Titre" />
               <textarea className="input min-h-[90px]" value={editForm.description} onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))} placeholder="Description" />
               <textarea className="input min-h-[130px]" value={editForm.notes} onChange={(e) => setEditForm((p) => ({ ...p, notes: e.target.value }))} placeholder="Notes" />
               <textarea className="input min-h-[130px]" value={editForm.exercises} onChange={(e) => setEditForm((p) => ({ ...p, exercises: e.target.value }))} placeholder="Exercices" />
               <div className="flex gap-2">
-                <button className="btn-primary" disabled={updating} onClick={() => onUpdatePlan(selectedPlan.id)}>{updating ? 'Mise a jour...' : 'Enregistrer'}</button>
+                <button className="btn-primary" disabled={updating} onClick={() => onUpdatePlan(selectedPlan.id)}>{updating ? 'Mise à jour...' : 'Enregistrer'}</button>
                 <button className="btn-secondary" onClick={() => setEditingPlanId(null)}>Annuler</button>
               </div>
             </div>
@@ -379,7 +379,7 @@ export default function StudyPlansPage() {
 
               <div>
                 <h4 className="text-sm font-semibold text-brand-900">Notes / Lecons</h4>
-                <p className="mt-1 text-sm text-brand-700 whitespace-pre-wrap">{selectedPlan.notes || 'Notes non renseignees.'}</p>
+                <p className="mt-1 text-sm text-brand-700 whitespace-pre-wrap">{selectedPlan.notes || 'Notes non renseignées.'}</p>
               </div>
 
               <div>

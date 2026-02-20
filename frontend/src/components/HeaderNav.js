@@ -207,9 +207,9 @@ export default function HeaderNav() {
       { href: '/focus', label: 'Focus', icon: '🎧' },
       { href: '/study-plans', label: 'Plans', icon: '🗂️' },
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
-      { href: '/subjects', label: 'Matieres', icon: '📘' },
-      { href: '/progress', label: 'Progres', icon: '📈' },
-      { href: '/library', label: 'Bibliotheque', icon: '📚' },
+      { href: '/subjects', label: 'Matières', icon: '📘' },
+      { href: '/progress', label: 'Progrès', icon: '📈' },
+      { href: '/library', label: 'Bibliothèque', icon: '📚' },
       { href: '/blog', label: 'Blog', icon: '📝' },
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : []),
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
@@ -218,11 +218,11 @@ export default function HeaderNav() {
 
   const mobileStudyItems = useMemo(
     () => [
-      { href: '/subjects', label: 'Matieres', icon: '📘' },
+      { href: '/subjects', label: 'Matières', icon: '📘' },
       { href: '/focus', label: 'Focus', icon: '🎧' },
       { href: '/study-plans', label: 'Plans', icon: '🗂️' },
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
-      { href: '/progress', label: 'Progres', icon: '📈' },
+      { href: '/progress', label: 'Progrès', icon: '📈' },
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : [])
     ],
     [canSeeCatchup, canSeeProbableExercises]
@@ -230,7 +230,7 @@ export default function HeaderNav() {
 
   const mobileToolItems = useMemo(
     () => [
-      { href: '/library', label: 'Bibliotheque', icon: '📚' },
+      { href: '/library', label: 'Bibliothèque', icon: '📚' },
       { href: '/blog', label: 'Blog', icon: '📝' },
       { href: '/search', label: 'Recherche', icon: '🔎' }
     ],
@@ -363,8 +363,8 @@ export default function HeaderNav() {
           type="button"
           className="hidden rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:inline-flex"
           onClick={toggleDarkMode}
-          title={darkMode ? 'Desactiver le mode sombre' : 'Activer le mode sombre'}
-          aria-label={darkMode ? 'Desactiver le mode sombre' : 'Activer le mode sombre'}
+          title={darkMode ? 'Désactiver le mode sombre' : 'Activer le mode sombre'}
+          aria-label={darkMode ? 'Désactiver le mode sombre' : 'Activer le mode sombre'}
         >
           {darkMode ? '☀️' : '🌙'}
         </button>
@@ -470,7 +470,7 @@ export default function HeaderNav() {
             className="hidden rounded-md border border-red-200 px-3 py-1.5 text-red-600 hover:bg-red-50 md:inline-flex"
             onClick={onLogout}
           >
-            Deconnexion
+            Déconnexion
           </button>
         ) : null}
 
@@ -613,7 +613,7 @@ export default function HeaderNav() {
                         className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-red-300 hover:bg-red-500/10"
                         onClick={onLogout}
                       >
-                        <span>⎋ Deconnexion</span>
+                        <span>⎋ Déconnexion</span>
                         <span className="text-red-300">›</span>
                       </button>
                     </div>
@@ -702,7 +702,7 @@ export default function HeaderNav() {
                     setIsQuickMenuOpen(false);
                     setIsNotifOpen(false);
                   }}
-                  aria-label="Ouvrir Activite"
+                  aria-label="Ouvrir Activité"
                 >
                   <div className="relative text-lg">
                     🔔
@@ -712,7 +712,7 @@ export default function HeaderNav() {
                       </span>
                     ) : null}
                   </div>
-                  <div>Activite</div>
+                  <div>Activité</div>
                 </button>
                 <Link href={mobileFourthTabHref} className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, mobileFourthTabHref) ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
                   <div className="text-lg">{mobileFourthTabIcon}</div>

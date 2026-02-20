@@ -31,7 +31,7 @@ async function markNotificationRead(req, res, next) {
       return res.status(404).json({ message: 'Notification introuvable.' });
     }
 
-    return res.json({ message: 'Notification marquee comme lue.' });
+    return res.json({ message: 'Notification marquée comme lue.' });
   } catch (error) {
     return next(error);
   }

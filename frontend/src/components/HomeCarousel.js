@@ -8,29 +8,29 @@ import SmartSearchSection from '@/components/search/SmartSearchSection';
 const SLIDES = [
   {
     id: 'haiti-school-1',
-    label: 'Ecoles haitiennes',
-    title: 'Un reseau academique connecte pour Haiti',
+    label: 'Écoles haïtiennes',
+    title: 'Un réseau académique connecté pour Haïti',
     image:
       'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80'
   },
   {
     id: 'haiti-students-1',
     label: 'Eleves NS4 (18+)',
-    title: 'Des eleves majeurs qui apprennent, publient et progressent',
+    title: 'Des élèves majeurs qui apprennent, publient et progressent',
     image:
       'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80'
   },
   {
     id: 'haiti-school-2',
-    label: 'Opportunites',
+    label: 'Opportunités',
     title: 'Des parcours vers des concours nationaux et internationaux',
     image:
       'https://images.unsplash.com/photo-1497486751825-1233686d5d80?auto=format&fit=crop&w=1600&q=80'
   },
   {
     id: 'haiti-student-local-1',
-    label: 'Eleves majeurs',
-    title: 'Des parcours inspires par la discipline et l ambition',
+    label: 'Élèves majeurs',
+    title: 'Des parcours inspirés par la discipline et l ambition',
     image: '/slides/BIBI.jpeg'
   }
 ];
@@ -39,25 +39,25 @@ const CONTEST_CARDS = [
   {
     id: 'contest-physics',
     title: 'Challenge Physique National',
-    subtitle: 'Inscriptions ouvertes - simulation chronometree',
+    subtitle: 'Inscriptions ouvertes - simulation chronométrée',
     status: 'Actif'
   },
   {
     id: 'contest-math',
     title: 'Sprint Mathematiques NS4',
-    subtitle: 'Series progressives avec classement hebdomadaire',
+    subtitle: 'Séries progressives avec classement hebdomadaire',
     status: 'Actif'
   },
   {
     id: 'contest-writing',
-    title: 'Concours Redaction Academique',
-    subtitle: 'Publication d articles avec revue pedagogique',
+    title: 'Concours Rédaction Académique',
+    subtitle: 'Publication d articles avec revue pédagogique',
     status: 'Actif'
   }
 ];
 
 const INTRO_TEXT =
-  "LinkEduPro est une plateforme educative moderne et integree, concue pour connecter eleves, professeurs et ecoles haitiennes dans un reseau academique national et international. Elle offre aux eleves NS4 (18 ans et plus) un espace securise pour apprendre, reviser, publier des contenus academiques et acceder a des opportunites nationales et internationales.";
+  "LinkEduPro est une plateforme éducative moderne et intégrée, conçue pour connecter élèves, professeurs et écoles haïtiennes dans un réseau académique national et international. Elle offre aux élèves NS4 (18 ans et plus) un espace sécurisé pour apprendre, réviser, publier des contenus académiques et accéder à des opportunités nationales et internationales.";
 
 export default function HomeCarousel({ isAuthed = false }) {
   const [index, setIndex] = useState(0);
