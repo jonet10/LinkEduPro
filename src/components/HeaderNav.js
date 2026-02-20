@@ -208,7 +208,7 @@ export default function HeaderNav() {
       { href: '/focus', label: 'Focus', icon: '🎧' },
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
-      { href: '/subjects', label: 'Matières', icon: '📘' },
+      { href: '/subjects', label: 'Rubriques', icon: '📘' },
       { href: '/progress', label: 'Progrès', icon: '📈' },
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
       { href: '/blog', label: 'Blog', icon: '📝' },
@@ -219,7 +219,7 @@ export default function HeaderNav() {
 
   const mobileStudyItems = useMemo(
     () => [
-      { href: '/subjects', label: 'Matières', icon: '📘' },
+      { href: '/subjects', label: 'Rubriques', icon: '📘' },
       { href: '/focus', label: 'Focus', icon: '🎧' },
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),

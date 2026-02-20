@@ -46,7 +46,7 @@ export default function SubjectsPage() {
 
   return (
     <section>
-      <h1 className="mb-6 text-3xl font-bold text-brand-900">Catalogue des matières</h1>
+      <h1 className="mb-6 text-3xl font-bold text-brand-900">Catalogue des rubriques</h1>
       {error ? <p className="mb-4 text-red-600">{error}</p> : null}
       {canSeeProbableExercises && !isNsivSectionVisible ? (
         <article className="card mb-4">
@@ -82,11 +82,11 @@ export default function SubjectsPage() {
         </article>
       ) : null}
       <section className="card">
-        <h2 className="text-xl font-semibold text-brand-900">Matières disponibles</h2>
+        <h2 className="text-xl font-semibold text-brand-900">Rubriques disponibles</h2>
         <p className="mt-2 text-sm text-brand-700">
           {isNsivSectionVisible
-            ? 'Sélection adaptée au niveau NSIV.'
-            : 'Sélection générale des matières disponibles.'}
+            ? 'Sélection adaptée au niveau NSIV. Chaque rubrique contient des contenus et des quiz.'
+            : 'Sélection générale des rubriques disponibles. Chaque rubrique contient des contenus et des quiz.'}
         </p>
         <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {visibleSubjects.map((subject) => (
@@ -94,7 +94,7 @@ export default function SubjectsPage() {
               <h2 className="text-xl font-semibold text-brand-900">{subject.name}</h2>
               <p className="mt-2 text-sm text-brand-700">{subject.description}</p>
               <p className="mt-3 text-xs font-semibold text-brand-500">{subject.questionCount} questions disponibles</p>
-              <Link href={`/quiz/${subject.id}`} className="btn-primary mt-4 inline-block">Lancer le quiz</Link>
+              <Link href={`/quiz/${subject.id}`} className="btn-primary mt-4 inline-block">Ouvrir la rubrique</Link>
             </article>
           ))}
           {visibleSubjects.length === 0 ? (
