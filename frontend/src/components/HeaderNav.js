@@ -168,10 +168,6 @@ export default function HeaderNav() {
   const showBackButton = Boolean(pathname) && pathname !== '/';
 
   function onBack() {
-    if (typeof window !== 'undefined' && window.history.length > 1) {
-      router.back();
-      return;
-    }
     router.push('/');
   }
 
@@ -454,7 +450,7 @@ export default function HeaderNav() {
             <Link href="/login" className="hidden hover:text-brand-700 md:inline">Connexion</Link>
             <Link
               href="/login"
-              className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:hidden"
+              className="ml-auto inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:hidden"
               aria-label="Connexion"
               title="Connexion"
             >
