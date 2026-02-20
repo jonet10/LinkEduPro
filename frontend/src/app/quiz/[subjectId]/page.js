@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getToken } from '@/lib/auth';
@@ -18,6 +18,14 @@ function shuffleWithIndexMap(options = []) {
     options: indexed.map((item) => item.label),
     optionIndexMap: indexed.map((item) => item.originalIndex)
   };
+}
+
+function sameOrder(a = [], b = []) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 }
 
 export default function QuizPage() {
@@ -43,6 +51,7 @@ export default function QuizPage() {
   const [liking, setLiking] = useState(false);
   const [reviewItems, setReviewItems] = useState([]);
   const [showReview, setShowReview] = useState(false);
+  const lastOptionOrderRef = useRef({});
 
   const selectedSet = quizSets.find((s) => s.key === selectedSetKey) || null;
 
@@ -60,7 +69,20 @@ export default function QuizPage() {
     setSubject(data.subject);
     setQuestions(
       (data.questions || []).map((question) => {
-        const shuffled = shuffleWithIndexMap(question.options || []);
+        let shuffled = shuffleWithIndexMap(question.options || []);
+        const previousOrder = lastOptionOrderRef.current[question.id];
+
+        // Force a different order from the previous opening of the same question.
+        if ((question.options || []).length > 1 && sameOrder(shuffled.optionIndexMap, previousOrder)) {
+          const remixed = [...shuffled.optionIndexMap];
+          [remixed[0], remixed[1]] = [remixed[1], remixed[0]];
+          shuffled = {
+            optionIndexMap: remixed,
+            options: remixed.map((idx) => (question.options || [])[idx])
+          };
+        }
+
+        lastOptionOrderRef.current[question.id] = shuffled.optionIndexMap;
         return {
           ...question,
           options: shuffled.options,
