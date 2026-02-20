@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken, isNsivStudent } from '@/lib/auth';
 
@@ -14,7 +14,6 @@ function toDatetimeLocal(value) {
 
 export default function RattrapagePage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const token = useMemo(() => getToken(), []);
   const student = useMemo(() => getStudent(), []);
   const canManage = student?.role === 'ADMIN' || student?.role === 'TEACHER';
@@ -64,11 +63,13 @@ export default function RattrapagePage() {
   }, [token, canView, router]);
 
   useEffect(() => {
-    const sessionParam = Number(searchParams.get('session') || 0);
+    if (typeof window === 'undefined') return;
+    const query = new URLSearchParams(window.location.search);
+    const sessionParam = Number(query.get('session') || 0);
     if (sessionParam > 0) {
       setHighlightedSessionId(sessionParam);
     }
-  }, [searchParams]);
+  }, []);
 
   async function onCreate(e) {
     e.preventDefault();
