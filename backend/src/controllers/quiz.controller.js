@@ -175,7 +175,87 @@ async function submitQuiz(req, res, next) {
       attemptId: attempt.id,
       score,
       totalQuestions: answers.length,
-      percentage: Math.round((score / answers.length) * 100)
+      percentage: Math.round((score / answers.length) * 100),
+      likesCount: 0,
+      likedByMe: false
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getQuizAttemptLikeState(req, res, next) {
+  try {
+    const attemptId = Number(req.params.attemptId);
+    const studentId = req.user.id;
+
+    const attempt = await prisma.quizAttempt.findUnique({
+      where: { id: attemptId },
+      select: { id: true }
+    });
+    if (!attempt) {
+      return res.status(404).json({ message: 'Tentative de quiz introuvable.' });
+    }
+
+    const [liked, likesCount] = await Promise.all([
+      prisma.quizAttemptLike.findUnique({
+        where: {
+          attemptId_userId: { attemptId, userId: studentId }
+        },
+        select: { id: true }
+      }),
+      prisma.quizAttemptLike.count({ where: { attemptId } })
+    ]);
+
+    return res.json({
+      attemptId,
+      likedByMe: Boolean(liked),
+      likesCount
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function toggleQuizAttemptLike(req, res, next) {
+  try {
+    const attemptId = Number(req.params.attemptId);
+    const studentId = req.user.id;
+
+    const attempt = await prisma.quizAttempt.findUnique({
+      where: { id: attemptId },
+      select: { id: true }
+    });
+    if (!attempt) {
+      return res.status(404).json({ message: 'Tentative de quiz introuvable.' });
+    }
+
+    const existing = await prisma.quizAttemptLike.findUnique({
+      where: {
+        attemptId_userId: { attemptId, userId: studentId }
+      },
+      select: { id: true }
+    });
+
+    let likedByMe = false;
+    if (existing) {
+      await prisma.quizAttemptLike.delete({ where: { id: existing.id } });
+      likedByMe = false;
+    } else {
+      await prisma.quizAttemptLike.create({
+        data: {
+          attemptId,
+          userId: studentId
+        }
+      });
+      likedByMe = true;
+    }
+
+    const likesCount = await prisma.quizAttemptLike.count({ where: { attemptId } });
+    return res.json({
+      attemptId,
+      likedByMe,
+      likesCount
     });
   } catch (error) {
     return next(error);
@@ -215,4 +295,11 @@ async function getPremiumInsights(req, res, next) {
   }
 }
 
-module.exports = { getQuizSets, getQuizQuestions, submitQuiz, getPremiumInsights };
+module.exports = {
+  getQuizSets,
+  getQuizQuestions,
+  submitQuiz,
+  getPremiumInsights,
+  getQuizAttemptLikeState,
+  toggleQuizAttemptLike
+};

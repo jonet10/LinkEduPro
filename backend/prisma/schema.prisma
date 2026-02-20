@@ -124,6 +124,7 @@ model Student {
   teacherLevel TeacherLevel  @default(STANDARD)
   reputationScore Int        @default(0)
   attempts     QuizAttempt[]
+  quizAttemptLikes QuizAttemptLike[]
   posts        BlogPost[]
   comments     BlogComment[]
   postLikes    BlogPostLike[] @relation("BlogPostLikeUser")
@@ -218,7 +219,22 @@ model QuizAttempt {
   student        Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
   subject        Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   answers        QuizAnswer[]
+  likes          QuizAttemptLike[]
   createdAt      DateTime     @default(now())
+}
+
+model QuizAttemptLike {
+  id        Int      @id @default(autoincrement())
+  attemptId Int      @map("attempt_id")
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  attempt   QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, userId])
+  @@index([attemptId, createdAt])
+  @@index([userId, createdAt])
+  @@map("quiz_attempt_likes")
 }
 
 model QuizAnswer {

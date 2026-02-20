@@ -65,6 +65,9 @@ const updateUnverifiedEmailSchema = Joi.object({
 const quizParamsSchema = Joi.object({
   subjectId: Joi.number().integer().positive().required()
 });
+const quizAttemptParamsSchema = Joi.object({
+  attemptId: Joi.number().integer().positive().required()
+});
 
 const quizQuerySchema = Joi.object({
   limit: Joi.number().integer().min(1).max(50).default(10),
@@ -162,6 +165,7 @@ module.exports = {
   resendVerificationEmailSchema,
   updateUnverifiedEmailSchema,
   quizParamsSchema,
+  quizAttemptParamsSchema,
   quizQuerySchema,
   submitQuizSchema,
   createLibraryBookSchema,
