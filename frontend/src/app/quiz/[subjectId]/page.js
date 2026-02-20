@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { getStudent, getToken } from '@/lib/auth';
 
 const QUIZ_SECONDS = 300;
 
@@ -52,8 +52,15 @@ export default function QuizPage() {
   const [reviewItems, setReviewItems] = useState([]);
   const [showReview, setShowReview] = useState(false);
   const lastOptionOrderRef = useRef({});
+  const currentStudent = useMemo(() => getStudent(), []);
 
   const selectedSet = quizSets.find((s) => s.key === selectedSetKey) || null;
+  const shouldShowExamHeader = Boolean(subject?.name) && (
+    String(subject.name).toLowerCase().includes('physique') ||
+    String(subject.name).toLowerCase().includes('histoire') ||
+    String(subject.name).toLowerCase().includes('connaissance')
+  );
+  const trackLabel = String(currentStudent?.nsivTrack || 'ORDINAIRE').toUpperCase();
 
   const loadQuestions = async (setKey, selectedMode = mode) => {
     const token = getToken();
@@ -289,6 +296,26 @@ export default function QuizPage() {
           <p className="rounded-lg bg-accent/20 px-3 py-2 text-sm font-semibold text-brand-900">Temps restant : {timeLeft}s</p>
         ) : null}
       </div>
+
+      {shouldShowExamHeader ? (
+        <div className="card mb-4 border-2 border-brand-200">
+          <p className="text-center text-xs font-semibold uppercase tracking-wide text-brand-700">
+            Ministere de l Education Nationale et de la Formation Professionnelle (MENFP)
+          </p>
+          <h2 className="mt-2 text-center text-lg font-black text-brand-900">
+            Baccalaureat d Enseignement General - Simulation d examen
+          </h2>
+          <p className="mt-1 text-center text-sm text-brand-700">
+            Examens de fin d etudes secondaires | Session d entrainement
+          </p>
+          <div className="mt-3 grid gap-2 text-sm text-brand-800 sm:grid-cols-2">
+            <p><span className="font-semibold">Matiere:</span> {subject?.name || 'Physique'}</p>
+            <p><span className="font-semibold">Filiere:</span> {trackLabel}</p>
+            <p><span className="font-semibold">Type:</span> Annales et questions de cours des examens passes</p>
+            <p><span className="font-semibold">Niveau:</span> NSIV</p>
+          </div>
+        </div>
+      ) : null}
 
       {error ? <p className="mb-4 text-red-600">{error}</p> : null}
 
