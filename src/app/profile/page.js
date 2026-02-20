@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken, setAuth } from '@/lib/auth';
 import { resolveMediaUrl } from '@/lib/media';
+import { getDepartments, getCommunes, getSchools } from '@/lib/schools';
 
 const ACADEMIC_LEVEL_OPTIONS = ['9e', 'NSI', 'NSII', 'NSIII', 'NSIV', 'Universitaire'];
 const LEGACY_TO_ACADEMIC = {
@@ -21,6 +22,29 @@ function normalizeAcademicLevel(value) {
   return LEGACY_TO_ACADEMIC[value] || '';
 }
 
+function parseSchoolLabel(value) {
+  if (!value || typeof value !== 'string') {
+    return { department: '', commune: '', schoolInput: '', schoolFromList: '' };
+  }
+
+  const parts = value.split('/').map((part) => part.trim()).filter(Boolean);
+  if (parts.length >= 3) {
+    return {
+      department: parts[0],
+      commune: parts[1],
+      schoolInput: parts.slice(2).join(' / '),
+      schoolFromList: ''
+    };
+  }
+
+  return {
+    department: '',
+    commune: '',
+    schoolInput: value,
+    schoolFromList: ''
+  };
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -31,7 +55,18 @@ export default function ProfilePage() {
   const [editMode, setEditMode] = useState(false);
 
   const [profile, setProfile] = useState(null);
-  const [form, setForm] = useState({ email: '', phone: '', address: '', password: '', level: '' });
+  const [form, setForm] = useState({
+    email: '',
+    phone: '',
+    address: '',
+    password: '',
+    level: '',
+    gradeLevel: '',
+    department: '',
+    commune: '',
+    schoolInput: '',
+    schoolFromList: ''
+  });
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
   const [avatarBroken, setAvatarBroken] = useState(false);
@@ -49,6 +84,10 @@ export default function ProfilePage() {
     apiClient('/v2/profile/me', { token })
       .then((data) => {
         const p = data.profile;
+        const parsedSchool = parseSchoolLabel(p.school);
+        const suggestedSchools = getSchools(parsedSchool.department, parsedSchool.commune);
+        const hasSuggestedMatch = suggestedSchools.includes(parsedSchool.schoolInput);
+
         setProfile(p);
         setAvatarBroken(false);
         setForm({
@@ -56,7 +95,12 @@ export default function ProfilePage() {
           phone: p.phone || '',
           address: p.address || '',
           password: '',
-          level: normalizeAcademicLevel(p.academicLevel || p.level)
+          level: normalizeAcademicLevel(p.academicLevel || p.level),
+          gradeLevel: p.gradeLevel || '',
+          department: parsedSchool.department,
+          commune: parsedSchool.commune,
+          schoolInput: hasSuggestedMatch ? '' : parsedSchool.schoolInput,
+          schoolFromList: hasSuggestedMatch ? parsedSchool.schoolInput : ''
         });
       })
       .catch((e) => setError(e.message || 'Erreur de chargement du profil'))
@@ -69,8 +113,31 @@ export default function ProfilePage() {
     return resolveMediaUrl(profile?.photoUrl);
   }, [photoPreview, profile?.photoUrl, avatarBroken]);
 
+  const departments = useMemo(() => getDepartments(), []);
+  const communes = useMemo(() => getCommunes(form.department), [form.department]);
+  const schools = useMemo(() => getSchools(form.department, form.commune), [form.department, form.commune]);
+
   function onChangeField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function onDepartmentChange(value) {
+    setForm((prev) => ({
+      ...prev,
+      department: value,
+      commune: '',
+      schoolFromList: '',
+      schoolInput: ''
+    }));
+  }
+
+  function onCommuneChange(value) {
+    setForm((prev) => ({
+      ...prev,
+      commune: value,
+      schoolFromList: '',
+      schoolInput: ''
+    }));
   }
 
   function onSelectPhoto(event) {
@@ -130,10 +197,17 @@ export default function ProfilePage() {
     setSuccess('');
 
     try {
+      const chosenSchool = form.schoolFromList || form.schoolInput;
+      const schoolLabel = form.department && form.commune && chosenSchool
+        ? `${form.department} / ${form.commune} / ${chosenSchool}`
+        : chosenSchool;
+
       const payload = {
         email: form.email || null,
         phone: form.phone || null,
-        address: form.address || null
+        address: form.address || null,
+        school: schoolLabel || null,
+        gradeLevel: form.gradeLevel || null
       };
       if (profile.role === 'STUDENT' && form.level) {
         payload.level = form.level;
@@ -161,7 +235,9 @@ export default function ProfilePage() {
           academicLevel: data.profile.academicLevel || normalizeAcademicLevel(data.profile.level),
           level: data.profile.level,
           darkMode: data.profile.darkMode,
-          photoUrl: data.profile.photoUrl
+          photoUrl: data.profile.photoUrl,
+          school: data.profile.school,
+          gradeLevel: data.profile.gradeLevel
         });
       }
 
@@ -176,12 +252,21 @@ export default function ProfilePage() {
 
   function onCancelEdit() {
     if (!profile) return;
+    const parsedSchool = parseSchoolLabel(profile.school);
+    const suggestedSchools = getSchools(parsedSchool.department, parsedSchool.commune);
+    const hasSuggestedMatch = suggestedSchools.includes(parsedSchool.schoolInput);
+
     setForm({
       email: profile.email || '',
       phone: profile.phone || '',
       address: profile.address || '',
       password: '',
-      level: normalizeAcademicLevel(profile.academicLevel || profile.level)
+      level: normalizeAcademicLevel(profile.academicLevel || profile.level),
+      gradeLevel: profile.gradeLevel || '',
+      department: parsedSchool.department,
+      commune: parsedSchool.commune,
+      schoolInput: hasSuggestedMatch ? '' : parsedSchool.schoolInput,
+      schoolFromList: hasSuggestedMatch ? parsedSchool.schoolInput : ''
     });
     setSelectedPhoto(null);
     setPhotoPreview('');
@@ -200,6 +285,9 @@ export default function ProfilePage() {
     <section className="mx-auto max-w-3xl space-y-6">
       <div className="card">
         <h1 className="mb-4 text-2xl font-bold text-brand-900">Profil utilisateur</h1>
+        <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">
+          Mise a jour disponible: la base des ecoles a ete enrichie. Verifie ton ecole et ta classe puis sauvegarde ton profil.
+        </div>
 
         <div className="mb-6 flex flex-col items-center gap-3 sm:flex-row sm:items-start">
           <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-brand-100 bg-brand-50 text-xl font-bold text-brand-700">
@@ -245,6 +333,68 @@ export default function ProfilePage() {
           <div>
             <label className="mb-1 block text-sm font-medium">Adresse</label>
             <input className="input" value={form.address} onChange={(e) => onChangeField('address', e.target.value)} disabled={!editMode} />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium">Departement</label>
+            <select
+              className="input"
+              value={form.department}
+              onChange={(e) => onDepartmentChange(e.target.value)}
+              disabled={!editMode}
+            >
+              <option value="">Selectionner</option>
+              {departments.map((department) => (
+                <option key={department} value={department}>{department}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium">Commune</label>
+            <select
+              className="input"
+              value={form.commune}
+              onChange={(e) => onCommuneChange(e.target.value)}
+              disabled={!editMode || !form.department}
+            >
+              <option value="">Selectionner</option>
+              {communes.map((commune) => (
+                <option key={commune} value={commune}>{commune}</option>
+              ))}
+            </select>
+          </div>
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-sm font-medium">Ecole (liste)</label>
+            <select
+              className="input"
+              value={form.schoolFromList}
+              onChange={(e) => onChangeField('schoolFromList', e.target.value)}
+              disabled={!editMode || !form.commune || schools.length === 0}
+            >
+              <option value="">Choisir dans la liste</option>
+              {schools.map((school) => (
+                <option key={school} value={school}>{school}</option>
+              ))}
+            </select>
+          </div>
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-sm font-medium">Ecole (saisie manuelle)</label>
+            <input
+              className="input"
+              value={form.schoolInput}
+              onChange={(e) => onChangeField('schoolInput', e.target.value)}
+              disabled={!editMode}
+              placeholder="Saisis le nom de ton ecole si elle n'est pas listee"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-sm font-medium">Niveau / Classe</label>
+            <input
+              className="input"
+              value={form.gradeLevel}
+              onChange={(e) => onChangeField('gradeLevel', e.target.value)}
+              disabled={!editMode}
+              placeholder="Ex: NSIV, Terminale A, Philo"
+            />
           </div>
           <div className="sm:col-span-2">
             <label className="mb-1 block text-sm font-medium">Nouveau mot de passe</label>

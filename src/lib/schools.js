@@ -1,3 +1,5 @@
+import schoolDirectory from './schools-data.json';
+
 const DEPARTMENT_COMMUNES = {
   Artibonite: [
     'Dessalines',
@@ -165,39 +167,64 @@ const DEPARTMENT_COMMUNES = {
   ]
 };
 
-const SCHOOL_SUGGESTIONS = {
-  Ouest: {
-    'Port-au-Prince': ['Lycee National de Petion-Ville', 'College Canado-Haitien'],
-    Delmas: ['Institution Mixte Delmas']
-  },
-  Artibonite: {
-    Gonaives: ['Lycee Fabre Geffrard']
-  },
-  Nord: {
-    'Cap-Haitien': ['Lycee Philippe Guerrier']
-  }
-};
+function normalizeText(value) {
+  if (!value) return '';
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[’']/g, ' ')
+    .replace(/[^a-zA-Z0-9]+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function normalizeCommune(value) {
+  return normalizeText(value)
+    .replace(/^(les|la|le|l)\s+/, '')
+    .trim();
+}
+
+function pickMatchingKey(keys, value, type = 'default') {
+  const target = type === 'commune' ? normalizeCommune(value) : normalizeText(value);
+  if (!target) return null;
+
+  const exact = keys.find((key) => {
+    const normalized = type === 'commune' ? normalizeCommune(key) : normalizeText(key);
+    return normalized === target;
+  });
+  if (exact) return exact;
+
+  return keys.find((key) => {
+    const normalized = type === 'commune' ? normalizeCommune(key) : normalizeText(key);
+    return normalized.includes(target) || target.includes(normalized);
+  }) || null;
+}
 
 export function getDepartments() {
-  return Object.keys(DEPARTMENT_COMMUNES);
+  const fromLegacy = Object.keys(DEPARTMENT_COMMUNES);
+  const fromWord = Object.keys(schoolDirectory);
+  return Array.from(new Set([...fromLegacy, ...fromWord]));
 }
 
 export function getCommunes(department) {
-  if (!department || !DEPARTMENT_COMMUNES[department]) return [];
-  return DEPARTMENT_COMMUNES[department];
+  if (!department) return [];
+
+  const legacyCommunes = DEPARTMENT_COMMUNES[department] || [];
+  const departmentKey = pickMatchingKey(Object.keys(schoolDirectory), department);
+  const wordCommunes = departmentKey ? Object.keys(schoolDirectory[departmentKey] || {}) : [];
+
+  return Array.from(new Set([...legacyCommunes, ...wordCommunes]));
 }
 
 export function getSchools(department, commune) {
   if (!department || !commune) return [];
 
-  if (SCHOOL_SUGGESTIONS[department]?.[commune]) {
-    return SCHOOL_SUGGESTIONS[department][commune];
-  }
+  const departmentKey = pickMatchingKey(Object.keys(schoolDirectory), department);
+  if (!departmentKey) return [];
 
-  if (department === 'Artibonite' && commune === 'Les Gonaives') {
-    return SCHOOL_SUGGESTIONS.Artibonite.Gonaives || [];
-  }
+  const communes = schoolDirectory[departmentKey] || {};
+  const communeKey = pickMatchingKey(Object.keys(communes), commune, 'commune');
+  if (!communeKey) return [];
 
-  return [];
+  return Array.from(new Set(communes[communeKey] || []));
 }
-
