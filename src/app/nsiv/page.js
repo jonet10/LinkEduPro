@@ -51,14 +51,6 @@ export default function NsivPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Link href="/study-plans?subject=Chimie" className="card hover:bg-brand-50">
-          <h2 className="text-xl font-semibold text-brand-900">Chimie NSIV</h2>
-          <p className="mt-2 text-sm text-brand-700">Chapitres ordonnés, notes de cours et exercices.</p>
-        </Link>
-        <Link href="/study-plans?subject=Physique" className="card hover:bg-brand-50">
-          <h2 className="text-xl font-semibold text-brand-900">Physique NSIV</h2>
-          <p className="mt-2 text-sm text-brand-700">Progression complète avec contenu par chapitre.</p>
-        </Link>
         <Link href="/probable-exercises" className="card hover:bg-brand-50">
           <h2 className="text-xl font-semibold text-brand-900">Exercices probables</h2>
           <p className="mt-2 text-sm text-brand-700">Sujets les plus fréquents analysés à partir des épreuves.</p>

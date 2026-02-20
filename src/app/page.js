@@ -131,14 +131,6 @@ export default function HomePage() {
               <p className="font-semibold text-brand-900">Espace NSIV</p>
               <p className="mt-1 text-sm text-brand-700">Tableau complet des rubriques et progression.</p>
             </Link>
-            <Link href="/study-plans?subject=Chimie" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
-              <p className="font-semibold text-brand-900">Chimie NSIV</p>
-              <p className="mt-1 text-sm text-brand-700">Plan complet par chapitres.</p>
-            </Link>
-            <Link href="/study-plans?subject=Physique" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
-              <p className="font-semibold text-brand-900">Physique NSIV</p>
-              <p className="mt-1 text-sm text-brand-700">Plan complet par chapitres.</p>
-            </Link>
             <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="font-semibold text-brand-900">Exercices probables</p>
               <p className="mt-1 text-sm text-brand-700">Sujets recurrents du Bac NSIV.</p>

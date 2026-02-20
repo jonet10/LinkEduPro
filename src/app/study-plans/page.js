@@ -1,18 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 
 const LEVELS = ['9e', 'NS1', 'NS2', 'NS3', 'Terminale', 'Universite'];
-const ACADEMIC_TO_LEVEL = {
-  NSI: 'NS1',
-  NSII: 'NS2',
-  NSIII: 'NS3',
-  NSIV: 'Terminale',
-  Universitaire: 'Universite',
-  '9e': '9e'
-};
 
 function parseChapterOrder(plan) {
   if (Number.isInteger(plan?.chapterOrder)) return plan.chapterOrder;
@@ -28,6 +21,7 @@ function sortPlans(a, b) {
 }
 
 export default function StudyPlansPage() {
+  const router = useRouter();
   const [plans, setPlans] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedPlanId, setSelectedPlanId] = useState(null);
@@ -65,6 +59,16 @@ export default function StudyPlansPage() {
   const student = useMemo(() => getStudent(), []);
   const [preferredSubject, setPreferredSubject] = useState('');
   const canCreate = student && ['TEACHER', 'ADMIN'].includes(student.role);
+
+  useEffect(() => {
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    if (student?.role === 'STUDENT') {
+      router.push('/subjects');
+    }
+  }, [token, student?.role, router]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -131,29 +135,11 @@ export default function StudyPlansPage() {
     setLoading(true);
     setError('');
     try {
-      if (student?.role === 'STUDENT') {
-        try {
-          const data = await apiClient('/v2/study-plans/my', { token });
-          setPlans(data.plans || []);
-        } catch (_) {
-          // Fallback for environments where /my fails due to backend/runtime mismatch.
-          const fallbackLevel =
-            ACADEMIC_TO_LEVEL[student?.academicLevel] ||
-            (typeof student?.level === 'string' ? student.level : '') ||
-            '';
-          const query = new URLSearchParams();
-          if (fallbackLevel) query.set('level', fallbackLevel);
-          const data = await apiClient(`/v2/study-plans${query.toString() ? `?${query.toString()}` : ''}`, { token });
-          setPlans(data.plans || []);
-          setError('Le chargement automatique a échoué; mode de secours activé.');
-        }
-      } else {
-        const query = new URLSearchParams();
-        if (filterLevel) query.set('level', filterLevel);
-        if (filterSubject.trim()) query.set('subject', filterSubject.trim());
-        const data = await apiClient(`/v2/study-plans${query.toString() ? `?${query.toString()}` : ''}`, { token });
-        setPlans(data.plans || []);
-      }
+      const query = new URLSearchParams();
+      if (filterLevel) query.set('level', filterLevel);
+      if (filterSubject.trim()) query.set('subject', filterSubject.trim());
+      const data = await apiClient(`/v2/study-plans${query.toString() ? `?${query.toString()}` : ''}`, { token });
+      setPlans(data.plans || []);
     } catch (e) {
       setError(e.message || 'Erreur chargement plans.');
     } finally {
@@ -162,9 +148,14 @@ export default function StudyPlansPage() {
   }
 
   useEffect(() => {
+    if (student?.role === 'STUDENT') return;
     loadPlans();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [student?.role]);
+
+  if (!token || student?.role === 'STUDENT') {
+    return null;
+  }
 
   function normalizePayload(payload) {
     return {

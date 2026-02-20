@@ -164,6 +164,7 @@ export default function HeaderNav() {
   const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
   const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeCatchup = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
+  const canSeeStudyPlans = isAuthed && student?.role !== 'STUDENT';
   const avatarUrl = avatarBroken ? null : resolveMediaUrl(student?.photoUrl);
   const showBackButton = Boolean(pathname) && pathname !== '/';
 
@@ -205,7 +206,7 @@ export default function HeaderNav() {
     return [
       { href: '/', label: 'Accueil', icon: '🏠' },
       { href: '/focus', label: 'Focus', icon: '🎧' },
-      { href: '/study-plans', label: 'Plans', icon: '🗂️' },
+      ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
       { href: '/subjects', label: 'Matières', icon: '📘' },
       { href: '/progress', label: 'Progrès', icon: '📈' },
@@ -214,18 +215,18 @@ export default function HeaderNav() {
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : []),
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
     ];
-  }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard]);
+  }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard, canSeeStudyPlans]);
 
   const mobileStudyItems = useMemo(
     () => [
       { href: '/subjects', label: 'Matières', icon: '📘' },
       { href: '/focus', label: 'Focus', icon: '🎧' },
-      { href: '/study-plans', label: 'Plans', icon: '🗂️' },
+      ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
       { href: '/progress', label: 'Progrès', icon: '📈' },
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : [])
     ],
-    [canSeeCatchup, canSeeProbableExercises]
+    [canSeeCatchup, canSeeProbableExercises, canSeeStudyPlans]
   );
 
   const mobileToolItems = useMemo(
