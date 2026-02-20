@@ -41,6 +41,8 @@ export default function QuizPage() {
   const [likedQuiz, setLikedQuiz] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [liking, setLiking] = useState(false);
+  const [reviewItems, setReviewItems] = useState([]);
+  const [showReview, setShowReview] = useState(false);
 
   const selectedSet = quizSets.find((s) => s.key === selectedSetKey) || null;
 
@@ -167,6 +169,8 @@ export default function QuizPage() {
         body: JSON.stringify(payload)
       });
       setQuizResult(result);
+      setReviewItems(Array.isArray(result.review) ? result.review : []);
+      setShowReview(false);
       setQuestions([]);
       setShareInfo('');
     } catch (e) {
@@ -295,13 +299,61 @@ export default function QuizPage() {
               className="btn-secondary"
               onClick={async () => {
                 setQuizResult(null);
+                setReviewItems([]);
+                setShowReview(false);
                 if (selectedSetKey) await startSet(selectedSetKey);
               }}
             >
               Refaire ce quiz
             </button>
+            {reviewItems.length > 0 ? (
+              <button className="btn-secondary" onClick={() => setShowReview((prev) => !prev)}>
+                {showReview ? 'Masquer le corrige' : 'Afficher le corrige'}
+              </button>
+            ) : null}
           </div>
           {shareInfo ? <p className="text-xs text-brand-700">{shareInfo}</p> : null}
+        </article>
+      ) : null}
+
+      {quizResult && reviewItems.length > 0 && showReview ? (
+        <article className="card mt-4 space-y-3">
+          <h2 className="text-xl font-semibold text-brand-900">Corrige detaille</h2>
+          <p className="text-sm text-brand-700">
+            Verifie tes reponses et compare-les avec les bonnes reponses.
+          </p>
+          <div className="space-y-4">
+            {reviewItems.map((item, idx) => (
+              <div key={`${item.questionId}_${idx}`} className="rounded-lg border border-brand-100 p-3">
+                <p className="font-semibold text-brand-900">{idx + 1}. {item.prompt}</p>
+                <p className={`mt-1 text-sm font-semibold ${item.isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                  {item.isCorrect ? 'Bonne reponse' : 'Reponse incorrecte'}
+                </p>
+                <div className="mt-3 space-y-2">
+                  {(item.options || []).map((option, optionIndex) => {
+                    const isSelected = item.selectedOption === optionIndex;
+                    const isCorrectOption = item.correctOption === optionIndex;
+                    const optionClass = isCorrectOption
+                      ? 'border-green-400 bg-green-50'
+                      : isSelected
+                        ? 'border-red-300 bg-red-50'
+                        : 'border-brand-100';
+
+                    return (
+                      <div key={optionIndex} className={`rounded border px-3 py-2 text-sm ${optionClass}`}>
+                        <span>{option}</span>
+                        {isSelected ? <span className="ml-2 text-xs font-semibold text-brand-700">(Ta reponse)</span> : null}
+                        {isCorrectOption ? <span className="ml-2 text-xs font-semibold text-green-700">(Bonne reponse)</span> : null}
+                      </div>
+                    );
+                  })}
+                </div>
+                {item.explanation ? (
+                  <p className="mt-2 text-sm text-brand-700">Explication: {item.explanation}</p>
+                ) : null}
+              </div>
+            ))}
+          </div>
         </article>
       ) : null}
 
