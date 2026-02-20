@@ -6,7 +6,6 @@ import { apiClient } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 
 const QUIZ_SECONDS = 300;
-const QUIZ_LIKES_KEY = 'linkedupro_quiz_likes';
 
 export default function QuizPage() {
   const params = useParams();
@@ -28,25 +27,9 @@ export default function QuizPage() {
   const [shareInfo, setShareInfo] = useState('');
   const [likedQuiz, setLikedQuiz] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
+  const [liking, setLiking] = useState(false);
 
   const selectedSet = quizSets.find((s) => s.key === selectedSetKey) || null;
-  const likeStorageKey = `${subjectId || 'unknown'}::${selectedSetKey || 'default'}::${mode}`;
-
-  function readLikesStore() {
-    if (typeof window === 'undefined') return {};
-    try {
-      const raw = localStorage.getItem(QUIZ_LIKES_KEY);
-      const parsed = raw ? JSON.parse(raw) : {};
-      return parsed && typeof parsed === 'object' ? parsed : {};
-    } catch (_) {
-      return {};
-    }
-  }
-
-  function writeLikesStore(nextStore) {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(QUIZ_LIKES_KEY, JSON.stringify(nextStore));
-  }
 
   const loadQuestions = async (setKey, selectedMode = mode) => {
     const token = getToken();
@@ -194,30 +177,41 @@ export default function QuizPage() {
     }
   };
 
-  const toggleQuizLike = () => {
-    const store = readLikesStore();
-    const current = store[likeStorageKey] || { liked: false, count: 0 };
-    const nextLiked = !current.liked;
-    const nextCount = Math.max(0, Number(current.count || 0) + (nextLiked ? 1 : -1));
-    const nextStore = {
-      ...store,
-      [likeStorageKey]: {
-        liked: nextLiked,
-        count: nextCount
-      }
-    };
-    writeLikesStore(nextStore);
-    setLikedQuiz(nextLiked);
-    setLikesCount(nextCount);
+  const toggleQuizLike = async () => {
+    if (!quizResult?.attemptId || liking) return;
+    const token = getToken();
+    if (!token) return;
+
+    setLiking(true);
+    try {
+      const data = await apiClient(`/quiz/attempt/${quizResult.attemptId}/like-toggle`, {
+        method: 'POST',
+        token
+      });
+      setLikedQuiz(Boolean(data.likedByMe));
+      setLikesCount(Number(data.likesCount || 0));
+    } catch (_) {
+      // No-op: keep current UI state if network fails.
+    } finally {
+      setLiking(false);
+    }
   };
 
   useEffect(() => {
-    if (!quizResult) return;
-    const store = readLikesStore();
-    const current = store[likeStorageKey] || { liked: false, count: 0 };
-    setLikedQuiz(Boolean(current.liked));
-    setLikesCount(Number(current.count || 0));
-  }, [quizResult, likeStorageKey]);
+    if (!quizResult?.attemptId) return;
+    const token = getToken();
+    if (!token) return;
+
+    apiClient(`/quiz/attempt/${quizResult.attemptId}/like-state`, { token })
+      .then((data) => {
+        setLikedQuiz(Boolean(data.likedByMe));
+        setLikesCount(Number(data.likesCount || 0));
+      })
+      .catch(() => {
+        setLikedQuiz(Boolean(quizResult.likedByMe));
+        setLikesCount(Number(quizResult.likesCount || 0));
+      });
+  }, [quizResult]);
 
   return (
     <section>
@@ -270,7 +264,7 @@ export default function QuizPage() {
           </p>
           <p className="text-sm text-brand-700">Tu peux aimer ce quiz et partager ton résultat avec tes amis.</p>
           <div className="flex flex-wrap gap-2">
-            <button className="btn-secondary" onClick={toggleQuizLike}>
+            <button className="btn-secondary" onClick={toggleQuizLike} disabled={liking}>
               {likedQuiz ? '❤️ J’aime ce quiz' : '🤍 J’aime ce quiz'} ({likesCount})
             </button>
             <button className="btn-secondary" onClick={shareQuizResult}>Partager avec mes amis</button>
