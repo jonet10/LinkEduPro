@@ -50,7 +50,7 @@ export default function LoginPage() {
         body: JSON.stringify({ identifier, password })
       });
       setAuth(data.token, data.student);
-      router.push('/subjects');
+      router.push('/');
     } catch (err) {
       setError(err.message || 'Erreur de connexion');
       if (err.code === 'EMAIL_NOT_VERIFIED') {
