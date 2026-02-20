@@ -7,6 +7,19 @@ import { getToken } from '@/lib/auth';
 
 const QUIZ_SECONDS = 300;
 
+function shuffleWithIndexMap(options = []) {
+  const indexed = options.map((label, originalIndex) => ({ label, originalIndex }));
+  for (let i = indexed.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+
+  return {
+    options: indexed.map((item) => item.label),
+    optionIndexMap: indexed.map((item) => item.originalIndex)
+  };
+}
+
 export default function QuizPage() {
   const params = useParams();
   const router = useRouter();
@@ -43,7 +56,16 @@ export default function QuizPage() {
     const premiumQuery = selectedMode === 'premium' ? '&premium=1' : '';
     const data = await apiClient(`/quiz/subject/${subjectId}?limit=10${setQuery}${premiumQuery}`, { token });
     setSubject(data.subject);
-    setQuestions(data.questions);
+    setQuestions(
+      (data.questions || []).map((question) => {
+        const shuffled = shuffleWithIndexMap(question.options || []);
+        return {
+          ...question,
+          options: shuffled.options,
+          optionIndexMap: shuffled.optionIndexMap
+        };
+      })
+    );
   };
 
   useEffect(() => {
@@ -128,7 +150,7 @@ export default function QuizPage() {
         .filter((q) => answers[q.id] !== undefined)
         .map((q) => ({
           questionId: q.id,
-          selectedOption: answers[q.id]
+          selectedOption: q.optionIndexMap?.[answers[q.id]] ?? answers[q.id]
         }))
     };
 
