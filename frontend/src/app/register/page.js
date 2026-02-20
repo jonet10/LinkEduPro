@@ -8,6 +8,7 @@ import { getDepartments, getCommunes, getSchools } from '@/lib/schools';
 const initialState = {
   role: 'STUDENT',
   academicLevel: '',
+  nsivTrack: 'ORDINAIRE',
   firstName: '',
   lastName: '',
   sex: 'MALE',
@@ -84,6 +85,7 @@ export default function RegisterPage() {
       const payload = {
         role: form.role,
         academicLevel: form.academicLevel,
+        nsivTrack: form.academicLevel === 'NSIV' ? form.nsivTrack : undefined,
         firstName: form.firstName,
         lastName: form.lastName,
         sex: form.sex,
@@ -133,6 +135,17 @@ export default function RegisterPage() {
             <option value="NSIII">NSIII</option>
             <option value="NSIV">NSIV</option>
             <option value="Universitaire">Universitaire</option>
+          </select>
+        ) : null}
+
+        {isStudent && form.academicLevel === 'NSIV' ? (
+          <select className="input md:col-span-2" name="nsivTrack" value={form.nsivTrack} onChange={onChange} required>
+            <option value="ORDINAIRE">Filiere NSIV: Ordinaire</option>
+            <option value="SVT">Filiere NSIV: SVT</option>
+            <option value="SMP">Filiere NSIV: SMP</option>
+            <option value="SES">Filiere NSIV: SES</option>
+            <option value="LLA">Filiere NSIV: LLA</option>
+            <option value="AUTRE">Filiere NSIV: Autre</option>
           </select>
         ) : null}
 

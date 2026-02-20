@@ -11,6 +11,7 @@ const updateProfileSchema = Joi.object({
   address: Joi.string().trim().max(255).allow(null, ''),
   school: Joi.string().trim().max(255).allow(null, ''),
   gradeLevel: Joi.string().trim().max(120).allow(null, ''),
+  nsivTrack: Joi.string().valid('ORDINAIRE', 'SVT', 'SMP', 'SES', 'LLA', 'AUTRE').allow(null, ''),
   password: Joi.string().min(8).max(128),
   level: academicLevelSchema.optional()
 }).min(1);

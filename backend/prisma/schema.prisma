@@ -172,11 +172,13 @@ model StudentProfile {
   id        Int           @id @default(autoincrement())
   userId    Int           @unique @map("user_id")
   level     AcademicLevel
+  nsivTrack String?       @map("nsiv_track")
   createdAt DateTime      @default(now()) @map("created_at")
   updatedAt DateTime      @updatedAt @map("updated_at")
   user      Student       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([level])
+  @@index([nsivTrack])
   @@map("student_profiles")
 }
 

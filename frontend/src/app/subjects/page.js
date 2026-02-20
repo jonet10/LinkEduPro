@@ -20,6 +20,8 @@ export default function SubjectsPage() {
   const [isNsivSectionVisible, setIsNsivSectionVisible] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const currentStudent = useMemo(() => getStudent(), []);
+  const nsivTrack = String(currentStudent?.nsivTrack || 'ORDINAIRE').toUpperCase();
   const visibleSubjects = useMemo(() => {
     if (!isNsivSectionVisible) return subjects;
     return subjects.filter((subject) => {
@@ -61,6 +63,7 @@ export default function SubjectsPage() {
           <p className="mt-2 text-sm text-brand-700">
             Accès rapide aux contenus structurés pour la classe NSIV.
           </p>
+          <p className="mt-1 text-sm font-semibold text-brand-800">Filiere active: {nsivTrack}</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="font-semibold text-brand-900">Espace NSIV</p>
@@ -77,6 +80,14 @@ export default function SubjectsPage() {
             <Link href="/rattrapage" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="font-semibold text-brand-900">Rattrapage Google Meet</p>
               <p className="mt-1 text-sm text-brand-700">Cours de rattrapage planifiés pour NSIV.</p>
+            </Link>
+            <Link href="/subjects" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
+              <p className="font-semibold text-brand-900">Histoire-Géographie NSIV</p>
+              <p className="mt-1 text-sm text-brand-700">Nouveaux quiz basés sur vos documents Hist-Géo.</p>
+            </Link>
+            <Link href="/subjects" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
+              <p className="font-semibold text-brand-900">Connaissance générale NSIV</p>
+              <p className="mt-1 text-sm text-brand-700">Rubrique culture générale pour toutes les filières.</p>
             </Link>
           </div>
         </article>

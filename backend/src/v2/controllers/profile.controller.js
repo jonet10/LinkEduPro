@@ -47,6 +47,7 @@ function toProfile(student) {
     address: student.address,
     role: student.role,
     academicLevel,
+    nsivTrack: student.studentProfile?.nsivTrack || null,
     level: academicLevel || toApiLevel(student.level),
     photoUrl: student.photoUrl,
     darkMode: student.darkMode,
@@ -74,7 +75,7 @@ async function getMyProfile(req, res, next) {
 
 async function updateMyProfile(req, res, next) {
   try {
-    const { phone, email, address, school, gradeLevel, password, level } = req.body;
+    const { phone, email, address, school, gradeLevel, nsivTrack, password, level } = req.body;
 
     const existing = await prisma.student.findUnique({
       where: { id: req.user.id },
@@ -129,17 +130,40 @@ async function updateMyProfile(req, res, next) {
       }
     }
 
+    const requestedTrack = nsivTrack !== undefined
+      ? (typeof nsivTrack === 'string' ? nsivTrack.trim().toUpperCase() : null)
+      : undefined;
+
+    if (nsivTrack !== undefined && existing.role !== 'STUDENT') {
+      return res.status(400).json({ message: 'Filiere NSIV reservee aux eleves.' });
+    }
+
     const updated = await prisma.$transaction(async (tx) => {
       await tx.student.update({
         where: { id: existing.id },
         data
       });
 
-      if (desiredAcademicLevel) {
+      if (desiredAcademicLevel || nsivTrack !== undefined) {
+        const nextLevel = desiredAcademicLevel || existing.studentProfile?.level;
+        if (!nextLevel) {
+          return existing;
+        }
+        const nextTrack = nextLevel === 'NSIV'
+          ? (requestedTrack || existing.studentProfile?.nsivTrack || 'ORDINAIRE')
+          : null;
+
         await tx.studentProfile.upsert({
           where: { userId: existing.id },
-          create: { userId: existing.id, level: desiredAcademicLevel },
-          update: { level: desiredAcademicLevel }
+          create: {
+            userId: existing.id,
+            level: nextLevel || 'NSIV',
+            nsivTrack: nextTrack
+          },
+          update: {
+            ...(desiredAcademicLevel ? { level: desiredAcademicLevel } : {}),
+            nsivTrack: nextTrack
+          }
         });
       }
 

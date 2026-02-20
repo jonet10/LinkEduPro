@@ -26,6 +26,7 @@ const ACADEMIC_LEVEL_TO_API = {
   NSIV: 'NSIV',
   UNIVERSITAIRE: 'Universitaire'
 };
+const NSIV_TRACKS = new Set(['ORDINAIRE', 'SVT', 'SMP', 'SES', 'LLA', 'AUTRE']);
 
 function sanitizeStudent(student) {
   return {
@@ -39,6 +40,7 @@ function sanitizeStudent(student) {
     email: student.email,
     emailVerified: student.emailVerified,
     academicLevel: student.studentProfile ? ACADEMIC_LEVEL_TO_API[student.studentProfile.level] : null,
+    nsivTrack: student.studentProfile?.nsivTrack || null,
     phone: student.phone,
     address: student.address,
     photoUrl: student.photoUrl,
@@ -173,6 +175,7 @@ async function register(req, res, next) {
       gradeLevel,
       role,
       academicLevel,
+      nsivTrack,
       email,
       phone,
       password
@@ -185,6 +188,15 @@ async function register(req, res, next) {
     const parsedAcademicLevel = parseAcademicLevel(academicLevel);
     if (!parsedAcademicLevel) {
       return res.status(400).json({ message: 'Niveau academique invalide.' });
+    }
+
+    let normalizedNsivTrack = null;
+    if (parsedAcademicLevel === 'NSIV') {
+      const rawTrack = typeof nsivTrack === 'string' ? nsivTrack.trim().toUpperCase() : 'ORDINAIRE';
+      if (!NSIV_TRACKS.has(rawTrack)) {
+        return res.status(400).json({ message: 'Filiere NSIV invalide.' });
+      }
+      normalizedNsivTrack = rawTrack;
     }
 
     const normalizedEmail = normalizeEmail(email);
@@ -220,7 +232,8 @@ async function register(req, res, next) {
       await tx.studentProfile.create({
         data: {
           userId: created.id,
-          level: parsedAcademicLevel
+          level: parsedAcademicLevel,
+          nsivTrack: normalizedNsivTrack
         }
       });
 

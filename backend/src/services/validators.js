@@ -9,6 +9,11 @@ const registerSchema = Joi.object({
     then: Joi.string().valid('9e', 'NSI', 'NSII', 'NSIII', 'NSIV', 'Universitaire').required(),
     otherwise: Joi.forbidden()
   }),
+  nsivTrack: Joi.when('academicLevel', {
+    is: 'NSIV',
+    then: Joi.string().valid('ORDINAIRE', 'SVT', 'SMP', 'SES', 'LLA', 'AUTRE').optional(),
+    otherwise: Joi.forbidden()
+  }),
   sex: Joi.string().valid('MALE', 'FEMALE', 'OTHER').required(),
   dateOfBirth: Joi.date().iso().required(),
   school: Joi.string().trim().min(2).max(120).required(),
