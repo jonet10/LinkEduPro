@@ -27,6 +27,14 @@ export default function ProbableExercisesPage() {
       .toUpperCase();
   }
 
+  function subjectMatches(subject, key) {
+    const normalized = normalizeSubjectName(subject);
+    if (key === 'PHYSIQUE') return normalized.includes('PHYSIQUE');
+    if (key === 'MATHEMATIQUE') return normalized.includes('MATHEMAT');
+    if (key === 'CHIMIE') return normalized.includes('CHIM');
+    return false;
+  }
+
   useEffect(() => {
     const authToken = getToken();
     setToken(authToken);
@@ -158,7 +166,7 @@ export default function ProbableExercisesPage() {
           onClick={() => setSelectedSubject('MATHEMATIQUE')}
         >
           <p className="text-lg font-semibold text-brand-900">Mathématique</p>
-          <p className="mt-1 text-sm text-brand-700">Contenu en préparation.</p>
+          <p className="mt-1 text-sm text-brand-700">Voir les exercices probables de Mathématique.</p>
         </button>
         <button
           type="button"
@@ -166,7 +174,7 @@ export default function ProbableExercisesPage() {
           onClick={() => setSelectedSubject('CHIMIE')}
         >
           <p className="text-lg font-semibold text-brand-900">Chimie</p>
-          <p className="mt-1 text-sm text-brand-700">Contenu en préparation.</p>
+          <p className="mt-1 text-sm text-brand-700">Voir les exercices probables de Chimie.</p>
         </button>
       </div>
 
@@ -174,19 +182,18 @@ export default function ProbableExercisesPage() {
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {feedback ? <p className="text-sm text-red-600">{feedback}</p> : null}
 
-      {!loading && !error ? (
-        selectedSubject !== 'PHYSIQUE' ? (
+      {!loading && !error ? (() => {
+        const selectedItems = items.filter((subjectItem) => subjectMatches(subjectItem.subject, selectedSubject));
+        return selectedItems.length === 0 ? (
           <div className="card">
             <p className="text-lg font-semibold text-brand-900">
-              {selectedSubject === 'MATHEMATIQUE' ? 'Mathématique' : 'Chimie'}
+              {selectedSubject === 'PHYSIQUE' ? 'Physique' : selectedSubject === 'MATHEMATIQUE' ? 'Mathématique' : 'Chimie'}
             </p>
             <p className="mt-2 text-sm text-brand-700">Ce contenu sera disponible bientôt.</p>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            {items
-              .filter((subjectItem) => normalizeSubjectName(subjectItem.subject).includes('PHYSIQUE'))
-              .map((subjectItem) => (
+            {selectedItems.map((subjectItem) => (
                 <article key={subjectItem.subject} className="card space-y-3">
                   <h2 className="text-xl font-semibold text-brand-900">{subjectItem.subject}</h2>
                   <div className="space-y-2">
@@ -267,12 +274,9 @@ export default function ProbableExercisesPage() {
                   </div>
                 </article>
               ))}
-            {items.filter((subjectItem) => normalizeSubjectName(subjectItem.subject).includes('PHYSIQUE')).length === 0 ? (
-              <p className="text-sm text-brand-700">Aucune donnée de Physique disponible pour le moment.</p>
-            ) : null}
           </div>
-        )
-      ) : null}
+        );
+      })() : null}
     </section>
   );
 }
