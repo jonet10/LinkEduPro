@@ -6,6 +6,7 @@ import { apiClient } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 
 const QUIZ_SECONDS = 300;
+const QUIZ_LIKES_KEY = 'linkedupro_quiz_likes';
 
 export default function QuizPage() {
   const params = useParams();
@@ -25,8 +26,27 @@ export default function QuizPage() {
   const [error, setError] = useState('');
   const [quizResult, setQuizResult] = useState(null);
   const [shareInfo, setShareInfo] = useState('');
+  const [likedQuiz, setLikedQuiz] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
 
   const selectedSet = quizSets.find((s) => s.key === selectedSetKey) || null;
+  const likeStorageKey = `${subjectId || 'unknown'}::${selectedSetKey || 'default'}::${mode}`;
+
+  function readLikesStore() {
+    if (typeof window === 'undefined') return {};
+    try {
+      const raw = localStorage.getItem(QUIZ_LIKES_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function writeLikesStore(nextStore) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(QUIZ_LIKES_KEY, JSON.stringify(nextStore));
+  }
 
   const loadQuestions = async (setKey, selectedMode = mode) => {
     const token = getToken();
@@ -174,6 +194,31 @@ export default function QuizPage() {
     }
   };
 
+  const toggleQuizLike = () => {
+    const store = readLikesStore();
+    const current = store[likeStorageKey] || { liked: false, count: 0 };
+    const nextLiked = !current.liked;
+    const nextCount = Math.max(0, Number(current.count || 0) + (nextLiked ? 1 : -1));
+    const nextStore = {
+      ...store,
+      [likeStorageKey]: {
+        liked: nextLiked,
+        count: nextCount
+      }
+    };
+    writeLikesStore(nextStore);
+    setLikedQuiz(nextLiked);
+    setLikesCount(nextCount);
+  };
+
+  useEffect(() => {
+    if (!quizResult) return;
+    const store = readLikesStore();
+    const current = store[likeStorageKey] || { liked: false, count: 0 };
+    setLikedQuiz(Boolean(current.liked));
+    setLikesCount(Number(current.count || 0));
+  }, [quizResult, likeStorageKey]);
+
   return (
     <section>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -223,8 +268,11 @@ export default function QuizPage() {
           <p className="text-sm text-brand-700">
             Ton score: <span className="font-semibold">{quizResult.score}/{quizResult.totalQuestions}</span> ({quizResult.percentage}%)
           </p>
-          <p className="text-sm text-brand-700">Partage ton resultat avec tes amis pour les inviter a essayer LinkEduPro.</p>
+          <p className="text-sm text-brand-700">Tu peux aimer ce quiz et partager ton résultat avec tes amis.</p>
           <div className="flex flex-wrap gap-2">
+            <button className="btn-secondary" onClick={toggleQuizLike}>
+              {likedQuiz ? '❤️ J’aime ce quiz' : '🤍 J’aime ce quiz'} ({likesCount})
+            </button>
             <button className="btn-secondary" onClick={shareQuizResult}>Partager avec mes amis</button>
             <button className="btn-primary" onClick={() => router.push('/progress')}>Voir mes progres</button>
             <button
