@@ -1,0 +1,414 @@
+{
+  "Artibonite": {
+    "Gonaïves": [
+      "Lycée Fabre Geffrard (public)",
+      "Collège Immaculée Conception",
+      "Collège Diocésain Saint-Paul",
+      "Collège Méthodiste Libre des Gonaïves",
+      "Collège Saint Pierre Claver",
+      "Institution La Pléiade",
+      "Collège Communautaire La Croix Périsse"
+    ],
+    "Saint-Marc": [
+      "Lycée de Saint-Marc (public)",
+      "Collège James Stine",
+      "Collège Frère Hervé",
+      "Collège Classique Saint-Marc",
+      "Institution Presbytérale Claire L.",
+      "Collège Saint-Louis de Saint-Marc"
+    ],
+    "Dessalines": [
+      "Lycée de Dessalines (public)",
+      "Institution Presbytérale Claire L.",
+      "Collège Saint Claire",
+      "Collège Saint Michel"
+    ],
+    "L’Estère": [
+      "Lycée de L’Estère (public)",
+      "École Presbytérale Congréganiste",
+      "Collège Saint François"
+    ],
+    "Petite Rivière de l’Artibonite": [
+      "Lycée de Petite Rivière (public)",
+      "Collège Notre-Dame de Fatima",
+      "Collège Saint Joseph"
+    ],
+    "Saint-Michel de l’Attalaye": [
+      "Lycée Charlemagne Péralte (public)",
+      "Collège Classique de Bayonnais",
+      "Collège Notre-Dame de Médor"
+    ],
+    "Gros-Morne": [
+      "Collège Jean XXIII",
+      "Collège Saint Jean-Baptiste"
+    ]
+  },
+  "Nord": {
+    "Cap-Haïtien": [
+      "Lycée Philippe Guerrier (public, le plus ancien du Nord)",
+      "Collège Notre-Dame du Cap-Haïtien",
+      "Collège Saint Joseph",
+      "Collège Saint François Xavier",
+      "Institution Mixte Saint Michel",
+      "Institution Mixte Saint Pierre",
+      "Institution Mixte Saint Louis de Gonzague (antenne locale)"
+    ],
+    "Limbé": [
+      "Lycée de Limbé (public)",
+      "Collège Saint Jean Baptiste",
+      "Institution Mixte Saint Charles",
+      "Institution Mixte Saint Esprit"
+    ],
+    "Plaine-du-Nord": [
+      "Lycée de Plaine-du-Nord (public)",
+      "Institution Mixte Saint Paul",
+      "Collège Saint Pierre"
+    ],
+    "Quartier-Morin": [
+      "Lycée de Quartier-Morin (public)",
+      "Institution Mixte Saint Augustin",
+      "Collège Saint Michel"
+    ],
+    "Grande-Rivière-du-Nord": [
+      "Lycée de Grande-Rivière-du-Nord (public)",
+      "Collège Saint Jacques",
+      "Institution Mixte Saint Gérard"
+    ],
+    "Acul-du-Nord": [
+      "Lycée de Acul-du-Nord (public)",
+      "Institution Mixte Saint Joseph",
+      "Collège Saint Louis"
+    ],
+    "Pignon": [
+      "Lycée de Pignon (public)",
+      "Collège Saint Michel",
+      "Institution Mixte Saint Pierre"
+    ]
+  },
+  "Ouest": {
+    "Port-au-Prince": [
+      "Lycée Pétion",
+      "Lycée Toussaint Louverture",
+      "Lycée des Jeunes Filles",
+      "Lycée Anténor Firmin",
+      "Collège Canado-Haïtien",
+      "Institution Saint-Louis de Gonzague",
+      "Collège Catts Pressoir",
+      "Collège Classique Féminin",
+      "Collège Marie Anne",
+      "Centre d’Études Secondaires (CES)",
+      "Collège Roger Anglade"
+    ],
+    "Pétion-Ville": [
+      "Lycée National de Pétion-Ville",
+      "Lycée Benoît Batraville (Laboule 13)",
+      "Union School (programme secondaire anglophone)",
+      "Collège Etzer Vilaire",
+      "Institution Saphir (secondaire)",
+      "Académie Arnold Armand Pernier",
+      "Collège Dominique Savio",
+      "Collège Marie Dominique Mazzarello",
+      "École Diocésaine Saint Vincent de Paul (Thomassin 25)",
+      "Institution Privée Mixte J’Apprends (Thomassin 25)",
+      "Institution Mixte Saint Jean (Laboule)",
+      "Institution Mixte Saint Louis Roi de France (Laboule)"
+    ],
+    "Carrefour": [
+      "Lycée de Carrefour",
+      "Collège Alain Clérie",
+      "Collège de Côte-Plage",
+      "Collège Marie Régine",
+      "Collège Père Basile Moreau",
+      "Institution Mixte Carrefour"
+    ],
+    "Delmas": [
+      "Lycée de Delmas",
+      "Institution Mixte Frère André",
+      "Collège Mixte La Bergerie I",
+      "Collège Excelsior",
+      "Institution Mixte La Source de Vie",
+      "Institution Mixte Les Frères Unis",
+      "Institution Mixte Saint-Joseph de Delmas",
+      "Institution Mixte La Renaissance de Delmas",
+      "Institution Mixte La Trinité",
+      "Institution Mixte Saint-Michel de Delmas",
+      "Institution Mixte Saint-Esprit"
+    ],
+    "Croix-des-Bouquets": [
+      "Lycée de Croix-des-Bouquets",
+      "Collège Aux-Jours-Heureux (CAJH)",
+      "Institution Mixte Saint-Charles",
+      "Institution Mixte Saint-Esprit",
+      "Institution Mixte Saint-Jacques"
+    ],
+    "Kenscoff / Fermathe / Thomassin": [
+      "Lycée de Kenscoff",
+      "Institution Mixte Saint Michel (Fermathe)",
+      "Institution Mixte Saint Gérard (Fermathe)",
+      "Institution Mixte Saint Pierre (Thomassin)",
+      "Institution Mixte La Source (Thomassin)",
+      "Institution Mixte Saint Augustin (Thomassin)",
+      "Institution Mixte Notre-Dame du Perpétuel Secours (Thomassin)"
+    ],
+    "Gressier": [
+      "Lycée de Gressier",
+      "Institution Mixte Gressier",
+      "Collège Saint-Jean Bosco"
+    ],
+    "Léogâne": [
+      "Lycée de Léogâne",
+      "Collège Saint-Rose de Lima",
+      "Institution Mixte Saint-Joseph de Léogâne",
+      "Institution Mixte Saint-Michel de Léogâne"
+    ]
+  },
+  "Nord-Est": {
+    "Fort-Liberté": [
+      "Lycée de Fort-Liberté (public)",
+      "Collège Saint Joseph",
+      "Collège Saint François d’Assise",
+      "Institution Mixte Saint Michel"
+    ],
+    "Ouanaminthe": [
+      "Lycée de Ouanaminthe (public)",
+      "Collège Saint Pierre",
+      "Collège Saint Louis",
+      "Institution Mixte Saint Gérard",
+      "Institution Mixte Saint Paul"
+    ],
+    "Trou-du-Nord": [
+      "Lycée de Trou-du-Nord (public)",
+      "Collège Saint Jacques",
+      "Institution Mixte Saint Esprit",
+      "Institution Mixte Saint Augustin"
+    ],
+    "Caracol": [
+      "Lycée de Caracol (public)",
+      "Institution Mixte Saint Joseph",
+      "Collège Saint Michel"
+    ],
+    "Ferrier": [
+      "Lycée de Ferrier (public)",
+      "Institution Mixte Saint Pierre",
+      "Collège Saint François"
+    ]
+  },
+  "Nord-Ouest": {
+    "Port-de-Paix": [
+      "Lycée de Port-de-Paix (public)",
+      "Collège Notre-Dame de Lourdes",
+      "Collège Saint Joseph",
+      "Institution Mixte Saint Michel",
+      "Institution Mixte Saint Pierre"
+    ],
+    "Saint-Louis du Nord": [
+      "Lycée de Saint-Louis du Nord (public)",
+      "Collège Saint François",
+      "Institution Mixte Saint Esprit",
+      "Institution Mixte Saint Jacques"
+    ],
+    "Jean-Rabel": [
+      "Lycée de Jean-Rabel (public)",
+      "Collège Saint Jean Baptiste",
+      "Institution Mixte Saint Augustin",
+      "Institution Mixte Saint Gérard"
+    ],
+    "Bombardopolis": [
+      "Lycée de Bombardopolis (public)",
+      "Institution Mixte Saint Joseph",
+      "Collège Saint Michel"
+    ],
+    "Môle-Saint-Nicolas": [
+      "Lycée de Môle-Saint-Nicolas (public)",
+      "Collège Saint Louis",
+      "Institution Mixte Saint Pierre"
+    ]
+  },
+  "Centre": {
+    "Hinche": [
+      "Lycée de Hinche (public)",
+      "Collège Saint-Martin de Porres",
+      "Collège Saint Michel",
+      "Institution Mixte Saint Joseph",
+      "Institution Mixte Saint Pierre"
+    ],
+    "Mirebalais": [
+      "Lycée de Mirebalais (public)",
+      "Collège Saint Louis",
+      "Collège Saint François d’Assise",
+      "Institution Mixte Saint Esprit",
+      "Institution Mixte Saint Gérard"
+    ],
+    "Boucan-Carré": [
+      "Lycée de Boucan-Carré (public)",
+      "Institution Mixte Saint Jacques",
+      "Collège Saint Augustin"
+    ],
+    "Thomonde": [
+      "Lycée de Thomonde (public)",
+      "Collège Saint Joseph",
+      "Institution Mixte Saint Michel"
+    ],
+    "Cerca-la-Source": [
+      "Lycée de Cerca-la-Source (public)",
+      "Collège Saint Pierre",
+      "Institution Mixte Saint Paul"
+    ],
+    "Cerca-Cavajal": [
+      "Lycée de Cerca-Cavajal (public)",
+      "Institution Mixte Saint François",
+      "Collège Saint Louis"
+    ]
+  },
+  "Sud": {
+    "Les Cayes": [
+      "Lycée Philippe Guerrier des Cayes (public)",
+      "Collège Saint-Jean Bosco",
+      "Collège Immaculée Conception",
+      "Institution Mixte Saint Michel",
+      "Institution Mixte Saint Pierre",
+      "Institution Mixte Saint Louis"
+    ],
+    "Aquin": [
+      "Lycée de Aquin (public)",
+      "Collège Saint François d’Assise",
+      "Institution Mixte Saint Joseph",
+      "Institution Mixte Saint Esprit"
+    ],
+    "Cavaillon": [
+      "Lycée de Cavaillon (public)",
+      "Institution Mixte Saint Gérard",
+      "Collège Saint Jacques"
+    ],
+    "Camp-Perrin": [
+      "Lycée de Camp-Perrin (public)",
+      "Institution Mixte Saint Augustin",
+      "Collège Saint Michel"
+    ],
+    "Chantal": [
+      "Lycée de Chantal (public)",
+      "Institution Mixte Saint Pierre",
+      "Collège Saint Louis"
+    ],
+    "Port-Salut": [
+      "Lycée de Port-Salut (public)",
+      "Collège Saint Joseph",
+      "Institution Mixte Saint François"
+    ],
+    "Torbeck": [
+      "Lycée de Torbeck (public)",
+      "Institution Mixte Saint Esprit",
+      "Collège Saint Michel"
+    ]
+  },
+  "Grand'Anse": {
+    "Jérémie": [
+      "Lycée Nord Alexis (public, le plus ancien du département)",
+      "Collège Saint Louis de Jérémie",
+      "Collège Saint Jean Bosco",
+      "Institution Mixte Saint Michel",
+      "Institution Mixte Saint Pierre",
+      "Institution Mixte Saint François"
+    ],
+    "Corail": [
+      "Lycée de Corail (public)",
+      "Collège Saint Joseph",
+      "Institution Mixte Saint Esprit"
+    ],
+    "Anse-d’Hainault": [
+      "Lycée de Anse-d’Hainault (public)",
+      "Collège Saint Louis",
+      "Institution Mixte Saint Jacques"
+    ],
+    "Dame-Marie": [
+      "Lycée de Dame-Marie (public)",
+      "Collège Saint François d’Assise",
+      "Institution Mixte Saint Augustin"
+    ],
+    "Les Irois": [
+      "Lycée de Les Irois (public)",
+      "Institution Mixte Saint Gérard",
+      "Collège Saint Michel"
+    ],
+    "Chambellan": [
+      "Lycée de Chambellan (public)",
+      "Institution Mixte Saint Pierre",
+      "Collège Saint Joseph"
+    ]
+  },
+  "Nippes": {
+    "Miragoâne": [
+      "Lycée de Miragoâne (public)",
+      "Collège Saint Louis de Miragoâne",
+      "Collège Saint Joseph",
+      "Institution Mixte Saint Michel",
+      "Institution Mixte Saint Pierre"
+    ],
+    "Anse-à-Veau": [
+      "Lycée de Anse-à-Veau (public)",
+      "Collège Saint François d’Assise",
+      "Institution Mixte Saint Esprit",
+      "Institution Mixte Saint Gérard"
+    ],
+    "Petit-Trou-de-Nippes": [
+      "Lycée de Petit-Trou-de-Nippes (public)",
+      "Institution Mixte Saint Jacques",
+      "Collège Saint Augustin"
+    ],
+    "Arnaud": [
+      "Lycée de Arnaud (public)",
+      "Institution Mixte Saint Joseph",
+      "Collège Saint Michel"
+    ],
+    "Paillant": [
+      "Lycée de Paillant (public)",
+      "Institution Mixte Saint Pierre",
+      "Collège Saint Louis"
+    ]
+  },
+  "Sud-Est": {
+    "Jacmel": [
+      "Lycée Pinchinat de Jacmel (public, institution historique)"
+    ],
+    "Centre Alcibiade Pommeyrac": [
+      "Centre d’Études La Trinité",
+      "Collège Suisse",
+      "Institution du Bon Pasteur",
+      "Institution Madeleine Moreno",
+      "Collège Saint-Louis de Jacmel",
+      "Collège Saint Joseph",
+      "Collège Saint François d’Assise"
+    ],
+    "Cayes-Jacmel": [
+      "Collège Béthanie",
+      "Institution Mixte locale (secondaire)"
+    ],
+    "La Vallée-de-Jacmel": [
+      "Collège Saint Paul de la Vallée",
+      "Lycée de La Vallée (public)",
+      "Institution Mixte Saint Joseph",
+      "Institution Mixte Saint Esprit"
+    ],
+    "Bainet": [
+      "Lycée de Bainet (public)",
+      "École Nationale Congréganiste Saint Gérard",
+      "Collège Saint Jacques",
+      "Institution Mixte Saint Augustin"
+    ],
+    "Côte-de-Fer": [
+      "Lycée de Côte-de-Fer (public)",
+      "Collège Saint Louis",
+      "Institution Mixte Saint Joseph",
+      "Institution Mixte Saint Gérard"
+    ],
+    "Marigot": [
+      "Lycée de Marigot (public)",
+      "Collège Saint Pierre",
+      "Institution Mixte Saint Michel",
+      "Institution Mixte Saint François"
+    ],
+    "Centre éducatif de Fond Jean-Noël": [
+      "Lycée Gérald Mathurin"
+    ]
+  }
+}

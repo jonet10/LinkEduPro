@@ -74,7 +74,7 @@ async function getMyProfile(req, res, next) {
 
 async function updateMyProfile(req, res, next) {
   try {
-    const { phone, email, address, password, level } = req.body;
+    const { phone, email, address, school, gradeLevel, password, level } = req.body;
 
     const existing = await prisma.student.findUnique({
       where: { id: req.user.id },
@@ -103,6 +103,14 @@ async function updateMyProfile(req, res, next) {
 
     if (address !== undefined) {
       data.address = address || null;
+    }
+
+    if (school !== undefined) {
+      data.school = school || existing.school;
+    }
+
+    if (gradeLevel !== undefined) {
+      data.gradeLevel = gradeLevel || existing.gradeLevel;
     }
 
     if (password !== undefined) {

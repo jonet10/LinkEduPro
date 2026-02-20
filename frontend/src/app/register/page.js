@@ -114,6 +114,9 @@ export default function RegisterPage() {
   return (
     <section className="mx-auto max-w-2xl card">
       <h1 className="mb-6 text-2xl font-bold text-brand-900">Inscription élève</h1>
+      <p className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">
+        Mise a jour: la liste officielle des ecoles par commune est disponible. Selectionne ton departement, ta commune et ton ecole.
+      </p>
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
         <select className="input md:col-span-2" name="role" value={form.role} onChange={onChange}>
           <option value="STUDENT">Eleve</option>

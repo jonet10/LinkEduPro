@@ -9,6 +9,8 @@ const updateProfileSchema = Joi.object({
   phone: Joi.string().trim().max(30).allow(null, ''),
   email: Joi.string().email({ tlds: { allow: false } }).allow(null, ''),
   address: Joi.string().trim().max(255).allow(null, ''),
+  school: Joi.string().trim().max(255).allow(null, ''),
+  gradeLevel: Joi.string().trim().max(120).allow(null, ''),
   password: Joi.string().min(8).max(128),
   level: academicLevelSchema.optional()
 }).min(1);
