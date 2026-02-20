@@ -61,6 +61,7 @@ export default function QuizPage() {
     String(subject.name).toLowerCase().includes('chimie') ||
     String(subject.name).toLowerCase().includes('svt') ||
     String(subject.name).toLowerCase().includes('histoire') ||
+    String(subject.name).toLowerCase().includes('philosophie') ||
     String(subject.name).toLowerCase().includes('connaissance')
   );
   const trackLabel = String(currentStudent?.nsivTrack || 'ORDINAIRE').toUpperCase();
@@ -75,6 +76,8 @@ export default function QuizPage() {
       ? 'SVT'
     : String(subject?.name || '').toLowerCase().includes('histoire')
       ? 'Histoire-Geographie'
+      : String(subject?.name || '').toLowerCase().includes('philosophie')
+        ? 'Philosophie'
       : String(subject?.name || '').toLowerCase().includes('connaissance')
         ? 'Connaissance generale'
         : 'Physique';
@@ -98,6 +101,16 @@ export default function QuizPage() {
     setSubject(data.subject);
     setQuestions(
       (data.questions || []).map((question) => {
+        const answerType = question.answerType || 'MCQ';
+        if (answerType === 'TEXT') {
+          return {
+            ...question,
+            answerType,
+            options: [],
+            optionIndexMap: []
+          };
+        }
+
         let shuffled = shuffleWithIndexMap(question.options || []);
         const previousOrder = lastOptionOrderRef.current[question.id];
 
@@ -114,6 +127,7 @@ export default function QuizPage() {
         lastOptionOrderRef.current[question.id] = shuffled.optionIndexMap;
         return {
           ...question,
+          answerType,
           options: shuffled.options,
           optionIndexMap: shuffled.optionIndexMap
         };
@@ -166,7 +180,23 @@ export default function QuizPage() {
   const durationSec = useMemo(() => QUIZ_SECONDS - timeLeft, [timeLeft]);
 
   const setAnswer = (questionId, selectedOption) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: selectedOption }));
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: {
+        ...(prev[questionId] || {}),
+        selectedOption
+      }
+    }));
+  };
+
+  const setTextAnswer = (questionId, selectedText) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: {
+        ...(prev[questionId] || {}),
+        selectedText
+      }
+    }));
   };
 
   const startSet = async (setKey) => {
@@ -200,11 +230,28 @@ export default function QuizPage() {
       startedAt,
       durationSec: Math.max(durationSec, 1),
       answers: questions
-        .filter((q) => answers[q.id] !== undefined)
-        .map((q) => ({
-          questionId: q.id,
-          selectedOption: q.optionIndexMap?.[answers[q.id]] ?? answers[q.id]
-        }))
+        .filter((q) => {
+          const entry = answers[q.id];
+          if (!entry) return false;
+          if (q.answerType === 'TEXT') {
+            return Boolean(String(entry.selectedText || '').trim());
+          }
+          return entry.selectedOption !== undefined;
+        })
+        .map((q) => {
+          const entry = answers[q.id] || {};
+          if (q.answerType === 'TEXT') {
+            return {
+              questionId: q.id,
+              selectedText: String(entry.selectedText || '').trim()
+            };
+          }
+
+          return {
+            questionId: q.id,
+            selectedOption: q.optionIndexMap?.[entry.selectedOption] ?? entry.selectedOption
+          };
+        })
     };
 
     if (payload.answers.length === 0) {
@@ -423,23 +470,35 @@ export default function QuizPage() {
                   {item.isCorrect ? 'Bonne reponse' : 'Reponse incorrecte'}
                 </p>
                 <div className="mt-3 space-y-2">
-                  {(item.options || []).map((option, optionIndex) => {
-                    const isSelected = item.selectedOption === optionIndex;
-                    const isCorrectOption = item.correctOption === optionIndex;
-                    const optionClass = isCorrectOption
-                      ? 'border-green-400 bg-green-50'
-                      : isSelected
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-brand-100';
-
-                    return (
-                      <div key={optionIndex} className={`rounded border px-3 py-2 text-sm ${optionClass}`}>
-                        <span>{option}</span>
-                        {isSelected ? <span className="ml-2 text-xs font-semibold text-brand-700">(Ta reponse)</span> : null}
-                        {isCorrectOption ? <span className="ml-2 text-xs font-semibold text-green-700">(Bonne reponse)</span> : null}
+                  {item.answerType === 'TEXT' ? (
+                    <div className="space-y-2">
+                      <div className="rounded border border-brand-100 px-3 py-2 text-sm">
+                        <span className="font-semibold">Ta reponse:</span>{' '}
+                        {item.selectedText || <em>Aucune reponse</em>}
                       </div>
-                    );
-                  })}
+                      <div className="rounded border border-green-400 bg-green-50 px-3 py-2 text-sm">
+                        <span className="font-semibold">Reponse attendue:</span> {item.correctText || 'N/A'}
+                      </div>
+                    </div>
+                  ) : (
+                    (item.options || []).map((option, optionIndex) => {
+                      const isSelected = item.selectedOption === optionIndex;
+                      const isCorrectOption = item.correctOption === optionIndex;
+                      const optionClass = isCorrectOption
+                        ? 'border-green-400 bg-green-50'
+                        : isSelected
+                          ? 'border-red-300 bg-red-50'
+                          : 'border-brand-100';
+
+                      return (
+                        <div key={optionIndex} className={`rounded border px-3 py-2 text-sm ${optionClass}`}>
+                          <span>{option}</span>
+                          {isSelected ? <span className="ml-2 text-xs font-semibold text-brand-700">(Ta reponse)</span> : null}
+                          {isCorrectOption ? <span className="ml-2 text-xs font-semibold text-green-700">(Bonne reponse)</span> : null}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
                 {item.explanation ? (
                   <p className="mt-2 text-sm text-brand-700">Explication: {item.explanation}</p>
@@ -460,17 +519,26 @@ export default function QuizPage() {
               <article key={q.id} className="card">
                 <p className="mb-3 font-semibold">{idx + 1}. {q.prompt}</p>
                 <div className="space-y-2">
-                  {q.options.map((opt, optIdx) => (
-                    <label key={optIdx} className="flex cursor-pointer items-center gap-2 rounded border border-brand-100 px-3 py-2 hover:bg-brand-50">
-                      <input
-                        type="radio"
-                        name={`q_${q.id}`}
-                        checked={answers[q.id] === optIdx}
-                        onChange={() => setAnswer(q.id, optIdx)}
-                      />
-                      <span>{opt}</span>
-                    </label>
-                  ))}
+                  {q.answerType === 'TEXT' ? (
+                    <textarea
+                      className="input min-h-28 w-full"
+                      placeholder="Ecris ta reponse ici..."
+                      value={answers[q.id]?.selectedText || ''}
+                      onChange={(e) => setTextAnswer(q.id, e.target.value)}
+                    />
+                  ) : (
+                    q.options.map((opt, optIdx) => (
+                      <label key={optIdx} className="flex cursor-pointer items-center gap-2 rounded border border-brand-100 px-3 py-2 hover:bg-brand-50">
+                        <input
+                          type="radio"
+                          name={`q_${q.id}`}
+                          checked={answers[q.id]?.selectedOption === optIdx}
+                          onChange={() => setAnswer(q.id, optIdx)}
+                        />
+                        <span>{opt}</span>
+                      </label>
+                    ))
+                  )}
                 </div>
               </article>
             ))}

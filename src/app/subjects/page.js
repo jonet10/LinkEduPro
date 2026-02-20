@@ -26,18 +26,22 @@ function scoreSubjectForTrack(subjectName, track) {
     if (normalized.includes('svt')) score += 8;
     if (normalized.includes('chimie')) score += 3;
     if (normalized.includes('histoire')) score += 3;
+    if (normalized.includes('philosophie')) score += 2;
     if (normalized.includes('physique')) score += 2;
   } else if (nsivTrack === 'SMP') {
     if (normalized.includes('physique')) score += 8;
     if (normalized.includes('chimie')) score += 5;
     if (normalized.includes('svt')) score += 2;
+    if (normalized.includes('philosophie')) score += 2;
     if (normalized.includes('histoire')) score += 2;
   } else if (nsivTrack === 'SES' || nsivTrack === 'LLA') {
+    if (normalized.includes('philosophie')) score += 9;
     if (normalized.includes('histoire')) score += 8;
     if (normalized.includes('connaissance generale')) score += 5;
     if (normalized.includes('svt')) score += 2;
     if (normalized.includes('chimie')) score += 1;
   } else {
+    if (normalized.includes('philosophie')) score += 6;
     if (normalized.includes('connaissance generale')) score += 7;
     if (normalized.includes('histoire')) score += 5;
     if (normalized.includes('physique')) score += 3;
