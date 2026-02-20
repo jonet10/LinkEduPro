@@ -450,7 +450,22 @@ export default function HeaderNav() {
             <span>Profil</span>
           </Link>
         ) : (
-          <Link href="/login" className="hover:text-brand-700">Connexion</Link>
+          <>
+            <Link href="/login" className="hidden hover:text-brand-700 md:inline">Connexion</Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:hidden"
+              aria-label="Connexion"
+              title="Connexion"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+                <path
+                  d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2-7 4.5V20h14v-1.5C19 16 16 14 12 14Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </Link>
+          </>
         )}
 
         {isAuthed ? (
