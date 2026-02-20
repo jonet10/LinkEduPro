@@ -67,7 +67,7 @@ export default function LoginPage() {
     setError('');
     setInfo('');
     if (!resendEmail) {
-      setError('Email requis pour renvoyer la verification.');
+      setError('Email requis pour renvoyer la vérification.');
       return;
     }
     setResending(true);
@@ -76,7 +76,7 @@ export default function LoginPage() {
         method: 'POST',
         body: JSON.stringify({ email: resendEmail })
       });
-      setInfo(data.message || 'Email de verification renvoye.');
+      setInfo(data.message || 'Email de vérification renvoyé.');
       if (data.devVerificationToken) {
         setInfo((prev) => `${prev} Token dev: ${data.devVerificationToken}`);
       }
@@ -102,14 +102,14 @@ export default function LoginPage() {
         method: 'POST',
         body: JSON.stringify({ email: resendEmail, newEmail, password })
       });
-      setInfo(data.message || 'Email mis a jour.');
+      setInfo(data.message || 'Email mis à jour.');
       setResendEmail(newEmail);
       setNewEmail('');
       if (data.devVerificationToken) {
         setInfo((prev) => `${prev} Token dev: ${data.devVerificationToken}`);
       }
     } catch (err) {
-      setError(err.message || "Erreur mise a jour de l'email.");
+      setError(err.message || "Erreur mise à jour de l'email.");
     } finally {
       setUpdatingEmail(false);
     }
@@ -117,9 +117,9 @@ export default function LoginPage() {
 
   return (
     <section className="mx-auto max-w-md card">
-      <h1 className="mb-6 text-2xl font-bold text-brand-900">Connexion eleve</h1>
+      <h1 className="mb-6 text-2xl font-bold text-brand-900">Connexion élève</h1>
       <form onSubmit={onSubmit} className="space-y-4">
-        <input className="input" placeholder="Email ou telephone" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required />
+        <input className="input" placeholder="Email ou téléphone" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required />
         <input className="input" type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} required />
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         {info ? <p className="text-sm text-green-600">{info}</p> : null}
@@ -127,13 +127,13 @@ export default function LoginPage() {
           <div className="space-y-2">
             <input className="input" type="email" placeholder="Votre email" value={resendEmail} onChange={(e) => setResendEmail(e.target.value)} required />
             <button className="btn-secondary w-full" type="button" onClick={onResend} disabled={resending}>
-              {resending ? 'Envoi...' : 'Renvoyer email de verification'}
+              {resending ? 'Envoi...' : 'Renvoyer email de vérification'}
             </button>
             {showUpdateEmail ? (
               <>
                 <input className="input" type="email" placeholder="Nouvel email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
                 <button className="btn-secondary w-full" type="button" onClick={onUpdateEmail} disabled={updatingEmail}>
-                  {updatingEmail ? 'Mise a jour...' : "Modifier l'adresse email"}
+                  {updatingEmail ? 'Mise à jour...' : "Modifier l'adresse email"}
                 </button>
               </>
             ) : null}
@@ -142,7 +142,7 @@ export default function LoginPage() {
         <button className="btn-primary w-full" type="submit" disabled={loading}>{loading ? 'Connexion...' : 'Se connecter'}</button>
       </form>
       <div className="mt-4 text-sm">
-        <Link href="/forgot-password" className="text-brand-700 hover:underline">Mot de passe oublie ?</Link>
+        <Link href="/forgot-password" className="text-brand-700 hover:underline">Mot de passe oublié ?</Link>
       </div>
     </section>
   );

@@ -139,7 +139,7 @@ export default function ProbableExercisesPage() {
       <div className="card">
         <h1 className="text-3xl font-bold text-brand-900">Exercices les plus probables</h1>
         <p className="mt-2 text-sm text-brand-700">
-          Analyse globale des examens passes pour le niveau NSIV (toutes ecoles confondues).
+          Analyse globale des examens passés pour le niveau NSIV (toutes écoles confondues).
         </p>
       </div>
 
@@ -157,8 +157,8 @@ export default function ProbableExercisesPage() {
           className={`card text-left ${selectedSubject === 'MATHEMATIQUE' ? 'ring-2 ring-brand-400' : ''}`}
           onClick={() => setSelectedSubject('MATHEMATIQUE')}
         >
-          <p className="text-lg font-semibold text-brand-900">Mathematique</p>
-          <p className="mt-1 text-sm text-brand-700">Contenu en preparation.</p>
+          <p className="text-lg font-semibold text-brand-900">Mathématique</p>
+          <p className="mt-1 text-sm text-brand-700">Contenu en préparation.</p>
         </button>
         <button
           type="button"
@@ -166,7 +166,7 @@ export default function ProbableExercisesPage() {
           onClick={() => setSelectedSubject('CHIMIE')}
         >
           <p className="text-lg font-semibold text-brand-900">Chimie</p>
-          <p className="mt-1 text-sm text-brand-700">Contenu en preparation.</p>
+          <p className="mt-1 text-sm text-brand-700">Contenu en préparation.</p>
         </button>
       </div>
 
@@ -178,9 +178,9 @@ export default function ProbableExercisesPage() {
         selectedSubject !== 'PHYSIQUE' ? (
           <div className="card">
             <p className="text-lg font-semibold text-brand-900">
-              {selectedSubject === 'MATHEMATIQUE' ? 'Mathematique' : 'Chimie'}
+              {selectedSubject === 'MATHEMATIQUE' ? 'Mathématique' : 'Chimie'}
             </p>
-            <p className="mt-2 text-sm text-brand-700">Ce contenu sera disponible bientot.</p>
+            <p className="mt-2 text-sm text-brand-700">Ce contenu sera disponible bientôt.</p>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
@@ -197,7 +197,7 @@ export default function ProbableExercisesPage() {
                         <p className="text-xs text-brand-700">Classification: {topicItem.classification}</p>
                         {topicItem.sampleQuestion ? (
                           <div className="mt-2 rounded border border-brand-100 bg-brand-50 px-2 py-2">
-                            <p className="text-[11px] font-semibold text-brand-900">Exercice reel (extrait)</p>
+                            <p className="text-[11px] font-semibold text-brand-900">Exercice réel (extrait)</p>
                             <p className="text-xs text-brand-700">{topicItem.sampleQuestion}</p>
                           </div>
                         ) : null}
@@ -262,13 +262,13 @@ export default function ProbableExercisesPage() {
                       </div>
                     ))}
                     {(subjectItem.topics || []).length === 0 ? (
-                      <p className="text-sm text-brand-700">Aucune donnee disponible.</p>
+                      <p className="text-sm text-brand-700">Aucune donnée disponible.</p>
                     ) : null}
                   </div>
                 </article>
               ))}
             {items.filter((subjectItem) => normalizeSubjectName(subjectItem.subject).includes('PHYSIQUE')).length === 0 ? (
-              <p className="text-sm text-brand-700">Aucune donnee de Physique disponible pour le moment.</p>
+              <p className="text-sm text-brand-700">Aucune donnée de Physique disponible pour le moment.</p>
             ) : null}
           </div>
         )

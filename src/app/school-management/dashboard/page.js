@@ -64,25 +64,25 @@ export default function SchoolManagementDashboardPage() {
         <div>
           <p className="text-sm text-brand-700">Espace School Management</p>
           <h1 className="text-2xl font-bold text-brand-900">
-            {admin?.role === 'SUPER_ADMIN' ? 'Dashboard Super Admin School' : 'Dashboard Admin Ecole'}
+            {admin?.role === 'SUPER_ADMIN' ? 'Dashboard Super Admin School' : 'Dashboard Admin École'}
           </h1>
-          <p className="text-sm text-brand-700">Connecte: {admin?.email}</p>
+          <p className="text-sm text-brand-700">Connecté: {admin?.email}</p>
         </div>
-        <button className="btn-secondary" onClick={logout}>Se deconnecter</button>
+        <button className="btn-secondary" onClick={logout}>Se déconnecter</button>
       </section>
 
       {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-red-700">{error}</p> : null}
 
       {admin?.role === 'SUPER_ADMIN' ? (
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <article className="card"><p className="text-sm">Total ecoles</p><p className="text-3xl font-black">{stats?.totalSchools ?? 0}</p></article>
-          <article className="card"><p className="text-sm">Eleves ecoles</p><p className="text-3xl font-black">{stats?.totalSchoolStudents ?? 0}</p></article>
+          <article className="card"><p className="text-sm">Total écoles</p><p className="text-3xl font-black">{stats?.totalSchools ?? 0}</p></article>
+          <article className="card"><p className="text-sm">Élèves écoles</p><p className="text-3xl font-black">{stats?.totalSchoolStudents ?? 0}</p></article>
           <article className="card"><p className="text-sm">Volume paiements</p><p className="text-3xl font-black">{String(stats?.globalPaymentVolume ?? 0)}</p></article>
-          <article className="card"><p className="text-sm">Activite ecoles</p><p className="text-3xl font-black">{stats?.schoolActivity?.length ?? 0}</p></article>
+          <article className="card"><p className="text-sm">Activité écoles</p><p className="text-3xl font-black">{stats?.schoolActivity?.length ?? 0}</p></article>
         </section>
       ) : (
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <article className="card"><p className="text-sm">Total eleves</p><p className="text-3xl font-black">{stats?.totalStudents ?? 0}</p></article>
+          <article className="card"><p className="text-sm">Total élèves</p><p className="text-3xl font-black">{stats?.totalStudents ?? 0}</p></article>
           <article className="card"><p className="text-sm">Total classes</p><p className="text-3xl font-black">{stats?.totalClasses ?? 0}</p></article>
           <article className="card"><p className="text-sm">Paiements du jour</p><p className="text-3xl font-black">{String(stats?.paymentsToday ?? 0)}</p></article>
           <article className="card"><p className="text-sm">Revenus mensuels</p><p className="text-3xl font-black">{String(stats?.monthlyRevenue ?? 0)}</p></article>

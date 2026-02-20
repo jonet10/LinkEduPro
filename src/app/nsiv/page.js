@@ -6,13 +6,13 @@ import { useRouter } from 'next/navigation';
 import { getStudent, getToken, isNsivStudent } from '@/lib/auth';
 
 const WEEKLY_PLAN = [
-  { week: 'Semaine 1', chimie: 'M1', physique: 'M1', focus: 'Bases + revision active' },
+  { week: 'Semaine 1', chimie: 'M1', physique: 'M1', focus: 'Bases + révision active' },
   { week: 'Semaine 2', chimie: 'M2', physique: 'M2', focus: 'Exercices de calcul' },
-  { week: 'Semaine 3', chimie: 'M3', physique: 'M3', focus: 'Methodologie + recap' },
+  { week: 'Semaine 3', chimie: 'M3', physique: 'M3', focus: 'Méthodologie + récap' },
   { week: 'Semaine 4', chimie: 'M4', physique: 'M4', focus: 'Serie d\'applications' },
-  { week: 'Semaine 5', chimie: 'M5', physique: 'M5', focus: 'Problemes types bac' },
+  { week: 'Semaine 5', chimie: 'M5', physique: 'M5', focus: 'Problèmes types bac' },
   { week: 'Semaine 6', chimie: 'M6', physique: 'M6', focus: 'Consolidation des notions' },
-  { week: 'Semaine 7', chimie: 'M7', physique: 'M7', focus: 'Revision ciblee' },
+  { week: 'Semaine 7', chimie: 'M7', physique: 'M7', focus: 'Révision ciblée' },
   { week: 'Semaine 8', chimie: 'M8', physique: 'M8', focus: 'Simulation bac + correction' }
 ];
 
@@ -37,7 +37,7 @@ export default function NsivPage() {
   }, [token, nsivAccess, router]);
 
   if (!ready) {
-    return <p>Chargement de l'espace NSIV...</p>;
+    return <p>Chargement de l’espace NSIV...</p>;
   }
 
   return (
@@ -46,22 +46,22 @@ export default function NsivPage() {
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Terminale</p>
         <h1 className="mt-2 text-3xl font-black text-brand-900">Espace NSIV</h1>
         <p className="mt-2 text-sm text-brand-700">
-          Rubriques organisees pour preparer le bac: cours structures, exercices probables et progression hebdomadaire.
+          Rubriques organisées pour préparer le bac: cours structurés, exercices probables et progression hebdomadaire.
         </p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Link href="/study-plans?subject=Chimie" className="card hover:bg-brand-50">
           <h2 className="text-xl font-semibold text-brand-900">Chimie NSIV</h2>
-          <p className="mt-2 text-sm text-brand-700">Chapitres ordonnes, notes de cours et exercices.</p>
+          <p className="mt-2 text-sm text-brand-700">Chapitres ordonnés, notes de cours et exercices.</p>
         </Link>
         <Link href="/study-plans?subject=Physique" className="card hover:bg-brand-50">
           <h2 className="text-xl font-semibold text-brand-900">Physique NSIV</h2>
-          <p className="mt-2 text-sm text-brand-700">Progression complete avec contenu par chapitre.</p>
+          <p className="mt-2 text-sm text-brand-700">Progression complète avec contenu par chapitre.</p>
         </Link>
         <Link href="/probable-exercises" className="card hover:bg-brand-50">
           <h2 className="text-xl font-semibold text-brand-900">Exercices probables</h2>
-          <p className="mt-2 text-sm text-brand-700">Sujets les plus frequents analyses a partir des epreuves.</p>
+          <p className="mt-2 text-sm text-brand-700">Sujets les plus fréquents analysés à partir des épreuves.</p>
         </Link>
         <Link href="/focus" className="card hover:bg-brand-50">
           <h2 className="text-xl font-semibold text-brand-900">Focus</h2>
@@ -69,26 +69,26 @@ export default function NsivPage() {
         </Link>
         <Link href="/rattrapage" className="card hover:bg-brand-50">
           <h2 className="text-xl font-semibold text-brand-900">Rattrapage Google Meet</h2>
-          <p className="mt-2 text-sm text-brand-700">Sessions planifiees par professeur ou admin.</p>
+          <p className="mt-2 text-sm text-brand-700">Sessions planifiées par professeur ou admin.</p>
         </Link>
         <Link href="/library" className="card hover:bg-brand-50">
-          <h2 className="text-xl font-semibold text-brand-900">Bibliotheque</h2>
-          <p className="mt-2 text-sm text-brand-700">Supports PDF et ressources de revision.</p>
+          <h2 className="text-xl font-semibold text-brand-900">Bibliothèque</h2>
+          <p className="mt-2 text-sm text-brand-700">Supports PDF et ressources de révision.</p>
         </Link>
         <Link href="/progress" className="card hover:bg-brand-50">
-          <h2 className="text-xl font-semibold text-brand-900">Mon progres</h2>
-          <p className="mt-2 text-sm text-brand-700">Suivi des performances et points a renforcer.</p>
+          <h2 className="text-xl font-semibold text-brand-900">Mon progrès</h2>
+          <p className="mt-2 text-sm text-brand-700">Suivi des performances et points à renforcer.</p>
         </Link>
       </section>
 
       <section className="card">
-        <h2 className="text-xl font-semibold text-brand-900">Plan de progression recommande (8 semaines)</h2>
-        <p className="mt-2 text-sm text-brand-700">Ordre recommande pour avancer en Chimie et Physique sans sauter les bases.</p>
+        <h2 className="text-xl font-semibold text-brand-900">Plan de progression recommandé (8 semaines)</h2>
+        <p className="mt-2 text-sm text-brand-700">Ordre recommandé pour avancer en Chimie et Physique sans sauter les bases.</p>
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
               <tr className="border-b border-brand-100 text-left">
-                <th className="px-2 py-2 font-semibold text-brand-900">Periode</th>
+                <th className="px-2 py-2 font-semibold text-brand-900">Période</th>
                 <th className="px-2 py-2 font-semibold text-brand-900">Chimie</th>
                 <th className="px-2 py-2 font-semibold text-brand-900">Physique</th>
                 <th className="px-2 py-2 font-semibold text-brand-900">Objectif</th>
