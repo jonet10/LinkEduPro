@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 
@@ -34,7 +34,6 @@ function conversationRecipientId(conversation, currentUserId) {
 
 export default function MessagesPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [token, setToken] = useState(null);
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -65,7 +64,7 @@ export default function MessagesPage() {
     () => conversations.filter((c) => c.type === 'GLOBAL'),
     [conversations]
   );
-  const requestedConversationId = Number(searchParams.get('conversation') || 0);
+  const [requestedConversationId, setRequestedConversationId] = useState(0);
 
   async function loadConversations(currentToken) {
     const data = await apiClient('/messages/conversations', { token: currentToken });
@@ -135,6 +134,15 @@ export default function MessagesPage() {
     if (!token || !selectedConversationId) return;
     loadConversationById(token, selectedConversationId);
   }, [token, selectedConversationId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const query = new URLSearchParams(window.location.search);
+    const nextId = Number(query.get('conversation') || 0);
+    if (nextId > 0) {
+      setRequestedConversationId(nextId);
+    }
+  }, []);
 
   useEffect(() => {
     if (!requestedConversationId || !conversations.length) return;
