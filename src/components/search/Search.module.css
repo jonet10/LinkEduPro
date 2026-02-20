@@ -154,6 +154,21 @@
   padding: 0.85rem;
 }
 
+.resultLinkCard {
+  display: block;
+  border-radius: 0.85rem;
+}
+
+.resultLinkCard .resultCard {
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+
+.resultLinkCard:hover .resultCard {
+  transform: translateY(-1px);
+  border-color: #99c9f2;
+  box-shadow: 0 8px 18px rgba(10, 111, 190, 0.12);
+}
+
 .meta {
   margin-top: 0.3rem;
   font-size: 0.8rem;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken, isNsivStudent } from '@/lib/auth';
 
@@ -14,22 +14,29 @@ function toDatetimeLocal(value) {
 
 export default function RattrapagePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const token = useMemo(() => getToken(), []);
   const student = useMemo(() => getStudent(), []);
   const canManage = student?.role === 'ADMIN' || student?.role === 'TEACHER';
   const canView = canManage || isNsivStudent(student);
 
   const [sessions, setSessions] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [highlightedSessionId, setHighlightedSessionId] = useState(null);
   const [form, setForm] = useState({
     title: '',
     subject: 'Physique',
     description: '',
     meetUrl: '',
+    invitationScope: 'GLOBAL',
+    targetSchool: '',
+    targetTeacherId: '',
+    invitationMessage: '',
     startsAt: '',
     endsAt: ''
   });
@@ -44,11 +51,24 @@ export default function RattrapagePage() {
       return;
     }
 
-    apiClient('/catchup', { token })
-      .then((data) => setSessions(data.sessions || []))
+    Promise.all([
+      apiClient('/catchup', { token }),
+      canManage ? apiClient('/catchup/teachers', { token }) : Promise.resolve({ teachers: [] })
+    ])
+      .then(([sessionsData, teachersData]) => {
+        setSessions(sessionsData.sessions || []);
+        setTeachers(teachersData.teachers || []);
+      })
       .catch((e) => setError(e.message || 'Impossible de charger les rattrapages.'))
       .finally(() => setLoading(false));
   }, [token, canView, router]);
+
+  useEffect(() => {
+    const sessionParam = Number(searchParams.get('session') || 0);
+    if (sessionParam > 0) {
+      setHighlightedSessionId(sessionParam);
+    }
+  }, [searchParams]);
 
   async function onCreate(e) {
     e.preventDefault();
@@ -63,11 +83,23 @@ export default function RattrapagePage() {
         body: JSON.stringify({
           ...form,
           startsAt: new Date(form.startsAt).toISOString(),
-          endsAt: new Date(form.endsAt).toISOString()
+          endsAt: new Date(form.endsAt).toISOString(),
+          targetTeacherId: form.invitationScope === 'TEACHER' ? Number(form.targetTeacherId || 0) : null
         })
       });
       setInfo('Rattrapage planifie.');
-      setForm({ title: '', subject: 'Physique', description: '', meetUrl: '', startsAt: '', endsAt: '' });
+      setForm({
+        title: '',
+        subject: 'Physique',
+        description: '',
+        meetUrl: '',
+        invitationScope: 'GLOBAL',
+        targetSchool: '',
+        targetTeacherId: '',
+        invitationMessage: '',
+        startsAt: '',
+        endsAt: ''
+      });
       const data = await apiClient('/catchup', { token });
       setSessions(data.sessions || []);
     } catch (e2) {
@@ -84,6 +116,10 @@ export default function RattrapagePage() {
       subject: session.subject || 'Physique',
       description: session.description || '',
       meetUrl: session.meetUrl || '',
+      invitationScope: session.invitationScope || 'GLOBAL',
+      targetSchool: session.targetSchool || '',
+      targetTeacherId: session.targetTeacherId ? String(session.targetTeacherId) : '',
+      invitationMessage: session.invitationMessage || '',
       startsAt: toDatetimeLocal(session.startsAt),
       endsAt: toDatetimeLocal(session.endsAt)
     });
@@ -103,12 +139,24 @@ export default function RattrapagePage() {
         body: JSON.stringify({
           ...form,
           startsAt: new Date(form.startsAt).toISOString(),
-          endsAt: new Date(form.endsAt).toISOString()
+          endsAt: new Date(form.endsAt).toISOString(),
+          targetTeacherId: form.invitationScope === 'TEACHER' ? Number(form.targetTeacherId || 0) : null
         })
       });
       setInfo('Rattrapage mis a jour.');
       setEditingId(null);
-      setForm({ title: '', subject: 'Physique', description: '', meetUrl: '', startsAt: '', endsAt: '' });
+      setForm({
+        title: '',
+        subject: 'Physique',
+        description: '',
+        meetUrl: '',
+        invitationScope: 'GLOBAL',
+        targetSchool: '',
+        targetTeacherId: '',
+        invitationMessage: '',
+        startsAt: '',
+        endsAt: ''
+      });
       const data = await apiClient('/catchup', { token });
       setSessions(data.sessions || []);
     } catch (e2) {
@@ -129,6 +177,15 @@ export default function RattrapagePage() {
     }
   }
 
+  async function onSubmitForm(e) {
+    if (editingId) {
+      e.preventDefault();
+      await onSaveEdit();
+      return;
+    }
+    await onCreate(e);
+  }
+
   return (
     <section className="space-y-5">
       <div className="card">
@@ -143,13 +200,33 @@ export default function RattrapagePage() {
           <h2 className="text-xl font-semibold text-brand-900">
             {editingId ? 'Modifier une session' : 'Planifier une session'}
           </h2>
-          <form className="mt-3 grid gap-3 md:grid-cols-2" onSubmit={onCreate}>
+          <form className="mt-3 grid gap-3 md:grid-cols-2" onSubmit={onSubmitForm}>
             <input className="input" placeholder="Titre" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} required />
             <input className="input" placeholder="Matiere (ex: Physique)" value={form.subject} onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))} required />
             <input className="input md:col-span-2" placeholder="Lien Google Meet" value={form.meetUrl} onChange={(e) => setForm((p) => ({ ...p, meetUrl: e.target.value }))} required />
+            <select className="input" value={form.invitationScope} onChange={(e) => setForm((p) => ({ ...p, invitationScope: e.target.value }))}>
+              <option value="GLOBAL">Global</option>
+              <option value="TEACHERS">Entre professeurs</option>
+              <option value="TEACHER">Professeur specifique</option>
+              <option value="SCHOOL">Ecole specifique</option>
+            </select>
+            {form.invitationScope === 'SCHOOL' ? (
+              <input className="input" placeholder="Ecole cible" value={form.targetSchool} onChange={(e) => setForm((p) => ({ ...p, targetSchool: e.target.value }))} required />
+            ) : null}
+            {form.invitationScope === 'TEACHER' ? (
+              <select className="input" value={form.targetTeacherId} onChange={(e) => setForm((p) => ({ ...p, targetTeacherId: e.target.value }))} required>
+                <option value="">Choisir un professeur</option>
+                {teachers.map((teacher) => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.firstName} {teacher.lastName} ({teacher.school || 'Sans ecole'})
+                  </option>
+                ))}
+              </select>
+            ) : null}
             <input className="input" type="datetime-local" value={form.startsAt} onChange={(e) => setForm((p) => ({ ...p, startsAt: e.target.value }))} required />
             <input className="input" type="datetime-local" value={form.endsAt} onChange={(e) => setForm((p) => ({ ...p, endsAt: e.target.value }))} required />
             <textarea className="input md:col-span-2" placeholder="Description (optionnel)" value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
+            <textarea className="input md:col-span-2" placeholder="Message d'annonce personnalise (optionnel)" value={form.invitationMessage} onChange={(e) => setForm((p) => ({ ...p, invitationMessage: e.target.value }))} />
             {!editingId ? (
               <button className="btn-primary md:col-span-2" disabled={saving}>{saving ? 'Enregistrement...' : 'Planifier'}</button>
             ) : (
@@ -168,10 +245,20 @@ export default function RattrapagePage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {sessions.map((session) => (
-          <article key={session.id} className="card">
+          <article key={session.id} className={`card ${highlightedSessionId === session.id ? 'ring-2 ring-brand-400' : ''}`}>
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">{session.subject}</p>
             <h3 className="text-lg font-semibold text-brand-900">{session.title}</h3>
             {session.description ? <p className="mt-1 text-sm text-brand-700">{session.description}</p> : null}
+            <p className="mt-1 text-xs text-brand-700">
+              Audience: {session.invitationScope}
+              {session.targetSchool ? ` | Ecole: ${session.targetSchool}` : ''}
+              {session.targetTeacherName ? ` | Prof: ${session.targetTeacherName}` : ''}
+            </p>
+            {session.invitationMessage ? (
+              <p className="mt-2 rounded border border-brand-100 bg-brand-50 px-2 py-1 text-sm text-brand-800">
+                {session.invitationMessage}
+              </p>
+            ) : null}
             <p className="mt-2 text-sm text-brand-700">Debut: {new Date(session.startsAt).toLocaleString()}</p>
             <p className="text-sm text-brand-700">Fin: {new Date(session.endsAt).toLocaleString()}</p>
             <a href={session.meetUrl} target="_blank" rel="noopener noreferrer" className="btn-primary mt-3 inline-block">
