@@ -51,6 +51,7 @@ export default function QuizPage() {
   const [liking, setLiking] = useState(false);
   const [reviewItems, setReviewItems] = useState([]);
   const [showReview, setShowReview] = useState(false);
+  const [reviewMode, setReviewMode] = useState('failed');
   const lastOptionOrderRef = useRef({});
   const currentStudent = useMemo(() => getStudent(), []);
 
@@ -77,6 +78,11 @@ export default function QuizPage() {
       : String(subject?.name || '').toLowerCase().includes('connaissance')
         ? 'Connaissance generale'
         : 'Physique';
+  const failedReviewItems = useMemo(
+    () => reviewItems.filter((item) => !item.isCorrect),
+    [reviewItems]
+  );
+  const displayedReviewItems = reviewMode === 'failed' ? failedReviewItems : reviewItems;
 
   const loadQuestions = async (setKey, selectedMode = mode) => {
     const token = getToken();
@@ -215,7 +221,8 @@ export default function QuizPage() {
       });
       setQuizResult(result);
       setReviewItems(Array.isArray(result.review) ? result.review : []);
-      setShowReview(false);
+      setShowReview(true);
+      setReviewMode('failed');
       setQuestions([]);
       setShareInfo('');
     } catch (e) {
@@ -359,21 +366,40 @@ export default function QuizPage() {
               {likedQuiz ? '❤️ J’aime ce quiz' : '🤍 J’aime ce quiz'} ({likesCount})
             </button>
             <button className="btn-secondary" onClick={shareQuizResult}>Partager avec mes amis</button>
-            <button className="btn-primary" onClick={() => router.push('/progress')}>Voir mes progres</button>
             <button
               className="btn-secondary"
               onClick={async () => {
                 setQuizResult(null);
                 setReviewItems([]);
                 setShowReview(false);
+                setReviewMode('failed');
                 if (selectedSetKey) await startSet(selectedSetKey);
               }}
             >
               Refaire ce quiz
             </button>
+            {failedReviewItems.length > 0 ? (
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  setReviewMode('failed');
+                  setShowReview((prev) => (reviewMode !== 'failed' ? true : !prev));
+                }}
+              >
+                {showReview && reviewMode === 'failed' ? 'Masquer mes erreurs' : 'Voir mes erreurs'}
+              </button>
+            ) : null}
             {reviewItems.length > 0 ? (
               <button className="btn-secondary" onClick={() => setShowReview((prev) => !prev)}>
                 {showReview ? 'Masquer le corrige' : 'Afficher le corrige'}
+              </button>
+            ) : null}
+            {reviewItems.length > 0 && showReview ? (
+              <button
+                className="btn-secondary"
+                onClick={() => setReviewMode((prev) => (prev === 'failed' ? 'all' : 'failed'))}
+              >
+                {reviewMode === 'failed' ? 'Voir tout le corrige' : 'Voir seulement mes erreurs'}
               </button>
             ) : null}
           </div>
@@ -385,10 +411,12 @@ export default function QuizPage() {
         <article className="card mt-4 space-y-3">
           <h2 className="text-xl font-semibold text-brand-900">Corrige detaille</h2>
           <p className="text-sm text-brand-700">
-            Verifie tes reponses et compare-les avec les bonnes reponses.
+            {reviewMode === 'failed'
+              ? "Voici les questions que tu as echouees."
+              : 'Verifie tes reponses et compare-les avec les bonnes reponses.'}
           </p>
           <div className="space-y-4">
-            {reviewItems.map((item, idx) => (
+            {displayedReviewItems.map((item, idx) => (
               <div key={`${item.questionId}_${idx}`} className="rounded-lg border border-brand-100 p-3">
                 <p className="font-semibold text-brand-900">{idx + 1}. {item.prompt}</p>
                 <p className={`mt-1 text-sm font-semibold ${item.isCorrect ? 'text-green-700' : 'text-red-700'}`}>
@@ -418,6 +446,9 @@ export default function QuizPage() {
                 ) : null}
               </div>
             ))}
+            {displayedReviewItems.length === 0 ? (
+              <p className="text-sm text-green-700">Excellent: aucune erreur sur ce quiz.</p>
+            ) : null}
           </div>
         </article>
       ) : null}
