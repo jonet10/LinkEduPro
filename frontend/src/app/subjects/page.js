@@ -14,6 +14,40 @@ function normalizeSubjectName(name) {
     .toLowerCase();
 }
 
+function scoreSubjectForTrack(subjectName, track) {
+  const normalized = normalizeSubjectName(subjectName);
+  const nsivTrack = String(track || 'ORDINAIRE').toUpperCase();
+
+  let score = 0;
+  if (normalized.includes('annales')) score += 3;
+  if (normalized.includes('connaissance generale')) score += 2;
+
+  if (nsivTrack === 'SVT') {
+    if (normalized.includes('svt')) score += 8;
+    if (normalized.includes('chimie')) score += 3;
+    if (normalized.includes('histoire')) score += 3;
+    if (normalized.includes('physique')) score += 2;
+  } else if (nsivTrack === 'SMP') {
+    if (normalized.includes('physique')) score += 8;
+    if (normalized.includes('chimie')) score += 5;
+    if (normalized.includes('svt')) score += 2;
+    if (normalized.includes('histoire')) score += 2;
+  } else if (nsivTrack === 'SES' || nsivTrack === 'LLA') {
+    if (normalized.includes('histoire')) score += 8;
+    if (normalized.includes('connaissance generale')) score += 5;
+    if (normalized.includes('svt')) score += 2;
+    if (normalized.includes('chimie')) score += 1;
+  } else {
+    if (normalized.includes('connaissance generale')) score += 7;
+    if (normalized.includes('histoire')) score += 5;
+    if (normalized.includes('physique')) score += 3;
+    if (normalized.includes('chimie')) score += 3;
+    if (normalized.includes('svt')) score += 3;
+  }
+
+  return score;
+}
+
 export default function SubjectsPage() {
   const [subjects, setSubjects] = useState([]);
   const [canSeeProbableExercises, setCanSeeProbableExercises] = useState(false);
@@ -23,12 +57,21 @@ export default function SubjectsPage() {
   const currentStudent = useMemo(() => getStudent(), []);
   const nsivTrack = String(currentStudent?.nsivTrack || 'ORDINAIRE').toUpperCase();
   const visibleSubjects = useMemo(() => {
-    if (!isNsivSectionVisible) return subjects;
-    return subjects.filter((subject) => {
+    const filtered = !isNsivSectionVisible ? subjects : subjects.filter((subject) => {
       const normalized = normalizeSubjectName(subject.name);
       return normalized !== 'sciences' && normalized !== 'francais';
     });
-  }, [subjects, isNsivSectionVisible]);
+
+    if (!isNsivSectionVisible) return filtered;
+
+    const scored = filtered.map((subject) => ({
+      ...subject,
+      _trackScore: scoreSubjectForTrack(subject.name, nsivTrack)
+    }));
+
+    scored.sort((a, b) => b._trackScore - a._trackScore || a.name.localeCompare(b.name));
+    return scored;
+  }, [subjects, isNsivSectionVisible, nsivTrack]);
 
   useEffect(() => {
     const token = getToken();
@@ -99,6 +142,11 @@ export default function SubjectsPage() {
             ? 'Sélection adaptée au niveau NSIV. Chaque rubrique contient des contenus et des quiz.'
             : 'Sélection générale des rubriques disponibles. Chaque rubrique contient des contenus et des quiz.'}
         </p>
+        {isNsivSectionVisible ? (
+          <p className="mt-1 text-xs font-semibold text-brand-700">
+            Affichage priorise pour ta filiere ({nsivTrack}).
+          </p>
+        ) : null}
         <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {visibleSubjects.map((subject) => (
             <article key={subject.id} className="card">

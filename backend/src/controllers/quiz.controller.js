@@ -156,6 +156,19 @@ async function submitQuiz(req, res, next) {
       };
     });
 
+    const review = normalizedAnswers.map((ans) => {
+      const question = questionMap.get(ans.questionId);
+      return {
+        questionId: question.id,
+        prompt: question.prompt,
+        options: question.options,
+        selectedOption: ans.selectedOption,
+        correctOption: question.correctOption,
+        isCorrect: ans.isCorrect,
+        explanation: question.explanation || null
+      };
+    });
+
     const attempt = await prisma.quizAttempt.create({
       data: {
         studentId,
@@ -177,7 +190,8 @@ async function submitQuiz(req, res, next) {
       totalQuestions: answers.length,
       percentage: Math.round((score / answers.length) * 100),
       likesCount: 0,
-      likedByMe: false
+      likedByMe: false,
+      review
     });
   } catch (error) {
     return next(error);

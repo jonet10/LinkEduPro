@@ -57,10 +57,26 @@ export default function QuizPage() {
   const selectedSet = quizSets.find((s) => s.key === selectedSetKey) || null;
   const shouldShowExamHeader = Boolean(subject?.name) && (
     String(subject.name).toLowerCase().includes('physique') ||
+    String(subject.name).toLowerCase().includes('chimie') ||
+    String(subject.name).toLowerCase().includes('svt') ||
     String(subject.name).toLowerCase().includes('histoire') ||
     String(subject.name).toLowerCase().includes('connaissance')
   );
   const trackLabel = String(currentStudent?.nsivTrack || 'ORDINAIRE').toUpperCase();
+  const filiereLabel = trackLabel === 'SMP' || trackLabel === 'SVT'
+    ? 'SMP/SVT'
+    : trackLabel === 'SES' || trackLabel === 'LLA'
+      ? 'SES/LLA'
+      : 'Ordinaire';
+  const examMatterLabel = String(subject?.name || '').toLowerCase().includes('chimie')
+    ? 'Chimie'
+    : String(subject?.name || '').toLowerCase().includes('svt')
+      ? 'SVT'
+    : String(subject?.name || '').toLowerCase().includes('histoire')
+      ? 'Histoire-Geographie'
+      : String(subject?.name || '').toLowerCase().includes('connaissance')
+        ? 'Connaissance generale'
+        : 'Physique';
 
   const loadQuestions = async (setKey, selectedMode = mode) => {
     const token = getToken();
@@ -309,8 +325,8 @@ export default function QuizPage() {
             Examens de fin d etudes secondaires | Session d entrainement
           </p>
           <div className="mt-3 grid gap-2 text-sm text-brand-800 sm:grid-cols-2">
-            <p><span className="font-semibold">Matiere:</span> {subject?.name || 'Physique'}</p>
-            <p><span className="font-semibold">Filiere:</span> {trackLabel}</p>
+            <p><span className="font-semibold">Matiere:</span> {examMatterLabel}</p>
+            <p><span className="font-semibold">Filiere:</span> {filiereLabel}</p>
             <p><span className="font-semibold">Type:</span> Annales et questions de cours des examens passes</p>
             <p><span className="font-semibold">Niveau:</span> NSIV</p>
           </div>
