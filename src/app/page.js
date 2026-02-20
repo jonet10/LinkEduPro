@@ -7,6 +7,8 @@ import { getToken, getStudent, isNsivStudent } from '@/lib/auth';
 import HomeCarousel from '@/components/HomeCarousel';
 import VerifiedTestimonials from '@/components/VerifiedTestimonials';
 
+const CALENDAR_NOTICE_KEY = 'linkedupro_calendar_notice_2025_2026_seen';
+
 export default function HomePage() {
   const [ready, setReady] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
@@ -14,8 +16,16 @@ export default function HomePage() {
   const [community, setCommunity] = useState({ leaderboard: [], recent: [], schools: [] });
   const [error, setError] = useState('');
   const [welcomePopup, setWelcomePopup] = useState(null);
+  const [showCalendarNotice, setShowCalendarNotice] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const alreadySeen = localStorage.getItem(CALENDAR_NOTICE_KEY) === '1';
+      if (!alreadySeen) {
+        setShowCalendarNotice(true);
+      }
+    }
+
     const token = getToken();
     const me = getStudent();
     setStudent(me);
@@ -43,11 +53,46 @@ export default function HomePage() {
       });
   }, []);
 
+  function closeCalendarNotice() {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(CALENDAR_NOTICE_KEY, '1');
+    }
+    setShowCalendarNotice(false);
+  }
+
   if (!ready) return <p>Chargement...</p>;
 
   if (!isAuthed) {
     return (
       <section className="space-y-8">
+        {showCalendarNotice ? (
+          <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
+            <div className="w-full max-w-lg rounded-2xl border border-brand-100 bg-white p-6 shadow-2xl">
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Information importante</p>
+              <h2 className="mt-2 text-xl font-black text-brand-900">Calendrier scolaire et examens officiels 2025-2026</h2>
+              <p className="mt-3 text-sm text-brand-700">
+                Le MENFP (Ministere de l'Education Nationale et de la Formation Professionnelle) a publie le calendrier scolaire 2025-2026.
+              </p>
+              <p className="mt-3 text-sm text-brand-700">Ce calendrier inclut:</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-brand-700">
+                <li>Les periodes de cours.</li>
+                <li>Les conges scolaires.</li>
+                <li>Les dates des examens officiels (9e annee fondamentale, ENIJE, CEF et baccalaureat).</li>
+              </ul>
+              <p className="mt-3 text-sm text-brand-700">
+                Les examens d'Etat restent programmes en juin et juillet 2026, comme les annees precedentes:
+              </p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-brand-700">
+                <li>Fin juin 2026: examens de la 9e annee fondamentale, ENIJE et CEF.</li>
+                <li>Mi-juillet 2026: examens du baccalaureat (fin d'etudes secondaires).</li>
+              </ul>
+              <div className="mt-5 flex justify-end">
+                <button type="button" className="btn-primary" onClick={closeCalendarNotice}>J'ai compris</button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <HomeCarousel isAuthed={isAuthed} />
 
         <section className="card" aria-labelledby="cta-title">
@@ -91,6 +136,34 @@ export default function HomePage() {
 
   return (
     <section className="space-y-6">
+      {showCalendarNotice ? (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-brand-100 bg-white p-6 shadow-2xl">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Information importante</p>
+            <h2 className="mt-2 text-xl font-black text-brand-900">Calendrier scolaire et examens officiels 2025-2026</h2>
+            <p className="mt-3 text-sm text-brand-700">
+              Le MENFP (Ministere de l'Education Nationale et de la Formation Professionnelle) a publie le calendrier scolaire 2025-2026.
+            </p>
+            <p className="mt-3 text-sm text-brand-700">Ce calendrier inclut:</p>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-brand-700">
+              <li>Les periodes de cours.</li>
+              <li>Les conges scolaires.</li>
+              <li>Les dates des examens officiels (9e annee fondamentale, ENIJE, CEF et baccalaureat).</li>
+            </ul>
+            <p className="mt-3 text-sm text-brand-700">
+              Les examens d'Etat restent programmes en juin et juillet 2026, comme les annees precedentes:
+            </p>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-brand-700">
+              <li>Fin juin 2026: examens de la 9e annee fondamentale, ENIJE et CEF.</li>
+              <li>Mi-juillet 2026: examens du baccalaureat (fin d'etudes secondaires).</li>
+            </ul>
+            <div className="mt-5 flex justify-end">
+              <button type="button" className="btn-primary" onClick={closeCalendarNotice}>J'ai compris</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {welcomePopup ? (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-4">
           <div className="w-full max-w-md rounded-2xl border border-brand-100 bg-white p-6 shadow-2xl" style={{ animation: 'fadeInWelcome 300ms ease' }}>
