@@ -7,6 +7,7 @@ import Link from 'next/link';
 
 export default function ProbableExercisesPage() {
   const [items, setItems] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState('PHYSIQUE');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [commentDrafts, setCommentDrafts] = useState({});
@@ -17,6 +18,13 @@ export default function ProbableExercisesPage() {
 
   function getKey(subject, topic) {
     return `${subject}__${topic}`;
+  }
+
+  function normalizeSubjectName(value) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase();
   }
 
   useEffect(() => {
@@ -135,95 +143,135 @@ export default function ProbableExercisesPage() {
         </p>
       </div>
 
+      <div className="grid gap-3 sm:grid-cols-3">
+        <button
+          type="button"
+          className={`card text-left ${selectedSubject === 'PHYSIQUE' ? 'ring-2 ring-brand-400' : ''}`}
+          onClick={() => setSelectedSubject('PHYSIQUE')}
+        >
+          <p className="text-lg font-semibold text-brand-900">Physique</p>
+          <p className="mt-1 text-sm text-brand-700">Voir tous les exercices probables de Physique.</p>
+        </button>
+        <button
+          type="button"
+          className={`card text-left ${selectedSubject === 'MATHEMATIQUE' ? 'ring-2 ring-brand-400' : ''}`}
+          onClick={() => setSelectedSubject('MATHEMATIQUE')}
+        >
+          <p className="text-lg font-semibold text-brand-900">Mathematique</p>
+          <p className="mt-1 text-sm text-brand-700">Contenu en preparation.</p>
+        </button>
+        <button
+          type="button"
+          className={`card text-left ${selectedSubject === 'CHIMIE' ? 'ring-2 ring-brand-400' : ''}`}
+          onClick={() => setSelectedSubject('CHIMIE')}
+        >
+          <p className="text-lg font-semibold text-brand-900">Chimie</p>
+          <p className="mt-1 text-sm text-brand-700">Contenu en preparation.</p>
+        </button>
+      </div>
+
       {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {feedback ? <p className="text-sm text-red-600">{feedback}</p> : null}
 
       {!loading && !error ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {items.map((subjectItem) => (
-            <article key={subjectItem.subject} className="card space-y-3">
-              <h2 className="text-xl font-semibold text-brand-900">{subjectItem.subject}</h2>
-              <div className="space-y-2">
-                {(subjectItem.topics || []).map((topicItem) => (
-                  <div key={`${subjectItem.subject}_${topicItem.topic}`} className="rounded-lg border border-brand-100 px-3 py-2">
-                    <p className="font-semibold text-brand-900">{topicItem.topic}</p>
-                    <p className="text-xs text-brand-700">Apparitions: {topicItem.frequency}</p>
-                    <p className="text-xs text-brand-700">Classification: {topicItem.classification}</p>
-                    {topicItem.sampleQuestion ? (
-                      <div className="mt-2 rounded border border-brand-100 bg-brand-50 px-2 py-2">
-                        <p className="text-[11px] font-semibold text-brand-900">Exercice reel (extrait)</p>
-                        <p className="text-xs text-brand-700">{topicItem.sampleQuestion}</p>
-                      </div>
-                    ) : null}
-                    {(topicItem.sources || []).length > 0 ? (
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {topicItem.sources.map((source) => (
-                          <Link
-                            key={`${subjectItem.subject}_${topicItem.topic}_${source.fileName}`}
-                            href={`/exam-viewer?file=${encodeURIComponent(source.fileName)}`}
+        selectedSubject !== 'PHYSIQUE' ? (
+          <div className="card">
+            <p className="text-lg font-semibold text-brand-900">
+              {selectedSubject === 'MATHEMATIQUE' ? 'Mathematique' : 'Chimie'}
+            </p>
+            <p className="mt-2 text-sm text-brand-700">Ce contenu sera disponible bientot.</p>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {items
+              .filter((subjectItem) => normalizeSubjectName(subjectItem.subject).includes('PHYSIQUE'))
+              .map((subjectItem) => (
+                <article key={subjectItem.subject} className="card space-y-3">
+                  <h2 className="text-xl font-semibold text-brand-900">{subjectItem.subject}</h2>
+                  <div className="space-y-2">
+                    {(subjectItem.topics || []).map((topicItem) => (
+                      <div key={`${subjectItem.subject}_${topicItem.topic}`} className="rounded-lg border border-brand-100 px-3 py-2">
+                        <p className="font-semibold text-brand-900">{topicItem.topic}</p>
+                        <p className="text-xs text-brand-700">Apparitions: {topicItem.frequency}</p>
+                        <p className="text-xs text-brand-700">Classification: {topicItem.classification}</p>
+                        {topicItem.sampleQuestion ? (
+                          <div className="mt-2 rounded border border-brand-100 bg-brand-50 px-2 py-2">
+                            <p className="text-[11px] font-semibold text-brand-900">Exercice reel (extrait)</p>
+                            <p className="text-xs text-brand-700">{topicItem.sampleQuestion}</p>
+                          </div>
+                        ) : null}
+                        {(topicItem.sources || []).length > 0 ? (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {topicItem.sources.map((source) => (
+                              <Link
+                                key={`${subjectItem.subject}_${topicItem.topic}_${source.fileName}`}
+                                href={`/exam-viewer?file=${encodeURIComponent(source.fileName)}`}
+                                className="btn-secondary !px-3 !py-1 text-xs"
+                              >
+                                Ouvrir PDF
+                              </Link>
+                            ))}
+                          </div>
+                        ) : null}
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
                             className="btn-secondary !px-3 !py-1 text-xs"
+                            onClick={() => onToggleLike(subjectItem.subject, topicItem.topic)}
+                            disabled={submittingKey === `like:${getKey(subjectItem.subject, topicItem.topic)}`}
                           >
-                            Ouvrir PDF
-                          </Link>
-                        ))}
-                      </div>
-                    ) : null}
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <button
-                        type="button"
-                        className="btn-secondary !px-3 !py-1 text-xs"
-                        onClick={() => onToggleLike(subjectItem.subject, topicItem.topic)}
-                        disabled={submittingKey === `like:${getKey(subjectItem.subject, topicItem.topic)}`}
-                      >
-                        {topicItem.likedByMe ? '💙 J’aime' : '🤍 J’aime'} ({topicItem.likes || 0})
-                      </button>
-                      <span className="text-xs text-brand-700">Commentaires: {topicItem.commentsCount || 0}</span>
-                    </div>
-
-                    <div className="mt-2 space-y-2">
-                      {(topicItem.comments || []).map((comment) => (
-                        <div key={comment.id} className="rounded border border-brand-100 bg-brand-50 px-2 py-1">
-                          <p className="text-xs text-brand-900">{comment.content}</p>
-                          <p className="text-[11px] text-brand-700">
-                            {comment.author?.firstName || 'Utilisateur'} {comment.author?.lastName || ''} • {new Date(comment.createdAt).toLocaleString()}
-                          </p>
+                            {topicItem.likedByMe ? '💙 J’aime' : '🤍 J’aime'} ({topicItem.likes || 0})
+                          </button>
+                          <span className="text-xs text-brand-700">Commentaires: {topicItem.commentsCount || 0}</span>
                         </div>
-                      ))}
-                    </div>
 
-                    <div className="mt-2 flex gap-2">
-                      <input
-                        className="input !py-1 text-xs"
-                        placeholder={token ? 'Ajouter un commentaire...' : 'Connecte-toi pour commenter'}
-                        value={commentDrafts[getKey(subjectItem.subject, topicItem.topic)] || ''}
-                        onChange={(e) =>
-                          setCommentDrafts((prev) => ({
-                            ...prev,
-                            [getKey(subjectItem.subject, topicItem.topic)]: e.target.value
-                          }))
-                        }
-                        disabled={!token || submittingKey === `comment:${getKey(subjectItem.subject, topicItem.topic)}`}
-                      />
-                      <button
-                        type="button"
-                        className="btn-primary !px-3 !py-1 text-xs"
-                        onClick={() => onComment(subjectItem.subject, topicItem.topic)}
-                        disabled={!token || submittingKey === `comment:${getKey(subjectItem.subject, topicItem.topic)}`}
-                      >
-                        Commenter
-                      </button>
-                    </div>
+                        <div className="mt-2 space-y-2">
+                          {(topicItem.comments || []).map((comment) => (
+                            <div key={comment.id} className="rounded border border-brand-100 bg-brand-50 px-2 py-1">
+                              <p className="text-xs text-brand-900">{comment.content}</p>
+                              <p className="text-[11px] text-brand-700">
+                                {comment.author?.firstName || 'Utilisateur'} {comment.author?.lastName || ''} • {new Date(comment.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="mt-2 flex gap-2">
+                          <input
+                            className="input !py-1 text-xs"
+                            placeholder={token ? 'Ajouter un commentaire...' : 'Connecte-toi pour commenter'}
+                            value={commentDrafts[getKey(subjectItem.subject, topicItem.topic)] || ''}
+                            onChange={(e) =>
+                              setCommentDrafts((prev) => ({
+                                ...prev,
+                                [getKey(subjectItem.subject, topicItem.topic)]: e.target.value
+                              }))
+                            }
+                            disabled={!token || submittingKey === `comment:${getKey(subjectItem.subject, topicItem.topic)}`}
+                          />
+                          <button
+                            type="button"
+                            className="btn-primary !px-3 !py-1 text-xs"
+                            onClick={() => onComment(subjectItem.subject, topicItem.topic)}
+                            disabled={!token || submittingKey === `comment:${getKey(subjectItem.subject, topicItem.topic)}`}
+                          >
+                            Commenter
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {(subjectItem.topics || []).length === 0 ? (
+                      <p className="text-sm text-brand-700">Aucune donnee disponible.</p>
+                    ) : null}
                   </div>
-                ))}
-                {(subjectItem.topics || []).length === 0 ? (
-                  <p className="text-sm text-brand-700">Aucune donnee disponible.</p>
-                ) : null}
-              </div>
-            </article>
-          ))}
-          {items.length === 0 ? <p className="text-sm text-brand-700">Aucune donnee NSIV disponible pour le moment.</p> : null}
-        </div>
+                </article>
+              ))}
+            {items.filter((subjectItem) => normalizeSubjectName(subjectItem.subject).includes('PHYSIQUE')).length === 0 ? (
+              <p className="text-sm text-brand-700">Aucune donnee de Physique disponible pour le moment.</p>
+            ) : null}
+          </div>
+        )
       ) : null}
     </section>
   );
