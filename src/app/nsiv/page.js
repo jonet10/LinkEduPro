@@ -23,6 +23,7 @@ export default function NsivPage() {
   const student = useMemo(() => getStudent(), []);
   const token = useMemo(() => getToken(), []);
   const nsivAccess = isNsivStudent(student);
+  const nsivTrack = String(student?.nsivTrack || 'ORDINAIRE').toUpperCase();
 
   useEffect(() => {
     if (!token) {
@@ -48,6 +49,7 @@ export default function NsivPage() {
         <p className="mt-2 text-sm text-brand-700">
           Rubriques organisées pour préparer le bac: cours structurés, exercices probables et progression hebdomadaire.
         </p>
+        <p className="mt-2 text-sm font-semibold text-brand-800">Filiere selectionnee: {nsivTrack}</p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -67,10 +69,42 @@ export default function NsivPage() {
           <h2 className="text-xl font-semibold text-brand-900">Bibliothèque</h2>
           <p className="mt-2 text-sm text-brand-700">Supports PDF et ressources de révision.</p>
         </Link>
+        <Link href="/subjects" className="card hover:bg-brand-50">
+          <h2 className="text-xl font-semibold text-brand-900">Histoire-Géographie</h2>
+          <p className="mt-2 text-sm text-brand-700">Quiz alignés sur les thèmes des documents Hist-Géo.</p>
+        </Link>
+        <Link href="/subjects" className="card hover:bg-brand-50">
+          <h2 className="text-xl font-semibold text-brand-900">Connaissance générale</h2>
+          <p className="mt-2 text-sm text-brand-700">Culture générale utile pour la filière ordinaire et toutes les séries.</p>
+        </Link>
         <Link href="/progress" className="card hover:bg-brand-50">
           <h2 className="text-xl font-semibold text-brand-900">Mon progrès</h2>
           <p className="mt-2 text-sm text-brand-700">Suivi des performances et points à renforcer.</p>
         </Link>
+      </section>
+
+      <section className="card">
+        <h2 className="text-xl font-semibold text-brand-900">Recommandations selon ta filiere</h2>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-brand-700">
+          {nsivTrack === 'SVT' ? (
+            <>
+              <li>Priorise Histoire-Géographie et Connaissance générale en complément des sciences.</li>
+              <li>Fais 1 quiz Hist-Géo puis 1 quiz scientifique par session de révision.</li>
+            </>
+          ) : null}
+          {nsivTrack === 'SMP' ? (
+            <>
+              <li>Combine Physique/Mathématiques avec une session régulière de culture générale.</li>
+              <li>Utilise les rubriques Hist-Géo pour renforcer les compétences transversales.</li>
+            </>
+          ) : null}
+          {nsivTrack !== 'SVT' && nsivTrack !== 'SMP' ? (
+            <>
+              <li>Commence par les rubriques Connaissance générale et Histoire-Géographie.</li>
+              <li>Ajoute progressivement les autres matières selon ton plan hebdomadaire.</li>
+            </>
+          ) : null}
+        </ul>
       </section>
 
       <section className="card">

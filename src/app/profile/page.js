@@ -8,6 +8,7 @@ import { resolveMediaUrl } from '@/lib/media';
 import { getDepartments, getCommunes, getSchools } from '@/lib/schools';
 
 const ACADEMIC_LEVEL_OPTIONS = ['9e', 'NSI', 'NSII', 'NSIII', 'NSIV', 'Universitaire'];
+const NSIV_TRACK_OPTIONS = ['ORDINAIRE', 'SVT', 'SMP', 'SES', 'LLA', 'AUTRE'];
 const LEGACY_TO_ACADEMIC = {
   NS1: 'NSI',
   NS2: 'NSII',
@@ -62,6 +63,7 @@ export default function ProfilePage() {
     password: '',
     level: '',
     gradeLevel: '',
+    nsivTrack: 'ORDINAIRE',
     department: '',
     commune: '',
     schoolInput: '',
@@ -97,6 +99,7 @@ export default function ProfilePage() {
           password: '',
           level: normalizeAcademicLevel(p.academicLevel || p.level),
           gradeLevel: p.gradeLevel || '',
+          nsivTrack: p.nsivTrack || 'ORDINAIRE',
           department: parsedSchool.department,
           commune: parsedSchool.commune,
           schoolInput: hasSuggestedMatch ? '' : parsedSchool.schoolInput,
@@ -207,7 +210,8 @@ export default function ProfilePage() {
         phone: form.phone || null,
         address: form.address || null,
         school: schoolLabel || null,
-        gradeLevel: form.gradeLevel || null
+        gradeLevel: form.gradeLevel || null,
+        nsivTrack: profile.role === 'STUDENT' && form.level === 'NSIV' ? form.nsivTrack : null
       };
       if (profile.role === 'STUDENT' && form.level) {
         payload.level = form.level;
@@ -237,7 +241,8 @@ export default function ProfilePage() {
           darkMode: data.profile.darkMode,
           photoUrl: data.profile.photoUrl,
           school: data.profile.school,
-          gradeLevel: data.profile.gradeLevel
+          gradeLevel: data.profile.gradeLevel,
+          nsivTrack: data.profile.nsivTrack
         });
       }
 
@@ -263,6 +268,7 @@ export default function ProfilePage() {
       password: '',
       level: normalizeAcademicLevel(profile.academicLevel || profile.level),
       gradeLevel: profile.gradeLevel || '',
+      nsivTrack: profile.nsivTrack || 'ORDINAIRE',
       department: parsedSchool.department,
       commune: parsedSchool.commune,
       schoolInput: hasSuggestedMatch ? '' : parsedSchool.schoolInput,
@@ -419,6 +425,21 @@ export default function ProfilePage() {
                 <option value="">Selectionner un niveau</option>
                 {ACADEMIC_LEVEL_OPTIONS.map((level) => (
                   <option key={level} value={level}>{level}</option>
+                ))}
+              </select>
+            </div>
+          ) : null}
+          {profile.role === 'STUDENT' && form.level === 'NSIV' ? (
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium">Filiere NSIV</label>
+              <select
+                className="input"
+                value={form.nsivTrack}
+                onChange={(e) => onChangeField('nsivTrack', e.target.value)}
+                disabled={!editMode}
+              >
+                {NSIV_TRACK_OPTIONS.map((track) => (
+                  <option key={track} value={track}>{track}</option>
                 ))}
               </select>
             </div>
