@@ -5,7 +5,8 @@ function toClientQuestion(question) {
     id: question.id,
     subjectId: question.subjectId,
     prompt: question.prompt,
-    options: question.options
+    options: question.options,
+    answerType: question.answerType || 'MCQ'
   };
 }
 
@@ -142,16 +143,40 @@ async function submitQuiz(req, res, next) {
     }
 
     const questionMap = new Map(questions.map((q) => [q.id, q]));
+    const answerMap = new Map(answers.map((a) => [a.questionId, a]));
     let score = 0;
 
-    const normalizedAnswers = answers.map((ans) => {
-      const q = questionMap.get(ans.questionId);
-      const isCorrect = q.correctOption === ans.selectedOption;
+    const normalizeTextAnswer = (value) =>
+      String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+
+    const normalizedAnswers = questions.map((q) => {
+      const ans = answerMap.get(q.id) || {};
+      const answerType = q.answerType || 'MCQ';
+      const selectedText = typeof ans.selectedText === 'string' ? ans.selectedText.trim() : null;
+      const selectedOption = Number.isInteger(ans.selectedOption) ? ans.selectedOption : null;
+
+      let isCorrect = false;
+      if (answerType === 'TEXT') {
+        isCorrect = normalizeTextAnswer(selectedText) === normalizeTextAnswer(q.correctText);
+      } else {
+        if (!Number.isInteger(selectedOption)) {
+          throw Object.assign(new Error('Option de reponse manquante.'), { statusCode: 400 });
+        }
+        isCorrect = q.correctOption === selectedOption;
+      }
+
       if (isCorrect) score += 1;
 
       return {
-        questionId: ans.questionId,
-        selectedOption: ans.selectedOption,
+        questionId: q.id,
+        selectedOption: answerType === 'TEXT' ? -1 : selectedOption,
+        selectedText: answerType === 'TEXT' ? selectedText : null,
         isCorrect
       };
     });
@@ -162,8 +187,11 @@ async function submitQuiz(req, res, next) {
         questionId: question.id,
         prompt: question.prompt,
         options: question.options,
+        answerType: question.answerType || 'MCQ',
         selectedOption: ans.selectedOption,
+        selectedText: ans.selectedText,
         correctOption: question.correctOption,
+        correctText: question.correctText,
         isCorrect: ans.isCorrect,
         explanation: question.explanation || null
       };
@@ -194,6 +222,9 @@ async function submitQuiz(req, res, next) {
       review
     });
   } catch (error) {
+    if (error?.statusCode === 400) {
+      return res.status(400).json({ message: error.message });
+    }
     return next(error);
   }
 }

@@ -7,6 +7,1026 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model Student {
+  id                                                                  Int                          @id @default(autoincrement())
+  firstName                                                           String
+  lastName                                                            String
+  sex                                                                 Sex
+  dateOfBirth                                                         DateTime
+  school                                                              String
+  gradeLevel                                                          String
+  email                                                               String?                      @unique
+  phone                                                               String?
+  passwordHash                                                        String
+  createdAt                                                           DateTime                     @default(now())
+  updatedAt                                                           DateTime                     @updatedAt
+  role                                                                UserRole                     @default(STUDENT)
+  teacherLevel                                                        TeacherLevel                 @default(STANDARD)
+  reputationScore                                                     Int                          @default(0)
+  address                                                             String?
+  photoUrl                                                            String?                      @map("photo_url")
+  level                                                               EducationLevel?
+  darkMode                                                            Boolean                      @default(false) @map("dark_mode")
+  emailVerified                                                       Boolean                      @default(false) @map("email_verified")
+  verificationToken                                                   String?                      @map("verification_token")
+  tokenExpiry                                                         DateTime?                    @map("token_expiry")
+  lastWelcomePopupDate                                                DateTime?                    @map("last_welcome_popup_date")
+  usedWelcomeMessageIds                                               Json?                        @map("used_welcome_message_ids")
+  attempts                                                            QuizAttempt[]
+  approvalLogs                                                        ApprovalLog[]                @relation("ContentApprovalAdmin")
+  blog_comments                                                       blog_comments[]
+  blog_post_likes                                                     blog_post_likes[]
+  blog_posts_blog_posts_approvedByToStudent                           blog_posts[]                 @relation("blog_posts_approvedByToStudent")
+  blog_posts_blog_posts_authorIdToStudent                             blog_posts[]                 @relation("blog_posts_authorIdToStudent")
+  comments                                                            BlogComment[]
+  communityConfigUpdates                                              CommunityConfig[]
+  communityLogs                                                       CommunityLog[]
+  submittedContents                                                   Content[]                    @relation("ContentTeacher")
+  conversationParticipants                                            ConversationParticipant[]
+  focusSongListens                                                    FocusSongListen[]
+  focusSongsCreated                                                   FocusSong[]
+  focusStatistics                                                     FocusStatistic[]
+  reviewedLibraryBooks                                                LibraryBook[]                @relation("LibraryBookReviewer")
+  uploadedLibraryBooks                                                LibraryBook[]                @relation("LibraryBookUploader")
+  sentMessages                                                        Message[]                    @relation("MessageSender")
+  nsiv_catchup_sessions_nsiv_catchup_sessions_created_byToStudent     nsiv_catchup_sessions[]      @relation("nsiv_catchup_sessions_created_byToStudent")
+  nsiv_catchup_sessions_nsiv_catchup_sessions_target_teacherToStudent nsiv_catchup_sessions[]      @relation("nsiv_catchup_sessions_target_teacherToStudent")
+  passwordResetCodes                                                  PasswordResetCode[]
+  personalStudyPlans                                                  PersonalStudyPlan[]
+  pomodoroSessions                                                    PomodoroSession[]
+  postLikes                                                           BlogPostLike[]               @relation("BlogPostLikeUser")
+  postReports                                                         PostReport[]
+  postReportsReviewed                                                 PostReport[]                 @relation("PostReportReviewer")
+  approvedPosts                                                       BlogPost[]                   @relation("BlogPostApprover")
+  posts                                                               BlogPost[]
+  probable_exercise_comments                                          probable_exercise_comments[]
+  probable_exercise_likes                                             probable_exercise_likes[]
+  quizAttemptLikes                                                    QuizAttemptLike[]
+  quizResults                                                         QuizResult[]
+  reputationEntries                                                   ReputationPoint[]
+  searchHistoryEntries                                                SearchHistory[]
+  studentProfile                                                      StudentProfile?
+  createdStudyPlans                                                   StudyPlan[]                  @relation("StudyPlanCreator")
+  teacherInvitationsCreated                                           TeacherInvitation[]          @relation("TeacherInvitationCreator")
+  teacherVerificationReviews                                          TeacherVerification[]        @relation("TeacherVerificationReviewer")
+  teacherVerifications                                                TeacherVerification[]        @relation("TeacherVerificationTeacher")
+  userBadges                                                          UserBadge[]
+  notifications                                                       UserNotification[]
+
+  @@index([lastName])
+  @@index([role])
+  @@index([tokenExpiry])
+  @@index([verificationToken])
+}
+
+model WelcomeMessage {
+  id        Int      @id @default(autoincrement())
+  text      String   @unique
+  category  String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("welcome_messages")
+}
+
+model StudentProfile {
+  id        Int           @id @default(autoincrement())
+  userId    Int           @unique @map("user_id")
+  level     AcademicLevel
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @default(now()) @updatedAt @map("updated_at")
+  nsivTrack String?       @map("nsiv_track")
+  user      Student       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([level])
+  @@index([nsivTrack])
+  @@map("student_profiles")
+}
+
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model Subject {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  description String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  questions   Question[]
+  attempts    QuizAttempt[]
+  courseTags  CourseTag[]
+
+  @@index([createdAt])
+  @@index([name])
+}
+
+model Question {
+  id             Int          @id @default(autoincrement())
+  subjectId      Int
+  prompt         String
+  options        Json
+  correctOption  Int
+  answerType     String       @default("MCQ")
+  correctText    String?
+  explanation    String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  isPremium      Boolean      @default(false)
+  frequencyScore Int          @default(0)
+  sourceTopic    String?
+  subject        Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  answers        QuizAnswer[]
+
+  @@index([subjectId, isPremium, frequencyScore])
+}
+
+model QuizAttempt {
+  id             Int               @id @default(autoincrement())
+  studentId      Int
+  subjectId      Int
+  startedAt      DateTime
+  finishedAt     DateTime
+  durationSec    Int
+  score          Int
+  totalQuestions Int
+  createdAt      DateTime          @default(now())
+  answers        QuizAnswer[]
+  student        Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject        Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  likes          QuizAttemptLike[]
+}
+
+model QuizAttemptLike {
+  id        Int         @id @default(autoincrement())
+  attemptId Int         @map("attempt_id")
+  userId    Int         @map("user_id")
+  createdAt DateTime    @default(now()) @map("created_at")
+  attempt   QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  user      Student     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, userId], map: "quiz_attempt_likes_unique")
+  @@index([attemptId, createdAt])
+  @@index([userId, createdAt])
+  @@map("quiz_attempt_likes")
+}
+
+model QuizAnswer {
+  id             Int         @id @default(autoincrement())
+  attemptId      Int
+  questionId     Int
+  selectedOption Int
+  selectedText   String?
+  isCorrect      Boolean
+  attempt        QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question       Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+}
+
+model School {
+  id            Int                  @id(map: "School_pkey") @default(autoincrement())
+  name          String
+  type          SchoolType
+  phone         String
+  email         String               @unique(map: "School_email_key")
+  address       String
+  city          String
+  country       String
+  logo          String?
+  isActive      Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  academicYears SchoolAcademicYear[]
+  admins        SchoolAdmin[]
+  classes       SchoolClass[]
+  logs          SchoolLog[]
+  paymentTypes  SchoolPaymentType[]
+  payments      SchoolPayment[]
+  students      SchoolStudent[]
+
+  @@map("schools")
+}
+
+model SchoolAdmin {
+  id                  Int             @id(map: "SchoolAdmin_pkey") @default(autoincrement())
+  schoolId            Int?
+  firstName           String
+  lastName            String
+  email               String          @unique(map: "SchoolAdmin_email_key")
+  phone               String?
+  passwordHash        String
+  role                SchoolRole
+  mustChangePassword  Boolean         @default(true)
+  isActive            Boolean         @default(true)
+  lastLoginAt         DateTime?
+  createdBySuperAdmin Int?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  school              School?         @relation(fields: [schoolId], references: [id], onDelete: Cascade, map: "SchoolAdmin_schoolId_fkey")
+  logs                SchoolLog[]     @relation("SchoolLogActor")
+  recordedPayments    SchoolPayment[] @relation("PaymentRecordedBy")
+
+  @@index([schoolId, role], map: "SchoolAdmin_schoolId_role_idx")
+  @@map("school_admins")
+}
+
+model SchoolAcademicYear {
+  id        Int             @id(map: "SchoolAcademicYear_pkey") @default(autoincrement())
+  schoolId  Int
+  label     String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean         @default(false)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  school    School          @relation(fields: [schoolId], references: [id], onDelete: Cascade, map: "SchoolAcademicYear_schoolId_fkey")
+  classes   SchoolClass[]
+  payments  SchoolPayment[]
+  students  SchoolStudent[]
+
+  @@unique([schoolId, label], map: "SchoolAcademicYear_schoolId_label_key")
+  @@index([schoolId, isActive], map: "SchoolAcademicYear_schoolId_isActive_idx")
+  @@map("school_academic_years")
+}
+
+model SchoolClass {
+  id             Int                @id(map: "SchoolClass_pkey") @default(autoincrement())
+  schoolId       Int
+  academicYearId Int
+  name           String
+  level          String?
+  capacity       Int?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  academicYear   SchoolAcademicYear @relation(fields: [academicYearId], references: [id], map: "SchoolClass_academicYearId_fkey")
+  school         School             @relation(fields: [schoolId], references: [id], onDelete: Cascade, map: "SchoolClass_schoolId_fkey")
+  payments       SchoolPayment[]
+  students       SchoolStudent[]
+
+  @@unique([schoolId, academicYearId, name], map: "SchoolClass_schoolId_academicYearId_name_key")
+  @@index([schoolId, academicYearId], map: "SchoolClass_schoolId_academicYearId_idx")
+  @@map("school_classes")
+}
+
+model SchoolStudent {
+  id             Int                @id(map: "SchoolStudent_pkey") @default(autoincrement())
+  schoolId       Int
+  classId        Int
+  academicYearId Int
+  studentId      String
+  firstName      String
+  lastName       String
+  sex            SchoolStudentSex
+  isActive       Boolean            @default(true)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  payments       SchoolPayment[]
+  academicYear   SchoolAcademicYear @relation(fields: [academicYearId], references: [id], map: "SchoolStudent_academicYearId_fkey")
+  schoolClass    SchoolClass        @relation(fields: [classId], references: [id], map: "SchoolStudent_classId_fkey")
+  school         School             @relation(fields: [schoolId], references: [id], onDelete: Cascade, map: "SchoolStudent_schoolId_fkey")
+
+  @@unique([schoolId, academicYearId, classId, firstName, lastName], map: "SchoolStudent_schoolId_academicYearId_classId_firstName_lastNam")
+  @@unique([schoolId, studentId], map: "SchoolStudent_schoolId_studentId_key")
+  @@index([schoolId, classId], map: "SchoolStudent_schoolId_classId_idx")
+  @@map("school_students")
+}
+
+model SchoolPaymentType {
+  id          Int             @id(map: "SchoolPaymentType_pkey") @default(autoincrement())
+  schoolId    Int
+  name        String
+  description String?
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  school      School          @relation(fields: [schoolId], references: [id], onDelete: Cascade, map: "SchoolPaymentType_schoolId_fkey")
+  payments    SchoolPayment[]
+
+  @@unique([schoolId, name], map: "SchoolPaymentType_schoolId_name_key")
+  @@map("school_payment_types")
+}
+
+model SchoolPayment {
+  id             Int                 @id(map: "SchoolPayment_pkey") @default(autoincrement())
+  schoolId       Int
+  studentId      Int
+  classId        Int
+  academicYearId Int
+  paymentTypeId  Int
+  amountDue      Decimal             @db.Decimal(10, 2)
+  amountPaid     Decimal             @db.Decimal(10, 2)
+  status         SchoolPaymentStatus
+  receiptNumber  String
+  receiptPath    String?
+  notes          String?
+  recordedById   Int
+  paymentDate    DateTime            @default(now())
+  deletedAt      DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  academicYear   SchoolAcademicYear  @relation(fields: [academicYearId], references: [id], map: "SchoolPayment_academicYearId_fkey")
+  schoolClass    SchoolClass         @relation(fields: [classId], references: [id], map: "SchoolPayment_classId_fkey")
+  paymentType    SchoolPaymentType   @relation(fields: [paymentTypeId], references: [id], map: "SchoolPayment_paymentTypeId_fkey")
+  recordedBy     SchoolAdmin         @relation("PaymentRecordedBy", fields: [recordedById], references: [id], map: "SchoolPayment_recordedById_fkey")
+  school         School              @relation(fields: [schoolId], references: [id], onDelete: Cascade, map: "SchoolPayment_schoolId_fkey")
+  student        SchoolStudent       @relation(fields: [studentId], references: [id], map: "SchoolPayment_studentId_fkey")
+
+  @@unique([schoolId, receiptNumber], map: "SchoolPayment_schoolId_receiptNumber_key")
+  @@index([schoolId, deletedAt], map: "SchoolPayment_schoolId_deletedAt_idx")
+  @@index([schoolId, paymentDate], map: "SchoolPayment_schoolId_paymentDate_idx")
+  @@map("school_payments")
+}
+
+model SchoolLog {
+  id         Int          @id(map: "SchoolLog_pkey") @default(autoincrement())
+  schoolId   Int?
+  actorId    Int?
+  actorRole  SchoolRole?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime     @default(now())
+  actor      SchoolAdmin? @relation("SchoolLogActor", fields: [actorId], references: [id], map: "SchoolLog_actorId_fkey")
+  school     School?      @relation(fields: [schoolId], references: [id], onDelete: Cascade, map: "SchoolLog_schoolId_fkey")
+
+  @@index([schoolId, createdAt], map: "SchoolLog_schoolId_createdAt_idx")
+  @@map("school_logs")
+}
+
+model TeacherVerification {
+  id          Int                       @id(map: "TeacherVerification_pkey") @default(autoincrement())
+  teacherId   Int
+  documentUrl String
+  status      TeacherVerificationStatus @default(PENDING)
+  reviewedBy  Int?
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  reviewer    Student?                  @relation("TeacherVerificationReviewer", fields: [reviewedBy], references: [id], map: "TeacherVerification_reviewedBy_fkey")
+  teacher     Student                   @relation("TeacherVerificationTeacher", fields: [teacherId], references: [id], onDelete: Cascade, map: "TeacherVerification_teacherId_fkey")
+
+  @@index([teacherId, status], map: "TeacherVerification_teacherId_status_idx")
+  @@map("teacher_verifications")
+}
+
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model BlogPost {
+  id              Int                  @id @default(autoincrement())
+  authorId        Int
+  title           String
+  content         String
+  excerpt         String?
+  isGlobal        Boolean              @default(true)
+  schoolId        Int?
+  isApproved      Boolean              @default(false)
+  isDeleted       Boolean              @default(false)
+  deletedAt       DateTime?
+  approvedBy      Int?
+  approvedAt      DateTime?
+  likeCount       Int                  @default(0)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  imageUrl        String?              @map("image_url")
+  comments        BlogComment[]
+  categories      PostCategoryOnPost[]
+  likes           BlogPostLike[]
+  reports         PostReport[]
+  tags            PostTagOnPost[]
+  approver        Student?             @relation("BlogPostApprover", fields: [approvedBy], references: [id], map: "Post_approvedBy_fkey")
+  author          Student              @relation(fields: [authorId], references: [id], onDelete: Cascade, map: "Post_authorId_fkey")
+  publicationTags PublicationTag[]
+
+  @@index([authorId, createdAt], map: "Post_authorId_createdAt_idx")
+  @@index([createdAt, likeCount], map: "Post_createdAt_likeCount_idx")
+  @@index([isApproved, createdAt], map: "Post_isApproved_createdAt_idx")
+  @@index([isDeleted, createdAt], map: "Post_isDeleted_createdAt_idx")
+  @@index([schoolId, createdAt], map: "Post_schoolId_createdAt_idx")
+  @@map("posts")
+}
+
+model BlogComment {
+  id        Int       @id @default(autoincrement())
+  postId    Int
+  authorId  Int
+  content   String
+  isHelpful Boolean   @default(false)
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  author    Student   @relation(fields: [authorId], references: [id], onDelete: Cascade, map: "Comment_authorId_fkey")
+  post      BlogPost  @relation(fields: [postId], references: [id], onDelete: Cascade, map: "Comment_postId_fkey")
+
+  @@index([authorId, createdAt], map: "Comment_authorId_createdAt_idx")
+  @@index([isDeleted, createdAt], map: "Comment_isDeleted_createdAt_idx")
+  @@index([postId, createdAt], map: "Comment_postId_createdAt_idx")
+  @@map("comments")
+}
+
+model BlogPostLike {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    Int
+  createdAt DateTime @default(now())
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade, map: "PostLike_postId_fkey")
+  user      Student  @relation("BlogPostLikeUser", fields: [userId], references: [id], onDelete: Cascade, map: "PostLike_userId_fkey")
+
+  @@unique([postId, userId])
+  @@index([postId, createdAt], map: "PostLike_postId_createdAt_idx")
+  @@map("post_likes")
+}
+
+model PostCategory {
+  id          Int                  @id @default(autoincrement())
+  name        String               @unique
+  slug        String               @unique
+  description String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  posts       PostCategoryOnPost[]
+
+  @@map("post_categories")
+}
+
+model PostTag {
+  id        Int             @id @default(autoincrement())
+  name      String          @unique
+  slug      String          @unique
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  posts     PostTagOnPost[]
+
+  @@map("post_tags")
+}
+
+model PostCategoryOnPost {
+  postId     Int
+  categoryId Int
+  assignedAt DateTime     @default(now())
+  category   PostCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade, map: "PostCategoryLink_categoryId_fkey")
+  post       BlogPost     @relation(fields: [postId], references: [id], onDelete: Cascade, map: "PostCategoryLink_postId_fkey")
+
+  @@id([postId, categoryId])
+  @@map("post_category_links")
+}
+
+model PostTagOnPost {
+  postId     Int
+  tagId      Int
+  assignedAt DateTime @default(now())
+  post       BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade, map: "PostTagLink_postId_fkey")
+  tag        PostTag  @relation(fields: [tagId], references: [id], onDelete: Cascade, map: "PostTagLink_tagId_fkey")
+
+  @@id([postId, tagId])
+  @@map("post_tag_links")
+}
+
+model PostReport {
+  id         Int       @id @default(autoincrement())
+  postId     Int
+  reportedBy Int
+  reason     String
+  details    String?
+  status     String    @default("PENDING")
+  reviewedBy Int?
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  post       BlogPost  @relation(fields: [postId], references: [id], onDelete: Cascade, map: "PostReport_postId_fkey")
+  reporter   Student   @relation(fields: [reportedBy], references: [id], onDelete: Cascade, map: "PostReport_reportedBy_fkey")
+  reviewer   Student?  @relation("PostReportReviewer", fields: [reviewedBy], references: [id], map: "PostReport_reviewedBy_fkey")
+
+  @@index([postId, createdAt], map: "PostReport_postId_createdAt_idx")
+  @@index([status, createdAt], map: "PostReport_status_createdAt_idx")
+  @@map("post_reports")
+}
+
+model ReputationPoint {
+  id        Int      @id(map: "ReputationPoint_pkey") @default(autoincrement())
+  userId    Int
+  points    Int
+  reason    String
+  createdAt DateTime @default(now())
+  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "ReputationPoint_userId_fkey")
+
+  @@index([userId, createdAt], map: "ReputationPoint_userId_createdAt_idx")
+  @@map("reputation_points")
+}
+
+model Badge {
+  id          Int         @id(map: "Badge_pkey") @default(autoincrement())
+  name        String      @unique
+  description String
+  icon        String
+  userBadges  UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  userId    Int
+  badgeId   Int
+  awardedAt DateTime @default(now())
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade, map: "UserBadge_badgeId_fkey")
+  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "UserBadge_userId_fkey")
+
+  @@id([userId, badgeId], map: "UserBadge_pkey")
+  @@index([badgeId, awardedAt], map: "UserBadge_badgeId_awardedAt_idx")
+  @@map("user_badges")
+}
+
+model CommunityConfig {
+  id                Int      @id(map: "CommunityConfig_pkey")
+  maxPostsPerDay    Int      @default(3)
+  maxPostsPerMonth  Int      @default(10)
+  commentRatePerMin Int      @default(10)
+  updatedBy         Int?
+  updatedAt         DateTime @updatedAt
+  updatedByUser     Student? @relation(fields: [updatedBy], references: [id], map: "CommunityConfig_updatedBy_fkey")
+
+  @@map("community_config")
+}
+
+model CommunityLog {
+  id         Int      @id(map: "CommunityLog_pkey") @default(autoincrement())
+  actorId    Int?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  actor      Student? @relation(fields: [actorId], references: [id], map: "CommunityLog_actorId_fkey")
+
+  @@index([actorId, createdAt], map: "CommunityLog_actorId_createdAt_idx")
+  @@index([entityType, createdAt], map: "CommunityLog_entityType_createdAt_idx")
+  @@map("community_logs")
+}
+
+model TeacherInvitation {
+  id        Int       @id @default(autoincrement())
+  email     String
+  token     String    @unique
+  expiresAt DateTime
+  used      Boolean   @default(false)
+  createdBy Int
+  createdAt DateTime  @default(now())
+  usedAt    DateTime?
+  creator   Student   @relation("TeacherInvitationCreator", fields: [createdBy], references: [id], onDelete: Cascade, map: "TeacherInvitation_createdBy_fkey")
+
+  @@index([email, expiresAt], map: "TeacherInvitation_email_expiresAt_idx")
+  @@index([used, expiresAt], map: "TeacherInvitation_used_expiresAt_idx")
+  @@map("teacher_invitations")
+}
+
+model LibraryBook {
+  id          Int               @id(map: "LibraryBook_pkey") @default(autoincrement())
+  title       String
+  subject     String
+  level       String
+  description String?
+  fileUrl     String
+  status      LibraryBookStatus @default(PENDING)
+  isDeleted   Boolean           @default(false)
+  deletedAt   DateTime?
+  uploadedBy  Int
+  reviewedBy  Int?
+  reviewedAt  DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  reviewer    Student?          @relation("LibraryBookReviewer", fields: [reviewedBy], references: [id], map: "LibraryBook_reviewedBy_fkey")
+  uploader    Student           @relation("LibraryBookUploader", fields: [uploadedBy], references: [id], onDelete: Cascade, map: "LibraryBook_uploadedBy_fkey")
+
+  @@index([isDeleted, createdAt], map: "LibraryBook_isDeleted_createdAt_idx")
+  @@index([status, createdAt], map: "LibraryBook_status_createdAt_idx")
+  @@index([uploadedBy, createdAt], map: "LibraryBook_uploadedBy_createdAt_idx")
+  @@map("library_books")
+}
+
+model UserNotification {
+  id         Int      @id(map: "UserNotification_pkey") @default(autoincrement())
+  userId     Int
+  type       String
+  title      String
+  message    String
+  entityType String?
+  entityId   String?
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  user       Student  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "UserNotification_userId_fkey")
+
+  @@index([userId, isRead, createdAt], map: "UserNotification_userId_isRead_createdAt_idx")
+  @@map("user_notifications")
+}
+
+model MusicTrack {
+  id        Int            @id @default(autoincrement())
+  title     String
+  url       String
+  level     EducationLevel
+  createdAt DateTime       @default(now())
+
+  @@index([level], map: "MusicTrack_level_idx")
+  @@map("music_tracks")
+}
+
+model PomodoroSession {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  duration  Int
+  createdAt DateTime  @default(now()) @map("created_at")
+  startTime DateTime? @map("start_time")
+  endTime   DateTime? @map("end_time")
+  cycleType String?   @map("cycle_type")
+  status    String?   @default("COMPLETED")
+  user      Student   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "PomodoroSession_user_id_fkey")
+
+  @@index([userId, createdAt], map: "PomodoroSession_user_id_created_at_idx")
+  @@index([userId, startTime, endTime], map: "PomodoroSession_user_id_start_time_end_time_idx")
+  @@map("pomodoro_sessions")
+}
+
+model Content {
+  id           Int            @id @default(autoincrement())
+  title        String
+  body         String
+  level        EducationLevel
+  type         ContentType
+  status       ContentStatus  @default(PENDING)
+  teacherId    Int            @map("teacher_id")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  approvalLogs ApprovalLog[]
+  teacher      Student        @relation("ContentTeacher", fields: [teacherId], references: [id], onDelete: Cascade, map: "Content_teacher_id_fkey")
+
+  @@index([level, status, createdAt], map: "Content_level_status_created_at_idx")
+  @@index([teacherId, createdAt], map: "Content_teacher_id_created_at_idx")
+  @@map("contents")
+}
+
+model ApprovalLog {
+  id        Int      @id @default(autoincrement())
+  contentId Int      @map("content_id")
+  adminId   Int      @map("admin_id")
+  action    String
+  timestamp DateTime @default(now())
+  admin     Student  @relation("ContentApprovalAdmin", fields: [adminId], references: [id], onDelete: Cascade, map: "ApprovalLog_admin_id_fkey")
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade, map: "ApprovalLog_content_id_fkey")
+
+  @@index([adminId, timestamp], map: "ApprovalLog_admin_id_timestamp_idx")
+  @@index([contentId, timestamp], map: "ApprovalLog_content_id_timestamp_idx")
+  @@map("approval_logs")
+}
+
+model StudyPlan {
+  id           Int            @id @default(autoincrement())
+  level        EducationLevel
+  title        String
+  description  String
+  subject      String?
+  createdById  Int?           @map("created_by_id")
+  chapterOrder Int?           @map("chapter_order")
+  notes        String?
+  exercises    String?
+  creator      Student?       @relation("StudyPlanCreator", fields: [createdById], references: [id])
+
+  @@index([subject, chapterOrder])
+  @@index([createdById], map: "StudyPlan_created_by_id_idx")
+  @@index([level], map: "StudyPlan_level_idx")
+  @@index([subject], map: "StudyPlan_subject_idx")
+  @@map("study_plans")
+}
+
+model PersonalStudyPlan {
+  id                Int       @id @default(autoincrement())
+  userId            Int       @map("user_id")
+  customPreferences Json?     @map("custom_preferences")
+  examDate          DateTime? @map("exam_date")
+  user              Student   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "PersonalStudyPlan_user_id_fkey")
+
+  @@index([userId], map: "PersonalStudyPlan_user_id_idx")
+  @@map("personal_study_plans")
+}
+
+model LevelQuiz {
+  id        Int             @id @default(autoincrement())
+  level     EducationLevel
+  title     String
+  createdAt DateTime        @default(now()) @map("created_at")
+  questions LevelQuestion[]
+  results   QuizResult[]
+
+  @@index([level, createdAt], map: "LevelQuiz_level_created_at_idx")
+  @@map("quizzes")
+}
+
+model LevelQuestion {
+  id            Int       @id @default(autoincrement())
+  quizId        Int       @map("quiz_id")
+  questionText  String    @map("question_text")
+  options       Json
+  correctAnswer String    @map("correct_answer")
+  quiz          LevelQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade, map: "LevelQuestion_quiz_id_fkey")
+
+  @@index([quizId], map: "LevelQuestion_quiz_id_idx")
+  @@map("questions")
+}
+
+model QuizResult {
+  id          Int       @id @default(autoincrement())
+  userId      Int       @map("user_id")
+  quizId      Int       @map("quiz_id")
+  score       Int
+  completedAt DateTime  @default(now()) @map("completed_at")
+  quiz        LevelQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade, map: "QuizResult_quiz_id_fkey")
+  user        Student   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "QuizResult_user_id_fkey")
+
+  @@index([quizId, completedAt], map: "QuizResult_quiz_id_completed_at_idx")
+  @@index([userId, completedAt], map: "QuizResult_user_id_completed_at_idx")
+  @@map("quiz_results")
+}
+
+model SearchTag {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  courseTags      CourseTag[]
+  publicationTags PublicationTag[]
+
+  @@map("tags")
+}
+
+model PublicationTag {
+  publicationId Int       @map("publication_id")
+  tagId         Int       @map("tag_id")
+  assignedAt    DateTime  @default(now()) @map("assigned_at")
+  publication   BlogPost  @relation(fields: [publicationId], references: [id], onDelete: Cascade, map: "PublicationTag_publication_id_fkey")
+  tag           SearchTag @relation(fields: [tagId], references: [id], onDelete: Cascade, map: "PublicationTag_tag_id_fkey")
+
+  @@id([publicationId, tagId])
+  @@index([tagId], map: "PublicationTag_tag_id_idx")
+  @@map("publication_tags")
+}
+
+model CourseTag {
+  courseId   Int       @map("course_id")
+  tagId      Int       @map("tag_id")
+  assignedAt DateTime  @default(now()) @map("assigned_at")
+  course     Subject   @relation(fields: [courseId], references: [id], onDelete: Cascade, map: "CourseTag_course_id_fkey")
+  tag        SearchTag @relation(fields: [tagId], references: [id], onDelete: Cascade, map: "CourseTag_tag_id_fkey")
+
+  @@id([courseId, tagId])
+  @@index([tagId], map: "CourseTag_tag_id_idx")
+  @@map("course_tags")
+}
+
+model SearchHistory {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  query     String
+  createdAt DateTime @default(now()) @map("created_at")
+  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "SearchHistory_user_id_fkey")
+
+  @@index([query], map: "SearchHistory_query_idx")
+  @@index([userId, createdAt], map: "SearchHistory_user_id_created_at_idx")
+  @@map("search_history")
+}
+
+model PasswordResetCode {
+  id        Int       @id @default(autoincrement())
+  studentId Int       @map("student_id")
+  phone     String?
+  codeHash  String    @map("code_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now()) @map("created_at")
+  email     String?
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([email, createdAt], map: "PasswordResetCode_email_created_at_idx")
+  @@index([phone, createdAt], map: "PasswordResetCode_phone_created_at_idx")
+  @@index([studentId, createdAt], map: "PasswordResetCode_student_id_created_at_idx")
+  @@map("password_reset_codes")
+}
+
+model Conversation {
+  id           Int                       @id @default(autoincrement())
+  type         ConversationType
+  privateKey   String?                   @unique @map("private_key")
+  targetLevel  AcademicLevel?            @map("target_level")
+  createdAt    DateTime                  @default(now()) @map("created_at")
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@index([type, createdAt])
+  @@index([targetLevel])
+  @@map("conversations")
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversationId Int          @map("conversation_id")
+  senderId       Int          @map("sender_id")
+  content        String
+  createdAt      DateTime     @default(now()) @map("created_at")
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         Student      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([senderId, createdAt])
+  @@map("messages")
+}
+
+model ConversationParticipant {
+  id             Int          @id @default(autoincrement())
+  conversationId Int          @map("conversation_id")
+  userId         Int          @map("user_id")
+  lastReadAt     DateTime?    @map("last_read_at")
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           Student      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId, lastReadAt])
+  @@map("conversation_participants")
+}
+
+model FocusSong {
+  id        Int               @id @default(autoincrement())
+  title     String
+  url       String
+  category  String?
+  createdAt DateTime          @default(now()) @map("created_at")
+  createdBy Int?              @map("created_by")
+  listens   FocusSongListen[]
+  creator   Student?          @relation(fields: [createdBy], references: [id], map: "FocusSong_created_by_fkey")
+
+  @@index([createdAt], map: "FocusSong_created_at_idx")
+  @@index([createdBy, createdAt], map: "FocusSong_created_by_created_at_idx")
+  @@map("focus_songs")
+}
+
+model FocusSongListen {
+  id       Int       @id @default(autoincrement())
+  userId   Int       @map("user_id")
+  songId   Int       @map("song_id")
+  playedAt DateTime  @default(now()) @map("played_at")
+  song     FocusSong @relation(fields: [songId], references: [id], onDelete: Cascade, map: "FocusSongListen_song_id_fkey")
+  user     Student   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FocusSongListen_user_id_fkey")
+
+  @@index([songId, playedAt], map: "FocusSongListen_song_id_played_at_idx")
+  @@index([userId, playedAt], map: "FocusSongListen_user_id_played_at_idx")
+  @@map("focus_song_listens")
+}
+
+model FocusStatistic {
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @map("user_id")
+  date               DateTime
+  totalTime          Int      @default(0) @map("total_time")
+  pomodorosCompleted Int      @default(0) @map("pomodoros_completed")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  user               Student  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "FocusStatistic_user_id_fkey")
+
+  @@unique([userId, date], map: "FocusStatistic_user_date_unique")
+  @@index([date], map: "FocusStatistic_date_idx")
+  @@map("focus_statistics")
+}
+
+model Exam {
+  id        Int            @id @default(autoincrement())
+  subject   String
+  year      Int
+  level     AcademicLevel
+  questions ExamQuestion[]
+
+  @@index([level])
+  @@index([subject])
+  @@map("exams")
+}
+
+model ExamQuestion {
+  id           Int    @id @default(autoincrement())
+  examId       Int    @map("exam_id")
+  questionText String @map("question_text")
+  topic        String
+  exam         Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@index([examId], map: "questions_exam_id_idx")
+  @@index([topic], map: "questions_topic_idx")
+  @@map("exam_questions")
+}
+
+model blog_comments {
+  id         Int        @id(map: "BlogComment_pkey") @default(autoincrement())
+  postId     Int
+  authorId   Int
+  content    String
+  isHelpful  Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime
+  Student    Student    @relation(fields: [authorId], references: [id], onDelete: Cascade, map: "BlogComment_authorId_fkey")
+  blog_posts blog_posts @relation(fields: [postId], references: [id], onDelete: Cascade, map: "BlogComment_postId_fkey")
+
+  @@index([authorId, createdAt], map: "BlogComment_authorId_createdAt_idx")
+  @@index([postId, createdAt], map: "BlogComment_postId_createdAt_idx")
+}
+
+model blog_post_likes {
+  id         Int        @id(map: "BlogPostLike_pkey") @default(autoincrement())
+  postId     Int
+  userId     Int
+  createdAt  DateTime   @default(now())
+  blog_posts blog_posts @relation(fields: [postId], references: [id], onDelete: Cascade, map: "BlogPostLike_postId_fkey")
+  Student    Student    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "BlogPostLike_userId_fkey")
+
+  @@unique([postId, userId])
+  @@index([postId, createdAt], map: "BlogPostLike_postId_createdAt_idx")
+}
+
+model blog_posts {
+  id                                     Int               @id(map: "BlogPost_pkey") @default(autoincrement())
+  authorId                               Int
+  title                                  String
+  content                                String
+  isApproved                             Boolean           @default(false)
+  approvedBy                             Int?
+  approvedAt                             DateTime?
+  likeCount                              Int               @default(0)
+  createdAt                              DateTime          @default(now())
+  updatedAt                              DateTime
+  blog_comments                          blog_comments[]
+  blog_post_likes                        blog_post_likes[]
+  Student_blog_posts_approvedByToStudent Student?          @relation("blog_posts_approvedByToStudent", fields: [approvedBy], references: [id], map: "BlogPost_approvedBy_fkey")
+  Student_blog_posts_authorIdToStudent   Student           @relation("blog_posts_authorIdToStudent", fields: [authorId], references: [id], onDelete: Cascade, map: "BlogPost_authorId_fkey")
+
+  @@index([authorId, createdAt], map: "BlogPost_authorId_createdAt_idx")
+  @@index([isApproved, createdAt], map: "BlogPost_isApproved_createdAt_idx")
+}
+
+model nsiv_catchup_sessions {
+  id                                                    Int           @id @default(autoincrement())
+  title                                                 String
+  subject                                               String
+  description                                           String?
+  meet_url                                              String
+  starts_at                                             DateTime
+  ends_at                                               DateTime
+  level                                                 AcademicLevel @default(NSIV)
+  is_active                                             Boolean       @default(true)
+  created_by                                            Int
+  created_at                                            DateTime      @default(now())
+  updated_at                                            DateTime      @default(now())
+  invitation_scope                                      String        @default("GLOBAL")
+  target_school                                         String?
+  invitation_message                                    String?
+  target_teacher                                        Int?
+  Student_nsiv_catchup_sessions_created_byToStudent     Student       @relation("nsiv_catchup_sessions_created_byToStudent", fields: [created_by], references: [id], onDelete: Cascade)
+  Student_nsiv_catchup_sessions_target_teacherToStudent Student?      @relation("nsiv_catchup_sessions_target_teacherToStudent", fields: [target_teacher], references: [id])
+
+  @@index([created_by])
+  @@index([invitation_scope])
+  @@index([level])
+  @@index([starts_at])
+  @@index([target_school])
+  @@index([target_teacher])
+}
+
+model probable_exercise_comments {
+  id         Int      @id @default(autoincrement())
+  subject    String
+  topic      String
+  user_id    Int
+  content    String
+  is_deleted Boolean  @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  Student    Student  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([created_at(sort: Desc)])
+  @@index([subject, topic])
+  @@index([user_id])
+}
+
+model probable_exercise_likes {
+  id         Int      @id @default(autoincrement())
+  subject    String
+  topic      String
+  user_id    Int
+  created_at DateTime @default(now())
+  Student    Student  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([subject, topic, user_id], map: "probable_exercise_likes_unique")
+  @@index([subject, topic])
+  @@index([user_id])
+}
+
+model probable_exercise_sources {
+  id         Int      @id @default(autoincrement())
+  subject    String
+  topic      String
+  file_name  String
+  created_at DateTime @default(now())
+
+  @@unique([subject, topic, file_name], map: "probable_exercise_sources_unique")
+  @@index([subject, topic])
+}
+
 enum Sex {
   MALE
   FEMALE
@@ -15,8 +1035,8 @@ enum Sex {
 
 enum UserRole {
   STUDENT
-  TEACHER
   ADMIN
+  TEACHER
 }
 
 enum TeacherLevel {
@@ -98,884 +1118,4 @@ enum ContentStatus {
   PENDING  @map("pending")
   APPROVED @map("approved")
   REJECTED @map("rejected")
-}
-
-model Student {
-  id           Int           @id @default(autoincrement())
-  firstName    String
-  lastName     String
-  sex          Sex
-  dateOfBirth  DateTime
-  school       String
-  gradeLevel   String
-  email        String?       @unique
-  phone        String?
-  address      String?
-  passwordHash String
-  emailVerified Boolean      @default(false) @map("email_verified")
-  verificationToken String?  @map("verification_token")
-  tokenExpiry   DateTime?    @map("token_expiry")
-  lastWelcomePopupDate DateTime? @map("last_welcome_popup_date")
-  usedWelcomeMessageIds Json? @map("used_welcome_message_ids")
-  photoUrl     String?       @map("photo_url")
-  level        EducationLevel?
-  darkMode     Boolean       @default(false) @map("dark_mode")
-  role         UserRole      @default(STUDENT)
-  teacherLevel TeacherLevel  @default(STANDARD)
-  reputationScore Int        @default(0)
-  attempts     QuizAttempt[]
-  quizAttemptLikes QuizAttemptLike[]
-  posts        BlogPost[]
-  comments     BlogComment[]
-  postLikes    BlogPostLike[] @relation("BlogPostLikeUser")
-  approvedPosts BlogPost[] @relation("BlogPostApprover")
-  postReports  PostReport[]
-  postReportsReviewed PostReport[] @relation("PostReportReviewer")
-  reputationEntries ReputationPoint[]
-  userBadges   UserBadge[]
-  teacherVerifications TeacherVerification[] @relation("TeacherVerificationTeacher")
-  teacherVerificationReviews TeacherVerification[] @relation("TeacherVerificationReviewer")
-  communityConfigUpdates CommunityConfig[]
-  communityLogs CommunityLog[]
-  teacherInvitationsCreated TeacherInvitation[] @relation("TeacherInvitationCreator")
-  uploadedLibraryBooks LibraryBook[] @relation("LibraryBookUploader")
-  reviewedLibraryBooks LibraryBook[] @relation("LibraryBookReviewer")
-  notifications UserNotification[]
-  pomodoroSessions PomodoroSession[]
-  submittedContents Content[] @relation("ContentTeacher")
-  createdStudyPlans StudyPlan[] @relation("StudyPlanCreator")
-  approvalLogs ApprovalLog[] @relation("ContentApprovalAdmin")
-  personalStudyPlans PersonalStudyPlan[]
-  quizResults QuizResult[]
-  searchHistoryEntries SearchHistory[]
-  focusSongsCreated FocusSong[]
-  focusSongListens FocusSongListen[]
-  focusStatistics FocusStatistic[]
-  passwordResetCodes PasswordResetCode[]
-  sentMessages Message[] @relation("MessageSender")
-  conversationParticipants ConversationParticipant[]
-  studentProfile StudentProfile?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-}
-
-model WelcomeMessage {
-  id        Int      @id @default(autoincrement())
-  text      String   @unique
-  category  String?
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@map("welcome_messages")
-}
-
-model StudentProfile {
-  id        Int           @id @default(autoincrement())
-  userId    Int           @unique @map("user_id")
-  level     AcademicLevel
-  nsivTrack String?       @map("nsiv_track")
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
-  user      Student       @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([level])
-  @@index([nsivTrack])
-  @@map("student_profiles")
-}
-
-model Subject {
-  id          Int           @id @default(autoincrement())
-  name        String        @unique
-  description String?
-  questions   Question[]
-  attempts    QuizAttempt[]
-  courseTags  CourseTag[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-}
-
-model Question {
-  id            Int          @id @default(autoincrement())
-  subjectId     Int
-  prompt        String
-  options       Json
-  correctOption Int
-  explanation   String?
-  isPremium     Boolean      @default(false)
-  frequencyScore Int         @default(0)
-  sourceTopic   String?
-  subject       Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  answers       QuizAnswer[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-}
-
-model QuizAttempt {
-  id             Int          @id @default(autoincrement())
-  studentId      Int
-  subjectId      Int
-  startedAt      DateTime
-  finishedAt     DateTime
-  durationSec    Int
-  score          Int
-  totalQuestions Int
-  student        Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  subject        Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  answers        QuizAnswer[]
-  likes          QuizAttemptLike[]
-  createdAt      DateTime     @default(now())
-}
-
-model QuizAttemptLike {
-  id        Int      @id @default(autoincrement())
-  attemptId Int      @map("attempt_id")
-  userId    Int      @map("user_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  attempt   QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([attemptId, userId])
-  @@index([attemptId, createdAt])
-  @@index([userId, createdAt])
-  @@map("quiz_attempt_likes")
-}
-
-model QuizAnswer {
-  id             Int         @id @default(autoincrement())
-  attemptId      Int
-  questionId     Int
-  selectedOption Int
-  isCorrect      Boolean
-  attempt        QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  question       Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  @@unique([attemptId, questionId])
-}
-
-model School {
-  id            Int                 @id @default(autoincrement())
-  name          String
-  type          SchoolType
-  phone         String
-  email         String              @unique
-  address       String
-  city          String
-  country       String
-  logo          String?
-  isActive      Boolean             @default(true)
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  admins        SchoolAdmin[]
-  academicYears SchoolAcademicYear[]
-  classes       SchoolClass[]
-  students      SchoolStudent[]
-  paymentTypes  SchoolPaymentType[]
-  payments      SchoolPayment[]
-  logs          SchoolLog[]
-
-  @@map("schools")
-}
-
-model SchoolAdmin {
-  id                   Int           @id @default(autoincrement())
-  schoolId             Int?
-  firstName            String
-  lastName             String
-  email                String        @unique
-  phone                String?
-  passwordHash         String
-  role                 SchoolRole
-  mustChangePassword   Boolean       @default(true)
-  isActive             Boolean       @default(true)
-  lastLoginAt          DateTime?
-  createdBySuperAdmin  Int?
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
-  school               School?       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  recordedPayments     SchoolPayment[] @relation("PaymentRecordedBy")
-  logs                 SchoolLog[]   @relation("SchoolLogActor")
-
-  @@index([schoolId, role])
-  @@map("school_admins")
-}
-
-model SchoolAcademicYear {
-  id          Int            @id @default(autoincrement())
-  schoolId    Int
-  label       String
-  startDate   DateTime
-  endDate     DateTime
-  isActive    Boolean        @default(false)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  school      School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  classes     SchoolClass[]
-  students    SchoolStudent[]
-  payments    SchoolPayment[]
-
-  @@unique([schoolId, label])
-  @@index([schoolId, isActive])
-  @@map("school_academic_years")
-}
-
-model SchoolClass {
-  id             Int               @id @default(autoincrement())
-  schoolId       Int
-  academicYearId Int
-  name           String
-  level          String?
-  capacity       Int?
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  school         School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  academicYear   SchoolAcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
-  students       SchoolStudent[]
-  payments       SchoolPayment[]
-
-  @@unique([schoolId, academicYearId, name])
-  @@index([schoolId, academicYearId])
-  @@map("school_classes")
-}
-
-model SchoolStudent {
-  id             Int               @id @default(autoincrement())
-  schoolId       Int
-  classId        Int
-  academicYearId Int
-  studentId      String
-  firstName      String
-  lastName       String
-  sex            SchoolStudentSex
-  isActive       Boolean           @default(true)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  school         School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  schoolClass    SchoolClass       @relation(fields: [classId], references: [id], onDelete: Restrict)
-  academicYear   SchoolAcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
-  payments       SchoolPayment[]
-
-  @@unique([schoolId, studentId])
-  @@unique([schoolId, academicYearId, classId, firstName, lastName])
-  @@index([schoolId, classId])
-  @@map("school_students")
-}
-
-model SchoolPaymentType {
-  id          Int            @id @default(autoincrement())
-  schoolId    Int
-  name        String
-  description String?
-  isActive    Boolean        @default(true)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  school      School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  payments    SchoolPayment[]
-
-  @@unique([schoolId, name])
-  @@map("school_payment_types")
-}
-
-model SchoolPayment {
-  id              Int               @id @default(autoincrement())
-  schoolId        Int
-  studentId       Int
-  classId         Int
-  academicYearId  Int
-  paymentTypeId   Int
-  amountDue       Decimal           @db.Decimal(10, 2)
-  amountPaid      Decimal           @db.Decimal(10, 2)
-  status          SchoolPaymentStatus
-  receiptNumber   String
-  receiptPath     String?
-  notes           String?
-  recordedById    Int
-  paymentDate     DateTime          @default(now())
-  deletedAt       DateTime?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  school          School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  student         SchoolStudent     @relation(fields: [studentId], references: [id], onDelete: Restrict)
-  schoolClass     SchoolClass       @relation(fields: [classId], references: [id], onDelete: Restrict)
-  academicYear    SchoolAcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
-  paymentType     SchoolPaymentType @relation(fields: [paymentTypeId], references: [id], onDelete: Restrict)
-  recordedBy      SchoolAdmin       @relation("PaymentRecordedBy", fields: [recordedById], references: [id], onDelete: Restrict)
-
-  @@unique([schoolId, receiptNumber])
-  @@index([schoolId, paymentDate])
-  @@index([schoolId, deletedAt])
-  @@map("school_payments")
-}
-
-model SchoolLog {
-  id         Int        @id @default(autoincrement())
-  schoolId   Int?
-  actorId    Int?
-  actorRole  SchoolRole?
-  action     String
-  entityType String
-  entityId   String?
-  metadata   Json?
-  createdAt  DateTime   @default(now())
-  school     School?    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  actor      SchoolAdmin? @relation("SchoolLogActor", fields: [actorId], references: [id], onDelete: SetNull)
-
-  @@index([schoolId, createdAt])
-  @@map("school_logs")
-}
-
-model TeacherVerification {
-  id          Int                       @id @default(autoincrement())
-  teacherId   Int
-  documentUrl String
-  status      TeacherVerificationStatus @default(PENDING)
-  reviewedBy  Int?
-  createdAt   DateTime                  @default(now())
-  updatedAt   DateTime                  @updatedAt
-  teacher     Student                   @relation("TeacherVerificationTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
-  reviewer    Student?                  @relation("TeacherVerificationReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
-
-  @@index([teacherId, status])
-  @@map("teacher_verifications")
-}
-
-model BlogPost {
-  id          Int       @id @default(autoincrement())
-  authorId    Int
-  title       String
-  content     String
-  excerpt     String?
-  imageUrl    String?   @map("image_url")
-  isGlobal    Boolean   @default(true)
-  schoolId    Int?
-  isApproved  Boolean   @default(false)
-  isDeleted   Boolean   @default(false)
-  deletedAt   DateTime?
-  approvedBy  Int?
-  approvedAt  DateTime?
-  likeCount   Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  author      Student   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  approver    Student?  @relation("BlogPostApprover", fields: [approvedBy], references: [id], onDelete: SetNull)
-  comments    BlogComment[]
-  likes       BlogPostLike[]
-  categories  PostCategoryOnPost[]
-  tags        PostTagOnPost[]
-  publicationTags PublicationTag[]
-  reports     PostReport[]
-
-  @@index([authorId, createdAt])
-  @@index([isApproved, createdAt])
-  @@index([schoolId, createdAt])
-  @@index([isDeleted, createdAt])
-  @@map("posts")
-}
-
-model BlogComment {
-  id         Int      @id @default(autoincrement())
-  postId     Int
-  authorId   Int
-  content    String
-  isHelpful  Boolean  @default(false)
-  isDeleted  Boolean  @default(false)
-  deletedAt  DateTime?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  post       BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author     Student  @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  @@index([postId, createdAt])
-  @@index([authorId, createdAt])
-  @@index([isDeleted, createdAt])
-  @@map("comments")
-}
-
-model BlogPostLike {
-  id        Int      @id @default(autoincrement())
-  postId    Int
-  userId    Int
-  createdAt DateTime @default(now())
-  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      Student  @relation("BlogPostLikeUser", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([postId, userId])
-  @@index([postId, createdAt])
-  @@map("post_likes")
-}
-
-model PostCategory {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  slug        String   @unique
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  posts       PostCategoryOnPost[]
-
-  @@map("post_categories")
-}
-
-model PostTag {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  posts     PostTagOnPost[]
-
-  @@map("post_tags")
-}
-
-model PostCategoryOnPost {
-  postId      Int
-  categoryId  Int
-  assignedAt  DateTime @default(now())
-  post        BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  category    PostCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  @@id([postId, categoryId])
-  @@map("post_category_links")
-}
-
-model PostTagOnPost {
-  postId      Int
-  tagId       Int
-  assignedAt  DateTime @default(now())
-  post        BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  tag         PostTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([postId, tagId])
-  @@map("post_tag_links")
-}
-
-model PostReport {
-  id          Int      @id @default(autoincrement())
-  postId      Int
-  reportedBy  Int
-  reason      String
-  details     String?
-  status      String   @default("PENDING")
-  reviewedBy  Int?
-  reviewedAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  post        BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  reporter    Student  @relation(fields: [reportedBy], references: [id], onDelete: Cascade)
-  reviewer    Student? @relation("PostReportReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
-
-  @@index([postId, createdAt])
-  @@index([status, createdAt])
-  @@map("post_reports")
-}
-
-model ReputationPoint {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  points    Int
-  reason    String
-  createdAt DateTime @default(now())
-  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-  @@map("reputation_points")
-}
-
-model Badge {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String
-  icon        String
-  userBadges  UserBadge[]
-
-  @@map("badges")
-}
-
-model UserBadge {
-  userId    Int
-  badgeId   Int
-  awardedAt DateTime @default(now())
-  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
-
-  @@id([userId, badgeId])
-  @@index([badgeId, awardedAt])
-  @@map("user_badges")
-}
-
-model CommunityConfig {
-  id                  Int      @id
-  maxPostsPerDay      Int      @default(3)
-  maxPostsPerMonth    Int      @default(10)
-  commentRatePerMin   Int      @default(10)
-  updatedBy           Int?
-  updatedAt           DateTime @updatedAt
-  updatedByUser       Student? @relation(fields: [updatedBy], references: [id], onDelete: SetNull)
-
-  @@map("community_config")
-}
-
-model CommunityLog {
-  id         Int      @id @default(autoincrement())
-  actorId    Int?
-  action     String
-  entityType String
-  entityId   String?
-  metadata   Json?
-  createdAt  DateTime @default(now())
-  actor      Student? @relation(fields: [actorId], references: [id], onDelete: SetNull)
-
-  @@index([actorId, createdAt])
-  @@index([entityType, createdAt])
-  @@map("community_logs")
-}
-
-model TeacherInvitation {
-  id         Int      @id @default(autoincrement())
-  email      String
-  token      String   @unique
-  expiresAt  DateTime
-  used       Boolean  @default(false)
-  createdBy  Int
-  createdAt  DateTime @default(now())
-  usedAt     DateTime?
-  creator    Student  @relation("TeacherInvitationCreator", fields: [createdBy], references: [id], onDelete: Cascade)
-
-  @@index([email, expiresAt])
-  @@index([used, expiresAt])
-  @@map("teacher_invitations")
-}
-
-model LibraryBook {
-  id          Int               @id @default(autoincrement())
-  title       String
-  subject     String
-  level       String
-  description String?
-  fileUrl     String
-  status      LibraryBookStatus @default(PENDING)
-  isDeleted   Boolean           @default(false)
-  deletedAt   DateTime?
-  uploadedBy  Int
-  reviewedBy  Int?
-  reviewedAt  DateTime?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  uploader    Student           @relation("LibraryBookUploader", fields: [uploadedBy], references: [id], onDelete: Cascade)
-  reviewer    Student?          @relation("LibraryBookReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
-
-  @@index([status, createdAt])
-  @@index([isDeleted, createdAt])
-  @@index([uploadedBy, createdAt])
-  @@map("library_books")
-}
-
-model UserNotification {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  type       String
-  title      String
-  message    String
-  entityType String?
-  entityId   String?
-  isRead     Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  user       Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, isRead, createdAt])
-  @@map("user_notifications")
-}
-
-model MusicTrack {
-  id        Int            @id @default(autoincrement())
-  title     String
-  url       String
-  level     EducationLevel
-  createdAt DateTime       @default(now())
-
-  @@index([level])
-  @@map("music_tracks")
-}
-
-model PomodoroSession {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @map("user_id")
-  duration  Int
-  startTime DateTime? @map("start_time")
-  endTime   DateTime? @map("end_time")
-  cycleType String?   @map("cycle_type")
-  status    String?   @default("COMPLETED")
-  createdAt DateTime @default(now()) @map("created_at")
-  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-  @@index([userId, startTime, endTime])
-  @@map("pomodoro_sessions")
-}
-
-model Content {
-  id          Int           @id @default(autoincrement())
-  title       String
-  body        String
-  level       EducationLevel
-  type        ContentType
-  status      ContentStatus @default(PENDING)
-  teacherId   Int           @map("teacher_id")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  teacher     Student       @relation("ContentTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
-  approvalLogs ApprovalLog[]
-
-  @@index([level, status, createdAt])
-  @@index([teacherId, createdAt])
-  @@map("contents")
-}
-
-model ApprovalLog {
-  id        Int      @id @default(autoincrement())
-  contentId Int      @map("content_id")
-  adminId   Int      @map("admin_id")
-  action    String
-  timestamp DateTime @default(now())
-  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
-  admin     Student  @relation("ContentApprovalAdmin", fields: [adminId], references: [id], onDelete: Cascade)
-
-  @@index([contentId, timestamp])
-  @@index([adminId, timestamp])
-  @@map("approval_logs")
-}
-
-model StudyPlan {
-  id          Int            @id @default(autoincrement())
-  level       EducationLevel
-  subject     String?
-  title       String
-  description String
-  chapterOrder Int?          @map("chapter_order")
-  notes       String?
-  exercises   String?
-  createdById Int?           @map("created_by_id")
-  creator     Student?       @relation("StudyPlanCreator", fields: [createdById], references: [id], onDelete: SetNull)
-
-  @@index([level])
-  @@index([subject])
-  @@index([subject, chapterOrder])
-  @@index([createdById])
-  @@map("study_plans")
-}
-
-model PersonalStudyPlan {
-  id                Int       @id @default(autoincrement())
-  userId            Int       @map("user_id")
-  customPreferences Json?     @map("custom_preferences")
-  examDate          DateTime? @map("exam_date")
-  user              Student   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("personal_study_plans")
-}
-
-model LevelQuiz {
-  id        Int             @id @default(autoincrement())
-  level     EducationLevel
-  title     String
-  createdAt DateTime        @default(now()) @map("created_at")
-  questions LevelQuestion[]
-  results   QuizResult[]
-
-  @@index([level, createdAt])
-  @@map("quizzes")
-}
-
-model LevelQuestion {
-  id           Int      @id @default(autoincrement())
-  quizId       Int      @map("quiz_id")
-  questionText String   @map("question_text")
-  options      Json
-  correctAnswer String  @map("correct_answer")
-  quiz         LevelQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-
-  @@index([quizId])
-  @@map("questions")
-}
-
-model QuizResult {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @map("user_id")
-  quizId      Int      @map("quiz_id")
-  score       Int
-  completedAt DateTime @default(now()) @map("completed_at")
-  user        Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quiz        LevelQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-
-  @@index([userId, completedAt])
-  @@index([quizId, completedAt])
-  @@map("quiz_results")
-}
-
-model SearchTag {
-  id              Int              @id @default(autoincrement())
-  name            String           @unique
-  publicationTags PublicationTag[]
-  courseTags      CourseTag[]
-
-  @@map("tags")
-}
-
-model PublicationTag {
-  publicationId Int      @map("publication_id")
-  tagId         Int      @map("tag_id")
-  assignedAt    DateTime @default(now()) @map("assigned_at")
-  publication   BlogPost @relation(fields: [publicationId], references: [id], onDelete: Cascade)
-  tag           SearchTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([publicationId, tagId])
-  @@index([tagId])
-  @@map("publication_tags")
-}
-
-model CourseTag {
-  courseId    Int      @map("course_id")
-  tagId       Int      @map("tag_id")
-  assignedAt  DateTime @default(now()) @map("assigned_at")
-  course      Subject  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  tag         SearchTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([courseId, tagId])
-  @@index([tagId])
-  @@map("course_tags")
-}
-
-model SearchHistory {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @map("user_id")
-  query     String
-  createdAt DateTime @default(now()) @map("created_at")
-  user      Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-  @@index([query])
-  @@map("search_history")
-}
-
-model PasswordResetCode {
-  id        Int      @id @default(autoincrement())
-  studentId Int      @map("student_id")
-  phone     String?
-  email     String?
-  codeHash  String   @map("code_hash")
-  expiresAt DateTime @map("expires_at")
-  usedAt    DateTime? @map("used_at")
-  attempts  Int      @default(0)
-  createdAt DateTime @default(now()) @map("created_at")
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
-  @@index([phone, createdAt])
-  @@index([email, createdAt])
-  @@index([studentId, createdAt])
-  @@map("password_reset_codes")
-}
-
-model Conversation {
-  id          Int                       @id @default(autoincrement())
-  type        ConversationType
-  privateKey  String?                   @unique @map("private_key")
-  targetLevel AcademicLevel?            @map("target_level")
-  createdAt   DateTime                  @default(now()) @map("created_at")
-  messages    Message[]
-  participants ConversationParticipant[]
-
-  @@index([type, createdAt])
-  @@index([targetLevel])
-  @@map("conversations")
-}
-
-model Message {
-  id             Int          @id @default(autoincrement())
-  conversationId Int          @map("conversation_id")
-  senderId       Int          @map("sender_id")
-  content        String
-  createdAt      DateTime     @default(now()) @map("created_at")
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender         Student      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
-
-  @@index([conversationId, createdAt])
-  @@index([senderId, createdAt])
-  @@map("messages")
-}
-
-model ConversationParticipant {
-  id             Int          @id @default(autoincrement())
-  conversationId Int          @map("conversation_id")
-  userId         Int          @map("user_id")
-  lastReadAt     DateTime?    @map("last_read_at")
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  user           Student      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([conversationId, userId])
-  @@index([userId, lastReadAt])
-  @@map("conversation_participants")
-}
-
-model FocusSong {
-  id        Int      @id @default(autoincrement())
-  title     String
-  url       String
-  category  String?
-  createdAt DateTime @default(now()) @map("created_at")
-  createdBy Int?     @map("created_by")
-  listens   FocusSongListen[]
-  creator   Student? @relation(fields: [createdBy], references: [id], onDelete: SetNull)
-
-  @@index([createdAt])
-  @@index([createdBy, createdAt])
-  @@map("focus_songs")
-}
-
-model FocusSongListen {
-  id       Int      @id @default(autoincrement())
-  userId   Int      @map("user_id")
-  songId   Int      @map("song_id")
-  playedAt DateTime @default(now()) @map("played_at")
-  user     Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  song     FocusSong @relation(fields: [songId], references: [id], onDelete: Cascade)
-
-  @@index([userId, playedAt])
-  @@index([songId, playedAt])
-  @@map("focus_song_listens")
-}
-
-model FocusStatistic {
-  id                 Int      @id @default(autoincrement())
-  userId             Int      @map("user_id")
-  date               DateTime
-  totalTime          Int      @default(0) @map("total_time")
-  pomodorosCompleted Int      @default(0) @map("pomodoros_completed")
-  updatedAt          DateTime @updatedAt @map("updated_at")
-  user               Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, date])
-  @@index([date])
-  @@map("focus_statistics")
-}
-
-model Exam {
-  id        Int            @id @default(autoincrement())
-  subject   String
-  year      Int
-  level     AcademicLevel
-  questions ExamQuestion[]
-
-  @@index([level])
-  @@index([subject])
-  @@map("exams")
-}
-
-model ExamQuestion {
-  id           Int    @id @default(autoincrement())
-  examId       Int    @map("exam_id")
-  questionText String @map("question_text")
-  topic        String
-  exam         Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
-
-  @@index([topic])
-  @@index([examId])
-  @@map("exam_questions")
 }

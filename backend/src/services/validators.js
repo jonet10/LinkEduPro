@@ -91,7 +91,13 @@ const submitQuizSchema = Joi.object({
     .items(
       Joi.object({
         questionId: Joi.number().integer().positive().required(),
-        selectedOption: Joi.number().integer().min(0).max(3).required()
+        selectedOption: Joi.number().integer().min(0).optional(),
+        selectedText: Joi.string().trim().max(2000).allow('').optional()
+      }).custom((value, helpers) => {
+        if (value.selectedOption === undefined && !value.selectedText) {
+          return helpers.error('any.invalid');
+        }
+        return value;
       })
     )
     .min(1)
