@@ -103,7 +103,13 @@ async function createPayment(req, res, next) {
 
     const updated = await prisma.schoolPayment.update({
       where: { id: payment.id },
-      data: { receiptPath: receipt.absolutePath }
+      data: { receiptPath: receipt.absolutePath },
+      include: {
+        student: { select: { id: true, studentId: true, firstName: true, lastName: true } },
+        paymentType: { select: { id: true, name: true } },
+        schoolClass: { select: { id: true, name: true } },
+        academicYear: { select: { id: true, label: true } }
+      }
     });
 
     await createSchoolLog({
