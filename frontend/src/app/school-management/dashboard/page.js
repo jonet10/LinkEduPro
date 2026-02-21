@@ -68,7 +68,51 @@ export default function SchoolManagementDashboardPage() {
           </h1>
           <p className="text-sm text-brand-700">Connecté: {admin?.email}</p>
         </div>
-        <button className="btn-secondary" onClick={logout}>Se déconnecter</button>
+        <div className="flex gap-2">
+          {admin?.role === 'SUPER_ADMIN' ? (
+            <button className="btn-primary" onClick={() => router.push('/school-management/schools')}>
+              Ajouter une ecole
+            </button>
+          ) : null}
+          <button className="btn-secondary" onClick={logout}>Se déconnecter</button>
+        </div>
+      </section>
+
+      {/* Navigation */}
+      <section className="card">
+        <h2 className="text-lg font-semibold text-brand-900 mb-3">Navigation</h2>
+        <div className="flex flex-wrap gap-3">
+          {admin?.role !== 'SUPER_ADMIN' && (
+            <>
+              <button
+                onClick={() => router.push('/school-management/payments')}
+                className="btn-secondary"
+              >
+                Gérer les paiements
+              </button>
+              <button
+                onClick={() => router.push('/school-management/students')}
+                className="btn-secondary"
+              >
+                Gérer les élèves
+              </button>
+              <button
+                onClick={() => router.push('/school-management/classes')}
+                className="btn-secondary"
+              >
+                Gérer les classes
+              </button>
+            </>
+          )}
+          {admin?.role === 'SUPER_ADMIN' && (
+            <button
+              onClick={() => router.push('/school-management/schools')}
+              className="btn-secondary"
+            >
+              Gérer les écoles
+            </button>
+          )}
+        </div>
       </section>
 
       {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-red-700">{error}</p> : null}
