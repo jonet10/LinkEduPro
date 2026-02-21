@@ -39,6 +39,22 @@ const createClassSchema = Joi.object({
   capacity: Joi.number().integer().min(1).max(1000).allow(null)
 });
 
+const updateClassSchema = Joi.object({
+  academicYearId: Joi.number().integer().positive().required(),
+  name: Joi.string().trim().min(1).max(120).required(),
+  level: Joi.string().trim().max(50).allow(null, ''),
+  capacity: Joi.number().integer().min(1).max(1000).allow(null)
+});
+
+const updateStudentSchema = Joi.object({
+  classId: Joi.number().integer().positive().required(),
+  academicYearId: Joi.number().integer().positive().required(),
+  studentId: Joi.string().trim().min(2).max(80).required(),
+  firstName: Joi.string().trim().min(1).max(120).required(),
+  lastName: Joi.string().trim().min(1).max(120).required(),
+  sex: Joi.string().valid('MALE', 'FEMALE', 'OTHER').required()
+});
+
 const createPaymentTypeSchema = Joi.object({
   schoolId: Joi.number().integer().positive().required(),
   name: Joi.string().trim().min(2).max(120).required(),
@@ -62,6 +78,8 @@ module.exports = {
   createSchoolSchema,
   createAcademicYearSchema,
   createClassSchema,
+  updateClassSchema,
+  updateStudentSchema,
   createPaymentTypeSchema,
   createPaymentSchema
 };

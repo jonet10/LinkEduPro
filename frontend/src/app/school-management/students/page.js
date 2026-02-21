@@ -16,6 +16,15 @@ export default function SchoolStudentsPage() {
   const [selectedYearId, setSelectedYearId] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingStudentId, setEditingStudentId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    classId: '',
+    academicYearId: '',
+    studentId: '',
+    firstName: '',
+    lastName: '',
+    sex: 'MALE'
+  });
   const [importClassId, setImportClassId] = useState('');
   const [importYearId, setImportYearId] = useState('');
   const [importFile, setImportFile] = useState(null);
@@ -153,6 +162,63 @@ export default function SchoolStudentsPage() {
     }
   }
 
+  function startEditStudent(student) {
+    setEditingStudentId(student.id);
+    setEditForm({
+      classId: String(student.classId),
+      academicYearId: String(student.academicYearId),
+      studentId: student.studentId || '',
+      firstName: student.firstName || '',
+      lastName: student.lastName || '',
+      sex: student.sex || 'MALE'
+    });
+  }
+
+  async function saveStudent(studentIdPk) {
+    if (!admin) return;
+    setError('');
+    setSuccess('');
+    try {
+      const token = getSchoolToken();
+      await apiClient(`/school-management/students/schools/${admin.schoolId}/${studentIdPk}`, {
+        method: 'PUT',
+        token,
+        body: JSON.stringify({
+          classId: Number(editForm.classId),
+          academicYearId: Number(editForm.academicYearId),
+          studentId: editForm.studentId,
+          firstName: editForm.firstName,
+          lastName: editForm.lastName,
+          sex: editForm.sex
+        })
+      });
+      setEditingStudentId(null);
+      setSuccess('Eleve modifie avec succes.');
+      await onFiltersChange(selectedClassId, selectedYearId);
+    } catch (e) {
+      setError(e.message || 'Impossible de modifier cet eleve.');
+    }
+  }
+
+  async function deleteStudent(studentIdPk) {
+    if (!admin) return;
+    const ok = window.confirm('Desactiver cet eleve ?');
+    if (!ok) return;
+    setError('');
+    setSuccess('');
+    try {
+      const token = getSchoolToken();
+      await apiClient(`/school-management/students/schools/${admin.schoolId}/${studentIdPk}`, {
+        method: 'DELETE',
+        token
+      });
+      setSuccess('Eleve desactive.');
+      await onFiltersChange(selectedClassId, selectedYearId);
+    } catch (e) {
+      setError(e.message || 'Impossible de desactiver cet eleve.');
+    }
+  }
+
   if (loading) {
     return <main className="mx-auto max-w-6xl px-4 py-8">Chargement...</main>;
   }
@@ -284,16 +350,101 @@ export default function SchoolStudentsPage() {
                   <th className="py-2 text-left">Sexe</th>
                   <th className="py-2 text-left">Classe</th>
                   <th className="py-2 text-left">Annee</th>
+                  <th className="py-2 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedStudents.map((student) => (
                   <tr key={student.id} className="border-b border-brand-100">
-                    <td className="py-2">{student.studentId}</td>
-                    <td className="py-2">{student.lastName} {student.firstName}</td>
-                    <td className="py-2">{student.gender || '-'}</td>
-                    <td className="py-2">{student.schoolClass?.name || '-'}</td>
-                    <td className="py-2">{student.academicYear?.label || '-'}</td>
+                    <td className="py-2">
+                      {editingStudentId === student.id ? (
+                        <input
+                          className="input !py-1"
+                          value={editForm.studentId}
+                          onChange={(e) => setEditForm((p) => ({ ...p, studentId: e.target.value }))}
+                        />
+                      ) : student.studentId}
+                    </td>
+                    <td className="py-2">
+                      {editingStudentId === student.id ? (
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <input
+                            className="input !py-1"
+                            value={editForm.lastName}
+                            onChange={(e) => setEditForm((p) => ({ ...p, lastName: e.target.value }))}
+                          />
+                          <input
+                            className="input !py-1"
+                            value={editForm.firstName}
+                            onChange={(e) => setEditForm((p) => ({ ...p, firstName: e.target.value }))}
+                          />
+                        </div>
+                      ) : `${student.lastName} ${student.firstName}`}
+                    </td>
+                    <td className="py-2">
+                      {editingStudentId === student.id ? (
+                        <select
+                          className="input !py-1"
+                          value={editForm.sex}
+                          onChange={(e) => setEditForm((p) => ({ ...p, sex: e.target.value }))}
+                        >
+                          <option value="MALE">MALE</option>
+                          <option value="FEMALE">FEMALE</option>
+                          <option value="OTHER">OTHER</option>
+                        </select>
+                      ) : (student.sex || '-')}
+                    </td>
+                    <td className="py-2">
+                      {editingStudentId === student.id ? (
+                        <select
+                          className="input !py-1"
+                          value={editForm.classId}
+                          onChange={(e) => setEditForm((p) => ({ ...p, classId: e.target.value }))}
+                        >
+                          {classes.map((cls) => (
+                            <option key={cls.id} value={cls.id}>{cls.name}</option>
+                          ))}
+                        </select>
+                      ) : (student.schoolClass?.name || '-')}
+                    </td>
+                    <td className="py-2">
+                      {editingStudentId === student.id ? (
+                        <select
+                          className="input !py-1"
+                          value={editForm.academicYearId}
+                          onChange={(e) => setEditForm((p) => ({ ...p, academicYearId: e.target.value }))}
+                        >
+                          {academicYears.map((year) => (
+                            <option key={year.id} value={year.id}>{year.label}</option>
+                          ))}
+                        </select>
+                      ) : (student.academicYear?.label || '-')}
+                    </td>
+                    <td className="py-2">
+                      {admin?.role === 'SCHOOL_ADMIN' ? (
+                        <div className="flex gap-2">
+                          {editingStudentId === student.id ? (
+                            <>
+                              <button type="button" className="btn-primary !px-3 !py-1" onClick={() => saveStudent(student.id)}>
+                                Enregistrer
+                              </button>
+                              <button type="button" className="btn-secondary !px-3 !py-1" onClick={() => setEditingStudentId(null)}>
+                                Annuler
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button type="button" className="btn-secondary !px-3 !py-1" onClick={() => startEditStudent(student)}>
+                                Modifier
+                              </button>
+                              <button type="button" className="btn-secondary !px-3 !py-1" onClick={() => deleteStudent(student.id)}>
+                                Supprimer
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      ) : <span className="text-xs text-brand-700">Lecture seule</span>}
+                    </td>
                   </tr>
                 ))}
               </tbody>

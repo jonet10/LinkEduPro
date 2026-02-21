@@ -90,4 +90,105 @@ async function importHistory(req, res, next) {
   }
 }
 
-module.exports = { listStudents, importStudents, importHistory };
+async function updateStudent(req, res, next) {
+  try {
+    const schoolId = Number(req.params.schoolId);
+    const studentPk = Number(req.params.studentId);
+    const user = req.schoolUser;
+    const { classId, academicYearId, studentId, firstName, lastName, sex } = req.body;
+
+    const existing = await prisma.schoolStudent.findFirst({
+      where: { id: studentPk, schoolId, isActive: true }
+    });
+    if (!existing) {
+      return res.status(404).json({ message: 'Eleve introuvable.' });
+    }
+
+    const [schoolClass, year] = await Promise.all([
+      prisma.schoolClass.findFirst({ where: { id: Number(classId), schoolId } }),
+      prisma.schoolAcademicYear.findFirst({ where: { id: Number(academicYearId), schoolId } })
+    ]);
+
+    if (!schoolClass || !year) {
+      return res.status(400).json({ message: 'Classe ou annee academique invalide pour cette ecole.' });
+    }
+
+    const duplicate = await prisma.schoolStudent.findFirst({
+      where: {
+        schoolId,
+        studentId,
+        id: { not: studentPk }
+      },
+      select: { id: true }
+    });
+
+    if (duplicate) {
+      return res.status(400).json({ message: 'Matricule deja utilise dans cette ecole.' });
+    }
+
+    const updated = await prisma.schoolStudent.update({
+      where: { id: studentPk },
+      data: {
+        classId: Number(classId),
+        academicYearId: Number(academicYearId),
+        studentId,
+        firstName,
+        lastName,
+        sex
+      },
+      include: {
+        schoolClass: { select: { id: true, name: true } },
+        academicYear: { select: { id: true, label: true } }
+      }
+    });
+
+    await createSchoolLog({
+      schoolId,
+      actorId: user.id,
+      actorRole: user.role,
+      action: 'STUDENT_UPDATED',
+      entityType: 'SchoolStudent',
+      entityId: String(studentPk),
+      metadata: { studentId }
+    });
+
+    return res.json({ student: updated });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deactivateStudent(req, res, next) {
+  try {
+    const schoolId = Number(req.params.schoolId);
+    const studentPk = Number(req.params.studentId);
+    const user = req.schoolUser;
+
+    const existing = await prisma.schoolStudent.findFirst({
+      where: { id: studentPk, schoolId, isActive: true }
+    });
+    if (!existing) {
+      return res.status(404).json({ message: 'Eleve introuvable.' });
+    }
+
+    await prisma.schoolStudent.update({
+      where: { id: studentPk },
+      data: { isActive: false }
+    });
+
+    await createSchoolLog({
+      schoolId,
+      actorId: user.id,
+      actorRole: user.role,
+      action: 'STUDENT_DEACTIVATED',
+      entityType: 'SchoolStudent',
+      entityId: String(studentPk)
+    });
+
+    return res.json({ message: 'Eleve desactive.' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { listStudents, importStudents, importHistory, updateStudent, deactivateStudent };
