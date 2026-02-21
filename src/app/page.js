@@ -274,7 +274,7 @@ export default function HomePage() {
         </div>
       ) : null}
 
-      <div className="card">
+      <div className="card motion-enter lift-card">
         <p className="text-sm text-brand-700">Bienvenue</p>
         <h1 className="text-3xl font-black text-brand-900">
           {student ? `${student.firstName} ${student.lastName}` : 'Espace élève'}
@@ -283,22 +283,22 @@ export default function HomePage() {
           Compare tes performances avec d'autres élèves et découvre les écoles les plus actives.
         </p>
         <div className="mt-4 flex gap-3">
-          <Link href="/subjects" className="btn-primary">Commencer un quiz</Link>
+          <Link href="/subjects" className="btn-primary cta-pulse">Commencer un quiz</Link>
           <Link href="/progress" className="btn-secondary">Voir mes progrès</Link>
         </div>
       </div>
 
-      <div className="card border border-brand-200 bg-gradient-to-r from-brand-50 to-white">
+      <div className="card motion-enter motion-delay-1 lift-card border border-brand-200 bg-gradient-to-r from-brand-50 to-white">
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Coaching intelligent</p>
         <h2 className="mt-1 text-xl font-bold text-brand-900">{dailyObjective.title}</h2>
         <p className="mt-2 text-sm text-brand-700">{dailyObjective.description}</p>
         <div className="mt-4">
-          <Link href={dailyObjective.ctaHref} className="btn-primary">{dailyObjective.ctaLabel}</Link>
+          <Link href={dailyObjective.ctaHref} className="btn-primary cta-pulse">{dailyObjective.ctaLabel}</Link>
         </div>
       </div>
 
       {!hasDepartmentAndCommune(student?.school) ? (
-        <div className="card border border-amber-300 bg-amber-50">
+        <div className="card motion-enter motion-delay-2 lift-card border border-amber-300 bg-amber-50">
           <p className="text-sm font-semibold text-amber-900">Mise a jour de profil requise</p>
           <p className="mt-1 text-sm text-amber-900">
             Ton departement et ta commune sont manquants. Merci de mettre a jour ton profil pour continuer avec des contenus personnalises.
@@ -310,15 +310,15 @@ export default function HomePage() {
       ) : null}
 
       {isNsivStudent(student) ? (
-        <div className="card">
+        <div className="card motion-enter motion-delay-2 lift-card">
           <h2 className="text-xl font-semibold text-brand-900">Rubriques NSIV</h2>
           <p className="mt-2 text-sm text-brand-700">Acces direct aux rubriques principales de Terminale.</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
+            <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50 lift-card">
               <p className="font-semibold text-brand-900">Espace NSIV</p>
               <p className="mt-1 text-sm text-brand-700">Tableau complet des rubriques et progression.</p>
             </Link>
-            <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
+            <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50 lift-card">
               <p className="font-semibold text-brand-900">Exercices probables</p>
               <p className="mt-1 text-sm text-brand-700">Sujets recurrents du Bac NSIV.</p>
             </Link>
@@ -328,30 +328,30 @@ export default function HomePage() {
 
       {error ? <p className="text-red-600">{error}</p> : null}
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <article className="card lg:col-span-2">
+      <div className="grid gap-4 lg:grid-cols-3 motion-enter motion-delay-3">
+        <article className="card lg:col-span-2 lift-card">
           <h2 className="mb-3 text-xl font-semibold text-brand-900">Plan rapide du jour</h2>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50">
+            <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
               <p className="text-sm font-semibold text-brand-900">Rubriques du jour</p>
               <p className="mt-1 text-sm text-brand-700">Révision ciblée par matière.</p>
             </Link>
-            <Link href="/probable-exercises" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50">
+            <Link href="/probable-exercises" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
               <p className="text-sm font-semibold text-brand-900">Exercices probables</p>
               <p className="mt-1 text-sm text-brand-700">Sujets les plus fréquents à l&apos;examen.</p>
             </Link>
-            <Link href="/focus" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50">
+            <Link href="/focus" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
               <p className="text-sm font-semibold text-brand-900">Session Focus</p>
               <p className="mt-1 text-sm text-brand-700">Concentration en 25 minutes.</p>
             </Link>
-            <Link href="/library" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50">
+            <Link href="/library" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
               <p className="text-sm font-semibold text-brand-900">Bibliothèque</p>
               <p className="mt-1 text-sm text-brand-700">PDF, ressources et fiches utiles.</p>
             </Link>
           </div>
         </article>
 
-        <article className="card">
+        <article className="card lift-card">
           <h2 className="mb-3 text-xl font-semibold text-brand-900">Mon niveau actuel</h2>
           {myRanking ? (
             <div className="space-y-2 text-sm text-brand-800">
@@ -368,7 +368,7 @@ export default function HomePage() {
         </article>
       </div>
 
-      <article className="card">
+      <article className="card motion-enter motion-delay-4 lift-card">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-brand-900">Annonces et alertes</h2>
           <Link href="/messages" className="text-sm text-brand-700 hover:underline">Voir tout</Link>
@@ -378,7 +378,7 @@ export default function HomePage() {
             <Link
               key={n.id}
               href={resolveNotificationHref(n)}
-              className={`block rounded border px-3 py-2 ${n.isRead ? 'border-brand-100' : 'border-brand-500 bg-brand-50'}`}
+              className={`block rounded border px-3 py-2 lift-card ${n.isRead ? 'border-brand-100' : 'border-brand-500 bg-brand-50'}`}
             >
               <p className="font-semibold text-brand-900">{n.title}</p>
               <p className="text-brand-700">{n.message}</p>
