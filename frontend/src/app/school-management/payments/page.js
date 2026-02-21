@@ -17,16 +17,45 @@ export default function SchoolPaymentsPage() {
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [creatingType, setCreatingType] = useState(false);
+  const [typeForm, setTypeForm] = useState({ name: '', description: '' });
 
   const [form, setForm] = useState({
     studentId: '',
     classId: '',
     academicYearId: '',
     paymentTypeId: '',
+    isInstallment: false,
     amountDue: '',
     amountPaid: '',
     notes: ''
   });
+
+  const paymentSummaries = (() => {
+    const map = new Map();
+    for (const payment of payments) {
+      const key = `${payment.student?.id}__${payment.paymentType?.id}__${payment.academicYear?.id}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          studentName: `${payment.student?.firstName || ''} ${payment.student?.lastName || ''}`.trim(),
+          paymentType: payment.paymentType?.name || '-',
+          academicYear: payment.academicYear?.label || '-',
+          amountDue: Number(payment.amountDue || 0),
+          amountPaid: 0
+        });
+      }
+      const current = map.get(key);
+      current.amountDue = Math.max(current.amountDue, Number(payment.amountDue || 0));
+      current.amountPaid += Number(payment.amountPaid || 0);
+    }
+    return Array.from(map.values())
+      .map((row) => ({
+        ...row,
+        remaining: Math.max(0, row.amountDue - row.amountPaid),
+        status: row.amountPaid >= row.amountDue ? 'SOLDE' : row.amountPaid > 0 ? 'PARTIEL' : 'IMPAYE'
+      }))
+      .sort((a, b) => a.studentName.localeCompare(b.studentName));
+  })();
 
   useEffect(() => {
     async function load() {
@@ -92,8 +121,12 @@ export default function SchoolPaymentsPage() {
       const payload = {
         schoolId,
         ...form,
+        isInstallment: Boolean(form.isInstallment),
         amountDue: parseFloat(form.amountDue),
-        amountPaid: parseFloat(form.amountPaid)
+        amountPaid: parseFloat(form.amountPaid),
+        notes: form.isInstallment
+          ? `[VERSEMENT] ${String(form.notes || '').trim()}`
+          : form.notes
       };
 
       await apiClient('/school-management/payments', {
@@ -112,6 +145,7 @@ export default function SchoolPaymentsPage() {
         paymentTypeId: '',
         amountDue: '',
         amountPaid: '',
+        isInstallment: false,
         notes: ''
       });
     } catch (e) {
@@ -148,6 +182,32 @@ export default function SchoolPaymentsPage() {
     }
   };
 
+  const handleCreatePaymentType = async (e) => {
+    e.preventDefault();
+    if (!admin) return;
+    setCreatingType(true);
+    setError('');
+    try {
+      const token = getSchoolToken();
+      const schoolId = admin.schoolId;
+      const response = await apiClient('/school-management/payments/types', {
+        method: 'POST',
+        token,
+        body: JSON.stringify({
+          schoolId,
+          name: typeForm.name,
+          description: typeForm.description || null
+        })
+      });
+      setPaymentTypes((prev) => [...prev, response.paymentType].sort((a, b) => a.name.localeCompare(b.name)));
+      setTypeForm({ name: '', description: '' });
+    } catch (e) {
+      setError(e.message || 'Erreur lors de la creation du type de paiement.');
+    } finally {
+      setCreatingType(false);
+    }
+  };
+
   if (loading) {
     return <main className="mx-auto max-w-6xl px-4 py-8">Chargement...</main>;
   }
@@ -168,6 +228,74 @@ export default function SchoolPaymentsPage() {
       </section>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      <section className="card">
+        <h2 className="text-xl font-semibold text-brand-900 mb-4">Resume des soldes (frais/versements)</h2>
+        {paymentSummaries.length === 0 ? (
+          <p className="text-sm text-brand-700">Aucun solde disponible.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-brand-200">
+                  <th className="text-left py-2">Eleve</th>
+                  <th className="text-left py-2">Type</th>
+                  <th className="text-left py-2">Annee</th>
+                  <th className="text-left py-2">Frais total</th>
+                  <th className="text-left py-2">Total verse</th>
+                  <th className="text-left py-2">Reste</th>
+                  <th className="text-left py-2">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paymentSummaries.map((row, idx) => (
+                  <tr key={`${row.studentName}_${row.paymentType}_${idx}`} className="border-b border-brand-100">
+                    <td className="py-2">{row.studentName}</td>
+                    <td className="py-2">{row.paymentType}</td>
+                    <td className="py-2">{row.academicYear}</td>
+                    <td className="py-2">{row.amountDue}</td>
+                    <td className="py-2">{row.amountPaid}</td>
+                    <td className="py-2">{row.remaining}</td>
+                    <td className="py-2">
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                        row.status === 'SOLDE' ? 'bg-green-100 text-green-800' :
+                        row.status === 'PARTIEL' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {row.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {admin?.role === 'SCHOOL_ADMIN' ? (
+        <section className="card">
+          <h2 className="text-xl font-semibold text-brand-900 mb-4">Types de paiements</h2>
+          <form onSubmit={handleCreatePaymentType} className="grid gap-3 sm:grid-cols-3">
+            <input
+              className="input"
+              placeholder="Nom du type (ex: Cantine, Uniforme)"
+              value={typeForm.name}
+              onChange={(e) => setTypeForm((prev) => ({ ...prev, name: e.target.value }))}
+              required
+            />
+            <input
+              className="input"
+              placeholder="Description (optionnel)"
+              value={typeForm.description}
+              onChange={(e) => setTypeForm((prev) => ({ ...prev, description: e.target.value }))}
+            />
+            <button type="submit" className="btn-primary" disabled={creatingType}>
+              {creatingType ? 'Creation...' : 'Ajouter le type'}
+            </button>
+          </form>
+        </section>
+      ) : null}
 
       <section className="card">
         <h2 className="text-xl font-semibold text-brand-900 mb-4">Liste des paiements</h2>
@@ -290,8 +418,21 @@ export default function SchoolPaymentsPage() {
                 </select>
               </div>
 
+              <div className="sm:col-span-2">
+                <label className="flex items-center gap-2 text-sm font-medium text-brand-700">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(form.isInstallment)}
+                    onChange={(e) => setForm(prev => ({ ...prev, isInstallment: e.target.checked }))}
+                  />
+                  Paiement en plusieurs versements
+                </label>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-brand-700">Montant dû</label>
+                <label className="block text-sm font-medium text-brand-700">
+                  {form.isInstallment ? 'Frais total a regler' : 'Montant du frais'}
+                </label>
                 <input
                   type="number"
                   step="0.01"
@@ -303,7 +444,9 @@ export default function SchoolPaymentsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-brand-700">Montant payé</label>
+                <label className="block text-sm font-medium text-brand-700">
+                  {form.isInstallment ? 'Montant de ce versement' : 'Montant paye'}
+                </label>
                 <input
                   type="number"
                   step="0.01"
@@ -321,6 +464,7 @@ export default function SchoolPaymentsPage() {
                   onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
                   className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
                   rows={3}
+                  placeholder={form.isInstallment ? 'Ex: 1er versement, novembre' : ''}
                 />
               </div>
 

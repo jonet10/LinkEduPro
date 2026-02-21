@@ -54,7 +54,7 @@ async function listPaymentTypes(req, res, next) {
 async function createPayment(req, res, next) {
   try {
     const user = req.schoolUser;
-    const { schoolId, studentId, classId, academicYearId, paymentTypeId, amountDue, amountPaid, notes } = req.body;
+    const { schoolId, studentId, classId, academicYearId, paymentTypeId, amountDue, amountPaid, notes, isInstallment } = req.body;
     const numericSchoolId = Number(schoolId);
 
     const [student, schoolClass, academicYear, paymentType] = await Promise.all([
@@ -72,7 +72,48 @@ async function createPayment(req, res, next) {
       return res.status(400).json({ message: 'Eleve, classe et annee academique incompatibles.' });
     }
 
-    const status = computePaymentStatus(Number(amountDue), Number(amountPaid));
+    const numericAmountPaid = Number(amountPaid);
+    let numericAmountDue = Number(amountDue);
+    let status;
+
+    if (Boolean(isInstallment)) {
+      const [sumPaid, existingPayment] = await Promise.all([
+        prisma.schoolPayment.aggregate({
+          where: {
+            schoolId: numericSchoolId,
+            studentId: Number(studentId),
+            classId: Number(classId),
+            academicYearId: Number(academicYearId),
+            paymentTypeId: Number(paymentTypeId),
+            deletedAt: null
+          },
+          _sum: { amountPaid: true }
+        }),
+        prisma.schoolPayment.findFirst({
+          where: {
+            schoolId: numericSchoolId,
+            studentId: Number(studentId),
+            classId: Number(classId),
+            academicYearId: Number(academicYearId),
+            paymentTypeId: Number(paymentTypeId),
+            deletedAt: null
+          },
+          orderBy: { createdAt: 'asc' }
+        })
+      ]);
+
+      if (existingPayment) {
+        // Keep a consistent total due across installments for the same fee.
+        numericAmountDue = Number(existingPayment.amountDue);
+      }
+
+      const alreadyPaid = Number(sumPaid?._sum?.amountPaid || 0);
+      const cumulativePaid = alreadyPaid + numericAmountPaid;
+      status = computePaymentStatus(numericAmountDue, cumulativePaid);
+    } else {
+      status = computePaymentStatus(numericAmountDue, numericAmountPaid);
+    }
+
     const receiptNumber = makeReceiptNumber(numericSchoolId);
 
     const payment = await prisma.schoolPayment.create({
@@ -82,8 +123,8 @@ async function createPayment(req, res, next) {
         classId: Number(classId),
         academicYearId: Number(academicYearId),
         paymentTypeId: Number(paymentTypeId),
-        amountDue: Number(amountDue),
-        amountPaid: Number(amountPaid),
+        amountDue: numericAmountDue,
+        amountPaid: numericAmountPaid,
         status,
         receiptNumber,
         notes: notes || null,
@@ -98,6 +139,20 @@ async function createPayment(req, res, next) {
         recordedBy: true
       }
     });
+
+    if (Boolean(isInstallment)) {
+      await prisma.schoolPayment.updateMany({
+        where: {
+          schoolId: numericSchoolId,
+          studentId: Number(studentId),
+          classId: Number(classId),
+          academicYearId: Number(academicYearId),
+          paymentTypeId: Number(paymentTypeId),
+          deletedAt: null
+        },
+        data: { status }
+      });
+    }
 
     const receipt = await generateReceiptPdf(payment, path.resolve(__dirname, '../../../storage/school-receipts'));
 
@@ -119,7 +174,7 @@ async function createPayment(req, res, next) {
       action: 'PAYMENT_RECORDED',
       entityType: 'SchoolPayment',
       entityId: String(payment.id),
-      metadata: { amountDue, amountPaid, status, receiptNumber }
+      metadata: { amountDue: numericAmountDue, amountPaid: numericAmountPaid, status, receiptNumber, isInstallment: Boolean(isInstallment) }
     });
 
     return res.status(201).json({ payment: updated, receiptFile: receipt.fileName });
