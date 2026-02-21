@@ -148,9 +148,14 @@ export default function SchoolManagementDashboardPage() {
         </div>
         <div className="flex gap-2">
           {admin?.role === 'SUPER_ADMIN' ? (
-            <button className="btn-primary" onClick={() => router.push('/school-management/schools')}>
-              Ajouter une ecole
-            </button>
+            <>
+              <button className="btn-secondary" onClick={() => router.push('/school-management/students-global')}>
+                Tous les eleves
+              </button>
+              <button className="btn-primary" onClick={() => router.push('/school-management/schools')}>
+                Ajouter une ecole
+              </button>
+            </>
           ) : null}
           <button className="btn-secondary" onClick={logout}>Se déconnecter</button>
         </div>
@@ -195,12 +200,20 @@ export default function SchoolManagementDashboardPage() {
               </>
             )}
             {admin?.role === 'SUPER_ADMIN' && (
-              <button
-                onClick={() => router.push('/school-management/schools')}
-                className="btn-secondary"
-              >
-                Gérer les écoles
-              </button>
+              <>
+                <button
+                  onClick={() => router.push('/school-management/schools')}
+                  className="btn-secondary"
+                >
+                  Gérer les écoles
+                </button>
+                <button
+                  onClick={() => router.push('/school-management/students-global')}
+                  className="btn-secondary"
+                >
+                  Élèves globaux
+                </button>
+              </>
             )}
           </div>
         </section>

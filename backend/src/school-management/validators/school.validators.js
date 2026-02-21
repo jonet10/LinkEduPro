@@ -16,6 +16,8 @@ const createSchoolSchema = Joi.object({
   phone: Joi.string().trim().min(6).max(40).required(),
   email: Joi.string().email({ tlds: { allow: false } }).required(),
   address: Joi.string().trim().min(4).max(255).required(),
+  department: Joi.string().trim().min(2).max(120).required(),
+  commune: Joi.string().trim().min(2).max(120).required(),
   city: Joi.string().trim().min(2).max(120).required(),
   country: Joi.string().trim().min(2).max(120).required(),
   logo: Joi.string().uri().allow(null, ''),
@@ -30,6 +32,8 @@ const updateSchoolSchema = Joi.object({
   phone: Joi.string().trim().min(6).max(40).required(),
   email: Joi.string().email({ tlds: { allow: false } }).required(),
   address: Joi.string().trim().min(4).max(255).required(),
+  department: Joi.string().trim().min(2).max(120).required(),
+  commune: Joi.string().trim().min(2).max(120).required(),
   city: Joi.string().trim().min(2).max(120).required(),
   country: Joi.string().trim().min(2).max(120).required(),
   logo: Joi.string().uri().allow(null, '')

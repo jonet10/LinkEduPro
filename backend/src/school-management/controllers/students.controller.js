@@ -29,6 +29,88 @@ async function listStudents(req, res, next) {
   }
 }
 
+async function listGlobalStudents(req, res, next) {
+  try {
+    const schoolId = req.query.schoolId ? Number(req.query.schoolId) : undefined;
+    const department = String(req.query.department || '').trim();
+    const commune = String(req.query.commune || '').trim();
+    const q = String(req.query.q || '').trim();
+
+    const schoolWhere = {};
+    if (schoolId) schoolWhere.id = schoolId;
+    if (department) schoolWhere.department = { equals: department, mode: 'insensitive' };
+    if (commune) schoolWhere.commune = { equals: commune, mode: 'insensitive' };
+
+    const students = await prisma.schoolStudent.findMany({
+      where: {
+        isActive: true,
+        ...(Object.keys(schoolWhere).length > 0 ? { school: { is: schoolWhere } } : {}),
+        ...(q
+          ? {
+              OR: [
+                { firstName: { contains: q, mode: 'insensitive' } },
+                { lastName: { contains: q, mode: 'insensitive' } },
+                { studentId: { contains: q, mode: 'insensitive' } }
+              ]
+            }
+          : {})
+      },
+      include: {
+        school: {
+          select: {
+            id: true,
+            name: true,
+            department: true,
+            commune: true,
+            city: true
+          }
+        },
+        schoolClass: { select: { id: true, name: true } },
+        academicYear: { select: { id: true, label: true } }
+      },
+      orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }]
+    });
+
+    const schools = await prisma.school.findMany({
+      select: {
+        id: true,
+        name: true,
+        department: true,
+        commune: true,
+        city: true
+      },
+      orderBy: { name: 'asc' }
+    });
+
+    const departments = Array.from(
+      new Set(
+        schools
+          .map((s) => (s.department || '').trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+
+    const communes = Array.from(
+      new Set(
+        schools
+          .map((s) => (s.commune || '').trim() || (s.city || '').trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+
+    return res.json({
+      students,
+      filters: {
+        schools,
+        departments,
+        communes
+      }
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function importStudents(req, res, next) {
   try {
     if (!req.file) {
@@ -191,4 +273,4 @@ async function deactivateStudent(req, res, next) {
   }
 }
 
-module.exports = { listStudents, importStudents, importHistory, updateStudent, deactivateStudent };
+module.exports = { listStudents, listGlobalStudents, importStudents, importHistory, updateStudent, deactivateStudent };

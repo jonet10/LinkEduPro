@@ -189,6 +189,8 @@ model School {
   email         String               @unique(map: "School_email_key")
   address       String
   city          String
+  department    String?
+  commune       String?
   country       String
   logo          String?
   isActive      Boolean              @default(true)

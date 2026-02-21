@@ -11,6 +11,8 @@ const initialForm = {
   phone: '',
   email: '',
   address: '',
+  department: '',
+  commune: '',
   city: '',
   country: 'Haiti',
   logo: '',
@@ -36,6 +38,8 @@ export default function SchoolManagementSchoolsPage() {
     phone: '',
     email: '',
     address: '',
+    department: '',
+    commune: '',
     city: '',
     country: 'Haiti',
     logo: ''
@@ -127,6 +131,8 @@ export default function SchoolManagementSchoolsPage() {
       phone: school.phone || '',
       email: school.email || '',
       address: school.address || '',
+      department: school.department || '',
+      commune: school.commune || '',
       city: school.city || '',
       country: school.country || 'Haiti',
       logo: school.logo || ''
@@ -259,6 +265,8 @@ export default function SchoolManagementSchoolsPage() {
           <input className="input" placeholder="Telephone ecole" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} required />
           <input className="input" type="email" placeholder="Email ecole" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} required />
           <input className="input sm:col-span-2" placeholder="Adresse" value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} required />
+          <input className="input" placeholder="Departement" value={form.department} onChange={(e) => setForm((p) => ({ ...p, department: e.target.value }))} required />
+          <input className="input" placeholder="Commune" value={form.commune} onChange={(e) => setForm((p) => ({ ...p, commune: e.target.value }))} required />
           <input className="input" placeholder="Ville" value={form.city} onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))} required />
           <input className="input" placeholder="Pays" value={form.country} onChange={(e) => setForm((p) => ({ ...p, country: e.target.value }))} required />
           <input className="input sm:col-span-2" placeholder="Logo URL (optionnel)" value={form.logo} onChange={(e) => setForm((p) => ({ ...p, logo: e.target.value }))} />
@@ -286,6 +294,8 @@ export default function SchoolManagementSchoolsPage() {
                   <th className="py-2 text-left">Type</th>
                   <th className="py-2 text-left">Email admin ecole</th>
                   <th className="py-2 text-left">Email</th>
+                  <th className="py-2 text-left">Departement</th>
+                  <th className="py-2 text-left">Commune</th>
                   <th className="py-2 text-left">Ville</th>
                   <th className="py-2 text-left">Telephone</th>
                   <th className="py-2 text-left">Dernier paiement</th>
@@ -305,6 +315,24 @@ export default function SchoolManagementSchoolsPage() {
                           {school.primaryAdminActive === false ? 'Compte admin inactif' : 'Compte admin actif'}
                         </p>
                       </div>
+                    </td>
+                    <td className="py-2">
+                      {editingSchoolId === school.id ? (
+                        <input
+                          className="input !py-1"
+                          value={editForm.department}
+                          onChange={(e) => setEditForm((p) => ({ ...p, department: e.target.value }))}
+                        />
+                      ) : (school.department || '-')}
+                    </td>
+                    <td className="py-2">
+                      {editingSchoolId === school.id ? (
+                        <input
+                          className="input !py-1"
+                          value={editForm.commune}
+                          onChange={(e) => setEditForm((p) => ({ ...p, commune: e.target.value }))}
+                        />
+                      ) : (school.commune || school.city || '-')}
                     </td>
                     <td className="py-2">
                       {editingSchoolId === school.id ? (

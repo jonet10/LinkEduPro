@@ -12,6 +12,8 @@ async function createSchool(req, res, next) {
       phone,
       email,
       address,
+      department,
+      commune,
       city,
       country,
       logo,
@@ -25,7 +27,7 @@ async function createSchool(req, res, next) {
 
     const created = await prisma.$transaction(async (tx) => {
       const school = await tx.school.create({
-        data: { name, type, phone, email, address, city, country, logo: logo || null }
+        data: { name, type, phone, email, address, department, commune, city, country, logo: logo || null }
       });
 
       const normalizedName = name.toLowerCase().replace(/[^a-z0-9]+/g, '.');
@@ -181,7 +183,7 @@ async function updateSchool(req, res, next) {
   try {
     const user = req.schoolUser;
     const schoolId = Number(req.params.schoolId);
-    const { name, type, phone, email, address, city, country, logo } = req.body;
+    const { name, type, phone, email, address, department, commune, city, country, logo } = req.body;
 
     const existing = await prisma.school.findUnique({ where: { id: schoolId } });
     if (!existing) {
@@ -196,6 +198,8 @@ async function updateSchool(req, res, next) {
         phone,
         email,
         address,
+        department,
+        commune,
         city,
         country,
         logo: logo || null
