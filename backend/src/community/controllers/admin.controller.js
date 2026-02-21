@@ -2,6 +2,35 @@ const prisma = require('../../config/prisma');
 const { getCommunityConfig } = require('../services/config.service');
 const { createCommunityLog } = require('../services/log.service');
 
+function parseSchoolLocation(label) {
+  const raw = String(label || '').trim();
+  if (!raw) return { schoolName: '', department: null, commune: null };
+
+  const parts = raw.split('/').map((part) => part.trim()).filter(Boolean);
+  if (parts.length < 2) return { schoolName: raw, department: null, commune: null };
+
+  const first = String(parts[0] || '').toLowerCase();
+  const hasCountryPrefix = first === 'haiti' || first === 'haïti';
+
+  if (hasCountryPrefix && parts.length >= 4) {
+    return {
+      schoolName: parts.slice(3).join(' / ') || parts[parts.length - 1],
+      department: parts[1] || null,
+      commune: parts[2] || null
+    };
+  }
+
+  if (parts.length >= 3) {
+    return {
+      schoolName: parts.slice(2).join(' / ') || parts[parts.length - 1],
+      department: parts[0] || null,
+      commune: parts[1] || null
+    };
+  }
+
+  return { schoolName: parts[parts.length - 1], department: null, commune: null };
+}
+
 async function getConfig(req, res, next) {
   try {
     const config = await getCommunityConfig();
@@ -153,15 +182,20 @@ async function listPlatformStudents(req, res, next) {
       schools.map((s) => [String(s.name || '').trim().toLowerCase(), s])
     );
 
-    let enriched = students.map((st) => {
-      const key = String(st.school || '').trim().toLowerCase();
-      const mapped = schoolMap.get(key);
+    const baseEnriched = students.map((st) => {
+      const parsed = parseSchoolLocation(st.school);
+      const fullSchoolKey = String(st.school || '').trim().toLowerCase();
+      const schoolNameKey = String(parsed.schoolName || '').trim().toLowerCase();
+      const mapped = schoolMap.get(fullSchoolKey) || schoolMap.get(schoolNameKey);
+
       return {
         ...st,
-        department: mapped?.department || null,
-        commune: mapped?.commune || mapped?.city || null
+        department: mapped?.department || parsed.department || null,
+        commune: mapped?.commune || mapped?.city || parsed.commune || null
       };
     });
+
+    let enriched = [...baseEnriched];
 
     if (departmentFilter) {
       enriched = enriched.filter((st) =>
@@ -181,7 +215,7 @@ async function listPlatformStudents(req, res, next) {
 
     const departmentOptions = Array.from(
       new Set(
-        schools
+        baseEnriched
           .map((s) => String(s.department || '').trim())
           .filter(Boolean)
       )
@@ -189,8 +223,8 @@ async function listPlatformStudents(req, res, next) {
 
     const communeOptions = Array.from(
       new Set(
-        schools
-          .map((s) => String(s.commune || s.city || '').trim())
+        baseEnriched
+          .map((s) => String(s.commune || '').trim())
           .filter(Boolean)
       )
     ).sort((a, b) => a.localeCompare(b));
