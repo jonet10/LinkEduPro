@@ -3,6 +3,7 @@ const auth = require('../middlewares/auth');
 const validate = require('../middlewares/validate');
 const { requireRoles } = require('../middlewares/roles');
 const {
+  listMessageRecipients,
   sendPrivateMessage,
   listConversations,
   getConversationById,
@@ -17,6 +18,7 @@ const router = express.Router();
 
 router.use(auth);
 
+router.get('/recipients', listMessageRecipients);
 router.post('/private', validate(privateMessageSchema), sendPrivateMessage);
 router.get('/conversations', listConversations);
 router.get('/conversations/:id', getConversationById);

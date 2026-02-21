@@ -132,6 +132,35 @@ async function sendPrivateMessage(req, res, next) {
   }
 }
 
+async function listMessageRecipients(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const recipients = await prisma.student.findMany({
+      where: { id: { not: userId } },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        school: true,
+        role: true
+      },
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }]
+    });
+
+    return res.json({
+      recipients: recipients.map((recipient) => ({
+        id: recipient.id,
+        firstName: recipient.firstName,
+        lastName: recipient.lastName,
+        school: recipient.school,
+        role: recipient.role
+      }))
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function listConversations(req, res, next) {
   try {
     const userId = req.user.id;
@@ -171,25 +200,36 @@ async function listConversations(req, res, next) {
           }
         }
       },
-      orderBy: {
-        conversation: {
-          createdAt: 'desc'
-        }
-      }
+      orderBy: { conversationId: 'desc' }
     });
 
-    const conversations = await Promise.all(
-      memberships.map(async (membership) => {
-        const unreadFilter = {
-          conversationId: membership.conversationId,
-          senderId: { not: userId },
-          ...(membership.lastReadAt ? { createdAt: { gt: membership.lastReadAt } } : {})
-        };
+    const unreadRows = await prisma.$queryRaw`
+      SELECT
+        cp.conversation_id AS "conversationId",
+        COUNT(m.id)::int AS "unreadCount"
+      FROM conversation_participants cp
+      LEFT JOIN messages m
+        ON m.conversation_id = cp.conversation_id
+       AND m.sender_id <> cp.user_id
+       AND (cp.last_read_at IS NULL OR m.created_at > cp.last_read_at)
+      WHERE cp.user_id = ${userId}
+      GROUP BY cp.conversation_id
+    `;
 
-        const unreadCount = await prisma.message.count({ where: unreadFilter });
-        return mapConversation(membership.conversation, unreadCount);
-      })
+    const unreadCountByConversation = new Map(
+      unreadRows.map((row) => [Number(row.conversationId), Number(row.unreadCount || 0)])
     );
+
+    const conversations = memberships
+      .map((membership) => mapConversation(
+        membership.conversation,
+        unreadCountByConversation.get(membership.conversationId) || 0
+      ))
+      .sort((a, b) => {
+        const aTime = new Date(a.lastMessage?.createdAt || a.createdAt).getTime();
+        const bTime = new Date(b.lastMessage?.createdAt || b.createdAt).getTime();
+        return bTime - aTime;
+      });
 
     return res.json({ conversations });
   } catch (error) {
@@ -405,6 +445,7 @@ async function sendGlobalMessage(req, res, next) {
 }
 
 module.exports = {
+  listMessageRecipients,
   sendPrivateMessage,
   listConversations,
   getConversationById,
