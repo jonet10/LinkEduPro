@@ -29,6 +29,28 @@ export default function SchoolManagementSchoolsPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [credentials, setCredentials] = useState(null);
+  const [editingSchoolId, setEditingSchoolId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    type: 'PRIVATE',
+    phone: '',
+    email: '',
+    address: '',
+    city: '',
+    country: 'Haiti',
+    logo: ''
+  });
+  const [actingSchoolId, setActingSchoolId] = useState(null);
+
+  function computeInactivity(lastPaymentDate) {
+    if (!lastPaymentDate) return { days: null, label: 'Aucun paiement', tone: 'text-red-700' };
+    const date = new Date(lastPaymentDate);
+    const today = new Date();
+    const diff = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    if (diff >= 60) return { days: diff, label: `Inactif ${diff}j`, tone: 'text-red-700' };
+    if (diff >= 30) return { days: diff, label: `Attention ${diff}j`, tone: 'text-yellow-700' };
+    return { days: diff, label: `Actif ${diff}j`, tone: 'text-green-700' };
+  }
 
   useEffect(() => {
     async function load() {
@@ -94,6 +116,81 @@ export default function SchoolManagementSchoolsPage() {
       setError(e.message || 'Erreur pendant la creation de l ecole.');
     } finally {
       setCreating(false);
+    }
+  }
+
+  function startEditSchool(school) {
+    setEditingSchoolId(school.id);
+    setEditForm({
+      name: school.name || '',
+      type: school.type || 'PRIVATE',
+      phone: school.phone || '',
+      email: school.email || '',
+      address: school.address || '',
+      city: school.city || '',
+      country: school.country || 'Haiti',
+      logo: school.logo || ''
+    });
+    setError('');
+    setSuccess('');
+  }
+
+  async function saveEditSchool(schoolId) {
+    setActingSchoolId(schoolId);
+    setError('');
+    setSuccess('');
+    try {
+      const token = getSchoolToken();
+      await apiClient(`/school-management/schools/${schoolId}`, {
+        method: 'PUT',
+        token,
+        body: JSON.stringify({
+          ...editForm,
+          logo: String(editForm.logo || '').trim() || null
+        })
+      });
+      setEditingSchoolId(null);
+      setSuccess('Informations de l ecole mises a jour.');
+      await reloadSchools();
+    } catch (e) {
+      setError(e.message || 'Impossible de modifier cette ecole.');
+    } finally {
+      setActingSchoolId(null);
+    }
+  }
+
+  async function toggleSchoolStatus(school) {
+    const willSuspend = Boolean(school.isActive);
+    const confirmMsg = willSuspend
+      ? 'Suspendre cette ecole pour paiement inactif ?'
+      : 'Reactiver cette ecole ?';
+    const confirmed = window.confirm(confirmMsg);
+    if (!confirmed) return;
+
+    let reason = '';
+    if (willSuspend) {
+      reason = window.prompt('Motif de suspension (ex: paiement inactif):', 'paiement inactif') || '';
+    }
+
+    setActingSchoolId(school.id);
+    setError('');
+    setSuccess('');
+    try {
+      const token = getSchoolToken();
+      const data = await apiClient(`/school-management/schools/${school.id}/status`, {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify({
+          isActive: !willSuspend,
+          reason: reason || null
+        })
+      });
+      setSuccess(data.message || (willSuspend ? 'Ecole suspendue.' : 'Ecole reactivee.'));
+      await reloadSchools();
+    } catch (e) {
+      setError(e.message || 'Impossible de changer le statut de l ecole.');
+    } finally {
+      setActingSchoolId(null);
     }
   }
 
@@ -163,21 +260,128 @@ export default function SchoolManagementSchoolsPage() {
                 <tr className="border-b border-brand-200">
                   <th className="py-2 text-left">Nom</th>
                   <th className="py-2 text-left">Type</th>
+                  <th className="py-2 text-left">Email</th>
                   <th className="py-2 text-left">Ville</th>
                   <th className="py-2 text-left">Telephone</th>
+                  <th className="py-2 text-left">Dernier paiement</th>
+                  <th className="py-2 text-left">Statut</th>
                   <th className="py-2 text-left">Eleves</th>
                   <th className="py-2 text-left">Classes</th>
+                  <th className="py-2 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {schools.map((school) => (
                   <tr key={school.id} className="border-b border-brand-100">
-                    <td className="py-2">{school.name}</td>
-                    <td className="py-2">{school.type}</td>
-                    <td className="py-2">{school.city}</td>
-                    <td className="py-2">{school.phone}</td>
+                    <td className="py-2">
+                      {editingSchoolId === school.id ? (
+                        <input
+                          className="input !py-1"
+                          value={editForm.name}
+                          onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
+                        />
+                      ) : school.name}
+                    </td>
+                    <td className="py-2">
+                      {editingSchoolId === school.id ? (
+                        <select
+                          className="input !py-1"
+                          value={editForm.type}
+                          onChange={(e) => setEditForm((p) => ({ ...p, type: e.target.value }))}
+                        >
+                          <option value="PRIVATE">Privee</option>
+                          <option value="PUBLIC">Publique</option>
+                          <option value="OTHER">Autre</option>
+                        </select>
+                      ) : school.type}
+                    </td>
+                    <td className="py-2">
+                      {editingSchoolId === school.id ? (
+                        <input
+                          className="input !py-1"
+                          type="email"
+                          value={editForm.email}
+                          onChange={(e) => setEditForm((p) => ({ ...p, email: e.target.value }))}
+                        />
+                      ) : school.email}
+                    </td>
+                    <td className="py-2">
+                      {editingSchoolId === school.id ? (
+                        <input
+                          className="input !py-1"
+                          value={editForm.city}
+                          onChange={(e) => setEditForm((p) => ({ ...p, city: e.target.value }))}
+                        />
+                      ) : school.city}
+                    </td>
+                    <td className="py-2">
+                      {editingSchoolId === school.id ? (
+                        <input
+                          className="input !py-1"
+                          value={editForm.phone}
+                          onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))}
+                        />
+                      ) : school.phone}
+                    </td>
+                    <td className="py-2">
+                      {(() => {
+                        const state = computeInactivity(school.lastPaymentDate);
+                        return (
+                          <div className="space-y-1">
+                            <p>{school.lastPaymentDate ? new Date(school.lastPaymentDate).toLocaleDateString('fr-FR') : '-'}</p>
+                            <p className={`text-xs font-semibold ${state.tone}`}>{state.label}</p>
+                          </div>
+                        );
+                      })()}
+                    </td>
+                    <td className="py-2">
+                      <span className={`rounded px-2 py-1 text-xs font-semibold ${school.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'}`}>
+                        {school.isActive ? 'Active' : 'Suspendue'}
+                      </span>
+                    </td>
                     <td className="py-2">{school?._count?.students ?? 0}</td>
                     <td className="py-2">{school?._count?.classes ?? 0}</td>
+                    <td className="py-2">
+                      <div className="flex flex-wrap gap-2">
+                        {editingSchoolId === school.id ? (
+                          <>
+                            <button
+                              type="button"
+                              className="btn-primary !px-3 !py-1"
+                              disabled={actingSchoolId === school.id}
+                              onClick={() => saveEditSchool(school.id)}
+                            >
+                              Enregistrer
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-secondary !px-3 !py-1"
+                              onClick={() => setEditingSchoolId(null)}
+                            >
+                              Annuler
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              className="btn-secondary !px-3 !py-1"
+                              onClick={() => startEditSchool(school)}
+                            >
+                              Modifier
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-secondary !px-3 !py-1"
+                              disabled={actingSchoolId === school.id}
+                              onClick={() => toggleSchoolStatus(school)}
+                            >
+                              {school.isActive ? 'Suspendre (paiement)' : 'Reactiver'}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

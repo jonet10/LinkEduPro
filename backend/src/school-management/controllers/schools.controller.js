@@ -81,16 +81,130 @@ async function createSchool(req, res, next) {
 
 async function listSchools(req, res, next) {
   try {
-    const schools = await prisma.school.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        _count: { select: { students: true, classes: true, payments: true } }
-      }
-    });
-    return res.json({ schools });
+    const [schools, paymentStats] = await Promise.all([
+      prisma.school.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: {
+          _count: { select: { students: true, classes: true, payments: true } }
+        }
+      }),
+      prisma.schoolPayment.groupBy({
+        by: ['schoolId'],
+        where: { deletedAt: null },
+        _max: { paymentDate: true }
+      })
+    ]);
+
+    const lastPaymentBySchoolId = new Map(
+      paymentStats.map((row) => [row.schoolId, row._max.paymentDate || null])
+    );
+
+    const enrichedSchools = schools.map((school) => ({
+      ...school,
+      lastPaymentDate: lastPaymentBySchoolId.get(school.id) || null
+    }));
+
+    return res.json({ schools: enrichedSchools });
   } catch (error) {
     return next(error);
   }
 }
 
-module.exports = { createSchool, listSchools };
+async function updateSchool(req, res, next) {
+  try {
+    const user = req.schoolUser;
+    const schoolId = Number(req.params.schoolId);
+    const { name, type, phone, email, address, city, country, logo } = req.body;
+
+    const existing = await prisma.school.findUnique({ where: { id: schoolId } });
+    if (!existing) {
+      return res.status(404).json({ message: 'Ecole introuvable.' });
+    }
+
+    const updated = await prisma.school.update({
+      where: { id: schoolId },
+      data: {
+        name,
+        type,
+        phone,
+        email,
+        address,
+        city,
+        country,
+        logo: logo || null
+      }
+    });
+
+    await createSchoolLog({
+      schoolId,
+      actorId: user.id,
+      actorRole: user.role,
+      action: 'SCHOOL_UPDATED',
+      entityType: 'School',
+      entityId: String(schoolId)
+    });
+
+    return res.json({ school: updated });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function setSchoolStatus(req, res, next) {
+  try {
+    const user = req.schoolUser;
+    const schoolId = Number(req.params.schoolId);
+    const { isActive, reason } = req.body;
+
+    const existing = await prisma.school.findUnique({ where: { id: schoolId } });
+    if (!existing) {
+      return res.status(404).json({ message: 'Ecole introuvable.' });
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const school = await tx.school.update({
+        where: { id: schoolId },
+        data: { isActive: Boolean(isActive) }
+      });
+
+      if (!isActive) {
+        await tx.schoolAdmin.updateMany({
+          where: {
+            schoolId,
+            role: { in: ['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT'] }
+          },
+          data: { isActive: false }
+        });
+      } else {
+        await tx.schoolAdmin.updateMany({
+          where: {
+            schoolId,
+            role: { in: ['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT'] }
+          },
+          data: { isActive: true }
+        });
+      }
+
+      return school;
+    });
+
+    await createSchoolLog({
+      schoolId,
+      actorId: user.id,
+      actorRole: user.role,
+      action: isActive ? 'SCHOOL_REACTIVATED' : 'SCHOOL_SUSPENDED',
+      entityType: 'School',
+      entityId: String(schoolId),
+      metadata: { reason: reason || null }
+    });
+
+    return res.json({
+      school: updated,
+      message: isActive ? 'Ecole reactivee.' : 'Ecole suspendue.'
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { createSchool, listSchools, updateSchool, setSchoolStatus };
