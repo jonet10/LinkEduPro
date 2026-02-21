@@ -21,6 +21,20 @@ export default function SchoolClassesPage() {
   const [selectedYearId, setSelectedYearId] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [yearForm, setYearForm] = useState({
+    label: '2025-2026',
+    startDate: '2025-09-01',
+    endDate: '2026-07-31',
+    isActive: true
+  });
+  const [creatingYear, setCreatingYear] = useState(false);
+  const [editingClassId, setEditingClassId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    academicYearId: '',
+    name: '',
+    level: '',
+    capacity: ''
+  });
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -136,6 +150,96 @@ export default function SchoolClassesPage() {
     }
   }
 
+  async function onCreateAcademicYear(e) {
+    e.preventDefault();
+    if (!admin) return;
+    setCreatingYear(true);
+    setError('');
+    setSuccess('');
+    try {
+      const token = getSchoolToken();
+      await apiClient(`/school-management/schools/${admin.schoolId}/academic-years`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({
+          label: yearForm.label,
+          startDate: yearForm.startDate,
+          endDate: yearForm.endDate,
+          isActive: Boolean(yearForm.isActive)
+        })
+      });
+
+      const yearsRes = await apiClient(`/school-management/schools/${admin.schoolId}/academic-years`, { token });
+      const years = yearsRes.academicYears || [];
+      setAcademicYears(years);
+      setSuccess(`Annee academique ${yearForm.label} ajoutee.`);
+      setSelectedYearId('');
+      setYearForm({
+        label: '2025-2026',
+        startDate: '2025-09-01',
+        endDate: '2026-07-31',
+        isActive: false
+      });
+      await reloadClasses('');
+    } catch (e) {
+      setError(e.message || 'Impossible de creer l annee academique.');
+    } finally {
+      setCreatingYear(false);
+    }
+  }
+
+  function startEditClass(item) {
+    setEditingClassId(item.id);
+    setEditForm({
+      academicYearId: String(item.academicYearId || ''),
+      name: item.name || '',
+      level: item.level || '',
+      capacity: item.capacity ? String(item.capacity) : ''
+    });
+  }
+
+  async function saveEditClass(classId) {
+    if (!admin) return;
+    setError('');
+    try {
+      const token = getSchoolToken();
+      await apiClient(`/school-management/classes/schools/${admin.schoolId}/${classId}`, {
+        method: 'PUT',
+        token,
+        body: JSON.stringify({
+          academicYearId: Number(editForm.academicYearId),
+          name: editForm.name,
+          level: editForm.level || null,
+          capacity: editForm.capacity ? Number(editForm.capacity) : null
+        })
+      });
+      setEditingClassId(null);
+      setSuccess('Classe modifiee avec succes.');
+      await reloadClasses(selectedYearId);
+    } catch (e) {
+      setError(e.message || 'Impossible de modifier la classe.');
+    }
+  }
+
+  async function removeClass(classId) {
+    if (!admin) return;
+    const ok = window.confirm('Supprimer cette classe ? Cette action est irreversible.');
+    if (!ok) return;
+    setError('');
+    setSuccess('');
+    try {
+      const token = getSchoolToken();
+      await apiClient(`/school-management/classes/schools/${admin.schoolId}/${classId}`, {
+        method: 'DELETE',
+        token
+      });
+      setSuccess('Classe supprimee.');
+      await reloadClasses(selectedYearId);
+    } catch (e) {
+      setError(e.message || 'Impossible de supprimer la classe.');
+    }
+  }
+
   if (loading) {
     return <main className="mx-auto max-w-6xl px-4 py-8">Chargement...</main>;
   }
@@ -156,47 +260,89 @@ export default function SchoolClassesPage() {
       {success ? <p className="rounded border border-green-200 bg-green-50 p-3 text-green-700">{success}</p> : null}
 
       {admin?.role === 'SCHOOL_ADMIN' ? (
-        <section className="card">
-          <h2 className="mb-4 text-lg font-semibold text-brand-900">Nouvelle classe</h2>
-          <form onSubmit={onCreateClass} className="grid gap-3 sm:grid-cols-2">
-            <select
-              className="input"
-              value={form.academicYearId}
-              onChange={(e) => setForm((prev) => ({ ...prev, academicYearId: e.target.value }))}
-              required
-            >
-              <option value="">Annee academique</option>
-              {academicYears.map((year) => (
-                <option key={year.id} value={year.id}>{year.label}</option>
-              ))}
-            </select>
-            <input
-              className="input"
-              placeholder="Nom de classe (ex: NSIV A)"
-              value={form.name}
-              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              required
-            />
-            <input
-              className="input"
-              placeholder="Niveau (optionnel)"
-              value={form.level}
-              onChange={(e) => setForm((prev) => ({ ...prev, level: e.target.value }))}
-            />
-            <input
-              className="input"
-              type="number"
-              min="1"
-              placeholder="Capacite (optionnel)"
-              value={form.capacity}
-              onChange={(e) => setForm((prev) => ({ ...prev, capacity: e.target.value }))}
-            />
-            <div className="sm:col-span-2">
-              <button className="btn-primary" type="submit" disabled={creating}>
-                {creating ? 'Creation...' : 'Creer la classe'}
+        <section className="grid gap-6 lg:grid-cols-2">
+          <article className="card">
+            <h2 className="mb-4 text-lg font-semibold text-brand-900">Annee academique</h2>
+            <form onSubmit={onCreateAcademicYear} className="grid gap-3">
+              <input
+                className="input"
+                value={yearForm.label}
+                onChange={(e) => setYearForm((prev) => ({ ...prev, label: e.target.value }))}
+                placeholder="Label (ex: 2025-2026)"
+                required
+              />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input
+                  type="date"
+                  className="input"
+                  value={yearForm.startDate}
+                  onChange={(e) => setYearForm((prev) => ({ ...prev, startDate: e.target.value }))}
+                  required
+                />
+                <input
+                  type="date"
+                  className="input"
+                  value={yearForm.endDate}
+                  onChange={(e) => setYearForm((prev) => ({ ...prev, endDate: e.target.value }))}
+                  required
+                />
+              </div>
+              <label className="flex items-center gap-2 text-sm text-brand-800">
+                <input
+                  type="checkbox"
+                  checked={yearForm.isActive}
+                  onChange={(e) => setYearForm((prev) => ({ ...prev, isActive: e.target.checked }))}
+                />
+                Definir comme annee active
+              </label>
+              <button className="btn-primary w-fit" type="submit" disabled={creatingYear}>
+                {creatingYear ? 'Creation...' : 'Ajouter annee (2025-2026)'}
               </button>
-            </div>
-          </form>
+            </form>
+          </article>
+
+          <article className="card">
+            <h2 className="mb-4 text-lg font-semibold text-brand-900">Nouvelle classe</h2>
+            <form onSubmit={onCreateClass} className="grid gap-3 sm:grid-cols-2">
+              <select
+                className="input"
+                value={form.academicYearId}
+                onChange={(e) => setForm((prev) => ({ ...prev, academicYearId: e.target.value }))}
+                required
+              >
+                <option value="">Annee academique</option>
+                {academicYears.map((year) => (
+                  <option key={year.id} value={year.id}>{year.label}</option>
+                ))}
+              </select>
+              <input
+                className="input"
+                placeholder="Nom de classe (ex: NSIV A)"
+                value={form.name}
+                onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                required
+              />
+              <input
+                className="input"
+                placeholder="Niveau (optionnel)"
+                value={form.level}
+                onChange={(e) => setForm((prev) => ({ ...prev, level: e.target.value }))}
+              />
+              <input
+                className="input"
+                type="number"
+                min="1"
+                placeholder="Capacite (optionnel)"
+                value={form.capacity}
+                onChange={(e) => setForm((prev) => ({ ...prev, capacity: e.target.value }))}
+              />
+              <div className="sm:col-span-2">
+                <button className="btn-primary" type="submit" disabled={creating}>
+                  {creating ? 'Creation...' : 'Creer la classe'}
+                </button>
+              </div>
+            </form>
+          </article>
         </section>
       ) : null}
 
@@ -250,16 +396,80 @@ export default function SchoolClassesPage() {
                   <th className="py-2 text-left">Annee</th>
                   <th className="py-2 text-left">Capacite</th>
                   <th className="py-2 text-left">Eleves</th>
+                  <th className="py-2 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedClasses.map((item) => (
                   <tr key={item.id} className="border-b border-brand-100">
-                    <td className="py-2">{item.name}</td>
-                    <td className="py-2">{item.level || '-'}</td>
-                    <td className="py-2">{item.academicYear?.label || '-'}</td>
-                    <td className="py-2">{item.capacity || '-'}</td>
+                    <td className="py-2">
+                      {editingClassId === item.id ? (
+                        <input
+                          className="input !py-1"
+                          value={editForm.name}
+                          onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
+                        />
+                      ) : item.name}
+                    </td>
+                    <td className="py-2">
+                      {editingClassId === item.id ? (
+                        <input
+                          className="input !py-1"
+                          value={editForm.level}
+                          onChange={(e) => setEditForm((p) => ({ ...p, level: e.target.value }))}
+                        />
+                      ) : (item.level || '-')}
+                    </td>
+                    <td className="py-2">
+                      {editingClassId === item.id ? (
+                        <select
+                          className="input !py-1"
+                          value={editForm.academicYearId}
+                          onChange={(e) => setEditForm((p) => ({ ...p, academicYearId: e.target.value }))}
+                        >
+                          {academicYears.map((year) => (
+                            <option key={year.id} value={year.id}>{year.label}</option>
+                          ))}
+                        </select>
+                      ) : (item.academicYear?.label || '-')}
+                    </td>
+                    <td className="py-2">
+                      {editingClassId === item.id ? (
+                        <input
+                          className="input !py-1"
+                          type="number"
+                          min="1"
+                          value={editForm.capacity}
+                          onChange={(e) => setEditForm((p) => ({ ...p, capacity: e.target.value }))}
+                        />
+                      ) : (item.capacity || '-')}
+                    </td>
                     <td className="py-2">{item?._count?.students ?? 0}</td>
+                    <td className="py-2">
+                      {admin?.role === 'SCHOOL_ADMIN' ? (
+                        <div className="flex gap-2">
+                          {editingClassId === item.id ? (
+                            <>
+                              <button type="button" className="btn-primary !px-3 !py-1" onClick={() => saveEditClass(item.id)}>
+                                Enregistrer
+                              </button>
+                              <button type="button" className="btn-secondary !px-3 !py-1" onClick={() => setEditingClassId(null)}>
+                                Annuler
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button type="button" className="btn-secondary !px-3 !py-1" onClick={() => startEditClass(item)}>
+                                Modifier
+                              </button>
+                              <button type="button" className="btn-secondary !px-3 !py-1" onClick={() => removeClass(item.id)}>
+                                Supprimer
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      ) : <span className="text-xs text-brand-700">Lecture seule</span>}
+                    </td>
                   </tr>
                 ))}
               </tbody>
