@@ -11,7 +11,8 @@ function sanitizeAdmin(admin) {
     lastName: admin.lastName,
     email: admin.email,
     role: admin.role,
-    mustChangePassword: admin.mustChangePassword
+    mustChangePassword: admin.mustChangePassword,
+    schoolActive: admin.schoolId ? Boolean(admin.school?.isActive) : true
   };
 }
 
@@ -19,7 +20,12 @@ async function login(req, res, next) {
   try {
     await ensureSuperAdminExists();
     const { email, password } = req.body;
-    const admin = await prisma.schoolAdmin.findUnique({ where: { email } });
+    const admin = await prisma.schoolAdmin.findUnique({
+      where: { email },
+      include: {
+        school: { select: { isActive: true } }
+      }
+    });
 
     if (!admin || !admin.isActive) {
       return res.status(401).json({ message: 'Identifiants invalides.' });

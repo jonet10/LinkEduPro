@@ -37,13 +37,27 @@ export default function SchoolManagementDashboardPage() {
         return;
       }
 
-      setAdmin(currentAdmin);
+      let syncedAdmin = currentAdmin;
+      try {
+        const me = await apiClient('/school-management/me', { token });
+        if (me?.user) {
+          syncedAdmin = {
+            ...currentAdmin,
+            ...me.user
+          };
+          setSchoolAuth(token, syncedAdmin);
+        }
+      } catch (_) {
+        // Ignore, fallback to cached admin
+      }
+
+      setAdmin(syncedAdmin);
 
       try {
         setError('');
-        const path = currentAdmin.role === 'SUPER_ADMIN'
+        const path = syncedAdmin.role === 'SUPER_ADMIN'
           ? '/school-management/dashboard/super-admin'
-          : `/school-management/dashboard/schools/${currentAdmin.schoolId}`;
+          : `/school-management/dashboard/schools/${syncedAdmin.schoolId}`;
 
         const data = await apiClient(path, { token });
         setStats(data);
@@ -143,41 +157,54 @@ export default function SchoolManagementDashboardPage() {
       </section>
 
       {/* Navigation */}
-      <section className="card">
-        <h2 className="text-lg font-semibold text-brand-900 mb-3">Navigation</h2>
-        <div className="flex flex-wrap gap-3">
-          {admin?.role !== 'SUPER_ADMIN' && (
-            <>
+      {admin?.role !== 'SUPER_ADMIN' && admin?.schoolActive === false ? (
+        <section className="rounded border border-red-200 bg-red-50 p-4">
+          <h2 className="text-lg font-semibold text-red-700">Compte école désactivé</h2>
+          <p className="mt-2 text-sm text-red-700">
+            Ton école est actuellement suspendue. Tu peux te connecter, mais tu ne peux pas gérer les paiements,
+            les élèves, les classes ou d autres opérations.
+          </p>
+          <p className="mt-2 text-sm text-red-700">
+            Contacte le responsable de la plateforme LinkEduPro pour réactiver le compte.
+          </p>
+        </section>
+      ) : (
+        <section className="card">
+          <h2 className="text-lg font-semibold text-brand-900 mb-3">Navigation</h2>
+          <div className="flex flex-wrap gap-3">
+            {admin?.role !== 'SUPER_ADMIN' && (
+              <>
+                <button
+                  onClick={() => router.push('/school-management/payments')}
+                  className="btn-secondary"
+                >
+                  Gérer les paiements
+                </button>
+                <button
+                  onClick={() => router.push('/school-management/students')}
+                  className="btn-secondary"
+                >
+                  Gérer les élèves
+                </button>
+                <button
+                  onClick={() => router.push('/school-management/classes')}
+                  className="btn-secondary"
+                >
+                  Gérer les classes
+                </button>
+              </>
+            )}
+            {admin?.role === 'SUPER_ADMIN' && (
               <button
-                onClick={() => router.push('/school-management/payments')}
+                onClick={() => router.push('/school-management/schools')}
                 className="btn-secondary"
               >
-                Gérer les paiements
+                Gérer les écoles
               </button>
-              <button
-                onClick={() => router.push('/school-management/students')}
-                className="btn-secondary"
-              >
-                Gérer les élèves
-              </button>
-              <button
-                onClick={() => router.push('/school-management/classes')}
-                className="btn-secondary"
-              >
-                Gérer les classes
-              </button>
-            </>
-          )}
-          {admin?.role === 'SUPER_ADMIN' && (
-            <button
-              onClick={() => router.push('/school-management/schools')}
-              className="btn-secondary"
-            >
-              Gérer les écoles
-            </button>
-          )}
-        </div>
-      </section>
+            )}
+          </div>
+        </section>
+      )}
 
       {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-red-700">{error}</p> : null}
       {admin?.mustChangePassword ? (
@@ -222,7 +249,7 @@ export default function SchoolManagementDashboardPage() {
         </section>
       ) : null}
 
-      {admin?.role === 'SUPER_ADMIN' ? (
+      {admin?.role !== 'SUPER_ADMIN' && admin?.schoolActive === false ? null : admin?.role === 'SUPER_ADMIN' ? (
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <article className="card"><p className="text-sm">Total écoles</p><p className="text-3xl font-black">{stats?.totalSchools ?? 0}</p></article>
           <article className="card"><p className="text-sm">Élèves écoles</p><p className="text-3xl font-black">{stats?.totalSchoolStudents ?? 0}</p></article>

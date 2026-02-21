@@ -234,23 +234,14 @@ async function setSchoolStatus(req, res, next) {
         data: { isActive: Boolean(isActive) }
       });
 
-      if (!isActive) {
-        await tx.schoolAdmin.updateMany({
-          where: {
-            schoolId,
-            role: { in: ['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT'] }
-          },
-          data: { isActive: false }
-        });
-      } else {
-        await tx.schoolAdmin.updateMany({
-          where: {
-            schoolId,
-            role: { in: ['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT'] }
-          },
-          data: { isActive: true }
-        });
-      }
+      // Keep school admins active so they can still connect and see suspension notice.
+      await tx.schoolAdmin.updateMany({
+        where: {
+          schoolId,
+          role: { in: ['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT'] }
+        },
+        data: { isActive: true }
+      });
 
       return school;
     });

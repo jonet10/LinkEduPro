@@ -20,6 +20,19 @@ router.use((req, res, next) => {
   }
   return next();
 });
+
+router.use((req, res, next) => {
+  const user = req.schoolUser;
+  if (user.role === 'SUPER_ADMIN') return next();
+  if (user.schoolActive) return next();
+
+  // Suspended schools can still access dashboard to see suspension notice.
+  if (req.path.startsWith('/dashboard')) return next();
+
+  return res.status(403).json({
+    message: 'Compte ecole desactive. Contacte le responsable de la plateforme.'
+  });
+});
 router.use('/schools', require('./schools.routes'));
 router.use('/classes', require('./classes.routes'));
 router.use('/students', require('./students.routes'));
