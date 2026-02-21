@@ -9,8 +9,22 @@ const initialForm = {
   academicYearId: '',
   name: '',
   level: '',
+  track: '',
+  section: 'A',
   capacity: ''
 };
+
+const HAITI_LEVEL_OPTIONS = [
+  '7e AF',
+  '8e AF',
+  '9e AF',
+  'NSI',
+  'NSII',
+  'NSIII',
+  'NSIV'
+];
+
+const NSIV_TRACK_OPTIONS = ['SMP', 'SVT', 'SES', 'LLA', 'Ordinaire'];
 
 export default function SchoolClassesPage() {
   const pageSize = 8;
@@ -40,6 +54,20 @@ export default function SchoolClassesPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  function normalizeSection(value) {
+    const v = String(value || '').trim().toUpperCase();
+    return v || 'A';
+  }
+
+  function buildSuggestedClassName(level, track, section) {
+    if (!level) return '';
+    const cleanSection = normalizeSection(section);
+    if (level === 'NSIV' && track) {
+      return `${level} ${track} ${cleanSection}`;
+    }
+    return `${level} ${cleanSection}`;
+  }
 
   useEffect(() => {
     async function load() {
@@ -126,11 +154,23 @@ export default function SchoolClassesPage() {
     setSuccess('');
     try {
       const token = getSchoolToken();
+      const suggestedName = buildSuggestedClassName(form.level, form.track, form.section);
+      const className = String(form.name || '').trim() || suggestedName;
+      const levelLabel = form.level
+        ? (form.level === 'NSIV' && form.track ? `${form.level} - ${form.track}` : form.level)
+        : null;
+
+      if (!className) {
+        setError('Renseigne le niveau ou le nom de classe.');
+        setCreating(false);
+        return;
+      }
+
       const payload = {
         schoolId: admin.schoolId,
         academicYearId: Number(form.academicYearId),
-        name: form.name,
-        level: form.level || null,
+        name: className,
+        level: levelLabel,
         capacity: form.capacity ? Number(form.capacity) : null
       };
 
@@ -303,6 +343,7 @@ export default function SchoolClassesPage() {
 
           <article className="card">
             <h2 className="mb-4 text-lg font-semibold text-brand-900">Nouvelle classe</h2>
+            <p className="mb-3 text-sm text-brand-700">Configuration adaptee au systeme scolaire haitien (Fondamental et NSIV).</p>
             <form onSubmit={onCreateClass} className="grid gap-3 sm:grid-cols-2">
               <select
                 className="input"
@@ -315,18 +356,49 @@ export default function SchoolClassesPage() {
                   <option key={year.id} value={year.id}>{year.label}</option>
                 ))}
               </select>
+              <select
+                className="input"
+                value={form.level}
+                onChange={(e) => {
+                  const levelValue = e.target.value;
+                  setForm((prev) => ({
+                    ...prev,
+                    level: levelValue,
+                    track: levelValue === 'NSIV' ? prev.track : ''
+                  }));
+                }}
+                required
+              >
+                <option value="">Niveau (systeme haitien)</option>
+                {HAITI_LEVEL_OPTIONS.map((level) => (
+                  <option key={level} value={level}>{level}</option>
+                ))}
+              </select>
+              {form.level === 'NSIV' ? (
+                <select
+                  className="input"
+                  value={form.track}
+                  onChange={(e) => setForm((prev) => ({ ...prev, track: e.target.value }))}
+                >
+                  <option value="">Filiere NSIV (optionnel)</option>
+                  {NSIV_TRACK_OPTIONS.map((track) => (
+                    <option key={track} value={track}>{track}</option>
+                  ))}
+                </select>
+              ) : (
+                <div />
+              )}
               <input
                 className="input"
-                placeholder="Nom de classe (ex: NSIV A)"
-                value={form.name}
-                onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                required
+                placeholder="Section (A, B, C...)"
+                value={form.section}
+                onChange={(e) => setForm((prev) => ({ ...prev, section: e.target.value }))}
               />
               <input
                 className="input"
-                placeholder="Niveau (optionnel)"
-                value={form.level}
-                onChange={(e) => setForm((prev) => ({ ...prev, level: e.target.value }))}
+                placeholder="Nom de classe (optionnel, auto si vide)"
+                value={form.name}
+                onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
               />
               <input
                 className="input"
@@ -336,7 +408,19 @@ export default function SchoolClassesPage() {
                 value={form.capacity}
                 onChange={(e) => setForm((prev) => ({ ...prev, capacity: e.target.value }))}
               />
-              <div className="sm:col-span-2">
+              <div className="sm:col-span-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      name: buildSuggestedClassName(prev.level, prev.track, prev.section)
+                    }))
+                  }
+                >
+                  Generer nom classe
+                </button>
                 <button className="btn-primary" type="submit" disabled={creating}>
                   {creating ? 'Creation...' : 'Creer la classe'}
                 </button>
