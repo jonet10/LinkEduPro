@@ -41,21 +41,37 @@ export default function SchoolPaymentsPage() {
           paymentType: payment.paymentType?.name || '-',
           academicYear: payment.academicYear?.label || '-',
           amountDue: Number(payment.amountDue || 0),
-          amountPaid: 0
+          amountPaid: 0,
+          lastPaymentDate: null
         });
       }
       const current = map.get(key);
       current.amountDue = Math.max(current.amountDue, Number(payment.amountDue || 0));
       current.amountPaid += Number(payment.amountPaid || 0);
+      const date = payment.paymentDate ? new Date(payment.paymentDate) : null;
+      if (date && (!current.lastPaymentDate || date > current.lastPaymentDate)) {
+        current.lastPaymentDate = date;
+      }
     }
+    const now = new Date();
     return Array.from(map.values())
       .map((row) => ({
         ...row,
         remaining: Math.max(0, row.amountDue - row.amountPaid),
-        status: row.amountPaid >= row.amountDue ? 'SOLDE' : row.amountPaid > 0 ? 'PARTIEL' : 'IMPAYE'
+        status: row.amountPaid >= row.amountDue ? 'SOLDE' : row.amountPaid > 0 ? 'PARTIEL' : 'IMPAYE',
+        overdueDays: row.lastPaymentDate
+          ? Math.floor((now.getTime() - row.lastPaymentDate.getTime()) / (1000 * 60 * 60 * 24))
+          : null
       }))
       .sort((a, b) => a.studentName.localeCompare(b.studentName));
   })();
+
+  const overdueAlerts = paymentSummaries.filter(
+    (row) => row.remaining > 0 && row.overdueDays !== null && row.overdueDays >= 30
+  );
+  const criticalOverdueAlerts = paymentSummaries.filter(
+    (row) => row.remaining > 0 && row.overdueDays !== null && row.overdueDays >= 90
+  );
 
   useEffect(() => {
     async function load() {
@@ -229,6 +245,38 @@ export default function SchoolPaymentsPage() {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
+      {criticalOverdueAlerts.length > 0 ? (
+        <section className="card border border-red-300 bg-red-100">
+          <h2 className="text-xl font-semibold text-red-800 mb-3">
+            Retards critiques 3+ mois ({criticalOverdueAlerts.length})
+          </h2>
+          <div className="space-y-2">
+            {criticalOverdueAlerts.map((row, idx) => (
+              <div key={`${row.studentName}_${row.paymentType}_critical_${idx}`} className="rounded border border-red-300 bg-white px-3 py-2">
+                <p className="text-sm text-red-900">
+                  {row.studentName} - {row.paymentType} ({row.academicYear}) : retard de {row.overdueDays} jours, reste {row.remaining}.
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {overdueAlerts.length > 0 ? (
+        <section className="card border border-red-200 bg-red-50">
+          <h2 className="text-xl font-semibold text-red-700 mb-3">Alertes de retard ({overdueAlerts.length})</h2>
+          <div className="space-y-2">
+            {overdueAlerts.map((row, idx) => (
+              <div key={`${row.studentName}_${row.paymentType}_${idx}`} className="rounded border border-red-200 bg-white px-3 py-2">
+                <p className="text-sm text-red-800">
+                  {row.studentName} - {row.paymentType} ({row.academicYear}) : retard de {row.overdueDays} jours, reste {row.remaining}.
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="card">
         <h2 className="text-xl font-semibold text-brand-900 mb-4">Resume des soldes (frais/versements)</h2>
         {paymentSummaries.length === 0 ? (
@@ -244,6 +292,7 @@ export default function SchoolPaymentsPage() {
                   <th className="text-left py-2">Frais total</th>
                   <th className="text-left py-2">Total verse</th>
                   <th className="text-left py-2">Reste</th>
+                  <th className="text-left py-2">Retard</th>
                   <th className="text-left py-2">Statut</th>
                 </tr>
               </thead>
@@ -256,6 +305,19 @@ export default function SchoolPaymentsPage() {
                     <td className="py-2">{row.amountDue}</td>
                     <td className="py-2">{row.amountPaid}</td>
                     <td className="py-2">{row.remaining}</td>
+                    <td className="py-2">
+                      {row.remaining > 0 && row.overdueDays !== null ? (
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                          row.overdueDays >= 90
+                            ? 'bg-red-200 text-red-900'
+                            : row.overdueDays >= 30
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {row.overdueDays >= 90 ? `${row.overdueDays} jours (3+ mois)` : `${row.overdueDays} jours`}
+                        </span>
+                      ) : '-'}
+                    </td>
                     <td className="py-2">
                       <span className={`px-2 py-1 rounded text-xs font-semibold ${
                         row.status === 'SOLDE' ? 'bg-green-100 text-green-800' :
