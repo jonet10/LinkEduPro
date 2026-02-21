@@ -91,6 +91,60 @@ export default function HomePage() {
     };
   }, [community.leaderboard, student?.id]);
   const dailyObjective = useMemo(() => getDailyObjective(student), [student]);
+  const isStudentRole = student?.role === 'STUDENT';
+  const isTeacherRole = student?.role === 'TEACHER';
+  const isAdminRole = student?.role === 'ADMIN';
+
+  const homeIntro = useMemo(() => {
+    if (isAdminRole) {
+      return {
+        title: 'Super Admin',
+        subtitle: 'Pilote la plateforme, supervise les ecoles, les contenus et les communications.',
+        primaryHref: '/admin/super-dashboard',
+        primaryLabel: 'Ouvrir le dashboard',
+        secondaryHref: '/messages',
+        secondaryLabel: 'Gerer les annonces'
+      };
+    }
+
+    if (isTeacherRole) {
+      return {
+        title: 'Espace Professeur',
+        subtitle: 'Cree des contenus, accompagne les eleves et organise les sessions de rattrapage.',
+        primaryHref: '/blog',
+        primaryLabel: 'Creer une publication',
+        secondaryHref: '/rattrapage',
+        secondaryLabel: 'Planifier rattrapage'
+      };
+    }
+
+    return {
+      title: student ? `${student.firstName} ${student.lastName}` : 'Espace élève',
+      subtitle: 'Compare tes performances avec d\'autres élèves et découvre les écoles les plus actives.',
+      primaryHref: '/subjects',
+      primaryLabel: 'Commencer un quiz',
+      secondaryHref: '/progress',
+      secondaryLabel: 'Voir mes progrès'
+    };
+  }, [isAdminRole, isTeacherRole, student]);
+
+  const managerQuickActions = useMemo(() => {
+    if (isAdminRole) {
+      return [
+        { href: '/admin/super-dashboard', title: 'Supervision globale', desc: 'Suivre les eleves, ecoles et activites.' },
+        { href: '/school-management/dashboard', title: 'Gestion scolaire', desc: 'Piloter classes, eleves et paiements.' },
+        { href: '/messages', title: 'Communication', desc: 'Publier annonces et gerer les messages.' },
+        { href: '/blog', title: 'Contenus communaute', desc: 'Valider et organiser les publications.' }
+      ];
+    }
+
+    return [
+      { href: '/blog', title: 'Publications pedagogiques', desc: 'Poster supports, conseils et ressources.' },
+      { href: '/rattrapage', title: 'Sessions rattrapage', desc: 'Programmer et suivre les sessions live.' },
+      { href: '/messages', title: 'Messagerie', desc: 'Repondre aux eleves et diffuser des annonces.' },
+      { href: '/library', title: 'Ressources', desc: 'Partager des PDF et references utiles.' }
+    ];
+  }, [isAdminRole]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -277,27 +331,29 @@ export default function HomePage() {
       <div className="card motion-enter lift-card">
         <p className="text-sm text-brand-700">Bienvenue</p>
         <h1 className="text-3xl font-black text-brand-900">
-          {student ? `${student.firstName} ${student.lastName}` : 'Espace élève'}
+          {homeIntro.title}
         </h1>
         <p className="mt-2 text-sm text-brand-700">
-          Compare tes performances avec d'autres élèves et découvre les écoles les plus actives.
+          {homeIntro.subtitle}
         </p>
         <div className="mt-4 flex gap-3">
-          <Link href="/subjects" className="btn-primary cta-pulse">Commencer un quiz</Link>
-          <Link href="/progress" className="btn-secondary">Voir mes progrès</Link>
+          <Link href={homeIntro.primaryHref} className="btn-primary cta-pulse">{homeIntro.primaryLabel}</Link>
+          <Link href={homeIntro.secondaryHref} className="btn-secondary">{homeIntro.secondaryLabel}</Link>
         </div>
       </div>
 
-      <div className="card motion-enter motion-delay-1 lift-card border border-brand-200 bg-gradient-to-r from-brand-50 to-white">
-        <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Coaching intelligent</p>
-        <h2 className="mt-1 text-xl font-bold text-brand-900">{dailyObjective.title}</h2>
-        <p className="mt-2 text-sm text-brand-700">{dailyObjective.description}</p>
-        <div className="mt-4">
-          <Link href={dailyObjective.ctaHref} className="btn-primary cta-pulse">{dailyObjective.ctaLabel}</Link>
+      {isStudentRole ? (
+        <div className="card motion-enter motion-delay-1 lift-card border border-brand-200 bg-gradient-to-r from-brand-50 to-white">
+          <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Coaching intelligent</p>
+          <h2 className="mt-1 text-xl font-bold text-brand-900">{dailyObjective.title}</h2>
+          <p className="mt-2 text-sm text-brand-700">{dailyObjective.description}</p>
+          <div className="mt-4">
+            <Link href={dailyObjective.ctaHref} className="btn-primary cta-pulse">{dailyObjective.ctaLabel}</Link>
+          </div>
         </div>
-      </div>
+      ) : null}
 
-      {!hasDepartmentAndCommune(student?.school) ? (
+      {isStudentRole && !hasDepartmentAndCommune(student?.school) ? (
         <div className="card motion-enter motion-delay-2 lift-card border border-amber-300 bg-amber-50">
           <p className="text-sm font-semibold text-amber-900">Mise a jour de profil requise</p>
           <p className="mt-1 text-sm text-amber-900">
@@ -309,7 +365,7 @@ export default function HomePage() {
         </div>
       ) : null}
 
-      {isNsivStudent(student) ? (
+      {isStudentRole && isNsivStudent(student) ? (
         <div className="card motion-enter motion-delay-2 lift-card">
           <h2 className="text-xl font-semibold text-brand-900">Rubriques NSIV</h2>
           <p className="mt-2 text-sm text-brand-700">Acces direct aux rubriques principales de Terminale.</p>
@@ -328,45 +384,59 @@ export default function HomePage() {
 
       {error ? <p className="text-red-600">{error}</p> : null}
 
-      <div className="grid gap-4 lg:grid-cols-3 motion-enter motion-delay-3">
-        <article className="card lg:col-span-2 lift-card">
-          <h2 className="mb-3 text-xl font-semibold text-brand-900">Plan rapide du jour</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
-              <p className="text-sm font-semibold text-brand-900">Rubriques du jour</p>
-              <p className="mt-1 text-sm text-brand-700">Révision ciblée par matière.</p>
-            </Link>
-            <Link href="/probable-exercises" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
-              <p className="text-sm font-semibold text-brand-900">Exercices probables</p>
-              <p className="mt-1 text-sm text-brand-700">Sujets les plus fréquents à l&apos;examen.</p>
-            </Link>
-            <Link href="/focus" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
-              <p className="text-sm font-semibold text-brand-900">Session Focus</p>
-              <p className="mt-1 text-sm text-brand-700">Concentration en 25 minutes.</p>
-            </Link>
-            <Link href="/library" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
-              <p className="text-sm font-semibold text-brand-900">Bibliothèque</p>
-              <p className="mt-1 text-sm text-brand-700">PDF, ressources et fiches utiles.</p>
-            </Link>
-          </div>
-        </article>
-
-        <article className="card lift-card">
-          <h2 className="mb-3 text-xl font-semibold text-brand-900">Mon niveau actuel</h2>
-          {myRanking ? (
-            <div className="space-y-2 text-sm text-brand-800">
-              <p>Classement: <strong>#{myRanking.position}</strong></p>
-              <p>Moyenne: <strong>{myRanking.average}%</strong></p>
-              <p>Meilleur score: <strong>{myRanking.best}%</strong></p>
+      {isStudentRole ? (
+        <div className="grid gap-4 lg:grid-cols-3 motion-enter motion-delay-3">
+          <article className="card lg:col-span-2 lift-card">
+            <h2 className="mb-3 text-xl font-semibold text-brand-900">Plan rapide du jour</h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
+                <p className="text-sm font-semibold text-brand-900">Rubriques du jour</p>
+                <p className="mt-1 text-sm text-brand-700">Révision ciblée par matière.</p>
+              </Link>
+              <Link href="/probable-exercises" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
+                <p className="text-sm font-semibold text-brand-900">Exercices probables</p>
+                <p className="mt-1 text-sm text-brand-700">Sujets les plus fréquents à l&apos;examen.</p>
+              </Link>
+              <Link href="/focus" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
+                <p className="text-sm font-semibold text-brand-900">Session Focus</p>
+                <p className="mt-1 text-sm text-brand-700">Concentration en 25 minutes.</p>
+              </Link>
+              <Link href="/library" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
+                <p className="text-sm font-semibold text-brand-900">Bibliothèque</p>
+                <p className="mt-1 text-sm text-brand-700">PDF, ressources et fiches utiles.</p>
+              </Link>
             </div>
-          ) : (
-            <p className="text-sm text-brand-700">Fais un quiz pour débloquer tes stats.</p>
-          )}
-          <div className="mt-4">
-            <Link href="/subjects" className="btn-primary">Lancer un entraînement</Link>
+          </article>
+
+          <article className="card lift-card">
+            <h2 className="mb-3 text-xl font-semibold text-brand-900">Mon niveau actuel</h2>
+            {myRanking ? (
+              <div className="space-y-2 text-sm text-brand-800">
+                <p>Classement: <strong>#{myRanking.position}</strong></p>
+                <p>Moyenne: <strong>{myRanking.average}%</strong></p>
+                <p>Meilleur score: <strong>{myRanking.best}%</strong></p>
+              </div>
+            ) : (
+              <p className="text-sm text-brand-700">Fais un quiz pour débloquer tes stats.</p>
+            )}
+            <div className="mt-4">
+              <Link href="/subjects" className="btn-primary">Lancer un entraînement</Link>
+            </div>
+          </article>
+        </div>
+      ) : (
+        <article className="card motion-enter motion-delay-3 lift-card">
+          <h2 className="mb-3 text-xl font-semibold text-brand-900">Centre de gestion</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {managerQuickActions.map((action) => (
+              <Link key={action.href} href={action.href} className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
+                <p className="text-sm font-semibold text-brand-900">{action.title}</p>
+                <p className="mt-1 text-sm text-brand-700">{action.desc}</p>
+              </Link>
+            ))}
           </div>
         </article>
-      </div>
+      )}
 
       <article className="card motion-enter motion-delay-4 lift-card">
         <div className="mb-3 flex items-center justify-between">
