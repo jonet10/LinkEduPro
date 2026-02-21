@@ -194,6 +194,30 @@ export default function SchoolManagementSchoolsPage() {
     }
   }
 
+  async function resetAdminPassword(school) {
+    const confirmed = window.confirm(`Reinitialiser le mot de passe de l admin pour ${school.name} ?`);
+    if (!confirmed) return;
+
+    setActingSchoolId(school.id);
+    setError('');
+    setSuccess('');
+    setCredentials(null);
+    try {
+      const token = getSchoolToken();
+      const data = await apiClient(`/school-management/schools/${school.id}/reset-admin-password`, {
+        method: 'POST',
+        token
+      });
+      setCredentials(data.schoolAdmin || null);
+      setSuccess(data.message || 'Mot de passe admin reinitialise.');
+      await reloadSchools();
+    } catch (e) {
+      setError(e.message || 'Impossible de reinitialiser le mot de passe admin.');
+    } finally {
+      setActingSchoolId(null);
+    }
+  }
+
   if (loading) {
     return <main className="mx-auto max-w-6xl px-4 py-8">Chargement...</main>;
   }
@@ -216,7 +240,7 @@ export default function SchoolManagementSchoolsPage() {
 
       {credentials ? (
         <section className="card space-y-1">
-          <h2 className="text-lg font-semibold text-brand-900">Identifiants admin ecole</h2>
+          <h2 className="text-lg font-semibold text-brand-900">Identifiants admin ecole (creation / reinitialisation)</h2>
           <p className="text-sm text-brand-700">Email: <span className="font-semibold text-brand-900">{credentials.email}</span></p>
           <p className="text-sm text-brand-700">Mot de passe temporaire: <span className="font-semibold text-brand-900">{credentials.temporaryPassword}</span></p>
           <p className="text-xs text-brand-700">Conserve ces informations. L admin de l ecole devra changer son mot de passe a la premiere connexion.</p>
@@ -260,6 +284,7 @@ export default function SchoolManagementSchoolsPage() {
                 <tr className="border-b border-brand-200">
                   <th className="py-2 text-left">Nom</th>
                   <th className="py-2 text-left">Type</th>
+                  <th className="py-2 text-left">Email admin ecole</th>
                   <th className="py-2 text-left">Email</th>
                   <th className="py-2 text-left">Ville</th>
                   <th className="py-2 text-left">Telephone</th>
@@ -273,6 +298,14 @@ export default function SchoolManagementSchoolsPage() {
               <tbody>
                 {schools.map((school) => (
                   <tr key={school.id} className="border-b border-brand-100">
+                    <td className="py-2">
+                      <div className="space-y-1">
+                        <p>{school.primaryAdminEmail || '-'}</p>
+                        <p className={`text-xs ${school.primaryAdminActive === false ? 'text-red-700' : 'text-brand-700'}`}>
+                          {school.primaryAdminActive === false ? 'Compte admin inactif' : 'Compte admin actif'}
+                        </p>
+                      </div>
+                    </td>
                     <td className="py-2">
                       {editingSchoolId === school.id ? (
                         <input
@@ -377,6 +410,14 @@ export default function SchoolManagementSchoolsPage() {
                               onClick={() => toggleSchoolStatus(school)}
                             >
                               {school.isActive ? 'Suspendre (paiement)' : 'Reactiver'}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-secondary !px-3 !py-1"
+                              disabled={actingSchoolId === school.id}
+                              onClick={() => resetAdminPassword(school)}
+                            >
+                              Reset mot de passe
                             </button>
                           </>
                         )}

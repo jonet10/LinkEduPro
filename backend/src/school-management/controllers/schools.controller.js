@@ -85,6 +85,12 @@ async function listSchools(req, res, next) {
       prisma.school.findMany({
         orderBy: { createdAt: 'desc' },
         include: {
+          admins: {
+            where: { role: 'SCHOOL_ADMIN' },
+            select: { id: true, email: true, firstName: true, lastName: true, isActive: true },
+            orderBy: { createdAt: 'asc' },
+            take: 1
+          },
           _count: { select: { students: true, classes: true, payments: true } }
         }
       }),
@@ -99,12 +105,73 @@ async function listSchools(req, res, next) {
       paymentStats.map((row) => [row.schoolId, row._max.paymentDate || null])
     );
 
-    const enrichedSchools = schools.map((school) => ({
-      ...school,
-      lastPaymentDate: lastPaymentBySchoolId.get(school.id) || null
-    }));
+    const enrichedSchools = schools.map((school) => {
+      const primaryAdmin = Array.isArray(school.admins) && school.admins.length > 0 ? school.admins[0] : null;
+      return {
+        ...school,
+        lastPaymentDate: lastPaymentBySchoolId.get(school.id) || null,
+        primaryAdminEmail: primaryAdmin?.email || null,
+        primaryAdminId: primaryAdmin?.id || null,
+        primaryAdminActive: primaryAdmin?.isActive ?? null
+      };
+    });
 
     return res.json({ schools: enrichedSchools });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function resetSchoolAdminPassword(req, res, next) {
+  try {
+    const user = req.schoolUser;
+    const schoolId = Number(req.params.schoolId);
+
+    const school = await prisma.school.findUnique({ where: { id: schoolId } });
+    if (!school) {
+      return res.status(404).json({ message: 'Ecole introuvable.' });
+    }
+
+    const admin = await prisma.schoolAdmin.findFirst({
+      where: { schoolId, role: 'SCHOOL_ADMIN' },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin ecole introuvable.' });
+    }
+
+    const tempPassword = generateTemporaryPassword();
+    const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+    await prisma.schoolAdmin.update({
+      where: { id: admin.id },
+      data: {
+        passwordHash,
+        mustChangePassword: true,
+        isActive: true
+      }
+    });
+
+    await createSchoolLog({
+      schoolId,
+      actorId: user.id,
+      actorRole: user.role,
+      action: 'SCHOOL_ADMIN_PASSWORD_RESET',
+      entityType: 'SchoolAdmin',
+      entityId: String(admin.id),
+      metadata: { adminEmail: admin.email }
+    });
+
+    return res.json({
+      schoolAdmin: {
+        id: admin.id,
+        email: admin.email,
+        temporaryPassword: tempPassword,
+        mustChangePassword: true
+      },
+      message: 'Mot de passe admin reinitialise.'
+    });
   } catch (error) {
     return next(error);
   }
@@ -207,4 +274,4 @@ async function setSchoolStatus(req, res, next) {
   }
 }
 
-module.exports = { createSchool, listSchools, updateSchool, setSchoolStatus };
+module.exports = { createSchool, listSchools, updateSchool, setSchoolStatus, resetSchoolAdminPassword };
