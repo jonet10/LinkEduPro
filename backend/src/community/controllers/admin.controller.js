@@ -102,4 +102,110 @@ async function getSuperDashboard(req, res, next) {
   }
 }
 
-module.exports = { getConfig, updateConfig, getSuperDashboard };
+async function listPlatformStudents(req, res, next) {
+  try {
+    const q = String(req.query.q || '').trim();
+    const schoolFilter = String(req.query.school || '').trim();
+    const departmentFilter = String(req.query.department || '').trim();
+    const communeFilter = String(req.query.commune || '').trim();
+    const limitRaw = Number(req.query.limit);
+    const limit = Number.isFinite(limitRaw) ? Math.max(20, Math.min(1000, Math.trunc(limitRaw))) : 300;
+
+    const students = await prisma.student.findMany({
+      where: {
+        role: 'STUDENT',
+        ...(q
+          ? {
+              OR: [
+                { firstName: { contains: q, mode: 'insensitive' } },
+                { lastName: { contains: q, mode: 'insensitive' } },
+                { email: { contains: q, mode: 'insensitive' } },
+                { school: { contains: q, mode: 'insensitive' } }
+              ]
+            }
+          : {}),
+        ...(schoolFilter ? { school: { contains: schoolFilter, mode: 'insensitive' } } : {})
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        school: true,
+        gradeLevel: true,
+        createdAt: true
+      },
+      orderBy: [{ createdAt: 'desc' }],
+      take: limit
+    });
+
+    const schools = await prisma.school.findMany({
+      select: {
+        id: true,
+        name: true,
+        city: true,
+        department: true,
+        commune: true
+      }
+    });
+
+    const schoolMap = new Map(
+      schools.map((s) => [String(s.name || '').trim().toLowerCase(), s])
+    );
+
+    let enriched = students.map((st) => {
+      const key = String(st.school || '').trim().toLowerCase();
+      const mapped = schoolMap.get(key);
+      return {
+        ...st,
+        department: mapped?.department || null,
+        commune: mapped?.commune || mapped?.city || null
+      };
+    });
+
+    if (departmentFilter) {
+      enriched = enriched.filter((st) =>
+        String(st.department || '').toLowerCase() === departmentFilter.toLowerCase()
+      );
+    }
+
+    if (communeFilter) {
+      enriched = enriched.filter((st) =>
+        String(st.commune || '').toLowerCase() === communeFilter.toLowerCase()
+      );
+    }
+
+    const schoolOptions = Array.from(
+      new Set(enriched.map((st) => String(st.school || '').trim()).filter(Boolean))
+    ).sort((a, b) => a.localeCompare(b));
+
+    const departmentOptions = Array.from(
+      new Set(
+        schools
+          .map((s) => String(s.department || '').trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+
+    const communeOptions = Array.from(
+      new Set(
+        schools
+          .map((s) => String(s.commune || s.city || '').trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+
+    return res.json({
+      students: enriched,
+      filters: {
+        schools: schoolOptions,
+        departments: departmentOptions,
+        communes: communeOptions
+      }
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { getConfig, updateConfig, getSuperDashboard, listPlatformStudents };

@@ -14,6 +14,18 @@ export default function SuperDashboardPage() {
   const [inviteLink, setInviteLink] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [students, setStudents] = useState([]);
+  const [studentFilters, setStudentFilters] = useState({
+    school: '',
+    department: '',
+    commune: '',
+    q: ''
+  });
+  const [studentFilterOptions, setStudentFilterOptions] = useState({
+    schools: [],
+    departments: [],
+    communes: []
+  });
 
   useEffect(() => {
     const token = getToken();
@@ -40,11 +52,28 @@ export default function SuperDashboardPage() {
       ]);
       setDashboard(d);
       setInvites(i.invitations || []);
+      await loadStudents(token, studentFilters);
     } catch (e) {
       setError(e.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  async function loadStudents(token, filters) {
+    const params = new URLSearchParams();
+    if (filters.school) params.set('school', filters.school);
+    if (filters.department) params.set('department', filters.department);
+    if (filters.commune) params.set('commune', filters.commune);
+    if (filters.q) params.set('q', filters.q);
+    const query = params.toString();
+    const data = await apiClient(`/community/admin/students-registry${query ? `?${query}` : ''}`, { token });
+    setStudents(data.students || []);
+    setStudentFilterOptions({
+      schools: data.filters?.schools || [],
+      departments: data.filters?.departments || [],
+      communes: data.filters?.communes || []
+    });
   }
 
   async function createInvite() {
@@ -87,6 +116,115 @@ export default function SuperDashboardPage() {
           <div className="card"><p className="text-sm">Paiements mensuels</p><p className="text-2xl font-bold">{String(dashboard.analytics.monthlyInternalPayments)}</p></div>
         </section>
       ) : null}
+
+      <section className="card space-y-3">
+        <h2 className="text-xl font-semibold">Liste globale des eleves (module eleves)</h2>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+          <select
+            className="input"
+            value={studentFilters.school}
+            onChange={(e) => setStudentFilters((prev) => ({ ...prev, school: e.target.value }))}
+          >
+            <option value="">Global - toutes ecoles</option>
+            {studentFilterOptions.schools.map((school) => (
+              <option key={school} value={school}>{school}</option>
+            ))}
+          </select>
+          <select
+            className="input"
+            value={studentFilters.department}
+            onChange={(e) => setStudentFilters((prev) => ({ ...prev, department: e.target.value }))}
+          >
+            <option value="">Tous departements</option>
+            {studentFilterOptions.departments.map((dpt) => (
+              <option key={dpt} value={dpt}>{dpt}</option>
+            ))}
+          </select>
+          <select
+            className="input"
+            value={studentFilters.commune}
+            onChange={(e) => setStudentFilters((prev) => ({ ...prev, commune: e.target.value }))}
+          >
+            <option value="">Toutes communes</option>
+            {studentFilterOptions.communes.map((commune) => (
+              <option key={commune} value={commune}>{commune}</option>
+            ))}
+          </select>
+          <input
+            className="input"
+            placeholder="Recherche nom/email/ecole"
+            value={studentFilters.q}
+            onChange={(e) => setStudentFilters((prev) => ({ ...prev, q: e.target.value }))}
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="btn-primary"
+            onClick={async () => {
+              try {
+                setError('');
+                const token = getToken();
+                if (!token) return;
+                await loadStudents(token, studentFilters);
+              } catch (e) {
+                setError(e.message);
+              }
+            }}
+          >
+            Filtrer
+          </button>
+          <button
+            className="btn-secondary"
+            onClick={async () => {
+              const reset = { school: '', department: '', commune: '', q: '' };
+              setStudentFilters(reset);
+              try {
+                setError('');
+                const token = getToken();
+                if (!token) return;
+                await loadStudents(token, reset);
+              } catch (e) {
+                setError(e.message);
+              }
+            }}
+          >
+            Reinitialiser
+          </button>
+        </div>
+
+        {students.length === 0 ? (
+          <p className="text-sm text-brand-700">Aucun eleve trouve.</p>
+        ) : (
+          <div className="overflow-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left">
+                  <th>Nom</th>
+                  <th>Email</th>
+                  <th>Ecole</th>
+                  <th>Departement</th>
+                  <th>Commune</th>
+                  <th>Niveau</th>
+                  <th>Inscription</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((st) => (
+                  <tr key={st.id}>
+                    <td>{st.lastName} {st.firstName}</td>
+                    <td>{st.email || '-'}</td>
+                    <td>{st.school || '-'}</td>
+                    <td>{st.department || '-'}</td>
+                    <td>{st.commune || '-'}</td>
+                    <td>{st.gradeLevel || '-'}</td>
+                    <td>{new Date(st.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       <section className="card space-y-3">
         <h2 className="text-xl font-semibold">Inviter un professeur</h2>
