@@ -115,12 +115,15 @@ export default function MessagesPage() {
 
     Promise.all([
       loadConversations(currentToken),
-      apiClient('/results/community', { token: currentToken })
+      apiClient('/messages/recipients', { token: currentToken })
     ])
-      .then(([, community]) => {
-        const users = (community?.leaderboard || [])
-          .filter((row) => row.studentId !== currentStudent.id)
-          .map((row) => ({ id: row.studentId, label: `${row.displayName} (${row.school})` }));
+      .then(([, recipientsData]) => {
+        const users = (recipientsData?.recipients || [])
+          .filter((row) => row.id !== currentStudent.id)
+          .map((row) => ({
+            id: row.id,
+            label: `${row.firstName} ${row.lastName} (${row.school})`
+          }));
         setCommunityUsers(users);
         if (users[0]) setRecipientId(String(users[0].id));
       })
