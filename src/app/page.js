@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getToken, getStudent, isNsivStudent } from '@/lib/auth';
 import HomeCarousel from '@/components/HomeCarousel';
@@ -9,14 +9,88 @@ import VerifiedTestimonials from '@/components/VerifiedTestimonials';
 
 const CALENDAR_NOTICE_KEY = 'linkedupro_calendar_notice_2025_2026_seen';
 
+function hasDepartmentAndCommune(schoolLabel) {
+  if (!schoolLabel || typeof schoolLabel !== 'string') return false;
+  const parts = schoolLabel.split('/').map((part) => part.trim()).filter(Boolean);
+  return parts.length >= 3 && Boolean(parts[0]) && Boolean(parts[1]);
+}
+
+function getDailyObjective(student) {
+  const track = String(student?.nsivTrack || 'ORDINAIRE').toUpperCase();
+  const isNsiv = isNsivStudent(student);
+
+  if (!isNsiv) {
+    return {
+      title: 'Objectif du jour',
+      description: 'Fais 1 quiz ciblé + 20 minutes de révision dans la bibliothèque.',
+      ctaLabel: 'Démarrer maintenant',
+      ctaHref: '/subjects'
+    };
+  }
+
+  const byTrack = {
+    SVT: {
+      title: 'Objectif du jour - Filière SVT',
+      description: 'Travaille 1 série SVT, puis fais 15 minutes de Focus pour consolider.',
+      ctaLabel: 'Lancer SVT',
+      ctaHref: '/subjects'
+    },
+    SMP: {
+      title: 'Objectif du jour - Filière SMP',
+      description: 'Fais 1 quiz math + 1 quiz physique, puis passe aux exercices probables.',
+      ctaLabel: 'M’entraîner SMP',
+      ctaHref: '/probable-exercises'
+    },
+    SES: {
+      title: 'Objectif du jour - Filière SES',
+      description: 'Révise 2 rubriques clés et termine avec un quiz d’évaluation rapide.',
+      ctaLabel: 'Commencer SES',
+      ctaHref: '/subjects'
+    },
+    LLA: {
+      title: 'Objectif du jour - Filière LLA',
+      description: 'Lis une ressource de bibliothèque puis fais un quiz de validation.',
+      ctaLabel: 'Étudier en LLA',
+      ctaHref: '/library'
+    },
+    AUTRE: {
+      title: 'Objectif du jour - Filière personnalisée',
+      description: 'Choisis une rubrique prioritaire et fais un entraînement ciblé.',
+      ctaLabel: 'Choisir ma rubrique',
+      ctaHref: '/subjects'
+    },
+    ORDINAIRE: {
+      title: 'Objectif du jour - Filière Ordinaire',
+      description: 'Fais 1 quiz de base et 1 session Focus pour rester constant.',
+      ctaLabel: 'Lancer ma session',
+      ctaHref: '/focus'
+    }
+  };
+
+  return byTrack[track] || byTrack.ORDINAIRE;
+}
+
 export default function HomePage() {
   const [ready, setReady] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
   const [student, setStudent] = useState(null);
   const [community, setCommunity] = useState({ leaderboard: [], recent: [], schools: [] });
+  const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState('');
   const [welcomePopup, setWelcomePopup] = useState(null);
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
+
+  const myRanking = useMemo(() => {
+    if (!student?.id) return null;
+    const index = community.leaderboard.findIndex((row) => row.studentId === student.id);
+    if (index < 0) return null;
+    return {
+      position: index + 1,
+      average: community.leaderboard[index].average,
+      best: community.leaderboard[index].best
+    };
+  }, [community.leaderboard, student?.id]);
+  const dailyObjective = useMemo(() => getDailyObjective(student), [student]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -38,10 +112,12 @@ export default function HomePage() {
 
     Promise.all([
       apiClient('/results/community', { token }),
-      apiClient('/v2/profile/daily-welcome-popup', { token })
+      apiClient('/v2/profile/daily-welcome-popup', { token }),
+      apiClient('/notifications', { token })
     ])
-      .then(([communityData, popupData]) => {
+      .then(([communityData, popupData, notifData]) => {
         setCommunity(communityData);
+        setNotifications((notifData?.notifications || []).slice(0, 6));
         if (popupData?.shouldShow) {
           setWelcomePopup(popupData);
         }
@@ -58,6 +134,23 @@ export default function HomePage() {
       localStorage.setItem(CALENDAR_NOTICE_KEY, '1');
     }
     setShowCalendarNotice(false);
+  }
+
+  function resolveNotificationHref(notification) {
+    const entityId = notification?.entityId ? String(notification.entityId) : '';
+    if (notification?.entityType === 'CATCHUP_SESSION' && entityId) {
+      return `/rattrapage?session=${encodeURIComponent(entityId)}`;
+    }
+    if (notification?.entityType === 'Conversation' && entityId) {
+      return `/messages?conversation=${encodeURIComponent(entityId)}`;
+    }
+    if (notification?.entityType === 'Post' && entityId) {
+      return `/blog?post=${encodeURIComponent(entityId)}`;
+    }
+    if (notification?.entityType === 'LibraryBook') {
+      return '/library';
+    }
+    return '/messages';
   }
 
   if (!ready) return <p>Chargement...</p>;
@@ -195,6 +288,27 @@ export default function HomePage() {
         </div>
       </div>
 
+      <div className="card border border-brand-200 bg-gradient-to-r from-brand-50 to-white">
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Coaching intelligent</p>
+        <h2 className="mt-1 text-xl font-bold text-brand-900">{dailyObjective.title}</h2>
+        <p className="mt-2 text-sm text-brand-700">{dailyObjective.description}</p>
+        <div className="mt-4">
+          <Link href={dailyObjective.ctaHref} className="btn-primary">{dailyObjective.ctaLabel}</Link>
+        </div>
+      </div>
+
+      {!hasDepartmentAndCommune(student?.school) ? (
+        <div className="card border border-amber-300 bg-amber-50">
+          <p className="text-sm font-semibold text-amber-900">Mise a jour de profil requise</p>
+          <p className="mt-1 text-sm text-amber-900">
+            Ton departement et ta commune sont manquants. Merci de mettre a jour ton profil pour continuer avec des contenus personnalises.
+          </p>
+          <div className="mt-3">
+            <Link href="/profile?edit=1" className="btn-primary">Mettre a jour mon profil</Link>
+          </div>
+        </div>
+      ) : null}
+
       {isNsivStudent(student) ? (
         <div className="card">
           <h2 className="text-xl font-semibold text-brand-900">Rubriques NSIV</h2>
@@ -216,46 +330,62 @@ export default function HomePage() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <article className="card lg:col-span-2">
-          <h2 className="mb-3 text-xl font-semibold">Classement élèves</h2>
-          <div className="space-y-2 text-sm">
-            {community.leaderboard.map((row, idx) => (
-              <div key={`${row.studentId}_${idx}`} className="flex flex-wrap items-center justify-between rounded border border-brand-100 px-3 py-2">
-                <span className="font-semibold">#{idx + 1} {row.displayName}</span>
-                <span>{row.school}</span>
-                <span>Moyenne: {row.average}%</span>
-                <span>Meilleur: {row.best}%</span>
-              </div>
-            ))}
-            {community.leaderboard.length === 0 ? <p>Aucune donnée pour le moment.</p> : null}
+          <h2 className="mb-3 text-xl font-semibold text-brand-900">Plan rapide du jour</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50">
+              <p className="text-sm font-semibold text-brand-900">Rubriques du jour</p>
+              <p className="mt-1 text-sm text-brand-700">Révision ciblée par matière.</p>
+            </Link>
+            <Link href="/probable-exercises" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50">
+              <p className="text-sm font-semibold text-brand-900">Exercices probables</p>
+              <p className="mt-1 text-sm text-brand-700">Sujets les plus fréquents à l&apos;examen.</p>
+            </Link>
+            <Link href="/focus" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50">
+              <p className="text-sm font-semibold text-brand-900">Session Focus</p>
+              <p className="mt-1 text-sm text-brand-700">Concentration en 25 minutes.</p>
+            </Link>
+            <Link href="/library" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50">
+              <p className="text-sm font-semibold text-brand-900">Bibliothèque</p>
+              <p className="mt-1 text-sm text-brand-700">PDF, ressources et fiches utiles.</p>
+            </Link>
           </div>
         </article>
 
         <article className="card">
-          <h2 className="mb-3 text-xl font-semibold">Écoles en tête</h2>
-          <div className="space-y-2 text-sm">
-            {community.schools.map((s, idx) => (
-              <div key={`${s.school}_${idx}`} className="rounded border border-brand-100 px-3 py-2">
-                <p className="font-semibold">#{idx + 1} {s.school}</p>
-                <p>{s.students} élève(s) | moyenne {s.average}%</p>
-              </div>
-            ))}
-            {community.schools.length === 0 ? <p>Aucune donnée pour le moment.</p> : null}
+          <h2 className="mb-3 text-xl font-semibold text-brand-900">Mon niveau actuel</h2>
+          {myRanking ? (
+            <div className="space-y-2 text-sm text-brand-800">
+              <p>Classement: <strong>#{myRanking.position}</strong></p>
+              <p>Moyenne: <strong>{myRanking.average}%</strong></p>
+              <p>Meilleur score: <strong>{myRanking.best}%</strong></p>
+            </div>
+          ) : (
+            <p className="text-sm text-brand-700">Fais un quiz pour débloquer tes stats.</p>
+          )}
+          <div className="mt-4">
+            <Link href="/subjects" className="btn-primary">Lancer un entraînement</Link>
           </div>
         </article>
       </div>
 
       <article className="card">
-        <h2 className="mb-3 text-xl font-semibold">Activité récente</h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-brand-900">Annonces et alertes</h2>
+          <Link href="/messages" className="text-sm text-brand-700 hover:underline">Voir tout</Link>
+        </div>
         <div className="space-y-2 text-sm">
-          {community.recent.map((a) => (
-            <div key={a.attemptId} className={`flex flex-wrap items-center justify-between rounded border px-3 py-2 ${a.mine ? 'border-brand-500 bg-brand-50' : 'border-brand-100'}`}>
-              <span className="font-semibold">{a.displayName} - {a.school}</span>
-              <span>{a.subject}</span>
-              <span>{a.percentage}%</span>
-              <span>{new Date(a.finishedAt).toLocaleString()}</span>
-            </div>
+          {notifications.map((n) => (
+            <Link
+              key={n.id}
+              href={resolveNotificationHref(n)}
+              className={`block rounded border px-3 py-2 ${n.isRead ? 'border-brand-100' : 'border-brand-500 bg-brand-50'}`}
+            >
+              <p className="font-semibold text-brand-900">{n.title}</p>
+              <p className="text-brand-700">{n.message}</p>
+              <p className="text-xs text-brand-700">{new Date(n.createdAt).toLocaleString()}</p>
+            </Link>
           ))}
-          {community.recent.length === 0 ? <p>Aucune tentative récente.</p> : null}
+          {notifications.length === 0 ? <p className="text-brand-700">Aucune alerte pour le moment.</p> : null}
         </div>
       </article>
 
