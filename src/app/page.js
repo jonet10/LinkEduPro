@@ -282,7 +282,7 @@ export default function HomePage() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="home-gold-shell space-y-6">
       {showCalendarNotice ? (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
           <div className="w-full max-w-lg rounded-2xl border border-brand-100 bg-white p-6 shadow-2xl">
@@ -328,27 +328,27 @@ export default function HomePage() {
         </div>
       ) : null}
 
-      <div className="card motion-enter lift-card">
+      <div className="card motion-enter lift-card home-gold-card">
         <p className="text-sm text-brand-700">Bienvenue</p>
-        <h1 className="text-3xl font-black text-brand-900">
+        <h1 className="home-gold-title text-3xl font-black text-brand-900">
           {homeIntro.title}
         </h1>
         <p className="mt-2 text-sm text-brand-700">
           {homeIntro.subtitle}
         </p>
         <div className="mt-4 flex gap-3">
-          <Link href={homeIntro.primaryHref} className="btn-primary cta-pulse">{homeIntro.primaryLabel}</Link>
+          <Link href={homeIntro.primaryHref} className="btn-primary cta-pulse home-gold-cta">{homeIntro.primaryLabel}</Link>
           <Link href={homeIntro.secondaryHref} className="btn-secondary">{homeIntro.secondaryLabel}</Link>
         </div>
       </div>
 
       {isStudentRole ? (
-        <div className="card motion-enter motion-delay-1 lift-card border border-brand-200 bg-gradient-to-r from-brand-50 to-white">
+        <div className="card motion-enter motion-delay-1 lift-card home-gold-soft border border-brand-200 bg-gradient-to-r from-brand-50 to-white">
           <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Coaching intelligent</p>
-          <h2 className="mt-1 text-xl font-bold text-brand-900">{dailyObjective.title}</h2>
+          <h2 className="home-gold-title mt-1 text-xl font-bold text-brand-900">{dailyObjective.title}</h2>
           <p className="mt-2 text-sm text-brand-700">{dailyObjective.description}</p>
           <div className="mt-4">
-            <Link href={dailyObjective.ctaHref} className="btn-primary cta-pulse">{dailyObjective.ctaLabel}</Link>
+            <Link href={dailyObjective.ctaHref} className="btn-primary cta-pulse home-gold-cta">{dailyObjective.ctaLabel}</Link>
           </div>
         </div>
       ) : null}
@@ -425,8 +425,8 @@ export default function HomePage() {
           </article>
         </div>
       ) : (
-        <article className="card motion-enter motion-delay-3 lift-card">
-          <h2 className="mb-3 text-xl font-semibold text-brand-900">Centre de gestion</h2>
+        <article className="card motion-enter motion-delay-3 lift-card home-gold-soft">
+          <h2 className="home-gold-title mb-3 text-xl font-semibold text-brand-900">Centre de gestion</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {managerQuickActions.map((action) => (
               <Link key={action.href} href={action.href} className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
@@ -438,9 +438,9 @@ export default function HomePage() {
         </article>
       )}
 
-      <article className="card motion-enter motion-delay-4 lift-card">
+      <article className="card motion-enter motion-delay-4 lift-card home-gold-soft">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-brand-900">Annonces et alertes</h2>
+          <h2 className="home-gold-title text-xl font-semibold text-brand-900">Annonces et alertes</h2>
           <Link href="/messages" className="text-sm text-brand-700 hover:underline">Voir tout</Link>
         </div>
         <div className="space-y-2 text-sm">
