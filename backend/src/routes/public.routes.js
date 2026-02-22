@@ -11,7 +11,9 @@ const {
   pingOnlinePresence,
   getOnlinePresenceStats,
   getHomeTikTokCreators,
-  submitHomeChallengeVote
+  submitHomeChallengeVote,
+  updateHomeChallengeVote,
+  deleteHomeChallengeVote
 } = require('../controllers/public.controller');
 
 const router = express.Router();
@@ -27,6 +29,8 @@ router.get('/online/stats', optionalAuth, getOnlinePresenceStats);
 router.get('/home/tiktok-creators', optionalAuth, getHomeTikTokCreators);
 router.get('/home/challenge', optionalAuth, getHomeTikTokCreators);
 router.post('/home/challenge/vote', auth, submitHomeChallengeVote);
+router.patch('/home/challenge/vote', auth, updateHomeChallengeVote);
+router.delete('/home/challenge/vote', auth, deleteHomeChallengeVote);
 
 module.exports = router;
 

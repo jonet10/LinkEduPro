@@ -158,6 +158,7 @@ export default function HomePage() {
   const [selectedChallengeHandle, setSelectedChallengeHandle] = useState('');
   const [challengeComment, setChallengeComment] = useState('');
   const [challengeSubmitting, setChallengeSubmitting] = useState(false);
+  const [challengeDeleting, setChallengeDeleting] = useState(false);
   const [challengeFeedback, setChallengeFeedback] = useState('');
   const [weekCountdown, setWeekCountdown] = useState(getWeekCountdownLabel());
   const [error, setError] = useState('');
@@ -371,6 +372,74 @@ export default function HomePage() {
       setChallengeFeedback(e.message || 'Impossible d’enregistrer le vote.');
     } finally {
       setChallengeSubmitting(false);
+    }
+  }
+
+  async function updateChallengeVote() {
+    const token = getToken();
+    if (!token) {
+      setChallengeFeedback('Connecte-toi pour modifier ton vote.');
+      return;
+    }
+    if (!selectedChallengeHandle) {
+      setChallengeFeedback('Choisis une personne avant de modifier.');
+      return;
+    }
+
+    try {
+      setChallengeSubmitting(true);
+      setChallengeFeedback('');
+      await apiClient('/public/home/challenge/vote', {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify({
+          handle: selectedChallengeHandle,
+          comment: challengeComment
+        })
+      });
+
+      const refreshed = await apiClient('/public/home/challenge', { token });
+      setHomeChallenge({
+        ...DEFAULT_HOME_CHALLENGE,
+        ...refreshed,
+        items: Array.isArray(refreshed?.items) ? refreshed.items : DEFAULT_HOME_CHALLENGE.items
+      });
+      setChallengeFeedback('Vote modifié avec succès.');
+    } catch (e) {
+      setChallengeFeedback(e.message || 'Impossible de modifier le vote.');
+    } finally {
+      setChallengeSubmitting(false);
+    }
+  }
+
+  async function deleteChallengeVote() {
+    const token = getToken();
+    if (!token) {
+      setChallengeFeedback('Connecte-toi pour supprimer ton vote.');
+      return;
+    }
+
+    try {
+      setChallengeDeleting(true);
+      setChallengeFeedback('');
+      await apiClient('/public/home/challenge/vote', {
+        method: 'DELETE',
+        token
+      });
+
+      const refreshed = await apiClient('/public/home/challenge', { token });
+      setHomeChallenge({
+        ...DEFAULT_HOME_CHALLENGE,
+        ...refreshed,
+        items: Array.isArray(refreshed?.items) ? refreshed.items : DEFAULT_HOME_CHALLENGE.items
+      });
+      setSelectedChallengeHandle('');
+      setChallengeComment('');
+      setChallengeFeedback('Vote supprimé. Tu peux voter à nouveau.');
+    } catch (e) {
+      setChallengeFeedback(e.message || 'Impossible de supprimer le vote.');
+    } finally {
+      setChallengeDeleting(false);
     }
   }
 
@@ -800,16 +869,36 @@ export default function HomePage() {
             value={challengeComment}
             onChange={(e) => setChallengeComment(e.target.value)}
             maxLength={500}
-            disabled={Boolean(homeChallenge.myVote)}
           />
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={submitChallengeVote}
-            disabled={challengeSubmitting || Boolean(homeChallenge.myVote)}
-          >
-            {homeChallenge.myVote ? 'Vote déjà envoyé' : (challengeSubmitting ? 'Envoi...' : 'Voter maintenant')}
-          </button>
+          {homeChallenge.myVote ? (
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={updateChallengeVote}
+                disabled={challengeSubmitting || challengeDeleting}
+              >
+                {challengeSubmitting ? 'Modification...' : 'Modifier mon vote'}
+              </button>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={deleteChallengeVote}
+                disabled={challengeSubmitting || challengeDeleting}
+              >
+                {challengeDeleting ? 'Suppression...' : 'Supprimer mon vote'}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={submitChallengeVote}
+              disabled={challengeSubmitting || challengeDeleting}
+            >
+              {challengeSubmitting ? 'Envoi...' : 'Voter maintenant'}
+            </button>
+          )}
         </div>
         {homeChallenge.myVote ? (
           <p className="mt-2 text-xs text-brand-700">

@@ -600,6 +600,101 @@ async function submitHomeChallengeVote(req, res, next) {
   }
 }
 
+async function updateHomeChallengeVote(req, res, next) {
+  try {
+    const handle = String(req.body?.handle || '').trim();
+    const comment = String(req.body?.comment || '').trim();
+
+    if (!handle) {
+      return res.status(400).json({ message: 'Choisis une personne avant de modifier le vote.' });
+    }
+    if (comment.length > 500) {
+      return res.status(400).json({ message: 'Commentaire trop long (500 caractères max).' });
+    }
+
+    const config = await prisma.communityConfig.findUnique({
+      where: { id: 1 },
+      select: { tiktokCreators: true, homeChallengeTheme: true }
+    });
+
+    const weekKey = getIsoWeekKey();
+    const challengeTheme = String(config?.homeChallengeTheme || 'TIKTOKERS');
+    const candidates = sanitizeTiktokCreators(config?.tiktokCreators || null);
+    const candidateExists = candidates.some((item) => item.handle === handle);
+    if (!candidateExists) {
+      return res.status(400).json({ message: 'Candidat invalide pour ce challenge.' });
+    }
+
+    const existing = await prisma.homeChallengeVote.findUnique({
+      where: {
+        userId_weekKey_challengeTheme: {
+          userId: req.user.id,
+          weekKey,
+          challengeTheme
+        }
+      }
+    });
+
+    if (!existing) {
+      return res.status(404).json({ message: 'Aucun vote trouvé pour cette semaine.' });
+    }
+
+    const updated = await prisma.homeChallengeVote.update({
+      where: {
+        userId_weekKey_challengeTheme: {
+          userId: req.user.id,
+          weekKey,
+          challengeTheme
+        }
+      },
+      data: {
+        candidateHandle: handle,
+        comment: comment || null
+      },
+      select: {
+        id: true,
+        candidateHandle: true,
+        comment: true,
+        createdAt: true
+      }
+    });
+
+    return res.json({
+      message: 'Vote modifié avec succès.',
+      vote: updated
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deleteHomeChallengeVote(req, res, next) {
+  try {
+    const config = await prisma.communityConfig.findUnique({
+      where: { id: 1 },
+      select: { homeChallengeTheme: true }
+    });
+    const weekKey = getIsoWeekKey();
+    const challengeTheme = String(config?.homeChallengeTheme || 'TIKTOKERS');
+
+    const deleted = await prisma.homeChallengeVote.deleteMany({
+      where: {
+        userId: req.user.id,
+        weekKey,
+        challengeTheme
+      }
+    });
+
+    if (deleted.count === 0) {
+      return res.status(404).json({ message: 'Aucun vote à supprimer pour cette semaine.' });
+    }
+
+    return res.json({ message: 'Vote supprimé.' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   listRecentBlogPosts,
   getPublicBlogPost,
@@ -610,6 +705,8 @@ module.exports = {
   pingOnlinePresence,
   getOnlinePresenceStats,
   getHomeTikTokCreators,
-  submitHomeChallengeVote
+  submitHomeChallengeVote,
+  updateHomeChallengeVote,
+  deleteHomeChallengeVote
 };
 
