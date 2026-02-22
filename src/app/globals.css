@@ -16,6 +16,15 @@
   --card-rgb-b: 255, 212, 143;
   --card-rgb-c: 175, 228, 193;
   --card-rgb-d: 218, 187, 255;
+  --input-bg-start: rgba(255, 255, 255, 0.95);
+  --input-bg-end: rgba(244, 250, 255, 0.96);
+  --input-border: rgba(177, 212, 245, 0.9);
+  --input-text: #08355f;
+  --input-placeholder: #8ba5bf;
+  --input-focus-border: rgba(31, 95, 168, 0.88);
+  --input-focus-ring: rgba(63, 143, 220, 0.18);
+  --input-inset-top: rgba(255, 255, 255, 0.75);
+  --input-inset-bottom: rgba(196, 221, 248, 0.55);
 }
 
 body {
@@ -42,6 +51,15 @@ body {
   --card-rgb-b: 151, 118, 58;
   --card-rgb-c: 64, 126, 104;
   --card-rgb-d: 116, 94, 166;
+  --input-bg-start: rgba(15, 28, 44, 0.9);
+  --input-bg-end: rgba(10, 22, 36, 0.92);
+  --input-border: #355172;
+  --input-text: #e8f2ff;
+  --input-placeholder: #9fb8d5;
+  --input-focus-border: #5b90c6;
+  --input-focus-ring: rgba(91, 144, 198, 0.22);
+  --input-inset-top: rgba(255, 255, 255, 0.06);
+  --input-inset-bottom: rgba(0, 0, 0, 0.22);
 }
 
 .dark body {
@@ -65,6 +83,10 @@ body {
   color: #bfdcff !important;
 }
 
+.dark .text-brand-800 {
+  color: #d6e9ff !important;
+}
+
 .dark .text-brand-500 {
   color: #96c2ef !important;
 }
@@ -79,14 +101,16 @@ body {
   border-color: #355172 !important;
 }
 
-.dark .hover\:bg-brand-50:hover {
-  background-color: rgba(53, 81, 114, 0.45) !important;
+.dark .border-brand-200 {
+  border-color: #466487 !important;
 }
 
-.dark .input {
-  background-color: rgba(15, 28, 44, 0.85);
-  color: #e8f2ff;
-  border-color: #355172;
+.dark .bg-brand-50 {
+  background-color: rgba(40, 62, 88, 0.5) !important;
+}
+
+.dark .hover\:bg-brand-50:hover {
+  background-color: rgba(53, 81, 114, 0.45) !important;
 }
 
 .dark .card::before {
@@ -199,19 +223,82 @@ body {
 
 .input {
   @apply w-full rounded-lg px-3 py-2 outline-none;
-  border: 1px solid rgba(177, 212, 245, 0.9);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(244, 250, 255, 0.96));
+  border: 1px solid var(--input-border);
+  background: linear-gradient(180deg, var(--input-bg-start), var(--input-bg-end));
+  color: var(--input-text);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    inset 0 -1px 0 rgba(196, 221, 248, 0.55);
+    inset 0 1px 0 var(--input-inset-top),
+    inset 0 -1px 0 var(--input-inset-bottom);
   transition: border-color 120ms ease, box-shadow 120ms ease;
+  color-scheme: light;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]):not(.input),
+.dark select:not(.input),
+.dark textarea:not(.input) {
+  background: linear-gradient(180deg, var(--input-bg-start), var(--input-bg-end));
+  color: var(--input-text);
+  border-color: var(--input-border);
+  box-shadow:
+    inset 0 1px 0 var(--input-inset-top),
+    inset 0 -1px 0 var(--input-inset-bottom);
+  color-scheme: dark;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]):not(.input)::placeholder,
+.dark textarea:not(.input)::placeholder {
+  color: var(--input-placeholder);
+  opacity: 1;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]):not(.input):focus,
+.dark select:not(.input):focus,
+.dark textarea:not(.input):focus {
+  border-color: var(--input-focus-border);
+  box-shadow:
+    inset 0 1px 0 var(--input-inset-top),
+    0 0 0 3px var(--input-focus-ring);
+  outline: none;
+}
+
+.dark input[type="datetime-local"]:not(.input),
+.dark input[type="date"]:not(.input),
+.dark input[type="time"]:not(.input) {
+  color: var(--input-text);
+}
+
+.input::placeholder {
+  color: var(--input-placeholder);
+  opacity: 1;
+}
+
+.input option {
+  color: #08355f;
+  background: #f7fbff;
+}
+
+.dark .input option {
+  color: #e8f2ff;
+  background: #13263b;
+}
+
+.dark .input {
+  color-scheme: dark;
 }
 
 .input:focus {
-  border-color: rgba(31, 95, 168, 0.88);
+  border-color: var(--input-focus-border);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    0 0 0 3px rgba(63, 143, 220, 0.18);
+    inset 0 1px 0 var(--input-inset-top),
+    0 0 0 3px var(--input-focus-ring);
+}
+
+input[type="checkbox"] {
+  accent-color: #2f93f2;
+}
+
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.95) hue-rotate(180deg) brightness(1.05);
 }
 
 @media (hover: none) {

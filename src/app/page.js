@@ -4,10 +4,44 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getToken, getStudent, isNsivStudent } from '@/lib/auth';
-import HomeCarousel from '@/components/HomeCarousel';
 import VerifiedTestimonials from '@/components/VerifiedTestimonials';
 
 const CALENDAR_NOTICE_KEY = 'linkedupro_calendar_notice_2025_2026_seen';
+const LANDING_SUBJECTS = [
+  { id: 'chimie', label: 'Chimie' },
+  { id: 'mathematiques', label: 'Mathématiques' },
+  { id: 'physique', label: 'Physique' },
+  { id: 'histoire_geo', label: 'Histoire et géographie' },
+  { id: 'philosophie', label: 'Philosophie' }
+];
+const LANDING_BOOKS_BY_SUBJECT = {
+  chimie: [
+    { title: 'Chimie NSIV - Annales MENFP', meta: '23 fiches • 120 questions' },
+    { title: 'Réactions et stœchiométrie', meta: '17 fiches • 86 questions' }
+  ],
+  mathematiques: [
+    { title: 'Mathématiques NSIV - Bac probable', meta: '34 fiches • 180 questions' },
+    { title: 'Algèbre, géométrie, logique', meta: '28 fiches • 140 questions' }
+  ],
+  physique: [
+    { title: 'Physique NSIV - Série entraînement', meta: '31 fiches • 160 questions' },
+    { title: 'Mécanique, électricité, optique', meta: '19 fiches • 95 questions' }
+  ],
+  histoire_geo: [
+    { title: 'Histoire-Géo NSIV - Examens passés', meta: '16 fiches • 72 questions' },
+    { title: 'Connaissance générale Haïti', meta: '12 fiches • 64 questions' }
+  ],
+  philosophie: [
+    { title: 'Philosophie - Concepts clés', meta: '14 fiches • 59 questions' },
+    { title: 'Dissertations guidées', meta: '10 fiches • 42 questions' }
+  ]
+};
+const LANDING_STUDY_TOOLS = [
+  { title: 'Apprendre', desc: 'Parcours guidé et progressif.' },
+  { title: 'Programmes d’étude', desc: 'Organisation intelligente de tes révisions.' },
+  { title: 'Cartes', desc: 'Mémoire active avec flashcards.' },
+  { title: 'Tests d’entraînement', desc: 'Simulation d’examen et correction.' }
+];
 
 function hasDepartmentAndCommune(schoolLabel) {
   if (!schoolLabel || typeof schoolLabel !== 'string') return false;
@@ -43,7 +77,7 @@ function getDailyObjective(student) {
     },
     SES: {
       title: 'Objectif du jour - Filière SES',
-      description: 'Révise 2 rubriques clés et termine avec un quiz d’évaluation rapide.',
+      description: 'Révise 2 rubriques clés et terminé avec un quiz d’évaluation rapide.',
       ctaLabel: 'Commencer SES',
       ctaHref: '/subjects'
     },
@@ -79,6 +113,7 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const [welcomePopup, setWelcomePopup] = useState(null);
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
+  const [activeLandingSubject, setActiveLandingSubject] = useState(LANDING_SUBJECTS[0].id);
 
   const myRanking = useMemo(() => {
     if (!student?.id) return null;
@@ -99,20 +134,20 @@ export default function HomePage() {
     if (isAdminRole) {
       return {
         title: 'Super Admin',
-        subtitle: 'Pilote la plateforme, supervise les ecoles, les contenus et les communications.',
+        subtitle: 'Pilote la plateforme, supervise les Écoles, les contenus et les communications.',
         primaryHref: '/admin/super-dashboard',
         primaryLabel: 'Ouvrir le dashboard',
         secondaryHref: '/messages',
-        secondaryLabel: 'Gerer les annonces'
+        secondaryLabel: 'Gérer les annonces'
       };
     }
 
     if (isTeacherRole) {
       return {
         title: 'Espace Professeur',
-        subtitle: 'Cree des contenus, accompagne les eleves et organise les sessions de rattrapage.',
+        subtitle: 'Crée des contenus, accompagne les élèves et organise les sessions de rattrapage.',
         primaryHref: '/blog',
-        primaryLabel: 'Creer une publication',
+        primaryLabel: 'Créer une publication',
         secondaryHref: '/rattrapage',
         secondaryLabel: 'Planifier rattrapage'
       };
@@ -131,20 +166,24 @@ export default function HomePage() {
   const managerQuickActions = useMemo(() => {
     if (isAdminRole) {
       return [
-        { href: '/admin/super-dashboard', title: 'Supervision globale', desc: 'Suivre les eleves, ecoles et activites.' },
-        { href: '/school-management/dashboard', title: 'Gestion scolaire', desc: 'Piloter classes, eleves et paiements.' },
-        { href: '/messages', title: 'Communication', desc: 'Publier annonces et gerer les messages.' },
-        { href: '/blog', title: 'Contenus communaute', desc: 'Valider et organiser les publications.' }
+        { href: '/admin/super-dashboard', title: 'Supervision globale', desc: 'Suivre les Élèves, Écoles et activités.' },
+        { href: '/school-management/dashboard', title: 'Gestion scolaire', desc: 'Piloter classes, Élèves et paiements.' },
+        { href: '/messages', title: 'Communication', desc: 'Publier annonces et Gérer les messages.' },
+        { href: '/blog', title: 'Contenus communauté', desc: 'Valider et organiser les publications.' }
       ];
     }
 
     return [
-      { href: '/blog', title: 'Publications pedagogiques', desc: 'Poster supports, conseils et ressources.' },
+      { href: '/blog', title: 'Publications pédagogiques', desc: 'Poster supports, conseils et ressources.' },
       { href: '/rattrapage', title: 'Sessions rattrapage', desc: 'Programmer et suivre les sessions live.' },
-      { href: '/messages', title: 'Messagerie', desc: 'Repondre aux eleves et diffuser des annonces.' },
-      { href: '/library', title: 'Ressources', desc: 'Partager des PDF et references utiles.' }
+      { href: '/messages', title: 'Messagerie', desc: 'Répondre aux Élèves et diffuser des annonces.' },
+      { href: '/library', title: 'Ressources', desc: 'Partager des PDF et références utiles.' }
     ];
   }, [isAdminRole]);
+  const activeLandingBooks = useMemo(
+    () => LANDING_BOOKS_BY_SUBJECT[activeLandingSubject] || [],
+    [activeLandingSubject]
+  );
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -211,7 +250,7 @@ export default function HomePage() {
 
   if (!isAuthed) {
     return (
-      <section className="space-y-8">
+      <section className="landing-shell space-y-8">
         {showCalendarNotice ? (
           <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
             <div className="w-full max-w-lg rounded-2xl border border-brand-100 bg-white p-6 shadow-2xl">
@@ -240,39 +279,88 @@ export default function HomePage() {
           </div>
         ) : null}
 
-        <HomeCarousel isAuthed={isAuthed} />
-
-        <section className="card" aria-labelledby="cta-title">
-          <h2 id="cta-title" className="text-2xl font-bold text-brand-900">Prêt à progresser dès aujourd'hui ?</h2>
-          <p className="mt-2 text-sm text-brand-700">
-            Lance un quiz, découvre les séries disponibles et commence ton entraînement.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link href="/login" className="btn-primary">Commencer un Quiz</Link>
-            <Link href="/subjects" className="btn-secondary">Explorer les Quiz</Link>
-            <Link href="/register" className="btn-secondary">Créer un compte</Link>
+        <section className="landing-hero card">
+          <div>
+            <p className="landing-kicker">LinkEduPro</p>
+            <h1 className="landing-title">Trouvez des solutions fiables tirées des contenus scolaires</h1>
+            <ul className="mt-5 space-y-2 text-base text-brand-900">
+              <li>Explications détaillées et progressives</li>
+              <li>Réponses vérifiées pour l'entraînement</li>
+              <li>Ressources utiles pour le Bac et les examens</li>
+            </ul>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link href="/register" className="btn-primary">S’inscrire gratuitement</Link>
+              <Link href="/login" className="btn-secondary">Se connecter</Link>
+            </div>
+          </div>
+          <div className="landing-hero-art" aria-hidden="true">
+            <div className="landing-device-card">
+              <p className="font-semibold text-brand-900">Exercice vérifié</p>
+              <p className="mt-1 text-sm text-brand-700">Solution étape par étape</p>
+            </div>
+            <div className="landing-device-card">
+              <p className="font-semibold text-brand-900">Test d’entraînement</p>
+              <p className="mt-1 text-sm text-brand-700">Score, correction et révision</p>
+            </div>
           </div>
         </section>
 
-        <section className="card" aria-labelledby="features-title">
-          <h2 id="features-title" className="mb-4 text-2xl font-bold text-brand-900">Fonctionnalités principales</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <article className="rounded-xl border border-brand-100 p-4">
-              <h3 className="font-semibold text-brand-900">Quiz interactifs</h3>
-              <p className="mt-2 text-sm text-brand-700">Questions dynamiques, chronomètre et correction immédiate.</p>
-            </article>
-            <article className="rounded-xl border border-brand-100 p-4">
-              <h3 className="font-semibold text-brand-900">Statistiques</h3>
-              <p className="mt-2 text-sm text-brand-700">Suivi des scores, moyenne par matière et progression.</p>
-            </article>
-            <article className="rounded-xl border border-brand-100 p-4">
-              <h3 className="font-semibold text-brand-900">Profils</h3>
-              <p className="mt-2 text-sm text-brand-700">Profil élève avec niveau, école et historique des tentatives.</p>
-            </article>
-            <article className="rounded-xl border border-brand-100 p-4">
-              <h3 className="font-semibold text-brand-900">Opportunités</h3>
-              <p className="mt-2 text-sm text-brand-700">Concours actifs, annonces académiques et recommandations ciblées.</p>
-            </article>
+        <section className="card">
+          <div className="landing-search-box">
+            <span className="text-xl text-brand-700">⌕</span>
+            <input
+              className="landing-search-input"
+              placeholder="Rechercher un manuel, une question ou un sujet"
+              type="text"
+            />
+          </div>
+        </section>
+
+        <section className="card" aria-labelledby="how-title">
+          <h2 id="how-title" className="text-4xl font-black text-brand-900">Comment souhaitez-vous étudier ?</h2>
+          <p className="mt-3 max-w-3xl text-lg text-brand-700">
+            Maîtrisez vos matières grâce aux cartes, tests d'entraînement, programmes d'étude et activités guidées.
+          </p>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {LANDING_STUDY_TOOLS.map((tool, idx) => (
+              <article key={tool.title} className={`landing-tool-card landing-tool-${idx + 1}`}>
+                <p className="text-2xl font-bold text-brand-900">{tool.title}</p>
+                <p className="mt-2 text-sm text-brand-700">{tool.desc}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="card" aria-labelledby="subjects-title">
+          <h2 id="subjects-title" className="text-4xl font-black text-brand-900">Parcourir par sujet</h2>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {LANDING_SUBJECTS.map((subject) => (
+              <button
+                key={subject.id}
+                type="button"
+                onClick={() => setActiveLandingSubject(subject.id)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                  activeLandingSubject === subject.id
+                    ? 'bg-brand-500 text-white'
+                    : 'border border-brand-100 bg-white text-brand-700'
+                }`}
+              >
+                {subject.label}
+              </button>
+            ))}
+          </div>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {activeLandingBooks.map((book) => (
+              <article key={book.title} className="rounded-xl border border-brand-100 bg-white p-4">
+                <p className="text-lg font-bold text-brand-900">{book.title}</p>
+                <p className="mt-2 text-sm text-brand-700">{book.meta}</p>
+                <div className="mt-3">
+                  <Link href="/register" className="text-sm font-semibold text-brand-500 hover:underline">
+                    Voir le contenu
+                  </Link>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
 
@@ -355,12 +443,12 @@ export default function HomePage() {
 
       {isStudentRole && !hasDepartmentAndCommune(student?.school) ? (
         <div className="card motion-enter motion-delay-2 lift-card border border-amber-300 bg-amber-50">
-          <p className="text-sm font-semibold text-amber-900">Mise a jour de profil requise</p>
+          <p className="text-sm font-semibold text-amber-900">Mise à jour de profil requise</p>
           <p className="mt-1 text-sm text-amber-900">
-            Ton departement et ta commune sont manquants. Merci de mettre a jour ton profil pour continuer avec des contenus personnalises.
+            Ton département et ta commune sont manquants. Merci de mettre à jour ton profil pour continuer avec des contenus personnalisés.
           </p>
           <div className="mt-3">
-            <Link href="/profile?edit=1" className="btn-primary">Mettre a jour mon profil</Link>
+            <Link href="/profile?edit=1" className="btn-primary">Mettre à jour mon profil</Link>
           </div>
         </div>
       ) : null}
@@ -368,7 +456,7 @@ export default function HomePage() {
       {isStudentRole && isNsivStudent(student) ? (
         <div className="card motion-enter motion-delay-2 lift-card">
           <h2 className="text-xl font-semibold text-brand-900">Rubriques NSIV</h2>
-          <p className="mt-2 text-sm text-brand-700">Acces direct aux rubriques principales de Terminale.</p>
+          <p className="mt-2 text-sm text-brand-700">Accès direct aux rubriques principales de Terminale.</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50 lift-card">
               <p className="font-semibold text-brand-900">Espace NSIV</p>
@@ -376,7 +464,7 @@ export default function HomePage() {
             </Link>
             <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50 lift-card">
               <p className="font-semibold text-brand-900">Exercices probables</p>
-              <p className="mt-1 text-sm text-brand-700">Sujets recurrents du Bac NSIV.</p>
+              <p className="mt-1 text-sm text-brand-700">Sujets récurrents du Bac NSIV.</p>
             </Link>
           </div>
         </div>

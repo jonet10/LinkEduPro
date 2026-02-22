@@ -183,7 +183,7 @@ export default function ProfilePage() {
 
       setSelectedPhoto(null);
       setPhotoPreview('');
-      setSuccess('Photo de profil mise a jour.');
+      setSuccess('Photo de profil Mise à jour.');
     } catch (e) {
       setError(e.message || 'Erreur upload photo');
     } finally {
@@ -201,6 +201,16 @@ export default function ProfilePage() {
 
     try {
       const chosenSchool = form.schoolFromList || form.schoolInput;
+      if (!form.department || !form.commune) {
+        setError('Le département et la commune sont obligatoires.');
+        setSaving(false);
+        return;
+      }
+      if (!chosenSchool) {
+        setError("Choisis une École dans la liste ou saisis une École manuellement.");
+        setSaving(false);
+        return;
+      }
       const schoolLabel = form.department && form.commune && chosenSchool
         ? `${form.department} / ${form.commune} / ${chosenSchool}`
         : chosenSchool;
@@ -247,7 +257,7 @@ export default function ProfilePage() {
       }
 
       setEditMode(false);
-      setSuccess('Profil mis a jour avec succes.');
+      setSuccess('Profil mis à jour avec succès.');
     } catch (e) {
       setError(e.message || 'Erreur de sauvegarde');
     } finally {
@@ -292,7 +302,7 @@ export default function ProfilePage() {
       <div className="card">
         <h1 className="mb-4 text-2xl font-bold text-brand-900">Profil utilisateur</h1>
         <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">
-          Mise a jour disponible: la base des ecoles a ete enrichie. Verifie ton ecole et ta classe puis sauvegarde ton profil.
+          Mise à jour disponible: la base des Écoles a été enrichie. Vérifie ton École et ta classe puis sauvegarde ton profil.
         </div>
 
         <div className="mb-6 flex flex-col items-center gap-3 sm:flex-row sm:items-start">
@@ -311,12 +321,12 @@ export default function ProfilePage() {
 
           <div className="w-full space-y-2">
             <p className="text-sm text-brand-700">{profile.firstName} {profile.lastName}</p>
-            <p className="text-xs text-brand-700">Role: {profile.role}</p>
+            <p className="text-xs text-brand-700">Rôle: {profile.role}</p>
             {editMode ? (
               <div className="flex flex-wrap items-center gap-2">
                 <input type="file" accept="image/*" onChange={onSelectPhoto} className="text-xs" />
                 <button type="button" className="btn-secondary" onClick={onUploadPhoto} disabled={!selectedPhoto || uploading}>
-                  {uploading ? 'Upload...' : 'Mettre a jour photo'}
+                  {uploading ? 'Upload...' : 'Mettre à jour photo'}
                 </button>
               </div>
             ) : null}
@@ -333,7 +343,7 @@ export default function ProfilePage() {
             <input className="input" value={form.email} onChange={(e) => onChangeField('email', e.target.value)} disabled={!editMode} />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Telephone</label>
+            <label className="mb-1 block text-sm font-medium">Téléphone</label>
             <input className="input" value={form.phone} onChange={(e) => onChangeField('phone', e.target.value)} disabled={!editMode} />
           </div>
           <div>
@@ -341,14 +351,14 @@ export default function ProfilePage() {
             <input className="input" value={form.address} onChange={(e) => onChangeField('address', e.target.value)} disabled={!editMode} />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Departement</label>
+            <label className="mb-1 block text-sm font-medium">Département</label>
             <select
               className="input"
               value={form.department}
               onChange={(e) => onDepartmentChange(e.target.value)}
               disabled={!editMode}
             >
-              <option value="">Selectionner</option>
+              <option value="">Sélectionner</option>
               {departments.map((department) => (
                 <option key={department} value={department}>{department}</option>
               ))}
@@ -362,14 +372,14 @@ export default function ProfilePage() {
               onChange={(e) => onCommuneChange(e.target.value)}
               disabled={!editMode || !form.department}
             >
-              <option value="">Selectionner</option>
+              <option value="">Sélectionner</option>
               {communes.map((commune) => (
                 <option key={commune} value={commune}>{commune}</option>
               ))}
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium">Ecole (liste)</label>
+            <label className="mb-1 block text-sm font-medium">École (liste)</label>
             <select
               className="input"
               value={form.schoolFromList}
@@ -383,13 +393,13 @@ export default function ProfilePage() {
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium">Ecole (saisie manuelle)</label>
+            <label className="mb-1 block text-sm font-medium">École (saisie manuelle)</label>
             <input
               className="input"
               value={form.schoolInput}
               onChange={(e) => onChangeField('schoolInput', e.target.value)}
               disabled={!editMode}
-              placeholder="Saisis le nom de ton ecole si elle n'est pas listee"
+              placeholder="Saisis le nom de ton École si elle n'est pas listée"
             />
           </div>
           <div className="sm:col-span-2">
@@ -415,14 +425,14 @@ export default function ProfilePage() {
           </div>
           {profile.role === 'STUDENT' ? (
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium">Niveau academique</label>
+              <label className="mb-1 block text-sm font-medium">Niveau académique</label>
               <select
                 className="input"
                 value={form.level}
                 onChange={(e) => onChangeField('level', e.target.value)}
                 disabled={!editMode}
               >
-                <option value="">Selectionner un niveau</option>
+                <option value="">Sélectionner un niveau</option>
                 {ACADEMIC_LEVEL_OPTIONS.map((level) => (
                   <option key={level} value={level}>{level}</option>
                 ))}
@@ -431,7 +441,7 @@ export default function ProfilePage() {
           ) : null}
           {profile.role === 'STUDENT' && form.level === 'NSIV' ? (
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium">Filiere NSIV</label>
+              <label className="mb-1 block text-sm font-medium">Filière NSIV</label>
               <select
                 className="input"
                 value={form.nsivTrack}
@@ -452,7 +462,7 @@ export default function ProfilePage() {
         <div className="mt-6 flex flex-wrap gap-2">
           {!editMode ? (
             <button type="button" className="btn-primary" onClick={() => setEditMode(true)}>
-              Modifier profil
+              Modifier le profil
             </button>
           ) : (
             <>
