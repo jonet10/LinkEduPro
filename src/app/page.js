@@ -149,6 +149,7 @@ export default function HomePage() {
     lastSeenByRole: { students: null, teachers: null, admins: null, others: null },
     mineLastSeenAt: null
   });
+  const [tiktokModels, setTiktokModels] = useState(TIKTOK_MODELS);
   const [error, setError] = useState('');
   const [welcomePopup, setWelcomePopup] = useState(null);
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
@@ -292,6 +293,23 @@ export default function HomePage() {
       if (timer) window.clearInterval(timer);
     };
   }, [isAuthed]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    apiClient('/public/home/tiktok-creators')
+      .then((data) => {
+        const items = Array.isArray(data?.items) ? data.items : [];
+        if (isMounted && items.length > 0) {
+          setTiktokModels(items);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   function closeCalendarNotice() {
     if (typeof window !== 'undefined') {
@@ -449,7 +467,7 @@ export default function HomePage() {
             Dernière activité: {formatLastSeen(onlineStats.latestSeenAt)}
           </p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {TIKTOK_MODELS.map((item) => (
+            {tiktokModels.map((item) => (
               <a
                 key={item.handle}
                 href={`https://www.tiktok.com/search?q=${encodeURIComponent(item.search)}`}
@@ -690,7 +708,7 @@ export default function HomePage() {
           </span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {TIKTOK_MODELS.map((item) => (
+          {tiktokModels.map((item) => (
             <a
               key={item.handle}
               href={`https://www.tiktok.com/search?q=${encodeURIComponent(item.search)}`}
