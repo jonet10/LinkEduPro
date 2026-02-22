@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
-import { getStudent, getToken, isNsivStudent } from '@/lib/auth';
+import { getStudent, getToken } from '@/lib/auth';
 
 function toDatetimeLocal(value) {
   if (!value) return '';
@@ -17,10 +17,14 @@ export default function RattrapagePage() {
   const token = useMemo(() => getToken(), []);
   const student = useMemo(() => getStudent(), []);
   const canManage = student?.role === 'ADMIN' || student?.role === 'TEACHER';
-  const canView = canManage || isNsivStudent(student);
+  const isStudent = student?.role === 'STUDENT';
+  const canView = Boolean(student);
 
   const [sessions, setSessions] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const [teacherStats, setTeacherStats] = useState(null);
+  const [studentStats, setStudentStats] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('MONCASH');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
@@ -29,16 +33,25 @@ export default function RattrapagePage() {
   const [highlightedSessionId, setHighlightedSessionId] = useState(null);
   const [form, setForm] = useState({
     title: '',
+    level: 'NSIV',
     subject: 'Physique',
+    isFree: false,
+    price: '0',
+    maxParticipants: '60',
     description: '',
-    meetUrl: '',
+    meetingLink: '',
     invitationScope: 'GLOBAL',
     targetSchool: '',
     targetTeacherId: '',
     invitationMessage: '',
-    startsAt: '',
-    endsAt: ''
+    startTime: '',
+    duration: '60'
   });
+
+  async function refreshSessions() {
+    const sessionsData = await apiClient('/catchup?page=1&pageSize=100', { token });
+    setSessions(sessionsData.sessions || []);
+  }
 
   useEffect(() => {
     if (!token) {
@@ -51,16 +64,20 @@ export default function RattrapagePage() {
     }
 
     Promise.all([
-      apiClient('/catchup', { token }),
-      canManage ? apiClient('/catchup/teachers', { token }) : Promise.resolve({ teachers: [] })
+      apiClient('/catchup?page=1&pageSize=100', { token }),
+      canManage ? apiClient('/catchup/teachers', { token }) : Promise.resolve({ teachers: [] }),
+      canManage ? apiClient('/catchup/dashboard/teacher', { token }) : Promise.resolve(null),
+      isStudent ? apiClient('/catchup/dashboard/student?page=1&pageSize=8', { token }) : Promise.resolve(null)
     ])
-      .then(([sessionsData, teachersData]) => {
+      .then(([sessionsData, teachersData, teacherData, studentData]) => {
         setSessions(sessionsData.sessions || []);
         setTeachers(teachersData.teachers || []);
+        setTeacherStats(teacherData);
+        setStudentStats(studentData);
       })
       .catch((e) => setError(e.message || 'Impossible de charger les rattrapages.'))
       .finally(() => setLoading(false));
-  }, [token, canView, router]);
+  }, [token, canView, router, canManage, isStudent]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -83,26 +100,32 @@ export default function RattrapagePage() {
         token,
         body: JSON.stringify({
           ...form,
-          startsAt: new Date(form.startsAt).toISOString(),
-          endsAt: new Date(form.endsAt).toISOString(),
+          isFree: Boolean(form.isFree),
+          price: form.isFree ? 0 : Number(form.price || 0),
+          maxParticipants: Number(form.maxParticipants || 0),
+          startTime: new Date(form.startTime).toISOString(),
+          duration: Number(form.duration || 0),
           targetTeacherId: form.invitationScope === 'TEACHER' ? Number(form.targetTeacherId || 0) : null
         })
       });
       setInfo('Rattrapage planifié.');
       setForm({
         title: '',
+        level: 'NSIV',
         subject: 'Physique',
+        isFree: false,
+        price: '0',
+        maxParticipants: '60',
         description: '',
-        meetUrl: '',
+        meetingLink: '',
         invitationScope: 'GLOBAL',
         targetSchool: '',
         targetTeacherId: '',
         invitationMessage: '',
-        startsAt: '',
-        endsAt: ''
+        startTime: '',
+        duration: '60'
       });
-      const data = await apiClient('/catchup', { token });
-      setSessions(data.sessions || []);
+      await refreshSessions();
     } catch (e2) {
       setError(e2.message || 'Erreur création rattrapage.');
     } finally {
@@ -114,15 +137,19 @@ export default function RattrapagePage() {
     setEditingId(session.id);
     setForm({
       title: session.title || '',
+      level: session.level || 'NSIV',
       subject: session.subject || 'Physique',
+      isFree: Boolean(session.isFree),
+      price: session.price != null ? String(session.price) : '0',
+      maxParticipants: session.maxParticipants ? String(session.maxParticipants) : '60',
       description: session.description || '',
-      meetUrl: session.meetUrl || '',
+      meetingLink: session.meetingLink || session.meetUrl || '',
       invitationScope: session.invitationScope || 'GLOBAL',
       targetSchool: session.targetSchool || '',
       targetTeacherId: session.targetTeacherId ? String(session.targetTeacherId) : '',
       invitationMessage: session.invitationMessage || '',
-      startsAt: toDatetimeLocal(session.startsAt),
-      endsAt: toDatetimeLocal(session.endsAt)
+      startTime: toDatetimeLocal(session.startTime || session.startsAt),
+      duration: session.duration ? String(session.duration) : '60'
     });
     setError('');
     setInfo('');
@@ -139,8 +166,11 @@ export default function RattrapagePage() {
         token,
         body: JSON.stringify({
           ...form,
-          startsAt: new Date(form.startsAt).toISOString(),
-          endsAt: new Date(form.endsAt).toISOString(),
+          isFree: Boolean(form.isFree),
+          price: form.isFree ? 0 : Number(form.price || 0),
+          maxParticipants: Number(form.maxParticipants || 0),
+          startTime: new Date(form.startTime).toISOString(),
+          duration: Number(form.duration || 0),
           targetTeacherId: form.invitationScope === 'TEACHER' ? Number(form.targetTeacherId || 0) : null
         })
       });
@@ -148,18 +178,21 @@ export default function RattrapagePage() {
       setEditingId(null);
       setForm({
         title: '',
+        level: 'NSIV',
         subject: 'Physique',
+        isFree: false,
+        price: '0',
+        maxParticipants: '60',
         description: '',
-        meetUrl: '',
+        meetingLink: '',
         invitationScope: 'GLOBAL',
         targetSchool: '',
         targetTeacherId: '',
         invitationMessage: '',
-        startsAt: '',
-        endsAt: ''
+        startTime: '',
+        duration: '60'
       });
-      const data = await apiClient('/catchup', { token });
-      setSessions(data.sessions || []);
+      await refreshSessions();
     } catch (e2) {
       setError(e2.message || 'Erreur mise à jour.');
     } finally {
@@ -187,14 +220,69 @@ export default function RattrapagePage() {
     await onCreate(e);
   }
 
+  async function onEnroll(sessionId) {
+    setError('');
+    setInfo('');
+    try {
+      const data = await apiClient(`/catchup/${sessionId}/enroll`, {
+        method: 'POST',
+        token
+      });
+      setInfo(data.message || 'Inscription enregistrée.');
+      await refreshSessions();
+    } catch (e) {
+      setError(e.message || 'Impossible de réserver la place.');
+    }
+  }
+
+  async function onPay(sessionId, price) {
+    setError('');
+    setInfo('');
+    try {
+      const data = await apiClient(`/catchup/${sessionId}/pay`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({
+          paymentMethod,
+          amount: Number(price || 0)
+        })
+      });
+      setInfo(data.message || 'Paiement validé.');
+      await refreshSessions();
+    } catch (e) {
+      setError(e.message || 'Impossible de valider le paiement.');
+    }
+  }
+
   return (
     <section className="space-y-5">
       <div className="card">
-        <h1 className="text-3xl font-bold text-brand-900">Rattrapage NSIV</h1>
+        <h1 className="text-3xl font-bold text-brand-900">Sessions de rattrapage</h1>
         <p className="mt-2 text-sm text-brand-700">
-          Sessions de rattrapage planifiées via Google Meet pour les élèves NSIV.
+          Sessions gratuites ou payantes. Les élèves réservent leur place et accèdent au lien après validation.
         </p>
       </div>
+
+      {canManage ? (
+        <div className="grid gap-3 md:grid-cols-4">
+          <article className="card">
+            <p className="text-xs text-brand-700">Revenus prof</p>
+            <p className="text-2xl font-bold text-brand-900">{teacherStats?.summary?.totalRevenue ?? 0}</p>
+          </article>
+          <article className="card">
+            <p className="text-xs text-brand-700">Commission plateforme</p>
+            <p className="text-2xl font-bold text-brand-900">{teacherStats?.summary?.totalCommission ?? 0}</p>
+          </article>
+          <article className="card">
+            <p className="text-xs text-brand-700">Élèves inscrits</p>
+            <p className="text-2xl font-bold text-brand-900">{teacherStats?.summary?.totalStudents ?? 0}</p>
+          </article>
+          <article className="card">
+            <p className="text-xs text-brand-700">Sessions</p>
+            <p className="text-2xl font-bold text-brand-900">{teacherStats?.summary?.totalSessions ?? 0}</p>
+          </article>
+        </div>
+      ) : null}
 
       {canManage ? (
         <div className="card">
@@ -203,8 +291,24 @@ export default function RattrapagePage() {
           </h2>
           <form className="mt-3 grid gap-3 md:grid-cols-2" onSubmit={onSubmitForm}>
             <input className="input" placeholder="Titre" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} required />
+            <select className="input" value={form.level} onChange={(e) => setForm((p) => ({ ...p, level: e.target.value }))} required>
+              <option value="LEVEL_9E">9e</option>
+              <option value="NSI">NSI</option>
+              <option value="NSII">NSII</option>
+              <option value="NSIII">NSIII</option>
+              <option value="NSIV">NSIV</option>
+              <option value="UNIVERSITAIRE">Universitaire</option>
+            </select>
             <input className="input" placeholder="Matière (ex: Physique)" value={form.subject} onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))} required />
-            <input className="input md:col-span-2" placeholder="Lien Google Meet" value={form.meetUrl} onChange={(e) => setForm((p) => ({ ...p, meetUrl: e.target.value }))} required />
+            <input className="input" type="number" min={1} placeholder="Max participants" value={form.maxParticipants} onChange={(e) => setForm((p) => ({ ...p, maxParticipants: e.target.value }))} required />
+            <label className="inline-flex items-center gap-2 text-sm text-brand-800">
+              <input type="checkbox" checked={Boolean(form.isFree)} onChange={(e) => setForm((p) => ({ ...p, isFree: e.target.checked }))} />
+              Session gratuite
+            </label>
+            {!form.isFree ? (
+              <input className="input" type="number" min={1} step="0.01" placeholder="Prix" value={form.price} onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))} required />
+            ) : null}
+            <input className="input md:col-span-2" placeholder="Lien Google Meet" value={form.meetingLink} onChange={(e) => setForm((p) => ({ ...p, meetingLink: e.target.value }))} required />
             <select className="input" value={form.invitationScope} onChange={(e) => setForm((p) => ({ ...p, invitationScope: e.target.value }))}>
               <option value="GLOBAL">Global</option>
               <option value="TEACHERS">Entre professeurs</option>
@@ -224,8 +328,8 @@ export default function RattrapagePage() {
                 ))}
               </select>
             ) : null}
-            <input className="input" type="datetime-local" value={form.startsAt} onChange={(e) => setForm((p) => ({ ...p, startsAt: e.target.value }))} required />
-            <input className="input" type="datetime-local" value={form.endsAt} onChange={(e) => setForm((p) => ({ ...p, endsAt: e.target.value }))} required />
+            <input className="input" type="datetime-local" value={form.startTime} onChange={(e) => setForm((p) => ({ ...p, startTime: e.target.value }))} required />
+            <input className="input" type="number" min={15} max={600} step={5} value={form.duration} onChange={(e) => setForm((p) => ({ ...p, duration: e.target.value }))} required />
             <textarea className="input md:col-span-2" placeholder="Description (optionnel)" value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
             <textarea className="input md:col-span-2" placeholder="Message d'annonce personnalisé (optionnel)" value={form.invitationMessage} onChange={(e) => setForm((p) => ({ ...p, invitationMessage: e.target.value }))} />
             {!editingId ? (
@@ -243,6 +347,33 @@ export default function RattrapagePage() {
       {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {info ? <p className="text-sm text-green-600">{info}</p> : null}
+      {isStudent ? (
+        <div className="card flex flex-wrap items-center gap-2">
+          <p className="text-sm text-brand-700">Méthode de paiement:</p>
+          <select className="input w-full max-w-xs" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+            <option value="MONCASH">MonCash</option>
+            <option value="NATCASH">NatCash</option>
+            <option value="CARD">Carte</option>
+            <option value="BANK_TRANSFER">Virement</option>
+            <option value="CASH">Cash</option>
+          </select>
+        </div>
+      ) : null}
+      {isStudent ? (
+        <div className="card">
+          <h2 className="text-lg font-semibold text-brand-900">Historique des sessions suivies</h2>
+          <div className="mt-2 space-y-2">
+            {(studentStats?.history || []).slice(0, 5).map((item) => (
+              <div key={item.enrollmentId} className="rounded border border-brand-200 px-3 py-2 text-sm text-brand-800">
+                {item.session?.title} | {item.session?.subject} | Paiement: {item.paymentStatus}
+              </div>
+            ))}
+            {(!studentStats?.history || studentStats.history.length === 0) ? (
+              <p className="text-sm text-brand-700">Aucune session suivie pour le moment.</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
         {sessions.map((session) => (
@@ -250,6 +381,9 @@ export default function RattrapagePage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">{session.subject}</p>
             <h3 className="text-lg font-semibold text-brand-900">{session.title}</h3>
             {session.description ? <p className="mt-1 text-sm text-brand-700">{session.description}</p> : null}
+            <p className="mt-1 text-xs text-brand-700">
+              Niveau: {session.level} | {session.isFree ? 'Gratuite' : `Prix: ${session.price}`} | Places: {session.enrolledCount}/{session.maxParticipants}
+            </p>
             <p className="mt-1 text-xs text-brand-700">
               Audience: {session.invitationScope}
               {session.targetSchool ? ` | École: ${session.targetSchool}` : ''}
@@ -260,11 +394,25 @@ export default function RattrapagePage() {
                 {session.invitationMessage}
               </p>
             ) : null}
-            <p className="mt-2 text-sm text-brand-700">Début: {new Date(session.startsAt).toLocaleString()}</p>
-            <p className="text-sm text-brand-700">Fin: {new Date(session.endsAt).toLocaleString()}</p>
-            <a href={session.meetUrl} target="_blank" rel="noopener noreferrer" className="btn-primary mt-3 inline-block">
-              Rejoindre Google Meet
-            </a>
+            <p className="mt-2 text-sm text-brand-700">Début: {new Date(session.startTime || session.startsAt).toLocaleString()}</p>
+            <p className="text-sm text-brand-700">Durée: {session.duration} minutes</p>
+            {session.canAccessMeeting && session.meetUrl ? (
+              <a href={session.meetUrl} target="_blank" rel="noopener noreferrer" className="btn-primary mt-3 inline-block">
+                Rejoindre Google Meet
+              </a>
+            ) : (
+              <p className="mt-2 text-sm text-amber-700">Lien Meet verrouillé jusqu’à validation de l’accès.</p>
+            )}
+            {isStudent ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {!session.enrollment ? (
+                  <button className="btn-secondary" onClick={() => onEnroll(session.id)}>Réserver ma place</button>
+                ) : null}
+                {session.enrollment && session.enrollment.paymentStatus !== 'PAID' && !session.isFree ? (
+                  <button className="btn-primary" onClick={() => onPay(session.id, session.price)}>Payer et débloquer</button>
+                ) : null}
+              </div>
+            ) : null}
             {canManage ? (
               <div className="mt-3 flex gap-2">
                 <button className="btn-secondary" onClick={() => startEdit(session)}>Modifier</button>
