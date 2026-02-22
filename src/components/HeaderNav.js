@@ -28,12 +28,41 @@ export default function HeaderNav() {
   const [darkMode, setDarkMode] = useState(false);
   const [avatarBroken, setAvatarBroken] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isPublicToolsOpen, setIsPublicToolsOpen] = useState(false);
+  const [isPublicSubjectsOpen, setIsPublicSubjectsOpen] = useState(false);
+  const [isPublicMobileMenuOpen, setIsPublicMobileMenuOpen] = useState(false);
 
   const quickMenuRef = useRef(null);
   const notifRef = useRef(null);
   const mobilePanelRef = useRef(null);
+  const publicToolsRef = useRef(null);
+  const publicSubjectsRef = useRef(null);
+  const publicMobilePanelRef = useRef(null);
   const router = useRouter();
   const pathname = usePathname();
+
+  const publicStudyTools = useMemo(() => ([
+    { href: '/subjects', label: 'Flashcards', icon: '🟦' },
+    { href: '/subjects', label: 'Apprendre', icon: '🧠' },
+    { href: '/study-plans', label: "Programmes d'étude", icon: '🗂️' },
+    { href: '/subjects', label: "Test d'entraînement", icon: '🧪' },
+    { href: '/blog', label: 'Solutions expertes', icon: '✅' },
+    { href: '/search', label: "Recherche d'étude", icon: '🔎' }
+  ]), []);
+
+  const publicTeacherTools = useMemo(() => ([
+    { href: '/blog', label: 'Publier des ressources', icon: '📝' },
+    { href: '/rattrapage', label: 'Live / rattrapage', icon: '📅' }
+  ]), []);
+
+  const publicSubjects = useMemo(() => ([
+    { href: '/subjects?topic=francais', label: 'Français', icon: '📖' },
+    { href: '/subjects?topic=philosophie', label: 'Philosophie', icon: '💭' },
+    { href: '/subjects?topic=histoire-geo', label: 'Histoire et géographie', icon: '🌍' },
+    { href: '/subjects?topic=mathematiques', label: 'Mathématiques', icon: '➗' },
+    { href: '/subjects?topic=chimie', label: 'Chimie', icon: '🧪' },
+    { href: '/subjects?topic=physique', label: 'Physique', icon: '⚡' }
+  ]), []);
 
   useEffect(() => {
     const refresh = () => {
@@ -81,6 +110,9 @@ export default function HeaderNav() {
       setIsQuickMenuOpen(false);
       setIsMobileMenuOpen(false);
       setIsMobileNotifOpen(false);
+      setIsPublicToolsOpen(false);
+      setIsPublicSubjectsOpen(false);
+      setIsPublicMobileMenuOpen(false);
       return;
     }
 
@@ -114,6 +146,28 @@ export default function HeaderNav() {
     document.addEventListener('mousedown', onClickOutside);
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, [isNotifOpen]);
+
+  useEffect(() => {
+    if (!isPublicToolsOpen) return undefined;
+    function onClickOutside(event) {
+      if (publicToolsRef.current && !publicToolsRef.current.contains(event.target)) {
+        setIsPublicToolsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [isPublicToolsOpen]);
+
+  useEffect(() => {
+    if (!isPublicSubjectsOpen) return undefined;
+    function onClickOutside(event) {
+      if (publicSubjectsRef.current && !publicSubjectsRef.current.contains(event.target)) {
+        setIsPublicSubjectsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [isPublicSubjectsOpen]);
 
   useEffect(() => {
     if (!isMobileMenuOpen || !mounted) return undefined;
@@ -160,6 +214,21 @@ export default function HeaderNav() {
       document.removeEventListener('keydown', onKeyDown);
     };
   }, [isMobileMenuOpen, mounted]);
+
+  useEffect(() => {
+    if (!isPublicMobileMenuOpen || !mounted) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    function onKeyDown(event) {
+      if (event.key === 'Escape') setIsPublicMobileMenuOpen(false);
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isPublicMobileMenuOpen, mounted]);
 
   const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
   const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
@@ -370,6 +439,88 @@ export default function HeaderNav() {
           {darkMode ? '☀️' : '🌙'}
         </button>
 
+        {!isAuthed ? (
+          <div className="relative hidden md:block" ref={publicToolsRef}>
+            <button
+              type="button"
+              className="rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50"
+              onClick={() => {
+                setIsPublicToolsOpen((v) => !v);
+                setIsPublicSubjectsOpen(false);
+              }}
+              aria-label="Outils pour étudier"
+            >
+              Outils pour étudier ▾
+            </button>
+            {isPublicToolsOpen ? (
+              <div className="absolute left-0 z-50 mt-2 w-[280px] rounded-xl border border-brand-100 bg-white p-3 shadow-xl">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Étudiants</p>
+                <div className="space-y-1">
+                  {publicStudyTools.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-brand-50"
+                      onClick={() => setIsPublicToolsOpen(false)}
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </Link>
+                  ))}
+                </div>
+                <hr className="my-2 border-brand-100" />
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Enseignants</p>
+                <div className="space-y-1">
+                  {publicTeacherTools.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-brand-50"
+                      onClick={() => setIsPublicToolsOpen(false)}
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {!isAuthed ? (
+          <div className="relative hidden md:block" ref={publicSubjectsRef}>
+            <button
+              type="button"
+              className="rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50"
+              onClick={() => {
+                setIsPublicSubjectsOpen((v) => !v);
+                setIsPublicToolsOpen(false);
+              }}
+              aria-label="Matières"
+            >
+              Matières ▾
+            </button>
+            {isPublicSubjectsOpen ? (
+              <div className="absolute left-0 z-50 mt-2 w-[320px] rounded-xl border border-brand-100 bg-white p-3 shadow-xl">
+                <div className="grid grid-cols-1 gap-1">
+                  {publicSubjects.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-brand-50"
+                      onClick={() => setIsPublicSubjectsOpen(false)}
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
         {isAuthed ? (
           <Link
             href="/messages"
@@ -448,6 +599,15 @@ export default function HeaderNav() {
           </Link>
         ) : (
           <>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:hidden"
+              aria-label="Menu public"
+              title="Menu public"
+              onClick={() => setIsPublicMobileMenuOpen(true)}
+            >
+              ☰
+            </button>
             <Link href="/login" className="hidden hover:text-brand-700 md:inline">Connexion</Link>
             <Link
               href="/login"
@@ -510,6 +670,69 @@ export default function HeaderNav() {
           </div>
         ) : null}
       </div>
+
+      {mounted && !isAuthed && isPublicMobileMenuOpen
+        ? createPortal(
+            <div className="fixed inset-0 z-[90] bg-[#060f1f]/70 backdrop-blur-sm md:hidden" onClick={() => setIsPublicMobileMenuOpen(false)}>
+              <div
+                ref={publicMobilePanelRef}
+                className="absolute inset-x-0 bottom-0 max-h-[86vh] overflow-y-auto rounded-t-2xl border-t border-brand-100 bg-white p-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-base font-semibold text-brand-900">Menu LinkEduPro</p>
+                  <button
+                    type="button"
+                    className="rounded-md border border-brand-100 px-2 py-1 text-xs"
+                    onClick={() => setIsPublicMobileMenuOpen(false)}
+                  >
+                    Fermer
+                  </button>
+                </div>
+
+                <section className="rounded-xl border border-brand-100 p-3">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Outils pour étudier</p>
+                  <div className="space-y-1">
+                    {publicStudyTools.map((item) => (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-brand-50"
+                        onClick={() => setIsPublicMobileMenuOpen(false)}
+                      >
+                        <span>{item.icon}</span>
+                        <span>{item.label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="mt-3 rounded-xl border border-brand-100 p-3">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Matières</p>
+                  <div className="space-y-1">
+                    {publicSubjects.map((item) => (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-brand-50"
+                        onClick={() => setIsPublicMobileMenuOpen(false)}
+                      >
+                        <span>{item.icon}</span>
+                        <span>{item.label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+
+                <div className="mt-4 flex gap-2">
+                  <Link href="/register" className="btn-primary" onClick={() => setIsPublicMobileMenuOpen(false)}>Créer un compte</Link>
+                  <Link href="/login" className="btn-secondary" onClick={() => setIsPublicMobileMenuOpen(false)}>Se connecter</Link>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
 
       {mounted && isAuthed && isMobileMenuOpen
         ? createPortal(
