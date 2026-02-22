@@ -49,7 +49,8 @@ function sanitizeStudent(student) {
     role: student.role,
     teacherLevel: student.teacherLevel,
     reputationScore: student.reputationScore,
-    createdAt: student.createdAt
+    createdAt: student.createdAt,
+    lastLoginAt: student.lastLoginAt || null
   };
 }
 
@@ -316,8 +317,20 @@ async function login(req, res, next) {
       });
     }
 
+    const loggedAt = new Date();
+    await prisma.student.update({
+      where: { id: student.id },
+      data: { lastLoginAt: loggedAt }
+    });
+
     const token = generateToken(student);
-    return res.json({ token, student: sanitizeStudent(student) });
+    return res.json({
+      token,
+      student: sanitizeStudent({
+        ...student,
+        lastLoginAt: loggedAt
+      })
+    });
   } catch (error) {
     return next(error);
   }

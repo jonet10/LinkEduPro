@@ -31,6 +31,7 @@ model Student {
   emailVerified                                                       Boolean                      @default(false) @map("email_verified")
   verificationToken                                                   String?                      @map("verification_token")
   tokenExpiry                                                         DateTime?                    @map("token_expiry")
+  lastLoginAt                                                         DateTime?                    @map("last_login_at")
   lastWelcomePopupDate                                                DateTime?                    @map("last_welcome_popup_date")
   usedWelcomeMessageIds                                               Json?                        @map("used_welcome_message_ids")
   attempts                                                            QuizAttempt[]

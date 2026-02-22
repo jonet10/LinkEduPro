@@ -557,6 +557,9 @@ export default function HomePage() {
       <div className="card lift-card">
         <p className="text-xs uppercase tracking-wide text-brand-700">Ma dernière activité</p>
         <p className="mt-2 text-sm text-brand-900">{formatLastSeen(onlineStats.mineLastSeenAt)}</p>
+        <p className="mt-1 text-xs text-brand-700">
+          Dernière connexion: {formatLastSeen(student?.lastLoginAt)}
+        </p>
       </div>
 
       {isStudentRole ? (

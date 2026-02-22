@@ -52,7 +52,8 @@ function toProfile(student) {
     photoUrl: student.photoUrl,
     darkMode: student.darkMode,
     school: student.school,
-    gradeLevel: student.gradeLevel
+    gradeLevel: student.gradeLevel,
+    lastLoginAt: student.lastLoginAt || null
   };
 }
 
@@ -121,7 +122,7 @@ async function updateMyProfile(req, res, next) {
     let desiredAcademicLevel = null;
     if (level !== undefined) {
       if (existing.role !== 'STUDENT') {
-        return res.status(400).json({ message: 'Niveau academique reserve aux eleves.' });
+        return res.status(400).json({ message: 'Niveau académique réserve aux Élèves.' });
       }
 
       desiredAcademicLevel = parseAcademicLevel(level);
@@ -135,7 +136,7 @@ async function updateMyProfile(req, res, next) {
       : undefined;
 
     if (nsivTrack !== undefined && existing.role !== 'STUDENT') {
-      return res.status(400).json({ message: 'Filiere NSIV reservee aux eleves.' });
+      return res.status(400).json({ message: 'Filière NSIV réservée aux Élèves.' });
     }
 
     const updated = await prisma.$transaction(async (tx) => {
@@ -173,7 +174,7 @@ async function updateMyProfile(req, res, next) {
       });
     });
 
-    return res.json({ message: 'Profil mis a jour.', profile: toProfile(updated) });
+    return res.json({ message: 'Profil mis à jour.', profile: toProfile(updated) });
   } catch (error) {
     return next(error);
   }
@@ -182,7 +183,7 @@ async function updateMyProfile(req, res, next) {
 async function uploadMyPhoto(req, res, next) {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: 'Aucun fichier envoye.' });
+      return res.status(400).json({ message: 'Aucun fichier envoyé.' });
     }
 
     const photoUrl = `/storage/profile-photos/${req.file.filename}`;
@@ -192,7 +193,7 @@ async function uploadMyPhoto(req, res, next) {
     });
 
     return res.status(201).json({
-      message: 'Photo de profil mise a jour.',
+      message: 'Photo de profil Mise à jour.',
       photoUrl: updated.photoUrl,
       profile: toProfile(updated)
     });
@@ -209,7 +210,7 @@ async function setDarkMode(req, res, next) {
     });
 
     return res.json({
-      message: 'Preference de theme mise a jour.',
+      message: 'Preference de theme Mise à jour.',
       darkMode: updated.darkMode,
       profile: toProfile(updated)
     });
