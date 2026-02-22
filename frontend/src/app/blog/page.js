@@ -11,6 +11,8 @@ function emptyForm() {
     excerpt: '',
     imageUrl: '',
     content: '',
+    postType: 'ARTICLE',
+    audienceScope: 'GLOBAL',
     isGlobal: true,
     schoolId: '',
     categoryIds: [],
@@ -23,6 +25,7 @@ export default function BlogPage() {
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
   const [search, setSearch] = useState('');
+  const [postTypeFilter, setPostTypeFilter] = useState('');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [error, setError] = useState('');
@@ -43,6 +46,14 @@ export default function BlogPage() {
   const [openComments, setOpenComments] = useState({});
   const [commentsByPost, setCommentsByPost] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
+  const [commentImageUrls, setCommentImageUrls] = useState({});
+  const [uploadingCommentImage, setUploadingCommentImage] = useState({});
+  const [reviewForms, setReviewForms] = useState({});
+  const [reviewingComment, setReviewingComment] = useState({});
+  const [reviewSummary, setReviewSummary] = useState({
+    stats: { pending: 0, corrected: 0, pinnedBest: 0 },
+    pendingItems: []
+  });
   const createGalleryInputRef = useRef(null);
   const createCameraInputRef = useRef(null);
   const editGalleryInputRef = useRef(null);
@@ -51,6 +62,7 @@ export default function BlogPage() {
   const token = useMemo(() => getToken(), []);
   const student = useMemo(() => getStudent(), []);
   const canCreatePost = Boolean(token);
+  const canSeeReviewSummary = Boolean(student && ['TEACHER', 'ADMIN'].includes(student.role));
   const selectedPost = useMemo(
     () => items.find((post) => post.id === expandedPostId) || null,
     [items, expandedPostId]
@@ -77,15 +89,32 @@ export default function BlogPage() {
     if (!token) return;
     try {
       setError('');
-      const [postRes, catRes, tagRes] = await Promise.all([
-        apiClient(`/community/blog/posts?page=${page}&limit=10&search=${encodeURIComponent(search)}`, { token }),
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: '10',
+        search
+      });
+      if (postTypeFilter) params.set('postType', postTypeFilter);
+      const requests = [
+        apiClient(`/community/blog/posts?${params.toString()}`, { token }),
         apiClient('/community/blog/categories', { token }),
         apiClient('/community/blog/tags', { token })
-      ]);
+      ];
+      if (canSeeReviewSummary) {
+        requests.push(apiClient('/community/blog/review-summary', { token }));
+      }
+
+      const [postRes, catRes, tagRes, summaryRes] = await Promise.all(requests);
       setItems(postRes.items || []);
       setPagination(postRes.pagination || { page: 1, totalPages: 1, total: 0 });
       setCategories(catRes.categories || []);
       setTags(tagRes.tags || []);
+      if (canSeeReviewSummary && summaryRes) {
+        setReviewSummary({
+          stats: summaryRes.stats || { pending: 0, corrected: 0, pinnedBest: 0 },
+          pendingItems: summaryRes.pendingItems || []
+        });
+      }
     } catch (e) {
       setError(e.message);
     }
@@ -154,8 +183,10 @@ export default function BlogPage() {
         excerpt: form.excerpt.trim(),
         imageUrl: form.imageUrl.trim() || null,
         content: form.content.trim(),
-        isGlobal: Boolean(form.isGlobal),
-        schoolId: form.isGlobal ? null : Number(form.schoolId || 0),
+        postType: form.postType,
+        audienceScope: form.audienceScope,
+        isGlobal: form.audienceScope === 'GLOBAL',
+        schoolId: form.audienceScope === 'SCHOOL' ? Number(form.schoolId || 0) : null,
         categoryIds: form.categoryIds,
         tagIds: form.tagIds
       };
@@ -187,6 +218,8 @@ export default function BlogPage() {
       excerpt: post.excerpt || '',
       imageUrl: post.imageUrl || '',
       content: post.content || '',
+      postType: post.postType || 'ARTICLE',
+      audienceScope: post.audienceScope || (post.isGlobal ? 'GLOBAL' : 'SCHOOL'),
       isGlobal: post.isGlobal !== false,
       schoolId: post.schoolId ? String(post.schoolId) : '',
       categoryIds: (post.categories || []).map((c) => c.categoryId),
@@ -205,8 +238,10 @@ export default function BlogPage() {
         excerpt: editForm.excerpt.trim(),
         imageUrl: editForm.imageUrl.trim() || null,
         content: editForm.content.trim(),
-        isGlobal: Boolean(editForm.isGlobal),
-        schoolId: editForm.isGlobal ? null : Number(editForm.schoolId || 0),
+        postType: editForm.postType,
+        audienceScope: editForm.audienceScope,
+        isGlobal: editForm.audienceScope === 'GLOBAL',
+        schoolId: editForm.audienceScope === 'SCHOOL' ? Number(editForm.schoolId || 0) : null,
         categoryIds: editForm.categoryIds,
         tagIds: editForm.tagIds
       };
@@ -246,6 +281,21 @@ export default function BlogPage() {
     try {
       const data = await apiClient(`/community/blog/posts/${postId}/comments`, { token });
       setCommentsByPost((prev) => ({ ...prev, [postId]: data.comments || [] }));
+      setReviewForms((prev) => {
+        const next = { ...prev };
+        (data.comments || []).forEach((comment) => {
+          if (!next[comment.id]) {
+            next[comment.id] = {
+              correctionStatus: comment.correctionStatus || 'PENDING',
+              score: comment.score ?? '',
+              maxScore: comment.maxScore ?? '',
+              teacherFeedback: comment.teacherFeedback || '',
+              pinBest: Boolean(comment.isPinnedBest)
+            };
+          }
+        });
+        return next;
+      });
     } catch (e) {
       setActionError(e.message || 'Erreur chargement commentaires.');
     }
@@ -261,19 +311,110 @@ export default function BlogPage() {
   async function addComment(postId) {
     if (!token) return;
     const content = (commentInputs[postId] || '').trim();
-    if (!content) return;
+    const imageUrl = commentImageUrls[postId] || null;
+    if (!content && !imageUrl) return;
 
     try {
       await apiClient(`/community/blog/posts/${postId}/comments`, {
         method: 'POST',
         token,
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ content: content || 'Réponse en image', imageUrl })
       });
       setCommentInputs((prev) => ({ ...prev, [postId]: '' }));
+      setCommentImageUrls((prev) => ({ ...prev, [postId]: '' }));
       await Promise.all([loadComments(postId), load()]);
     } catch (e) {
       setActionError(e.message || 'Erreur ajout commentaire.');
     }
+  }
+
+  async function uploadCommentImage(postId, file) {
+    if (!token || !file) return;
+    setUploadingCommentImage((prev) => ({ ...prev, [postId]: true }));
+    try {
+      const body = new FormData();
+      body.append('image', file);
+      const data = await apiClient('/community/blog/posts/upload-image', {
+        method: 'POST',
+        token,
+        body
+      });
+      setCommentImageUrls((prev) => ({ ...prev, [postId]: data.imageUrl || '' }));
+    } catch (e) {
+      setActionError(e.message || 'Erreur upload image commentaire.');
+    } finally {
+      setUploadingCommentImage((prev) => ({ ...prev, [postId]: false }));
+    }
+  }
+
+  async function reactComment(postId, commentId, emoji) {
+    if (!token) return;
+    try {
+      const data = await apiClient(`/community/blog/comments/${commentId}/reaction`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({ emoji })
+      });
+      setCommentsByPost((prev) => ({
+        ...prev,
+        [postId]: (prev[postId] || []).map((c) => (
+          c.id === commentId
+            ? { ...c, reactions: data.reactions || {}, myReaction: data.myReaction || null }
+            : c
+        ))
+      }));
+    } catch (e) {
+      setActionError(e.message || 'Erreur reaction emoji.');
+    }
+  }
+
+  function updateReviewForm(commentId, key, value) {
+    setReviewForms((prev) => ({
+      ...prev,
+      [commentId]: {
+        correctionStatus: 'PENDING',
+        score: '',
+        maxScore: '',
+        teacherFeedback: '',
+        pinBest: false,
+        ...(prev[commentId] || {}),
+        [key]: value
+      }
+    }));
+  }
+
+  async function reviewCommentByTeacher(postId, commentId) {
+    if (!token) return;
+    const draft = reviewForms[commentId] || {};
+    try {
+      setReviewingComment((prev) => ({ ...prev, [commentId]: true }));
+      await apiClient(`/community/blog/comments/${commentId}/review`, {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify({
+          correctionStatus: draft.correctionStatus || 'PENDING',
+          score: draft.score === '' ? null : Number(draft.score),
+          maxScore: draft.maxScore === '' ? null : Number(draft.maxScore),
+          teacherFeedback: draft.teacherFeedback || null,
+          pinBest: Boolean(draft.pinBest)
+        })
+      });
+      await Promise.all([loadComments(postId), load()]);
+      setActionInfo('Correction enregistrée.');
+      setActionError('');
+    } catch (e) {
+      setActionError(e.message || 'Erreur correction commentaire.');
+    } finally {
+      setReviewingComment((prev) => ({ ...prev, [commentId]: false }));
+    }
+  }
+
+  async function openPendingForReview(item) {
+    if (!item?.postId) return;
+    setExpandedPostId(item.postId);
+    setOpenComments((prev) => ({ ...prev, [item.postId]: true }));
+    await loadComments(item.postId);
+    setTimeout(() => scrollToPostTop(item.postId, true), 0);
   }
 
   async function sharePost(post) {
@@ -317,6 +458,7 @@ export default function BlogPage() {
 
   function renderPostCard(post, options = {}) {
     const canEdit = student && (student.role === 'ADMIN' || student.id === post.authorId);
+    const canReviewExerciseAnswers = student && ['TEACHER', 'ADMIN'].includes(student.role) && post.postType === 'EXERCISE';
     const isExpanded = expandedPostId === post.id;
     const isPriority = Boolean(options.isPriority);
 
@@ -333,6 +475,12 @@ export default function BlogPage() {
           {post.author?.firstName} {post.author?.lastName} · {post.author?.role}
           {post.author?.role === 'TEACHER' ? ` (${post.author?.teacherLevel})` : ''}
         </p>
+        <div className="flex flex-wrap gap-2 text-xs">
+          <span className="rounded border border-brand-100 px-2 py-1">{post.postType === 'EXERCISE' ? 'Exercice' : 'Article'}</span>
+          <span className="rounded border border-brand-100 px-2 py-1">
+            {post.audienceScope === 'GLOBAL' ? 'Global' : post.audienceScope === 'INTER_SCHOOL' ? 'Inter-école' : 'École'}
+          </span>
+        </div>
 
         {post.imageUrl ? (
           <img
@@ -366,19 +514,127 @@ export default function BlogPage() {
                 {(commentsByPost[post.id] || []).map((comment) => (
                   <div key={comment.id} className="rounded border border-brand-100 p-2 text-sm">
                     <p className="font-semibold">{comment.author?.firstName} {comment.author?.lastName}</p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                      <span className={`rounded border px-2 py-0.5 ${comment.correctionStatus === 'CORRECTED' ? 'border-green-300 bg-green-50 text-green-700' : 'border-amber-300 bg-amber-50 text-amber-700'}`}>
+                        {comment.correctionStatus === 'CORRECTED' ? 'Corrigé' : 'Non corrigé'}
+                      </span>
+                      {comment.isPinnedBest ? (
+                        <span className="rounded border border-brand-300 bg-brand-50 px-2 py-0.5 text-brand-700">Meilleure réponse</span>
+                      ) : null}
+                      {(comment.score !== null && comment.score !== undefined && comment.maxScore) ? (
+                        <span className="rounded border border-brand-100 px-2 py-0.5 text-brand-700">
+                          Barème: {comment.score}/{comment.maxScore}
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="mt-1 text-justify">{comment.content}</p>
+                    {comment.imageUrl ? (
+                      <img
+                        src={resolveMediaUrl(comment.imageUrl)}
+                        alt="Réponse"
+                        className="mt-2 max-h-40 w-full rounded border border-brand-100 object-cover"
+                      />
+                    ) : null}
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {['👍', '❤️', '🔥', '👏', '💡'].map((emoji) => (
+                        <button
+                          key={`${comment.id}-${emoji}`}
+                          type="button"
+                          className={`rounded border px-2 py-1 text-xs ${comment.myReaction === emoji ? 'border-brand-500 bg-brand-50' : 'border-brand-100'}`}
+                          onClick={() => reactComment(post.id, comment.id, emoji)}
+                        >
+                          {emoji} {comment.reactions?.[emoji] || 0}
+                        </button>
+                      ))}
+                    </div>
+                    {comment.teacherFeedback ? (
+                      <p className="mt-2 rounded border border-brand-100 bg-brand-50 px-2 py-1 text-xs text-brand-800">
+                        Feedback professeur: {comment.teacherFeedback}
+                      </p>
+                    ) : null}
+                    {comment.corrector ? (
+                      <p className="mt-1 text-[11px] text-brand-700">
+                        Corrigé par {comment.corrector.firstName} {comment.corrector.lastName}
+                        {comment.correctedAt ? ` le ${new Date(comment.correctedAt).toLocaleString()}` : ''}
+                      </p>
+                    ) : null}
+                    {canReviewExerciseAnswers ? (
+                      <div className="mt-3 rounded border border-brand-100 p-2">
+                        <p className="text-xs font-semibold text-brand-900">Correction guidée</p>
+                        <div className="mt-2 grid gap-2 md:grid-cols-2">
+                          <select
+                            className="input"
+                            value={reviewForms[comment.id]?.correctionStatus || 'PENDING'}
+                            onChange={(e) => updateReviewForm(comment.id, 'correctionStatus', e.target.value)}
+                          >
+                            <option value="PENDING">Non corrigé</option>
+                            <option value="CORRECTED">Corrigé</option>
+                          </select>
+                          <label className="inline-flex items-center gap-2 text-xs text-brand-700">
+                            <input
+                              type="checkbox"
+                              checked={Boolean(reviewForms[comment.id]?.pinBest)}
+                              onChange={(e) => updateReviewForm(comment.id, 'pinBest', e.target.checked)}
+                            />
+                            Épingler meilleure réponse
+                          </label>
+                          <input
+                            className="input"
+                            type="number"
+                            min={0}
+                            placeholder="Score"
+                            value={reviewForms[comment.id]?.score ?? ''}
+                            onChange={(e) => updateReviewForm(comment.id, 'score', e.target.value)}
+                          />
+                          <input
+                            className="input"
+                            type="number"
+                            min={1}
+                            placeholder="Barème max"
+                            value={reviewForms[comment.id]?.maxScore ?? ''}
+                            onChange={(e) => updateReviewForm(comment.id, 'maxScore', e.target.value)}
+                          />
+                        </div>
+                        <textarea
+                          className="input mt-2 min-h-[70px]"
+                          placeholder="Feedback professeur"
+                          value={reviewForms[comment.id]?.teacherFeedback || ''}
+                          onChange={(e) => updateReviewForm(comment.id, 'teacherFeedback', e.target.value)}
+                        />
+                        <div className="mt-2">
+                          <button
+                            type="button"
+                            className="btn-primary"
+                            disabled={Boolean(reviewingComment[comment.id])}
+                            onClick={() => reviewCommentByTeacher(post.id, comment.id)}
+                          >
+                            {reviewingComment[comment.id] ? 'Enregistrement...' : 'Enregistrer correction'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 ))}
                 {(commentsByPost[post.id] || []).length === 0 ? <p className="text-sm text-brand-700">Aucun commentaire.</p> : null}
 
-                <div className="flex gap-2">
-                  <input
-                    className="input"
-                    placeholder="Ajouter un commentaire"
-                    value={commentInputs[post.id] || ''}
-                    onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
-                  />
-                  <button className="btn-primary" onClick={() => addComment(post.id)}>Commenter</button>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      className="input"
+                      placeholder="Ajouter un commentaire"
+                      value={commentInputs[post.id] || ''}
+                      onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
+                    />
+                    <button className="btn-primary" onClick={() => addComment(post.id)}>Commenter</button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <input type="file" accept="image/*" onChange={(e) => uploadCommentImage(post.id, e.target.files?.[0])} />
+                    <input type="file" accept="image/*" capture="environment" onChange={(e) => uploadCommentImage(post.id, e.target.files?.[0])} />
+                  </div>
+                  {uploadingCommentImage[post.id] ? <p className="text-xs text-brand-700">Upload image réponse...</p> : null}
+                  {commentImageUrls[post.id] ? (
+                    <img src={resolveMediaUrl(commentImageUrls[post.id])} alt="Aperçu réponse" className="max-h-40 rounded border border-brand-100" />
+                  ) : null}
                 </div>
               </div>
             ) : null}
@@ -388,10 +644,10 @@ export default function BlogPage() {
         {canEdit ? (
           <div>
             {editingPostId !== post.id ? (
-              <button className="btn-secondary" onClick={() => openEdit(post)}>Modifier</button>
+              <button className="btn-secondary" onClick={() => openEdit(post)}>modifier</button>
             ) : (
               <div className="mt-3 space-y-3 rounded-lg border border-brand-100 p-3">
-                <p className="text-sm font-semibold">Modifier la publication</p>
+                <p className="text-sm font-semibold">modifier la publication</p>
                 <input className="input" value={editForm.title} onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))} placeholder="Titre" />
                 <input className="input" value={editForm.excerpt} onChange={(e) => setEditForm((prev) => ({ ...prev, excerpt: e.target.value }))} placeholder="Extrait" />
                 <div className="grid gap-2 md:grid-cols-2">
@@ -422,14 +678,22 @@ export default function BlogPage() {
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <label className="text-sm text-slate-700">
+                    Type
+                    <select className="input mt-1" value={editForm.postType} onChange={(e) => setEditForm((prev) => ({ ...prev, postType: e.target.value }))}>
+                      <option value="ARTICLE">Article</option>
+                      <option value="EXERCISE">Exercice</option>
+                    </select>
+                  </label>
+                  <label className="text-sm text-slate-700">
                     Portée
-                    <select className="input mt-1" value={editForm.isGlobal ? 'global' : 'school'} onChange={(e) => setEditForm((prev) => ({ ...prev, isGlobal: e.target.value === 'global' }))}>
-                      <option value="global">Blog global</option>
-                      <option value="school">Blog interne</option>
+                    <select className="input mt-1" value={editForm.audienceScope || 'GLOBAL'} onChange={(e) => setEditForm((prev) => ({ ...prev, audienceScope: e.target.value }))}>
+                      <option value="GLOBAL">Global</option>
+                      <option value="INTER_SCHOOL">Inter-école</option>
+                      <option value="SCHOOL">École spécifique</option>
                     </select>
                   </label>
 
-                  {!editForm.isGlobal ? (
+                  {editForm.audienceScope === 'SCHOOL' ? (
                     <label className="text-sm text-slate-700">
                       School ID
                       <input className="input mt-1" type="number" value={editForm.schoolId} onChange={(e) => setEditForm((prev) => ({ ...prev, schoolId: e.target.value }))} />
@@ -492,14 +756,57 @@ export default function BlogPage() {
 
       <section className="card space-y-4">
         <h1 className="text-2xl font-semibold">Blog Global LinkEduPro</h1>
-        <div className="flex gap-2">
+        <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]">
           <input className="input" placeholder="Recherche posts" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <select className="input" value={postTypeFilter} onChange={(e) => setPostTypeFilter(e.target.value)}>
+            <option value="">Tous contenus</option>
+            <option value="EXERCISE">Exercices</option>
+            <option value="ARTICLE">Articles</option>
+          </select>
           <button className="btn-primary" onClick={() => { setPage(1); load(); }}>Rechercher</button>
         </div>
         {error ? <p className="text-red-600">{error}</p> : null}
         {actionError ? <p className="text-red-600">{actionError}</p> : null}
         {actionInfo ? <p className="text-green-600">{actionInfo}</p> : null}
       </section>
+
+      {canSeeReviewSummary ? (
+        <section className="card space-y-3">
+          <h2 className="text-xl font-semibold">Copies à corriger</h2>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <article className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <p className="text-xs uppercase tracking-wide text-amber-800">En attente</p>
+              <p className="mt-1 text-2xl font-bold text-amber-900">{reviewSummary.stats.pending}</p>
+            </article>
+            <article className="rounded-lg border border-green-200 bg-green-50 p-3">
+              <p className="text-xs uppercase tracking-wide text-green-800">Corrigées</p>
+              <p className="mt-1 text-2xl font-bold text-green-900">{reviewSummary.stats.corrected}</p>
+            </article>
+            <article className="rounded-lg border border-brand-200 bg-brand-50 p-3">
+              <p className="text-xs uppercase tracking-wide text-brand-800">Meilleures épinglées</p>
+              <p className="mt-1 text-2xl font-bold text-brand-900">{reviewSummary.stats.pinnedBest}</p>
+            </article>
+          </div>
+          <div className="space-y-2">
+            {reviewSummary.pendingItems.length === 0 ? (
+              <p className="text-sm text-brand-700">Aucune copie en attente.</p>
+            ) : (
+              reviewSummary.pendingItems.map((item) => (
+                <div key={item.commentId} className="flex flex-wrap items-center justify-between gap-2 rounded border border-brand-100 p-2 text-sm">
+                  <div>
+                    <p className="font-semibold text-brand-900">{item.studentName}</p>
+                    <p className="text-brand-700">{item.postTitle}</p>
+                    <p className="text-xs text-brand-700">{new Date(item.createdAt).toLocaleString()}</p>
+                  </div>
+                  <button type="button" className="btn-primary" onClick={() => openPendingForReview(item)}>
+                    Corriger
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      ) : null}
 
       {canCreatePost ? (
         <section className="card space-y-4">
@@ -542,14 +849,22 @@ export default function BlogPage() {
 
           <div className="grid gap-3 md:grid-cols-2">
             <label className="text-sm text-slate-700">
+              Type
+              <select className="input mt-1" value={form.postType} onChange={(e) => setForm((prev) => ({ ...prev, postType: e.target.value }))}>
+                <option value="ARTICLE">Article</option>
+                <option value="EXERCISE">Exercice (prof/admin)</option>
+              </select>
+            </label>
+            <label className="text-sm text-slate-700">
               Portée
-              <select className="input mt-1" value={form.isGlobal ? 'global' : 'school'} onChange={(e) => setForm((prev) => ({ ...prev, isGlobal: e.target.value === 'global' }))}>
-                <option value="global">Blog global</option>
-                <option value="school">Blog interne (école)</option>
+              <select className="input mt-1" value={form.audienceScope || 'GLOBAL'} onChange={(e) => setForm((prev) => ({ ...prev, audienceScope: e.target.value }))}>
+                <option value="GLOBAL">Global</option>
+                <option value="INTER_SCHOOL">Inter-école</option>
+                <option value="SCHOOL">École spécifique</option>
               </select>
             </label>
 
-            {!form.isGlobal ? (
+            {form.audienceScope === 'SCHOOL' ? (
               <label className="text-sm text-slate-700">
                 School ID
                 <input className="input mt-1" type="number" value={form.schoolId} onChange={(e) => setForm((prev) => ({ ...prev, schoolId: e.target.value }))} placeholder="Ex: 1" />

@@ -11,6 +11,8 @@ const {
   approvePost,
   likePost,
   createComment,
+  reviewComment,
+  reactToComment,
   listComments,
   markCommentHelpful,
   reportPost,
@@ -21,12 +23,15 @@ const {
   createCategory,
   listTags,
   createTag,
-  uploadPostImage
+  uploadPostImage,
+  getReviewSummary
 } = require('../controllers/blog.controller');
 const {
   createPostSchema,
   updatePostSchema,
   createCommentSchema,
+  commentReactionSchema,
+  reviewCommentSchema,
   reportPostSchema,
   reviewReportSchema,
   createCategorySchema,
@@ -36,6 +41,7 @@ const {
 const router = express.Router();
 
 router.get('/posts', listPosts);
+router.get('/review-summary', requireTeacherOrAdmin, getReviewSummary);
 router.get('/categories', listCategories);
 router.get('/tags', listTags);
 router.post('/posts/upload-image', uploadBlogImage.single('image'), uploadPostImage);
@@ -44,6 +50,8 @@ router.patch('/posts/:postId', validate(updatePostSchema), updatePost);
 router.post('/posts/:postId/like', likePost);
 router.get('/posts/:postId/comments', listComments);
 router.post('/posts/:postId/comments', commentRateLimit, validate(createCommentSchema), createComment);
+router.post('/comments/:commentId/reaction', validate(commentReactionSchema), reactToComment);
+router.patch('/comments/:commentId/review', requireTeacherOrAdmin, validate(reviewCommentSchema), reviewComment);
 router.post('/posts/:postId/report', validate(reportPostSchema), reportPost);
 router.delete('/posts/:postId', softDeletePost);
 

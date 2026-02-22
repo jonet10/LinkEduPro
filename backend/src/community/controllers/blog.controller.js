@@ -5,11 +5,28 @@ const { createCommunityLog } = require('../services/log.service');
 const { sanitizeText } = require('../utils/sanitize');
 const { notifyAdmins } = require('../../services/notifications');
 
+const ALLOWED_POST_TYPES = new Set(['ARTICLE', 'EXERCISE']);
+const ALLOWED_AUDIENCE_SCOPES = new Set(['GLOBAL', 'INTER_SCHOOL', 'SCHOOL']);
+const ALLOWED_EMOJIS = new Set(['👍', '❤️', '🔥', '👏', '🎉', '💡', '✅', '😍', '😮', '😂']);
+
 function getPagination(query) {
   const page = Math.max(1, Number(query.page || 1));
   const limit = Math.min(50, Math.max(1, Number(query.limit || 10)));
   const skip = (page - 1) * limit;
   return { page, limit, skip };
+}
+
+function normalizePostType(value) {
+  const type = String(value || 'ARTICLE').trim().toUpperCase();
+  return ALLOWED_POST_TYPES.has(type) ? type : 'ARTICLE';
+}
+
+function normalizeAudienceScope(value, isGlobal, schoolId) {
+  const scope = String(value || '').trim().toUpperCase();
+  if (ALLOWED_AUDIENCE_SCOPES.has(scope)) return scope;
+  if (isGlobal === true) return 'GLOBAL';
+  if (schoolId) return 'SCHOOL';
+  return 'INTER_SCHOOL';
 }
 
 async function createPost(req, res, next) {
@@ -19,13 +36,20 @@ async function createPost(req, res, next) {
       return res.status(401).json({ message: 'Utilisateur introuvable.' });
     }
 
-    const isGlobal = req.body.isGlobal !== false;
-    const schoolId = req.body.schoolId ? Number(req.body.schoolId) : null;
+    const requestedSchoolId = req.body.schoolId ? Number(req.body.schoolId) : null;
+    const requestedIsGlobal = req.body.isGlobal !== false;
+    const audienceScope = normalizeAudienceScope(req.body.audienceScope, requestedIsGlobal, requestedSchoolId);
+    const isGlobal = audienceScope === 'GLOBAL';
+    const schoolId = audienceScope === 'SCHOOL' ? requestedSchoolId : null;
+    const postType = normalizePostType(req.body.postType);
     const categoryIds = (req.body.categoryIds || []).map(Number);
     const tagIds = (req.body.tagIds || []).map(Number);
 
-    if (!isGlobal && !schoolId) {
-      return res.status(400).json({ message: 'schoolId requis pour un blog interne.' });
+    if (audienceScope === 'SCHOOL' && !schoolId) {
+      return res.status(400).json({ message: 'schoolId requis pour une publication école.' });
+    }
+    if (postType === 'EXERCISE' && !['TEACHER', 'ADMIN'].includes(user.role)) {
+      return res.status(403).json({ message: 'Seuls les professeurs et admins peuvent publier un exercice.' });
     }
 
     const isSuperAdmin = user.role === 'ADMIN' && process.env.SUPER_ADMIN_EMAIL && user.email === process.env.SUPER_ADMIN_EMAIL;
@@ -38,6 +62,8 @@ async function createPost(req, res, next) {
         excerpt: sanitizeText(req.body.excerpt || '', 400) || null,
         imageUrl: req.body.imageUrl ? String(req.body.imageUrl).trim() : null,
         content: sanitizeText(req.body.content, 10000),
+        postType,
+        audienceScope,
         isGlobal,
         schoolId,
         isApproved: autoApproved,
@@ -67,7 +93,7 @@ async function createPost(req, res, next) {
       action: 'POST_CREATED',
       entityType: 'Post',
       entityId: String(post.id),
-      metadata: { isGlobal, schoolId }
+      metadata: { isGlobal, schoolId, audienceScope, postType }
     });
 
     await notifyAdmins({
@@ -117,11 +143,22 @@ async function updatePost(req, res, next) {
     const isSuperAdmin = actor.role === 'ADMIN' && process.env.SUPER_ADMIN_EMAIL && actor.email === process.env.SUPER_ADMIN_EMAIL;
     const autoApproved = isSuperAdmin || ['ADMIN', 'TEACHER'].includes(actor.role);
 
-    const nextIsGlobal = req.body.isGlobal !== undefined ? req.body.isGlobal : existing.isGlobal;
-    const nextSchoolId = req.body.schoolId !== undefined ? (req.body.schoolId ? Number(req.body.schoolId) : null) : existing.schoolId;
+    const requestedIsGlobal = req.body.isGlobal !== undefined ? req.body.isGlobal : existing.isGlobal;
+    const requestedSchoolId = req.body.schoolId !== undefined ? (req.body.schoolId ? Number(req.body.schoolId) : null) : existing.schoolId;
+    const nextAudienceScope = normalizeAudienceScope(
+      req.body.audienceScope !== undefined ? req.body.audienceScope : existing.audienceScope,
+      requestedIsGlobal,
+      requestedSchoolId
+    );
+    const nextIsGlobal = nextAudienceScope === 'GLOBAL';
+    const nextSchoolId = nextAudienceScope === 'SCHOOL' ? requestedSchoolId : null;
+    const nextPostType = normalizePostType(req.body.postType !== undefined ? req.body.postType : existing.postType);
 
-    if (!nextIsGlobal && !nextSchoolId) {
-      return res.status(400).json({ message: 'schoolId requis pour un blog interne.' });
+    if (nextAudienceScope === 'SCHOOL' && !nextSchoolId) {
+      return res.status(400).json({ message: 'schoolId requis pour une publication école.' });
+    }
+    if (nextPostType === 'EXERCISE' && !['TEACHER', 'ADMIN'].includes(actor.role)) {
+      return res.status(403).json({ message: 'Seuls les professeurs et admins peuvent publier un exercice.' });
     }
 
     const categoryIds = Array.isArray(req.body.categoryIds) ? req.body.categoryIds.map(Number) : null;
@@ -143,6 +180,8 @@ async function updatePost(req, res, next) {
           excerpt: req.body.excerpt !== undefined ? (sanitizeText(req.body.excerpt || '', 400) || null) : undefined,
           imageUrl: req.body.imageUrl !== undefined ? (req.body.imageUrl ? String(req.body.imageUrl).trim() : null) : undefined,
           content: req.body.content !== undefined ? sanitizeText(req.body.content, 10000) : undefined,
+          postType: req.body.postType !== undefined ? nextPostType : undefined,
+          audienceScope: req.body.audienceScope !== undefined ? nextAudienceScope : undefined,
           isGlobal: nextIsGlobal,
           schoolId: nextSchoolId,
           isApproved: autoApproved ? true : false,
@@ -192,6 +231,10 @@ async function listPosts(req, res, next) {
     const search = sanitizeText(req.query.search || '', 120);
     const isGlobal = req.query.isGlobal;
     const schoolId = req.query.schoolId ? Number(req.query.schoolId) : undefined;
+    const postType = req.query.postType ? normalizePostType(req.query.postType) : undefined;
+    const audienceScope = req.query.audienceScope
+      ? normalizeAudienceScope(req.query.audienceScope, undefined, undefined)
+      : undefined;
     const categoryId = req.query.categoryId ? Number(req.query.categoryId) : undefined;
     const tagId = req.query.tagId ? Number(req.query.tagId) : undefined;
 
@@ -211,6 +254,8 @@ async function listPosts(req, res, next) {
       ...(isGlobal === 'true' ? { isGlobal: true } : {}),
       ...(isGlobal === 'false' ? { isGlobal: false } : {}),
       ...(schoolId ? { schoolId } : {}),
+      ...(postType ? { postType } : {}),
+      ...(audienceScope ? { audienceScope } : {}),
       ...(search
         ? {
             OR: [
@@ -366,11 +411,18 @@ async function createComment(req, res, next) {
       return res.status(404).json({ message: 'Post introuvable.' });
     }
 
+    const content = sanitizeText(req.body.content || '', 2000);
+    const imageUrl = req.body.imageUrl ? String(req.body.imageUrl).trim() : null;
+    if (!content && !imageUrl) {
+      return res.status(400).json({ message: 'Commentaire vide: texte ou image requis.' });
+    }
+
     const comment = await prisma.blogComment.create({
       data: {
         postId,
         authorId: req.user.id,
-        content: sanitizeText(req.body.content, 2000)
+        content,
+        imageUrl
       }
     });
 
@@ -402,12 +454,183 @@ async function listComments(req, res, next) {
             teacherLevel: true,
             reputationScore: true
           }
+        },
+        corrector: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            role: true
+          }
         }
       },
       orderBy: { createdAt: 'asc' }
     });
 
-    return res.json({ comments });
+    const commentIds = comments.map((c) => c.id);
+    let reactions = [];
+    if (commentIds.length) {
+      reactions = await prisma.blogCommentReaction.findMany({
+        where: { commentId: { in: commentIds } },
+        select: { commentId: true, userId: true, emoji: true }
+      });
+    }
+
+    const summaryMap = new Map();
+    const myMap = new Map();
+    for (const row of reactions) {
+      if (!summaryMap.has(row.commentId)) summaryMap.set(row.commentId, {});
+      const bucket = summaryMap.get(row.commentId);
+      bucket[row.emoji] = (bucket[row.emoji] || 0) + 1;
+      if (row.userId === req.user.id) myMap.set(row.commentId, row.emoji);
+    }
+
+    const mapped = comments.map((c) => ({
+      ...c,
+      reactions: summaryMap.get(c.id) || {},
+      myReaction: myMap.get(c.id) || null
+    }));
+
+    return res.json({ comments: mapped });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function reactToComment(req, res, next) {
+  try {
+    const commentId = Number(req.params.commentId);
+    const emoji = String(req.body.emoji || '').trim();
+
+    if (!ALLOWED_EMOJIS.has(emoji)) {
+      return res.status(400).json({ message: 'Emoji non pris en charge.' });
+    }
+
+    const comment = await prisma.blogComment.findUnique({ where: { id: commentId } });
+    if (!comment || comment.isDeleted) {
+      return res.status(404).json({ message: 'Commentaire introuvable.' });
+    }
+
+    const existing = await prisma.blogCommentReaction.findUnique({
+      where: { commentId_userId: { commentId, userId: req.user.id } }
+    });
+
+    let myReaction = emoji;
+    if (existing && existing.emoji === emoji) {
+      await prisma.blogCommentReaction.delete({
+        where: { commentId_userId: { commentId, userId: req.user.id } }
+      });
+      myReaction = null;
+    } else if (existing) {
+      await prisma.blogCommentReaction.update({
+        where: { commentId_userId: { commentId, userId: req.user.id } },
+        data: { emoji }
+      });
+    } else {
+      await prisma.blogCommentReaction.create({
+        data: { commentId, userId: req.user.id, emoji }
+      });
+    }
+
+    const rows = await prisma.blogCommentReaction.groupBy({
+      by: ['emoji'],
+      where: { commentId },
+      _count: { _all: true }
+    });
+    const reactions = {};
+    rows.forEach((row) => { reactions[row.emoji] = row._count._all; });
+
+    return res.json({ commentId, reactions, myReaction });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function reviewComment(req, res, next) {
+  try {
+    const commentId = Number(req.params.commentId);
+    const {
+      correctionStatus,
+      score,
+      maxScore,
+      teacherFeedback,
+      pinBest
+    } = req.body;
+
+    if (
+      score !== null && maxScore !== null &&
+      Number.isFinite(Number(score)) && Number.isFinite(Number(maxScore)) &&
+      Number(score) > Number(maxScore)
+    ) {
+      return res.status(400).json({ message: 'Le score ne peut pas dépasser le barème.' });
+    }
+
+    const comment = await prisma.blogComment.findUnique({
+      where: { id: commentId },
+      include: { post: true }
+    });
+    if (!comment || comment.isDeleted || comment.post?.isDeleted) {
+      return res.status(404).json({ message: 'Commentaire introuvable.' });
+    }
+    if (comment.post.postType !== 'EXERCISE') {
+      return res.status(400).json({ message: 'La correction guidée est disponible uniquement pour les exercices.' });
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      if (pinBest) {
+        await tx.blogComment.updateMany({
+          where: { postId: comment.postId, isPinnedBest: true },
+          data: { isPinnedBest: false }
+        });
+      }
+
+      return tx.blogComment.update({
+        where: { id: commentId },
+        data: {
+          correctionStatus,
+          score: score === null ? null : Number(score),
+          maxScore: maxScore === null ? null : Number(maxScore),
+          teacherFeedback: teacherFeedback ? sanitizeText(teacherFeedback, 2000) : null,
+          isPinnedBest: Boolean(pinBest),
+          correctedBy: req.user.id,
+          correctedAt: new Date()
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              role: true
+            }
+          },
+          corrector: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              role: true
+            }
+          }
+        }
+      });
+    });
+
+    await createCommunityLog({
+      actorId: req.user.id,
+      action: 'COMMENT_REVIEWED',
+      entityType: 'Comment',
+      entityId: String(commentId),
+      metadata: {
+        postId: comment.postId,
+        correctionStatus,
+        score: updated.score,
+        maxScore: updated.maxScore,
+        isPinnedBest: updated.isPinnedBest
+      }
+    });
+
+    return res.json({ comment: updated });
   } catch (error) {
     return next(error);
   }
@@ -611,11 +834,85 @@ async function createTag(req, res, next) {
 async function uploadPostImage(req, res, next) {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: 'Aucune image envoyee.' });
+      return res.status(400).json({ message: 'Aucune image envoyée.' });
     }
 
     const imageUrl = `/storage/blog-images/${req.file.filename}`;
     return res.status(201).json({ imageUrl });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getReviewSummary(req, res, next) {
+  try {
+    if (!['TEACHER', 'ADMIN'].includes(req.user.role)) {
+      return res.status(403).json({ message: 'Acces reserve professeur/admin.' });
+    }
+
+    const wherePosts = {
+      isDeleted: false,
+      postType: 'EXERCISE',
+      ...(req.user.role === 'TEACHER' ? { authorId: req.user.id } : {})
+    };
+
+    const [pendingCount, correctedCount, pinnedCount, pendingItems] = await Promise.all([
+      prisma.blogComment.count({
+        where: {
+          isDeleted: false,
+          correctionStatus: 'PENDING',
+          post: wherePosts
+        }
+      }),
+      prisma.blogComment.count({
+        where: {
+          isDeleted: false,
+          correctionStatus: 'CORRECTED',
+          post: wherePosts
+        }
+      }),
+      prisma.blogComment.count({
+        where: {
+          isDeleted: false,
+          isPinnedBest: true,
+          post: wherePosts
+        }
+      }),
+      prisma.blogComment.findMany({
+        where: {
+          isDeleted: false,
+          correctionStatus: 'PENDING',
+          post: wherePosts
+        },
+        orderBy: { createdAt: 'asc' },
+        take: 20,
+        select: {
+          id: true,
+          createdAt: true,
+          author: {
+            select: { firstName: true, lastName: true }
+          },
+          post: {
+            select: { id: true, title: true }
+          }
+        }
+      })
+    ]);
+
+    return res.json({
+      stats: {
+        pending: pendingCount,
+        corrected: correctedCount,
+        pinnedBest: pinnedCount
+      },
+      pendingItems: pendingItems.map((row) => ({
+        commentId: row.id,
+        createdAt: row.createdAt,
+        studentName: `${row.author?.firstName || ''} ${row.author?.lastName || ''}`.trim() || 'Élève',
+        postId: row.post.id,
+        postTitle: row.post.title
+      }))
+    });
   } catch (error) {
     return next(error);
   }
@@ -629,6 +926,8 @@ module.exports = {
   likePost,
   createComment,
   listComments,
+  reviewComment,
+  reactToComment,
   markCommentHelpful,
   reportPost,
   listReports,
@@ -638,5 +937,6 @@ module.exports = {
   createCategory,
   listTags,
   createTag,
-  uploadPostImage
+  uploadPostImage,
+  getReviewSummary
 };

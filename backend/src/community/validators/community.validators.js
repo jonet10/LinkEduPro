@@ -10,6 +10,8 @@ const createPostSchema = Joi.object({
   content: Joi.string().trim().min(20).max(10000).required(),
   excerpt: Joi.string().trim().max(400).allow('', null),
   imageUrl: imageUrlSchema.allow('', null),
+  postType: Joi.string().valid('ARTICLE', 'EXERCISE').default('ARTICLE'),
+  audienceScope: Joi.string().valid('GLOBAL', 'INTER_SCHOOL', 'SCHOOL').default('GLOBAL'),
   isGlobal: Joi.boolean().default(true),
   schoolId: Joi.number().integer().positive().allow(null),
   categoryIds: Joi.array().items(Joi.number().integer().positive()).default([]),
@@ -21,6 +23,8 @@ const updatePostSchema = Joi.object({
   content: Joi.string().trim().min(20).max(10000).optional(),
   excerpt: Joi.string().trim().max(400).allow('', null),
   imageUrl: imageUrlSchema.allow('', null),
+  postType: Joi.string().valid('ARTICLE', 'EXERCISE').optional(),
+  audienceScope: Joi.string().valid('GLOBAL', 'INTER_SCHOOL', 'SCHOOL').optional(),
   isGlobal: Joi.boolean().optional(),
   schoolId: Joi.number().integer().positive().allow(null),
   categoryIds: Joi.array().items(Joi.number().integer().positive()).optional(),
@@ -28,7 +32,20 @@ const updatePostSchema = Joi.object({
 }).min(1);
 
 const createCommentSchema = Joi.object({
-  content: Joi.string().trim().min(2).max(2000).required()
+  content: Joi.string().trim().min(1).max(2000).required(),
+  imageUrl: imageUrlSchema.allow('', null)
+});
+
+const commentReactionSchema = Joi.object({
+  emoji: Joi.string().trim().min(1).max(16).required()
+});
+
+const reviewCommentSchema = Joi.object({
+  correctionStatus: Joi.string().valid('PENDING', 'CORRECTED').required(),
+  score: Joi.number().integer().min(0).allow(null),
+  maxScore: Joi.number().integer().min(1).allow(null),
+  teacherFeedback: Joi.string().trim().max(2000).allow('', null),
+  pinBest: Joi.boolean().default(false)
 });
 
 const reportPostSchema = Joi.object({
@@ -85,6 +102,8 @@ module.exports = {
   createPostSchema,
   updatePostSchema,
   createCommentSchema,
+  commentReactionSchema,
+  reviewCommentSchema,
   reportPostSchema,
   reviewVerificationSchema,
   updateTeacherLevelSchema,

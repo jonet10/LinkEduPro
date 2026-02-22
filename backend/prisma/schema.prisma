@@ -41,6 +41,8 @@ model Student {
   blog_posts_blog_posts_approvedByToStudent                           blog_posts[]                 @relation("blog_posts_approvedByToStudent")
   blog_posts_blog_posts_authorIdToStudent                             blog_posts[]                 @relation("blog_posts_authorIdToStudent")
   comments                                                            BlogComment[]
+  correctedBlogComments                                               BlogComment[]               @relation("CommentCorrector")
+  commentReactions                                                    BlogCommentReaction[]
   communityConfigUpdates                                              CommunityConfig[]
   communityLogs                                                       CommunityLog[]
   submittedContents                                                   Content[]                    @relation("ContentTeacher")
@@ -393,6 +395,8 @@ model BlogPost {
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
   imageUrl        String?              @map("image_url")
+  postType        String               @default("ARTICLE") @map("post_type")
+  audienceScope   String               @default("GLOBAL") @map("audience_scope")
   comments        BlogComment[]
   categories      PostCategoryOnPost[]
   likes           BlogPostLike[]
@@ -415,18 +419,42 @@ model BlogComment {
   postId    Int
   authorId  Int
   content   String
+  imageUrl  String?   @map("image_url")
+  correctionStatus String @default("PENDING") @map("correction_status")
+  score     Int?
+  maxScore  Int?      @map("max_score")
+  teacherFeedback String? @map("teacher_feedback")
+  isPinnedBest Boolean @default(false) @map("is_pinned_best")
+  correctedBy Int?    @map("corrected_by")
+  correctedAt DateTime? @map("corrected_at")
   isHelpful Boolean   @default(false)
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   author    Student   @relation(fields: [authorId], references: [id], onDelete: Cascade, map: "Comment_authorId_fkey")
+  corrector Student?  @relation("CommentCorrector", fields: [correctedBy], references: [id], map: "Comment_correctedBy_fkey")
   post      BlogPost  @relation(fields: [postId], references: [id], onDelete: Cascade, map: "Comment_postId_fkey")
+  reactions BlogCommentReaction[]
 
   @@index([authorId, createdAt], map: "Comment_authorId_createdAt_idx")
   @@index([isDeleted, createdAt], map: "Comment_isDeleted_createdAt_idx")
   @@index([postId, createdAt], map: "Comment_postId_createdAt_idx")
   @@map("comments")
+}
+
+model BlogCommentReaction {
+  id        Int         @id @default(autoincrement())
+  commentId Int         @map("comment_id")
+  userId    Int         @map("user_id")
+  emoji     String      @db.VarChar(16)
+  createdAt DateTime    @default(now()) @map("created_at")
+  comment   BlogComment @relation(fields: [commentId], references: [id], onDelete: Cascade, map: "CommentReaction_commentId_fkey")
+  user      Student     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "CommentReaction_userId_fkey")
+
+  @@unique([commentId, userId], map: "CommentReaction_unique_comment_user")
+  @@index([commentId, emoji], map: "CommentReaction_comment_emoji_idx")
+  @@map("comment_reactions")
 }
 
 model BlogPostLike {
