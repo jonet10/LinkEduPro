@@ -57,6 +57,11 @@ const LANDING_HERO_SLIDES = [
     id: 'h-3',
     image: '/slides/HTC.png',
     caption: 'Outils modernes pour réussir les examens'
+  },
+  {
+    id: 'h-4',
+    image: '/slides/HL.jpg',
+    caption: 'Écoles et élèves engagés dans la réussite'
   }
 ];
 const DEFAULT_HOME_CHALLENGE = {
