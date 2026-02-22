@@ -42,7 +42,9 @@ async function getConfig(req, res, next) {
 
 async function updateConfig(req, res, next) {
   try {
-    const { maxPostsPerDay, maxPostsPerMonth, commentRatePerMin } = req.body;
+    const { maxPostsPerDay, maxPostsPerMonth, commentRatePerMin, tiktokCreators } = req.body;
+    const hasTiktokCreatorsPayload = Array.isArray(tiktokCreators);
+    const nextTiktokCreators = hasTiktokCreatorsPayload ? tiktokCreators : undefined;
 
     const config = await prisma.communityConfig.upsert({
       where: { id: 1 },
@@ -50,6 +52,7 @@ async function updateConfig(req, res, next) {
         maxPostsPerDay,
         maxPostsPerMonth,
         commentRatePerMin,
+        ...(hasTiktokCreatorsPayload ? { tiktokCreators: nextTiktokCreators } : {}),
         updatedBy: req.user.id
       },
       create: {
@@ -57,6 +60,7 @@ async function updateConfig(req, res, next) {
         maxPostsPerDay,
         maxPostsPerMonth,
         commentRatePerMin,
+        tiktokCreators: hasTiktokCreatorsPayload ? nextTiktokCreators : [],
         updatedBy: req.user.id
       }
     });
@@ -66,7 +70,12 @@ async function updateConfig(req, res, next) {
       action: 'COMMUNITY_CONFIG_UPDATED',
       entityType: 'CommunityConfig',
       entityId: '1',
-      metadata: { maxPostsPerDay, maxPostsPerMonth, commentRatePerMin }
+      metadata: {
+        maxPostsPerDay,
+        maxPostsPerMonth,
+        commentRatePerMin,
+        ...(hasTiktokCreatorsPayload ? { tiktokCreatorsCount: nextTiktokCreators.length } : {})
+      }
     });
 
     return res.json({ config });

@@ -545,6 +545,7 @@ model CommunityConfig {
   maxPostsPerDay    Int      @default(3)
   maxPostsPerMonth  Int      @default(10)
   commentRatePerMin Int      @default(10)
+  tiktokCreators    Json     @default("[]") @map("tiktok_creators")
   updatedBy         Int?
   updatedAt         DateTime @updatedAt
   updatedByUser     Student? @relation(fields: [updatedBy], references: [id], map: "CommunityConfig_updatedBy_fkey")

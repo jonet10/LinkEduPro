@@ -9,7 +9,8 @@ async function getCommunityConfig() {
       id: 1,
       maxPostsPerDay: 3,
       maxPostsPerMonth: 10,
-      commentRatePerMin: 10
+      commentRatePerMin: 10,
+      tiktokCreators: []
     }
   });
 }

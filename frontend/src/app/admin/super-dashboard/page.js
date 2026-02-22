@@ -26,6 +26,9 @@ export default function SuperDashboardPage() {
     departments: [],
     communes: []
   });
+  const [communityConfig, setCommunityConfig] = useState(null);
+  const [tiktokEditors, setTiktokEditors] = useState([]);
+  const [savingTiktok, setSavingTiktok] = useState(false);
 
   useEffect(() => {
     const token = getToken();
@@ -46,17 +49,72 @@ export default function SuperDashboardPage() {
     try {
       setError('');
       setLoading(true);
-      const [d, i] = await Promise.all([
+      const [d, i, c] = await Promise.all([
         apiClient('/community/admin/super-dashboard', { token }),
-        apiClient('/community/admin/teacher-invitations', { token })
+        apiClient('/community/admin/teacher-invitations', { token }),
+        apiClient('/community/admin/config', { token })
       ]);
       setDashboard(d);
       setInvites(i.invitations || []);
+      if (c?.config) {
+        setCommunityConfig(c.config);
+        setTiktokEditors(Array.isArray(c.config.tiktokCreators) ? c.config.tiktokCreators : []);
+      }
       await loadStudents(token, studentFilters);
     } catch (e) {
       setError(e.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  function updateTiktokRow(index, field, value) {
+    setTiktokEditors((prev) => prev.map((row, idx) => (idx === index ? { ...row, [field]: value } : row)));
+  }
+
+  function addTiktokRow() {
+    setTiktokEditors((prev) => (
+      [...prev, { title: '', handle: '', category: '', search: '' }].slice(0, 12)
+    ));
+  }
+
+  function removeTiktokRow(index) {
+    setTiktokEditors((prev) => prev.filter((_, idx) => idx !== index));
+  }
+
+  async function saveTiktokModels() {
+    const token = getToken();
+    if (!token || !communityConfig) return;
+
+    const cleaned = tiktokEditors
+      .map((row) => ({
+        title: String(row?.title || '').trim(),
+        handle: String(row?.handle || '').trim(),
+        category: String(row?.category || '').trim(),
+        search: String(row?.search || '').trim()
+      }))
+      .filter((row) => row.title && row.handle && row.category && row.search)
+      .slice(0, 12);
+
+    try {
+      setSavingTiktok(true);
+      setError('');
+      const data = await apiClient('/community/admin/config', {
+        method: 'PUT',
+        token,
+        body: JSON.stringify({
+          maxPostsPerDay: communityConfig.maxPostsPerDay,
+          maxPostsPerMonth: communityConfig.maxPostsPerMonth,
+          commentRatePerMin: communityConfig.commentRatePerMin,
+          tiktokCreators: cleaned
+        })
+      });
+      setCommunityConfig(data.config);
+      setTiktokEditors(Array.isArray(data.config?.tiktokCreators) ? data.config.tiktokCreators : []);
+    } catch (e) {
+      setError(e.message || 'Erreur pendant la sauvegarde des modèles TikTok.');
+    } finally {
+      setSavingTiktok(false);
     }
   }
 
@@ -110,22 +168,22 @@ export default function SuperDashboardPage() {
 
       {dashboard?.analytics ? (
         <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          <div className="card"><p className="text-sm">Ecoles</p><p className="text-2xl font-bold">{dashboard.analytics.schools}</p></div>
-          <div className="card"><p className="text-sm">Eleves NS4</p><p className="text-2xl font-bold">{dashboard.analytics.publicStudents}</p></div>
+          <div className="card"><p className="text-sm">Écoles</p><p className="text-2xl font-bold">{dashboard.analytics.schools}</p></div>
+          <div className="card"><p className="text-sm">Élèves NS4</p><p className="text-2xl font-bold">{dashboard.analytics.publicStudents}</p></div>
           <div className="card"><p className="text-sm">Professeurs</p><p className="text-2xl font-bold">{dashboard.analytics.teachers}</p></div>
           <div className="card"><p className="text-sm">Paiements mensuels</p><p className="text-2xl font-bold">{String(dashboard.analytics.monthlyInternalPayments)}</p></div>
         </section>
       ) : null}
 
       <section className="card space-y-3">
-        <h2 className="text-xl font-semibold">Liste globale des eleves (module eleves)</h2>
+        <h2 className="text-xl font-semibold">Liste globale des Élèves (module Élèves)</h2>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
           <select
             className="input"
             value={studentFilters.school}
             onChange={(e) => setStudentFilters((prev) => ({ ...prev, school: e.target.value }))}
           >
-            <option value="">Global - toutes ecoles</option>
+            <option value="">Global - toutes Écoles</option>
             {studentFilterOptions.schools.map((school) => (
               <option key={school} value={school}>{school}</option>
             ))}
@@ -135,7 +193,7 @@ export default function SuperDashboardPage() {
             value={studentFilters.department}
             onChange={(e) => setStudentFilters((prev) => ({ ...prev, department: e.target.value }))}
           >
-            <option value="">Tous departements</option>
+            <option value="">Tous départements</option>
             {studentFilterOptions.departments.map((dpt) => (
               <option key={dpt} value={dpt}>{dpt}</option>
             ))}
@@ -152,7 +210,7 @@ export default function SuperDashboardPage() {
           </select>
           <input
             className="input"
-            placeholder="Recherche nom/email/ecole"
+            placeholder="Recherche nom/email/École"
             value={studentFilters.q}
             onChange={(e) => setStudentFilters((prev) => ({ ...prev, q: e.target.value }))}
           />
@@ -193,7 +251,7 @@ export default function SuperDashboardPage() {
         </div>
 
         {students.length === 0 ? (
-          <p className="text-sm text-brand-700">Aucun eleve trouve.</p>
+          <p className="text-sm text-brand-700">Aucun élève trouvé.</p>
         ) : (
           <div className="overflow-auto">
             <table className="min-w-full text-sm">
@@ -201,8 +259,8 @@ export default function SuperDashboardPage() {
                 <tr className="text-left">
                   <th>Nom</th>
                   <th>Email</th>
-                  <th>Ecole</th>
-                  <th>Departement</th>
+                  <th>École</th>
+                  <th>département</th>
                   <th>Commune</th>
                   <th>Niveau</th>
                   <th>Inscription</th>
@@ -234,6 +292,65 @@ export default function SuperDashboardPage() {
           <button className="btn-primary" onClick={createInvite}>Generer invitation</button>
         </div>
         {inviteLink ? <p className="rounded border border-brand-100 bg-brand-50 p-2 text-sm break-all">{inviteLink}</p> : null}
+      </section>
+
+      <section className="card space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Modèles TikTokeurs/TikTokeuses (page d&apos;accueil)</h2>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={addTiktokRow}
+            disabled={tiktokEditors.length >= 12}
+          >
+            Ajouter
+          </button>
+        </div>
+        <p className="text-sm text-brand-700">Tu peux gérer jusqu&apos;à 12 modèles. Les champs vides ne seront pas sauvegardés.</p>
+
+        <div className="space-y-3">
+          {tiktokEditors.map((row, index) => (
+            <div key={`${index}-${row.handle || 'model'}`} className="grid grid-cols-1 gap-2 rounded-lg border border-brand-100 p-3 md:grid-cols-5">
+              <input
+                className="input"
+                placeholder="Titre"
+                value={row.title || ''}
+                onChange={(e) => updateTiktokRow(index, 'title', e.target.value)}
+              />
+              <input
+                className="input"
+                placeholder="@handle"
+                value={row.handle || ''}
+                onChange={(e) => updateTiktokRow(index, 'handle', e.target.value)}
+              />
+              <input
+                className="input"
+                placeholder="Catégorie"
+                value={row.category || ''}
+                onChange={(e) => updateTiktokRow(index, 'category', e.target.value)}
+              />
+              <input
+                className="input"
+                placeholder="Mots-clés de recherche"
+                value={row.search || ''}
+                onChange={(e) => updateTiktokRow(index, 'search', e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => removeTiktokRow(index)}
+              >
+                Supprimer
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-end">
+          <button type="button" className="btn-primary" onClick={saveTiktokModels} disabled={savingTiktok}>
+            {savingTiktok ? 'Sauvegarde...' : 'Sauvegarder les modèles'}
+          </button>
+        </div>
       </section>
 
       <section className="card space-y-2">

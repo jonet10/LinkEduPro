@@ -4,6 +4,13 @@ const path = require('path');
 const fs = require('fs');
 const { touchPresence, getOnlineStats } = require('../services/online-presence.service');
 
+const DEFAULT_TIKTOK_CREATORS = [
+  { title: 'Maths en 60 secondes', handle: '@mathsfacile.ht', category: 'Mathématiques', search: 'maths bac haiti' },
+  { title: 'Chimie visuelle', handle: '@chimie.simple', category: 'Chimie', search: 'chimie exercices' },
+  { title: 'Histoire-Géo active', handle: '@histgeo.smart', category: 'Histoire-Géo', search: 'histoire geographie revision' },
+  { title: 'Philo en pratique', handle: '@philo.express', category: 'Philosophie', search: 'philosophie terminale' }
+];
+
 function getLimit(value, fallback = 6) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
@@ -412,6 +419,36 @@ async function getOnlinePresenceStats(req, res, next) {
   }
 }
 
+function sanitizeTiktokCreators(raw) {
+  if (!Array.isArray(raw)) return DEFAULT_TIKTOK_CREATORS;
+  const items = raw
+    .map((item) => ({
+      title: String(item?.title || '').trim(),
+      handle: String(item?.handle || '').trim(),
+      category: String(item?.category || '').trim(),
+      search: String(item?.search || '').trim()
+    }))
+    .filter((item) => item.title && item.handle && item.category && item.search)
+    .slice(0, 12);
+
+  return items.length ? items : DEFAULT_TIKTOK_CREATORS;
+}
+
+async function getHomeTikTokCreators(req, res, next) {
+  try {
+    const config = await prisma.communityConfig.findUnique({
+      where: { id: 1 },
+      select: { tiktokCreators: true }
+    });
+
+    return res.json({
+      items: sanitizeTiktokCreators(config?.tiktokCreators || null)
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   listRecentBlogPosts,
   getPublicBlogPost,
@@ -420,6 +457,7 @@ module.exports = {
   addProbableExerciseComment,
   streamExamPdf,
   pingOnlinePresence,
-  getOnlinePresenceStats
+  getOnlinePresenceStats,
+  getHomeTikTokCreators
 };
 

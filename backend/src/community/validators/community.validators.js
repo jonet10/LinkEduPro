@@ -47,7 +47,15 @@ const updateTeacherLevelSchema = Joi.object({
 const updateConfigSchema = Joi.object({
   maxPostsPerDay: Joi.number().integer().min(1).max(100).required(),
   maxPostsPerMonth: Joi.number().integer().min(1).max(1000).required(),
-  commentRatePerMin: Joi.number().integer().min(1).max(120).required()
+  commentRatePerMin: Joi.number().integer().min(1).max(120).required(),
+  tiktokCreators: Joi.array().items(
+    Joi.object({
+      title: Joi.string().trim().min(2).max(120).required(),
+      handle: Joi.string().trim().min(2).max(120).required(),
+      category: Joi.string().trim().min(2).max(80).required(),
+      search: Joi.string().trim().min(2).max(180).required()
+    })
+  ).max(12).optional()
 });
 
 const createTeacherInvitationSchema = Joi.object({
