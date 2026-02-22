@@ -42,11 +42,44 @@ const LANDING_STUDY_TOOLS = [
   { title: 'Cartes', desc: 'Mémoire active avec flashcards.' },
   { title: 'Tests d’entraînement', desc: 'Simulation d’examen et correction.' }
 ];
+const TIKTOK_MODELS = [
+  {
+    title: 'Maths en 60 secondes',
+    handle: '@mathsfacile.ht',
+    category: 'Mathématiques',
+    search: 'maths bac haiti'
+  },
+  {
+    title: 'Chimie visuelle',
+    handle: '@chimie.simple',
+    category: 'Chimie',
+    search: 'chimie exercices'
+  },
+  {
+    title: 'Histoire-Géo active',
+    handle: '@histgeo.smart',
+    category: 'Histoire-Géo',
+    search: 'histoire geographie revision'
+  },
+  {
+    title: 'Philo en pratique',
+    handle: '@philo.express',
+    category: 'Philosophie',
+    search: 'philosophie terminale'
+  }
+];
 
 function hasDepartmentAndCommune(schoolLabel) {
   if (!schoolLabel || typeof schoolLabel !== 'string') return false;
   const parts = schoolLabel.split('/').map((part) => part.trim()).filter(Boolean);
   return parts.length >= 3 && Boolean(parts[0]) && Boolean(parts[1]);
+}
+
+function formatLastSeen(value) {
+  if (!value) return 'Aucune activité récente';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Aucune activité récente';
+  return date.toLocaleString();
 }
 
 function getDailyObjective(student) {
@@ -110,6 +143,12 @@ export default function HomePage() {
   const [student, setStudent] = useState(null);
   const [community, setCommunity] = useState({ leaderboard: [], recent: [], schools: [] });
   const [notifications, setNotifications] = useState([]);
+  const [onlineStats, setOnlineStats] = useState({
+    counts: { total: 0, students: 0, teachers: 0, admins: 0, others: 0 },
+    latestSeenAt: null,
+    lastSeenByRole: { students: null, teachers: null, admins: null, others: null },
+    mineLastSeenAt: null
+  });
   const [error, setError] = useState('');
   const [welcomePopup, setWelcomePopup] = useState(null);
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
@@ -221,6 +260,38 @@ export default function HomePage() {
         setReady(true);
       });
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    let timer = null;
+
+    const loadOnlineStats = async () => {
+      const token = getToken();
+      try {
+        if (token) {
+          const pingData = await apiClient('/public/online/ping', { method: 'POST', token });
+          if (isMounted && pingData?.stats?.counts) {
+            setOnlineStats(pingData.stats);
+            return;
+          }
+        }
+
+        const statsData = await apiClient('/public/online/stats');
+        if (isMounted && statsData?.counts) {
+          setOnlineStats(statsData);
+        }
+      } catch (_) {
+      }
+    };
+
+    loadOnlineStats();
+    timer = window.setInterval(loadOnlineStats, 30000);
+
+    return () => {
+      isMounted = false;
+      if (timer) window.clearInterval(timer);
+    };
+  }, [isAuthed]);
 
   function closeCalendarNotice() {
     if (typeof window !== 'undefined') {
@@ -364,6 +435,36 @@ export default function HomePage() {
           </div>
         </section>
 
+        <section className="card" aria-labelledby="tiktok-title">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 id="tiktok-title" className="text-2xl font-black text-brand-900">Modèles TikTokeurs ou TikTokeuses à suivre</h2>
+              <p className="mt-1 text-sm text-brand-700">Sélection orientée éducation pour apprendre vite et rester motivé.</p>
+            </div>
+            <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+              {onlineStats.counts.total} en ligne
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-brand-700">
+            Dernière activité: {formatLastSeen(onlineStats.latestSeenAt)}
+          </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {TIKTOK_MODELS.map((item) => (
+              <a
+                key={item.handle}
+                href={`https://www.tiktok.com/search?q=${encodeURIComponent(item.search)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-xl border border-brand-100 bg-white p-4 transition hover:-translate-y-0.5 hover:bg-brand-50"
+              >
+                <p className="text-base font-semibold text-brand-900">{item.title}</p>
+                <p className="mt-1 text-sm text-brand-700">{item.handle} · {item.category}</p>
+                <p className="mt-2 text-xs font-semibold text-brand-500">Explorer</p>
+              </a>
+            ))}
+          </div>
+        </section>
+
         <VerifiedTestimonials />
       </section>
     );
@@ -428,6 +529,34 @@ export default function HomePage() {
           <Link href={homeIntro.primaryHref} className="btn-primary cta-pulse home-gold-cta">{homeIntro.primaryLabel}</Link>
           <Link href={homeIntro.secondaryHref} className="btn-secondary">{homeIntro.secondaryLabel}</Link>
         </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <article className="card lift-card">
+          <p className="text-xs uppercase tracking-wide text-brand-700">Utilisateurs en ligne</p>
+          <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.total}</p>
+          <p className="mt-1 text-xs text-brand-700">Dernière activité: {formatLastSeen(onlineStats.latestSeenAt)}</p>
+        </article>
+        <article className="card lift-card">
+          <p className="text-xs uppercase tracking-wide text-brand-700">Élèves</p>
+          <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.students}</p>
+          <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.students)}</p>
+        </article>
+        <article className="card lift-card">
+          <p className="text-xs uppercase tracking-wide text-brand-700">Professeurs</p>
+          <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.teachers}</p>
+          <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.teachers)}</p>
+        </article>
+        <article className="card lift-card">
+          <p className="text-xs uppercase tracking-wide text-brand-700">Admins</p>
+          <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.admins}</p>
+          <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.admins)}</p>
+        </article>
+      </div>
+
+      <div className="card lift-card">
+        <p className="text-xs uppercase tracking-wide text-brand-700">Ma dernière activité</p>
+        <p className="mt-2 text-sm text-brand-900">{formatLastSeen(onlineStats.mineLastSeenAt)}</p>
       </div>
 
       {isStudentRole ? (
@@ -544,6 +673,33 @@ export default function HomePage() {
             </Link>
           ))}
           {notifications.length === 0 ? <p className="text-brand-700">Aucune alerte pour le moment.</p> : null}
+        </div>
+      </article>
+
+      <article className="card motion-enter motion-delay-4 lift-card home-gold-soft">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div>
+            <h2 className="home-gold-title text-xl font-semibold text-brand-900">Modèles TikTokeurs ou TikTokeuses à suivre</h2>
+            <p className="mt-1 text-sm text-brand-700">Comptes et thèmes utiles pour apprendre rapidement.</p>
+          </div>
+          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+            {onlineStats.counts.total} actifs
+          </span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {TIKTOK_MODELS.map((item) => (
+            <a
+              key={item.handle}
+              href={`https://www.tiktok.com/search?q=${encodeURIComponent(item.search)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-xl border border-brand-100 bg-white p-4 transition hover:-translate-y-0.5 hover:bg-brand-50"
+            >
+              <p className="text-sm font-semibold text-brand-900">{item.title}</p>
+              <p className="mt-1 text-xs text-brand-700">{item.handle}</p>
+              <p className="mt-2 text-xs font-semibold text-brand-500">{item.category}</p>
+            </a>
+          ))}
         </div>
       </article>
 

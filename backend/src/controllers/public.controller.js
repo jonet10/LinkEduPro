@@ -2,6 +2,7 @@ const prisma = require('../config/prisma');
 const { Prisma } = require('@prisma/client');
 const path = require('path');
 const fs = require('fs');
+const { touchPresence, getOnlineStats } = require('../services/online-presence.service');
 
 function getLimit(value, fallback = 6) {
   const parsed = Number(value);
@@ -269,9 +270,18 @@ async function streamExamPdf(req, res, next) {
       return res.status(400).json({ message: 'Nom de fichier invalide.' });
     }
 
-    const examDir = path.resolve(__dirname, '../../../Examen Physiques');
-    const filePath = path.join(examDir, safeName);
-    if (!fs.existsSync(filePath)) {
+    const candidateDirs = [
+      path.resolve(__dirname, '../../../Examen Physiques'),
+      path.resolve(__dirname, '../../../Documents/Chimie'),
+      path.resolve(__dirname, '../../../Documents/Math'),
+      path.resolve(__dirname, '../../../Documents/Mathematiques')
+    ];
+
+    const filePath = candidateDirs
+      .map((dir) => path.join(dir, safeName))
+      .find((candidate) => fs.existsSync(candidate));
+
+    if (!filePath) {
       return res.status(404).json({ message: 'PDF introuvable.' });
     }
 
@@ -381,12 +391,35 @@ async function addProbableExerciseComment(req, res, next) {
   }
 }
 
+async function pingOnlinePresence(req, res, next) {
+  try {
+    const pingInfo = touchPresence(req.user);
+    return res.json({
+      message: 'Presence mise a jour.',
+      ping: pingInfo,
+      stats: getOnlineStats(req.user?.id)
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getOnlinePresenceStats(req, res, next) {
+  try {
+    return res.json(getOnlineStats(req.user?.id));
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   listRecentBlogPosts,
   getPublicBlogPost,
   listProbableExercises,
   toggleProbableExerciseLike,
   addProbableExerciseComment,
-  streamExamPdf
+  streamExamPdf,
+  pingOnlinePresence,
+  getOnlinePresenceStats
 };
 
