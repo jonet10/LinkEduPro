@@ -45,7 +45,7 @@ export default function RootLayout({ children }) {
       <body className="flex min-h-screen flex-col">
         <ThemeInit />
         <SplashScreenGate />
-        <header className="border-b border-brand-100 bg-white/80 backdrop-blur">
+        <header className="relative z-[120] border-b border-brand-100 bg-white/80 backdrop-blur">
           <nav className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
             <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3 text-xl font-bold text-brand-700 md:static md:translate-x-0" aria-label="Accueil LinkEduPro">
               <Image src="/logo.png" alt="Logo LinkEduPro" width={62} height={62} priority />
@@ -53,7 +53,7 @@ export default function RootLayout({ children }) {
             <HeaderNav />
           </nav>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8 pb-28 md:pb-8">{children}</main>
+        <main className="relative z-0 mx-auto w-full max-w-6xl flex-1 px-6 py-8 pb-28 md:pb-8">{children}</main>
         <Footer />
       </body>
     </html>
