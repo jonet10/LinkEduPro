@@ -12,6 +12,10 @@
   --elev-shadow: 0 10px 24px rgba(18, 63, 108, 0.12);
   --elev-shadow-strong: 0 18px 34px rgba(18, 63, 108, 0.18);
   --press-shadow: 0 4px 10px rgba(18, 63, 108, 0.18);
+  --card-rgb-a: 132, 200, 255;
+  --card-rgb-b: 255, 212, 143;
+  --card-rgb-c: 175, 228, 193;
+  --card-rgb-d: 218, 187, 255;
 }
 
 body {
@@ -34,6 +38,10 @@ body {
   --elev-shadow: 0 12px 24px rgba(2, 8, 18, 0.5);
   --elev-shadow-strong: 0 20px 34px rgba(2, 8, 18, 0.62);
   --press-shadow: 0 6px 12px rgba(2, 8, 18, 0.64);
+  --card-rgb-a: 67, 126, 191;
+  --card-rgb-b: 151, 118, 58;
+  --card-rgb-c: 64, 126, 104;
+  --card-rgb-d: 116, 94, 166;
 }
 
 .dark body {
@@ -109,9 +117,21 @@ body {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--card-border);
-  background: linear-gradient(170deg, var(--surface-grad-start), var(--surface-grad-end));
+  background:
+    linear-gradient(170deg, var(--surface-grad-start), var(--surface-grad-end)),
+    radial-gradient(circle at 10% 18%, rgba(var(--card-rgb-a), 0.2), transparent 44%),
+    radial-gradient(circle at 92% 6%, rgba(var(--card-rgb-b), 0.18), transparent 40%),
+    radial-gradient(circle at 20% 96%, rgba(var(--card-rgb-c), 0.14), transparent 38%),
+    radial-gradient(circle at 100% 100%, rgba(var(--card-rgb-d), 0.12), transparent 42%);
+  background-size: 100% 100%, 145% 145%, 145% 145%, 145% 145%, 145% 145%;
+  background-position: 0% 0%, 0% 0%, 100% 0%, 0% 100%, 100% 100%;
   box-shadow: var(--elev-shadow);
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background-position 280ms ease,
+    filter 220ms ease;
 }
 
 .card::before {
@@ -127,6 +147,8 @@ body {
 .card:hover {
   transform: translateY(-1px);
   box-shadow: var(--elev-shadow-strong);
+  background-position: 0% 0%, 22% 8%, 78% 12%, 10% 88%, 90% 90%;
+  filter: saturate(1.04);
 }
 
 .btn-primary {
@@ -190,6 +212,15 @@ body {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.75),
     0 0 0 3px rgba(63, 143, 220, 0.18);
+}
+
+@media (hover: none) {
+  .card:active,
+  .card:focus-within {
+    background-position: 0% 0%, 22% 8%, 78% 12%, 10% 88%, 90% 90%;
+    filter: saturate(1.04);
+    box-shadow: var(--elev-shadow-strong);
+  }
 }
 
 @keyframes fadeInWelcome {
