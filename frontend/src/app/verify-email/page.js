@@ -27,7 +27,7 @@ async function verifyToken(token) {
     const data = await res.json().catch(() => ({}));
     return {
       ok: res.ok,
-      message: data.message || (res.ok ? 'Email verifie avec succes.' : 'Lien invalide ou expire.')
+      message: data.message || (res.ok ? 'Email vérifié avec succès.' : 'Lien invalide ou expiré.')
     };
   } catch (_) {
     return { ok: false, message: 'Erreur de verification. Reessayez plus tard.' };

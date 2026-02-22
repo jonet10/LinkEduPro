@@ -152,7 +152,7 @@ async function verifyAndConsumeEmailToken(rawToken) {
     }
   });
 
-  return { ok: true, message: 'Email verifie avec succes.' };
+  return { ok: true, message: 'Email vérifié avec succès.' };
 }
 
 function hashResetCode(email, code) {
@@ -172,6 +172,8 @@ async function register(req, res, next) {
       sex,
       dateOfBirth,
       school,
+      department,
+      commune,
       gradeLevel,
       role,
       academicLevel,
@@ -182,19 +184,25 @@ async function register(req, res, next) {
     } = req.body;
 
     if (role !== 'STUDENT') {
-      return res.status(400).json({ message: "Inscription directe disponible uniquement pour les eleves." });
+      return res.status(400).json({ message: "Inscription directe disponible uniquement pour les Élèves." });
+    }
+
+    const normalizedDepartment = typeof department === 'string' ? department.trim() : '';
+    const normalizedCommune = typeof commune === 'string' ? commune.trim() : '';
+    if (!normalizedDepartment || !normalizedCommune) {
+      return res.status(400).json({ message: 'département et commune sont obligatoires.' });
     }
 
     const parsedAcademicLevel = parseAcademicLevel(academicLevel);
     if (!parsedAcademicLevel) {
-      return res.status(400).json({ message: 'Niveau academique invalide.' });
+      return res.status(400).json({ message: 'Niveau académique invalide.' });
     }
 
     let normalizedNsivTrack = null;
     if (parsedAcademicLevel === 'NSIV') {
       const rawTrack = typeof nsivTrack === 'string' ? nsivTrack.trim().toUpperCase() : 'ORDINAIRE';
       if (!NSIV_TRACKS.has(rawTrack)) {
-        return res.status(400).json({ message: 'Filiere NSIV invalide.' });
+        return res.status(400).json({ message: 'Filière NSIV invalide.' });
       }
       normalizedNsivTrack = rawTrack;
     }
@@ -209,6 +217,11 @@ async function register(req, res, next) {
     const passwordHash = await bcrypt.hash(password, 10);
     const { plainToken, tokenHash, tokenExpiry } = createEmailVerificationToken();
 
+    const normalizedSchool = typeof school === 'string' ? school.trim() : '';
+    const schoolLabel = normalizedSchool.includes('/')
+      ? normalizedSchool
+      : `${normalizedDepartment} / ${normalizedCommune} / ${normalizedSchool}`;
+
     const student = await prisma.$transaction(async (tx) => {
       const created = await tx.student.create({
         data: {
@@ -216,7 +229,7 @@ async function register(req, res, next) {
           lastName,
           sex,
           dateOfBirth: new Date(dateOfBirth),
-          school,
+          school: schoolLabel,
           gradeLevel,
           email: normalizedEmail,
           phone: phone || null,
@@ -252,7 +265,7 @@ async function register(req, res, next) {
     } catch (mailError) {
       console.error('Email verification send failed on register:', mailError);
       return res.status(503).json({
-        message: "Compte cree, mais l'email de verification n'a pas pu etre envoye. Utilisez 'Renvoyer email'.",
+        message: "Compte créé, mais l'email de vérification n'a pas pu être envoyé. Utilisez 'Renvoyer email'.",
         code: 'EMAIL_SERVICE_UNAVAILABLE',
         requiresEmailVerification: true,
         email: normalizedEmail
@@ -260,7 +273,7 @@ async function register(req, res, next) {
     }
 
     const response = {
-      message: 'Un email de verification a ete envoye. Veuillez verifier votre boite mail.',
+      message: 'Un email de vérification a été envoyé. Veuillez vérifier votre boîte mail.',
       requiresEmailVerification: true
     };
     if (process.env.NODE_ENV !== 'production' && (process.env.EMAIL_PROVIDER || 'brevo').toLowerCase() === 'mock') {
@@ -297,7 +310,7 @@ async function login(req, res, next) {
 
     if (!student.emailVerified) {
       return res.status(403).json({
-        message: 'Veuillez verifier votre email pour activer votre compte.',
+        message: 'Veuillez vérifier votre email pour activer votre compte.',
         code: 'EMAIL_NOT_VERIFIED',
         email: student.email
       });
@@ -389,7 +402,7 @@ async function verifyEmailByLink(req, res, next) {
 async function resendVerificationEmail(req, res, next) {
   try {
     const email = normalizeEmail(req.body.email);
-    const genericResponse = { message: 'Si ce compte existe, un email de verification a ete envoye.' };
+    const genericResponse = { message: 'Si ce compte existe, un email de vérification a été envoyé.' };
 
     const student = await prisma.student.findUnique({ where: { email } });
 
@@ -398,7 +411,7 @@ async function resendVerificationEmail(req, res, next) {
     }
 
     if (student.emailVerified) {
-      return res.json({ message: 'Cet email est deja verifie.' });
+      return res.json({ message: 'Cet email est déjà vérifié.' });
     }
 
     const now = new Date();
@@ -460,7 +473,7 @@ async function updateUnverifiedEmail(req, res, next) {
     }
 
     if (student.emailVerified) {
-      return res.status(400).json({ message: 'Cet email est deja verifie.' });
+      return res.status(400).json({ message: 'Cet email est déjà vérifié.' });
     }
 
     const valid = await bcrypt.compare(password, student.passwordHash);
@@ -491,7 +504,7 @@ async function updateUnverifiedEmail(req, res, next) {
       token: plainToken
     });
 
-    const response = { message: 'Email mis a jour. Un nouvel email de verification a ete envoye.' };
+    const response = { message: 'Email mis à jour. Un nouvel email de verification a été envoyé.' };
     if (process.env.NODE_ENV !== 'production' && (process.env.EMAIL_PROVIDER || 'brevo').toLowerCase() === 'mock') {
       response.devVerificationToken = plainToken;
     }
@@ -520,7 +533,7 @@ async function requestPasswordReset(req, res, next) {
     const email = normalizeEmail(req.body.email);
     const student = await prisma.student.findUnique({ where: { email } });
 
-    const genericResponse = { message: 'Si cet email existe, un code de reinitialisation a ete envoye par email.' };
+    const genericResponse = { message: 'Si cet email existe, un code de reinitialisation a été envoyé par email.' };
 
     if (!student) {
       return res.json(genericResponse);
@@ -663,7 +676,7 @@ async function resetPasswordWithCode(req, res, next) {
       });
     });
 
-    return res.json({ message: 'Mot de passe reinitialise avec succes.' });
+    return res.json({ message: 'Mot de passe reinitialise avec succès.' });
   } catch (error) {
     return next(error);
   }
