@@ -42,6 +42,23 @@ const LANDING_STUDY_TOOLS = [
   { title: 'Cartes', desc: 'Mémoire active avec flashcards.' },
   { title: 'Tests d’entraînement', desc: 'Simulation d’examen et correction.' }
 ];
+const LANDING_HERO_SLIDES = [
+  {
+    id: 'h-1',
+    image: '/slides/H.jpeg',
+    caption: 'Apprentissage guidé et personnalisé'
+  },
+  {
+    id: 'h-2',
+    image: '/slides/HC.png',
+    caption: 'Communauté active entre élèves et professeurs'
+  },
+  {
+    id: 'h-3',
+    image: '/slides/HTC.png',
+    caption: 'Outils modernes pour réussir les examens'
+  }
+];
 const DEFAULT_HOME_CHALLENGE = {
   title: 'Vote de la semaine',
   subtitle: 'Choisis la personne qui doit rester en tête cette semaine.',
@@ -165,6 +182,7 @@ export default function HomePage() {
   const [welcomePopup, setWelcomePopup] = useState(null);
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
   const [activeLandingSubject, setActiveLandingSubject] = useState(LANDING_SUBJECTS[0].id);
+  const [landingHeroIndex, setLandingHeroIndex] = useState(0);
 
   const myRanking = useMemo(() => {
     if (!student?.id) return null;
@@ -310,6 +328,13 @@ export default function HomePage() {
       setWeekCountdown(getWeekCountdownLabel());
     }, 60000);
     setWeekCountdown(getWeekCountdownLabel());
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setLandingHeroIndex((prev) => (prev + 1) % LANDING_HERO_SLIDES.length);
+    }, 4500);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -503,11 +528,11 @@ export default function HomePage() {
         <section className="landing-hero card">
           <div>
             <p className="landing-kicker">LinkEduPro</p>
-            <h1 className="landing-title">Trouvez des solutions fiables tirées des contenus scolaires</h1>
+            <h1 className="landing-title">LinkEduPro, c&apos;est une plateforme éducative haïtienne qui relie élèves, professeurs et écoles.</h1>
             <ul className="mt-5 space-y-2 text-base text-brand-900">
-              <li>Explications détaillées et progressives</li>
-              <li>Réponses vérifiées pour l'entraînement</li>
-              <li>Ressources utiles pour le Bac et les examens</li>
+              <li>Un espace unique pour apprendre, pratiquer et publier des contenus académiques.</li>
+              <li>Des quiz, exercices, rattrapages, challenges et outils de suivi des performances.</li>
+              <li>Une communauté structurée pour préparer efficacement les examens en Haïti.</li>
             </ul>
             <div className="mt-5 flex flex-wrap gap-3">
               <Link href="/register" className="btn-primary">S’inscrire gratuitement</Link>
@@ -515,13 +540,26 @@ export default function HomePage() {
             </div>
           </div>
           <div className="landing-hero-art" aria-hidden="true">
-            <div className="landing-device-card">
-              <p className="font-semibold text-brand-900">Exercice vérifié</p>
-              <p className="mt-1 text-sm text-brand-700">Solution étape par étape</p>
+            <div className="landing-hero-slide-shell">
+              <img
+                src={LANDING_HERO_SLIDES[landingHeroIndex].image}
+                alt={LANDING_HERO_SLIDES[landingHeroIndex].caption}
+                className="landing-hero-slide-image"
+              />
+              <div className="landing-hero-slide-overlay">
+                <p className="text-sm font-semibold text-white">{LANDING_HERO_SLIDES[landingHeroIndex].caption}</p>
+              </div>
             </div>
-            <div className="landing-device-card">
-              <p className="font-semibold text-brand-900">Test d’entraînement</p>
-              <p className="mt-1 text-sm text-brand-700">Score, correction et révision</p>
+            <div className="landing-hero-dots">
+              {LANDING_HERO_SLIDES.map((slide, idx) => (
+                <button
+                  key={slide.id}
+                  type="button"
+                  aria-label={`Aller au visuel ${idx + 1}`}
+                  onClick={() => setLandingHeroIndex(idx)}
+                  className={`landing-hero-dot ${idx === landingHeroIndex ? 'is-active' : ''}`}
+                />
+              ))}
             </div>
           </div>
         </section>
