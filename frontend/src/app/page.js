@@ -50,12 +50,12 @@ const LANDING_HERO_SLIDES = [
   },
   {
     id: 'h-2',
-    image: '/slides/HC.png',
+    image: '/slides/HC.jpg',
     caption: 'Communauté active entre élèves et professeurs'
   },
   {
     id: 'h-3',
-    image: '/slides/HTC.png',
+    image: '/slides/HTC.jpg',
     caption: 'Outils modernes pour réussir les examens'
   },
   {
