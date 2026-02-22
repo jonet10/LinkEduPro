@@ -42,32 +42,21 @@ const LANDING_STUDY_TOOLS = [
   { title: 'Cartes', desc: 'Mémoire active avec flashcards.' },
   { title: 'Tests d’entraînement', desc: 'Simulation d’examen et correction.' }
 ];
-const TIKTOK_MODELS = [
-  {
-    title: 'Maths en 60 secondes',
-    handle: '@mathsfacile.ht',
-    category: 'Mathématiques',
-    search: 'maths bac haiti'
-  },
-  {
-    title: 'Chimie visuelle',
-    handle: '@chimie.simple',
-    category: 'Chimie',
-    search: 'chimie exercices'
-  },
-  {
-    title: 'Histoire-Géo active',
-    handle: '@histgeo.smart',
-    category: 'Histoire-Géo',
-    search: 'histoire geographie revision'
-  },
-  {
-    title: 'Philo en pratique',
-    handle: '@philo.express',
-    category: 'Philosophie',
-    search: 'philosophie terminale'
-  }
-];
+const DEFAULT_HOME_CHALLENGE = {
+  title: 'Vote de la semaine',
+  subtitle: 'Choisis la personne qui doit rester en tête cette semaine.',
+  theme: 'TIKTOKERS',
+  weekKey: '',
+  totalVotes: 0,
+  myVote: null,
+  recentComments: [],
+  items: [
+    { title: 'Maths en 60 secondes', handle: '@mathsfacile.ht', category: 'Mathématiques', search: 'maths bac haiti', votes: 0 },
+    { title: 'Chimie visuelle', handle: '@chimie.simple', category: 'Chimie', search: 'chimie exercices', votes: 0 },
+    { title: 'Histoire-Géo active', handle: '@histgeo.smart', category: 'Histoire-Géo', search: 'histoire geographie revision', votes: 0 },
+    { title: 'Philo en pratique', handle: '@philo.express', category: 'Philosophie', search: 'philosophie terminale', votes: 0 }
+  ]
+};
 
 function hasDepartmentAndCommune(schoolLabel) {
   if (!schoolLabel || typeof schoolLabel !== 'string') return false;
@@ -149,7 +138,11 @@ export default function HomePage() {
     lastSeenByRole: { students: null, teachers: null, admins: null, others: null },
     mineLastSeenAt: null
   });
-  const [tiktokModels, setTiktokModels] = useState(TIKTOK_MODELS);
+  const [homeChallenge, setHomeChallenge] = useState(DEFAULT_HOME_CHALLENGE);
+  const [selectedChallengeHandle, setSelectedChallengeHandle] = useState('');
+  const [challengeComment, setChallengeComment] = useState('');
+  const [challengeSubmitting, setChallengeSubmitting] = useState(false);
+  const [challengeFeedback, setChallengeFeedback] = useState('');
   const [error, setError] = useState('');
   const [welcomePopup, setWelcomePopup] = useState(null);
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
@@ -297,11 +290,19 @@ export default function HomePage() {
   useEffect(() => {
     let isMounted = true;
 
-    apiClient('/public/home/tiktok-creators')
+    apiClient('/public/home/challenge', { token: getToken() || undefined })
       .then((data) => {
-        const items = Array.isArray(data?.items) ? data.items : [];
-        if (isMounted && items.length > 0) {
-          setTiktokModels(items);
+        if (isMounted && Array.isArray(data?.items) && data.items.length > 0) {
+          const merged = {
+            ...DEFAULT_HOME_CHALLENGE,
+            ...data,
+            items: data.items
+          };
+          setHomeChallenge(merged);
+          if (data?.myVote?.candidateHandle) {
+            setSelectedChallengeHandle(data.myVote.candidateHandle);
+            setChallengeComment(data?.myVote?.comment || '');
+          }
         }
       })
       .catch(() => {});
@@ -309,7 +310,44 @@ export default function HomePage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isAuthed]);
+
+  async function submitChallengeVote() {
+    const token = getToken();
+    if (!token) {
+      setChallengeFeedback('Connecte-toi pour participer au challenge.');
+      return;
+    }
+    if (!selectedChallengeHandle) {
+      setChallengeFeedback('Choisis une personne avant de voter.');
+      return;
+    }
+
+    try {
+      setChallengeSubmitting(true);
+      setChallengeFeedback('');
+      await apiClient('/public/home/challenge/vote', {
+        method: 'POST',
+        token,
+        body: JSON.stringify({
+          handle: selectedChallengeHandle,
+          comment: challengeComment
+        })
+      });
+
+      const refreshed = await apiClient('/public/home/challenge', { token });
+      setHomeChallenge({
+        ...DEFAULT_HOME_CHALLENGE,
+        ...refreshed,
+        items: Array.isArray(refreshed?.items) ? refreshed.items : DEFAULT_HOME_CHALLENGE.items
+      });
+      setChallengeFeedback('Vote enregistré avec succès.');
+    } catch (e) {
+      setChallengeFeedback(e.message || 'Impossible d’enregistrer le vote.');
+    } finally {
+      setChallengeSubmitting(false);
+    }
+  }
 
   function closeCalendarNotice() {
     if (typeof window !== 'undefined') {
@@ -456,18 +494,18 @@ export default function HomePage() {
         <section className="card" aria-labelledby="tiktok-title">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 id="tiktok-title" className="text-2xl font-black text-brand-900">Modèles TikTokeurs ou TikTokeuses à suivre</h2>
-              <p className="mt-1 text-sm text-brand-700">Sélection orientée éducation pour apprendre vite et rester motivé.</p>
+              <h2 id="tiktok-title" className="text-2xl font-black text-brand-900">{homeChallenge.title}</h2>
+              <p className="mt-1 text-sm text-brand-700">{homeChallenge.subtitle}</p>
             </div>
             <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-              {onlineStats.counts.total} en ligne
+              {homeChallenge.totalVotes} vote(s)
             </span>
           </div>
           <p className="mt-2 text-xs text-brand-700">
-            Dernière activité: {formatLastSeen(onlineStats.latestSeenAt)}
+            Semaine: {homeChallenge.weekKey || '-'}
           </p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {tiktokModels.map((item, idx) => (
+            {homeChallenge.items.map((item, idx) => (
               <a
                 key={item.handle}
                 href={`https://www.tiktok.com/search?q=${encodeURIComponent(item.search)}`}
@@ -477,10 +515,11 @@ export default function HomePage() {
               >
                 <p className="text-base font-semibold text-brand-900">{item.title}</p>
                 <p className="mt-1 text-sm text-brand-700">{item.handle} · {item.category}</p>
-                <p className="mt-2 text-xs font-semibold text-brand-500">Explorer</p>
+                <p className="mt-2 text-xs font-semibold text-brand-500">Votes: {item.votes || 0}</p>
               </a>
             ))}
           </div>
+          <p className="mt-3 text-xs text-brand-700">Connecte-toi pour voter et laisser ton commentaire.</p>
         </section>
 
         <VerifiedTestimonials />
@@ -700,28 +739,68 @@ export default function HomePage() {
       <article className="card motion-enter motion-delay-4 lift-card home-gold-soft">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <h2 className="home-gold-title text-xl font-semibold text-brand-900">Modèles TikTokeurs ou TikTokeuses à suivre</h2>
-            <p className="mt-1 text-sm text-brand-700">Comptes et thèmes utiles pour apprendre rapidement.</p>
+            <h2 className="home-gold-title text-xl font-semibold text-brand-900">{homeChallenge.title}</h2>
+            <p className="mt-1 text-sm text-brand-700">{homeChallenge.subtitle}</p>
           </div>
           <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-            {onlineStats.counts.total} actifs
+            {homeChallenge.totalVotes} vote(s)
           </span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {tiktokModels.map((item, idx) => (
-            <a
+          {homeChallenge.items.map((item, idx) => (
+            <button
               key={item.handle}
-              href={`https://www.tiktok.com/search?q=${encodeURIComponent(item.search)}`}
-              target="_blank"
-              rel="noreferrer"
+              type="button"
+              onClick={() => setSelectedChallengeHandle(item.handle)}
               className={`rounded-xl border border-brand-100 p-4 palette-card palette-${(idx % 4) + 1}`}
             >
               <p className="text-sm font-semibold text-brand-900">{item.title}</p>
               <p className="mt-1 text-xs text-brand-700">{item.handle}</p>
               <p className="mt-2 text-xs font-semibold text-brand-500">{item.category}</p>
-            </a>
+              <p className="mt-1 text-xs text-brand-700">Votes: {item.votes || 0}</p>
+              {selectedChallengeHandle === item.handle ? (
+                <p className="mt-1 text-xs font-semibold text-brand-900">Sélectionné</p>
+              ) : null}
+            </button>
           ))}
         </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+          <textarea
+            className="input min-h-[92px]"
+            placeholder="Laisse un commentaire (optionnel)"
+            value={challengeComment}
+            onChange={(e) => setChallengeComment(e.target.value)}
+            maxLength={500}
+            disabled={Boolean(homeChallenge.myVote)}
+          />
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={submitChallengeVote}
+            disabled={challengeSubmitting || Boolean(homeChallenge.myVote)}
+          >
+            {homeChallenge.myVote ? 'Vote déjà envoyé' : (challengeSubmitting ? 'Envoi...' : 'Voter maintenant')}
+          </button>
+        </div>
+        {homeChallenge.myVote ? (
+          <p className="mt-2 text-xs text-brand-700">
+            Tu as voté pour {homeChallenge.myVote.candidateHandle} le {formatLastSeen(homeChallenge.myVote.createdAt)}.
+          </p>
+        ) : null}
+        {challengeFeedback ? <p className="mt-2 text-xs text-brand-700">{challengeFeedback}</p> : null}
+        {Array.isArray(homeChallenge.recentComments) && homeChallenge.recentComments.length > 0 ? (
+          <div className="mt-4 rounded-lg border border-brand-100 p-3">
+            <p className="text-sm font-semibold text-brand-900">Commentaires récents</p>
+            <div className="mt-2 space-y-2">
+              {homeChallenge.recentComments.map((row) => (
+                <div key={row.id} className="rounded-md border border-brand-100 px-3 py-2 text-xs">
+                  <p className="font-semibold text-brand-900">{row.author} • {row.candidateHandle}</p>
+                  <p className="mt-1 text-brand-700">{row.comment}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </article>
 
       <VerifiedTestimonials />
