@@ -440,7 +440,7 @@ export default function HomePage() {
           </div>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {activeLandingBooks.map((book) => (
-              <article key={book.title} className="rounded-xl border border-brand-100 bg-white p-4">
+              <article key={book.title} className="palette-card rounded-xl border border-brand-100 p-4">
                 <p className="text-lg font-bold text-brand-900">{book.title}</p>
                 <p className="mt-2 text-sm text-brand-700">{book.meta}</p>
                 <div className="mt-3">
@@ -467,13 +467,13 @@ export default function HomePage() {
             Dernière activité: {formatLastSeen(onlineStats.latestSeenAt)}
           </p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {tiktokModels.map((item) => (
+            {tiktokModels.map((item, idx) => (
               <a
                 key={item.handle}
                 href={`https://www.tiktok.com/search?q=${encodeURIComponent(item.search)}`}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-xl border border-brand-100 bg-white p-4 transition hover:-translate-y-0.5 hover:bg-brand-50"
+                className={`palette-card palette-${(idx % 4) + 1} rounded-xl border border-brand-100 p-4`}
               >
                 <p className="text-base font-semibold text-brand-900">{item.title}</p>
                 <p className="mt-1 text-sm text-brand-700">{item.handle} · {item.category}</p>
@@ -550,22 +550,22 @@ export default function HomePage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <article className="card lift-card">
+        <article className="card lift-card palette-card palette-1">
           <p className="text-xs uppercase tracking-wide text-brand-700">Utilisateurs en ligne</p>
           <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.total}</p>
           <p className="mt-1 text-xs text-brand-700">Dernière activité: {formatLastSeen(onlineStats.latestSeenAt)}</p>
         </article>
-        <article className="card lift-card">
+        <article className="card lift-card palette-card palette-2">
           <p className="text-xs uppercase tracking-wide text-brand-700">Élèves</p>
           <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.students}</p>
           <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.students)}</p>
         </article>
-        <article className="card lift-card">
+        <article className="card lift-card palette-card palette-3">
           <p className="text-xs uppercase tracking-wide text-brand-700">Professeurs</p>
           <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.teachers}</p>
           <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.teachers)}</p>
         </article>
-        <article className="card lift-card">
+        <article className="card lift-card palette-card palette-4">
           <p className="text-xs uppercase tracking-wide text-brand-700">Admins</p>
           <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.admins}</p>
           <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.admins)}</p>
@@ -608,11 +608,11 @@ export default function HomePage() {
           <h2 className="text-xl font-semibold text-brand-900">Rubriques NSIV</h2>
           <p className="mt-2 text-sm text-brand-700">Accès direct aux rubriques principales de Terminale.</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50 lift-card">
+            <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 lift-card palette-card palette-1">
               <p className="font-semibold text-brand-900">Espace NSIV</p>
               <p className="mt-1 text-sm text-brand-700">Tableau complet des rubriques et progression.</p>
             </Link>
-            <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50 lift-card">
+            <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 lift-card palette-card palette-2">
               <p className="font-semibold text-brand-900">Exercices probables</p>
               <p className="mt-1 text-sm text-brand-700">Sujets récurrents du Bac NSIV.</p>
             </Link>
@@ -627,19 +627,19 @@ export default function HomePage() {
           <article className="card lg:col-span-2 lift-card">
             <h2 className="mb-3 text-xl font-semibold text-brand-900">Plan rapide du jour</h2>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
+              <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-1">
                 <p className="text-sm font-semibold text-brand-900">Rubriques du jour</p>
                 <p className="mt-1 text-sm text-brand-700">Révision ciblée par matière.</p>
               </Link>
-              <Link href="/probable-exercises" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
+              <Link href="/probable-exercises" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-2">
                 <p className="text-sm font-semibold text-brand-900">Exercices probables</p>
                 <p className="mt-1 text-sm text-brand-700">Sujets les plus fréquents à l&apos;examen.</p>
               </Link>
-              <Link href="/focus" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
+              <Link href="/focus" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-3">
                 <p className="text-sm font-semibold text-brand-900">Session Focus</p>
                 <p className="mt-1 text-sm text-brand-700">Concentration en 25 minutes.</p>
               </Link>
-              <Link href="/library" className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
+              <Link href="/library" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-4">
                 <p className="text-sm font-semibold text-brand-900">Bibliothèque</p>
                 <p className="mt-1 text-sm text-brand-700">PDF, ressources et fiches utiles.</p>
               </Link>
@@ -666,8 +666,8 @@ export default function HomePage() {
         <article className="card motion-enter motion-delay-3 lift-card home-gold-soft">
           <h2 className="home-gold-title mb-3 text-xl font-semibold text-brand-900">Centre de gestion</h2>
           <div className="grid gap-3 sm:grid-cols-2">
-            {managerQuickActions.map((action) => (
-              <Link key={action.href} href={action.href} className="rounded-xl border border-brand-100 p-4 hover:bg-brand-50 lift-card">
+            {managerQuickActions.map((action, idx) => (
+              <Link key={action.href} href={action.href} className={`rounded-xl border border-brand-100 p-4 lift-card palette-card palette-${(idx % 4) + 1}`}>
                 <p className="text-sm font-semibold text-brand-900">{action.title}</p>
                 <p className="mt-1 text-sm text-brand-700">{action.desc}</p>
               </Link>
@@ -708,13 +708,13 @@ export default function HomePage() {
           </span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {tiktokModels.map((item) => (
+          {tiktokModels.map((item, idx) => (
             <a
               key={item.handle}
               href={`https://www.tiktok.com/search?q=${encodeURIComponent(item.search)}`}
               target="_blank"
               rel="noreferrer"
-              className="rounded-xl border border-brand-100 bg-white p-4 transition hover:-translate-y-0.5 hover:bg-brand-50"
+              className={`rounded-xl border border-brand-100 p-4 palette-card palette-${(idx % 4) + 1}`}
             >
               <p className="text-sm font-semibold text-brand-900">{item.title}</p>
               <p className="mt-1 text-xs text-brand-700">{item.handle}</p>
