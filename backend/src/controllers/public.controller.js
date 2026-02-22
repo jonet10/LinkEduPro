@@ -509,10 +509,17 @@ async function getHomeTikTokCreators(req, res, next) {
       myVote = mine || null;
     }
 
-    const items = candidates.map((item) => ({
-      ...item,
-      votes: Number(voteMap.get(item.handle) || 0)
-    }));
+    const items = candidates
+      .map((item, index) => ({
+        ...item,
+        votes: Number(voteMap.get(item.handle) || 0),
+        _order: index
+      }))
+      .sort((a, b) => {
+        if (b.votes !== a.votes) return b.votes - a.votes;
+        return a._order - b._order;
+      })
+      .map(({ _order, ...rest }) => rest);
 
     return res.json({
       title: config?.homeChallengeTitle || 'Vote de la semaine',
