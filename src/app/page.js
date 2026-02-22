@@ -71,6 +71,22 @@ function formatLastSeen(value) {
   return date.toLocaleString();
 }
 
+function getWeekCountdownLabel(now = new Date()) {
+  const current = new Date(now);
+  const day = current.getDay(); // 0 Sunday ... 6 Saturday
+  const diffToSunday = day === 0 ? 0 : (7 - day);
+  const end = new Date(current);
+  end.setDate(current.getDate() + diffToSunday);
+  end.setHours(23, 59, 59, 999);
+
+  const ms = Math.max(0, end.getTime() - current.getTime());
+  const totalMinutes = Math.floor(ms / 60000);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+  return `${days}j ${hours}h ${minutes}m`;
+}
+
 function getDailyObjective(student) {
   const track = String(student?.nsivTrack || 'ORDINAIRE').toUpperCase();
   const isNsiv = isNsivStudent(student);
@@ -143,6 +159,7 @@ export default function HomePage() {
   const [challengeComment, setChallengeComment] = useState('');
   const [challengeSubmitting, setChallengeSubmitting] = useState(false);
   const [challengeFeedback, setChallengeFeedback] = useState('');
+  const [weekCountdown, setWeekCountdown] = useState(getWeekCountdownLabel());
   const [error, setError] = useState('');
   const [welcomePopup, setWelcomePopup] = useState(null);
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
@@ -286,6 +303,14 @@ export default function HomePage() {
       if (timer) window.clearInterval(timer);
     };
   }, [isAuthed]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setWeekCountdown(getWeekCountdownLabel());
+    }, 60000);
+    setWeekCountdown(getWeekCountdownLabel());
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -745,6 +770,10 @@ export default function HomePage() {
           <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
             {homeChallenge.totalVotes} vote(s)
           </span>
+        </div>
+        <div className="mb-3 rounded-lg border border-brand-100 bg-brand-50/60 px-3 py-2 text-xs text-brand-800">
+          <p className="font-semibold">Challenge de la semaine {homeChallenge.weekKey || '-'}</p>
+          <p className="mt-1">Fin de ce cycle dans: {weekCountdown}. Un nouveau vote est disponible chaque semaine.</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {homeChallenge.items.map((item, idx) => (
