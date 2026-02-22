@@ -419,6 +419,15 @@ async function getOnlinePresenceStats(req, res, next) {
   }
 }
 
+function getIsoWeekKey(date = new Date()) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+}
+
 function sanitizeTiktokCreators(raw) {
   if (!Array.isArray(raw)) return DEFAULT_TIKTOK_CREATORS;
   const items = raw
@@ -438,11 +447,153 @@ async function getHomeTikTokCreators(req, res, next) {
   try {
     const config = await prisma.communityConfig.findUnique({
       where: { id: 1 },
-      select: { tiktokCreators: true }
+      select: {
+        tiktokCreators: true,
+        homeChallengeTitle: true,
+        homeChallengeSubtitle: true,
+        homeChallengeTheme: true
+      }
     });
 
+    const weekKey = getIsoWeekKey();
+    const challengeTheme = String(config?.homeChallengeTheme || 'TIKTOKERS');
+    const candidates = sanitizeTiktokCreators(config?.tiktokCreators || null);
+    const handles = candidates.map((item) => item.handle);
+
+    const voteRows = await prisma.homeChallengeVote.groupBy({
+      by: ['candidateHandle'],
+      where: {
+        weekKey,
+        challengeTheme,
+        candidateHandle: { in: handles }
+      },
+      _count: { _all: true }
+    });
+
+    const voteMap = new Map(voteRows.map((row) => [row.candidateHandle, row._count._all]));
+    const totalVotes = voteRows.reduce((sum, row) => sum + row._count._all, 0);
+    const recentCommentsRows = await prisma.homeChallengeVote.findMany({
+      where: {
+        weekKey,
+        challengeTheme,
+        comment: { not: null }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 6,
+      select: {
+        id: true,
+        candidateHandle: true,
+        comment: true,
+        createdAt: true,
+        user: {
+          select: {
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    });
+
+    let myVote = null;
+    if (req.user?.id) {
+      const mine = await prisma.homeChallengeVote.findUnique({
+        where: {
+          userId_weekKey_challengeTheme: {
+            userId: req.user.id,
+            weekKey,
+            challengeTheme
+          }
+        },
+        select: { candidateHandle: true, comment: true, createdAt: true }
+      });
+      myVote = mine || null;
+    }
+
+    const items = candidates.map((item) => ({
+      ...item,
+      votes: Number(voteMap.get(item.handle) || 0)
+    }));
+
     return res.json({
-      items: sanitizeTiktokCreators(config?.tiktokCreators || null)
+      title: config?.homeChallengeTitle || 'Vote de la semaine',
+      subtitle: config?.homeChallengeSubtitle || 'Choisis la personne qui doit rester en tête cette semaine.',
+      theme: challengeTheme,
+      weekKey,
+      totalVotes,
+      myVote,
+      recentComments: recentCommentsRows.map((row) => ({
+        id: row.id,
+        candidateHandle: row.candidateHandle,
+        comment: row.comment,
+        createdAt: row.createdAt,
+        author: `${String(row.user?.firstName || '').trim()} ${String(row.user?.lastName || '').trim()}`.trim() || 'Utilisateur'
+      })),
+      items
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function submitHomeChallengeVote(req, res, next) {
+  try {
+    const handle = String(req.body?.handle || '').trim();
+    const comment = String(req.body?.comment || '').trim();
+
+    if (!handle) {
+      return res.status(400).json({ message: 'Choisis une personne avant de voter.' });
+    }
+    if (comment.length > 500) {
+      return res.status(400).json({ message: 'Commentaire trop long (500 caractères max).' });
+    }
+
+    const config = await prisma.communityConfig.findUnique({
+      where: { id: 1 },
+      select: { tiktokCreators: true, homeChallengeTheme: true }
+    });
+
+    const weekKey = getIsoWeekKey();
+    const challengeTheme = String(config?.homeChallengeTheme || 'TIKTOKERS');
+    const candidates = sanitizeTiktokCreators(config?.tiktokCreators || null);
+    const candidateExists = candidates.some((item) => item.handle === handle);
+
+    if (!candidateExists) {
+      return res.status(400).json({ message: 'Candidat invalide pour ce challenge.' });
+    }
+
+    const existing = await prisma.homeChallengeVote.findUnique({
+      where: {
+        userId_weekKey_challengeTheme: {
+          userId: req.user.id,
+          weekKey,
+          challengeTheme
+        }
+      }
+    });
+
+    if (existing) {
+      return res.status(409).json({ message: 'Tu as déjà voté cette semaine.' });
+    }
+
+    const created = await prisma.homeChallengeVote.create({
+      data: {
+        userId: req.user.id,
+        weekKey,
+        challengeTheme,
+        candidateHandle: handle,
+        comment: comment || null
+      },
+      select: {
+        id: true,
+        candidateHandle: true,
+        comment: true,
+        createdAt: true
+      }
+    });
+
+    return res.status(201).json({
+      message: 'Vote enregistré avec succès.',
+      vote: created
     });
   } catch (error) {
     return next(error);
@@ -458,6 +609,7 @@ module.exports = {
   streamExamPdf,
   pingOnlinePresence,
   getOnlinePresenceStats,
-  getHomeTikTokCreators
+  getHomeTikTokCreators,
+  submitHomeChallengeVote
 };
 

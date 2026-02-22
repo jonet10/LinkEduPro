@@ -42,7 +42,15 @@ async function getConfig(req, res, next) {
 
 async function updateConfig(req, res, next) {
   try {
-    const { maxPostsPerDay, maxPostsPerMonth, commentRatePerMin, tiktokCreators } = req.body;
+    const {
+      maxPostsPerDay,
+      maxPostsPerMonth,
+      commentRatePerMin,
+      tiktokCreators,
+      homeChallengeTitle,
+      homeChallengeSubtitle,
+      homeChallengeTheme
+    } = req.body;
     const hasTiktokCreatorsPayload = Array.isArray(tiktokCreators);
     const nextTiktokCreators = hasTiktokCreatorsPayload ? tiktokCreators : undefined;
 
@@ -52,6 +60,9 @@ async function updateConfig(req, res, next) {
         maxPostsPerDay,
         maxPostsPerMonth,
         commentRatePerMin,
+        ...(homeChallengeTitle !== undefined ? { homeChallengeTitle } : {}),
+        ...(homeChallengeSubtitle !== undefined ? { homeChallengeSubtitle } : {}),
+        ...(homeChallengeTheme !== undefined ? { homeChallengeTheme } : {}),
         ...(hasTiktokCreatorsPayload ? { tiktokCreators: nextTiktokCreators } : {}),
         updatedBy: req.user.id
       },
@@ -60,6 +71,9 @@ async function updateConfig(req, res, next) {
         maxPostsPerDay,
         maxPostsPerMonth,
         commentRatePerMin,
+        homeChallengeTitle: homeChallengeTitle || 'Vote de la semaine',
+        homeChallengeSubtitle: homeChallengeSubtitle || 'Choisis la personne qui doit rester en tête cette semaine.',
+        homeChallengeTheme: homeChallengeTheme || 'TIKTOKERS',
         tiktokCreators: hasTiktokCreatorsPayload ? nextTiktokCreators : [],
         updatedBy: req.user.id
       }
@@ -74,6 +88,9 @@ async function updateConfig(req, res, next) {
         maxPostsPerDay,
         maxPostsPerMonth,
         commentRatePerMin,
+        ...(homeChallengeTitle !== undefined ? { homeChallengeTitle } : {}),
+        ...(homeChallengeSubtitle !== undefined ? { homeChallengeSubtitle } : {}),
+        ...(homeChallengeTheme !== undefined ? { homeChallengeTheme } : {}),
         ...(hasTiktokCreatorsPayload ? { tiktokCreatorsCount: nextTiktokCreators.length } : {})
       }
     });

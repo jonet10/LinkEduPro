@@ -10,7 +10,10 @@ async function getCommunityConfig() {
       maxPostsPerDay: 3,
       maxPostsPerMonth: 10,
       commentRatePerMin: 10,
-      tiktokCreators: []
+      tiktokCreators: [],
+      homeChallengeTitle: 'Vote de la semaine',
+      homeChallengeSubtitle: 'Choisis la personne qui doit rester en tête cette semaine.',
+      homeChallengeTheme: 'TIKTOKERS'
     }
   });
 }

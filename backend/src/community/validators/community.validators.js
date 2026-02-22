@@ -48,6 +48,9 @@ const updateConfigSchema = Joi.object({
   maxPostsPerDay: Joi.number().integer().min(1).max(100).required(),
   maxPostsPerMonth: Joi.number().integer().min(1).max(1000).required(),
   commentRatePerMin: Joi.number().integer().min(1).max(120).required(),
+  homeChallengeTitle: Joi.string().trim().min(4).max(140).optional(),
+  homeChallengeSubtitle: Joi.string().trim().min(8).max(240).optional(),
+  homeChallengeTheme: Joi.string().trim().valid('TIKTOKERS', 'MUSICIENS', 'CHANTEURS', 'LIBRE').optional(),
   tiktokCreators: Joi.array().items(
     Joi.object({
       title: Joi.string().trim().min(2).max(120).required(),

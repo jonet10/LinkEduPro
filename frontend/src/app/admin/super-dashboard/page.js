@@ -28,6 +28,9 @@ export default function SuperDashboardPage() {
   });
   const [communityConfig, setCommunityConfig] = useState(null);
   const [tiktokEditors, setTiktokEditors] = useState([]);
+  const [challengeTitle, setChallengeTitle] = useState('Vote de la semaine');
+  const [challengeSubtitle, setChallengeSubtitle] = useState('Choisis la personne qui doit rester en tête cette semaine.');
+  const [challengeTheme, setChallengeTheme] = useState('TIKTOKERS');
   const [savingTiktok, setSavingTiktok] = useState(false);
 
   useEffect(() => {
@@ -59,6 +62,9 @@ export default function SuperDashboardPage() {
       if (c?.config) {
         setCommunityConfig(c.config);
         setTiktokEditors(Array.isArray(c.config.tiktokCreators) ? c.config.tiktokCreators : []);
+        setChallengeTitle(c.config.homeChallengeTitle || 'Vote de la semaine');
+        setChallengeSubtitle(c.config.homeChallengeSubtitle || 'Choisis la personne qui doit rester en tête cette semaine.');
+        setChallengeTheme(c.config.homeChallengeTheme || 'TIKTOKERS');
       }
       await loadStudents(token, studentFilters);
     } catch (e) {
@@ -106,6 +112,9 @@ export default function SuperDashboardPage() {
           maxPostsPerDay: communityConfig.maxPostsPerDay,
           maxPostsPerMonth: communityConfig.maxPostsPerMonth,
           commentRatePerMin: communityConfig.commentRatePerMin,
+          homeChallengeTitle: challengeTitle,
+          homeChallengeSubtitle: challengeSubtitle,
+          homeChallengeTheme: challengeTheme,
           tiktokCreators: cleaned
         })
       });
@@ -296,7 +305,7 @@ export default function SuperDashboardPage() {
 
       <section className="card space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Modèles TikTokeurs/TikTokeuses (page d&apos;accueil)</h2>
+          <h2 className="text-xl font-semibold">Challenge hebdomadaire (page d&apos;accueil)</h2>
           <button
             type="button"
             className="btn-secondary"
@@ -307,6 +316,30 @@ export default function SuperDashboardPage() {
           </button>
         </div>
         <p className="text-sm text-brand-700">Tu peux gérer jusqu&apos;à 12 modèles. Les champs vides ne seront pas sauvegardés.</p>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+          <input
+            className="input md:col-span-2"
+            placeholder="Titre du challenge"
+            value={challengeTitle}
+            onChange={(e) => setChallengeTitle(e.target.value)}
+          />
+          <select
+            className="input"
+            value={challengeTheme}
+            onChange={(e) => setChallengeTheme(e.target.value)}
+          >
+            <option value="TIKTOKERS">TikTokeurs/TikTokeuses</option>
+            <option value="MUSICIENS">Musiciens</option>
+            <option value="CHANTEURS">Chanteurs/Chanteuses</option>
+            <option value="LIBRE">Challenge libre</option>
+          </select>
+          <input
+            className="input md:col-span-3"
+            placeholder="Sous-titre du challenge"
+            value={challengeSubtitle}
+            onChange={(e) => setChallengeSubtitle(e.target.value)}
+          />
+        </div>
 
         <div className="space-y-3">
           {tiktokEditors.map((row, index) => (

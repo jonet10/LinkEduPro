@@ -10,7 +10,8 @@ const {
   streamExamPdf,
   pingOnlinePresence,
   getOnlinePresenceStats,
-  getHomeTikTokCreators
+  getHomeTikTokCreators,
+  submitHomeChallengeVote
 } = require('../controllers/public.controller');
 
 const router = express.Router();
@@ -23,7 +24,9 @@ router.post('/probable-exercises/like', auth, toggleProbableExerciseLike);
 router.post('/probable-exercises/comment', auth, addProbableExerciseComment);
 router.post('/online/ping', auth, pingOnlinePresence);
 router.get('/online/stats', optionalAuth, getOnlinePresenceStats);
-router.get('/home/tiktok-creators', getHomeTikTokCreators);
+router.get('/home/tiktok-creators', optionalAuth, getHomeTikTokCreators);
+router.get('/home/challenge', optionalAuth, getHomeTikTokCreators);
+router.post('/home/challenge/vote', auth, submitHomeChallengeVote);
 
 module.exports = router;
 

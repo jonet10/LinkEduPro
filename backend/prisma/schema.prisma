@@ -48,6 +48,7 @@ model Student {
   focusSongListens                                                    FocusSongListen[]
   focusSongsCreated                                                   FocusSong[]
   focusStatistics                                                     FocusStatistic[]
+  homeChallengeVotes                                                  HomeChallengeVote[]
   reviewedLibraryBooks                                                LibraryBook[]                @relation("LibraryBookReviewer")
   uploadedLibraryBooks                                                LibraryBook[]                @relation("LibraryBookUploader")
   sentMessages                                                        Message[]                    @relation("MessageSender")
@@ -546,11 +547,30 @@ model CommunityConfig {
   maxPostsPerMonth  Int      @default(10)
   commentRatePerMin Int      @default(10)
   tiktokCreators    Json     @default("[]") @map("tiktok_creators")
+  homeChallengeTitle String  @default("Vote de la semaine") @map("home_challenge_title")
+  homeChallengeSubtitle String @default("Choisis la personne qui doit rester en tête cette semaine.") @map("home_challenge_subtitle")
+  homeChallengeTheme String  @default("TIKTOKERS") @map("home_challenge_theme")
   updatedBy         Int?
   updatedAt         DateTime @updatedAt
   updatedByUser     Student? @relation(fields: [updatedBy], references: [id], map: "CommunityConfig_updatedBy_fkey")
 
   @@map("community_config")
+}
+
+model HomeChallengeVote {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @map("user_id")
+  weekKey         String   @map("week_key")
+  challengeTheme  String   @map("challenge_theme")
+  candidateHandle String   @map("candidate_handle")
+  comment         String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  user            Student  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "HomeChallengeVote_userId_fkey")
+
+  @@unique([userId, weekKey, challengeTheme], map: "HomeChallengeVote_unique_user_week_theme")
+  @@index([weekKey, challengeTheme], map: "HomeChallengeVote_week_theme_idx")
+  @@index([candidateHandle, weekKey], map: "HomeChallengeVote_candidate_week_idx")
+  @@map("home_challenge_votes")
 }
 
 model CommunityLog {
