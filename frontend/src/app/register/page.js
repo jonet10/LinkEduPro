@@ -71,13 +71,19 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!form.department || !form.commune) {
+      setError('Le département et la commune sont obligatoires.');
+      setLoading(false);
+      return;
+    }
+
     const schoolLabel = form.department && form.commune
       ? `${form.department} / ${form.commune} / ${chosenSchool}`
       : chosenSchool;
 
     try {
       if (!isStudent) {
-        setError("L'inscription directe est disponible uniquement pour les eleves. Utilisez l'invitation enseignant ou la gestion scolaire.");
+        setError("L'inscription directe est disponible uniquement pour les Élèves. Utilisez l'invitation enseignant ou la gestion scolaire.");
         setLoading(false);
         return;
       }
@@ -91,6 +97,8 @@ export default function RegisterPage() {
         sex: form.sex,
         dateOfBirth: form.dateOfBirth,
         school: schoolLabel,
+        department: form.department,
+        commune: form.commune,
         gradeLevel: form.gradeLevel,
         email: form.email,
         phone: form.phone,
@@ -101,7 +109,7 @@ export default function RegisterPage() {
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      setInfo(data.message || 'Compte cree. Verifiez votre email avant connexion.');
+      setInfo(data.message || 'Compte créé. Vérifiez votre email avant connexion.');
       if (data.devVerificationToken) {
         setDevToken(data.devVerificationToken);
       }
@@ -117,18 +125,18 @@ export default function RegisterPage() {
     <section className="mx-auto max-w-2xl card">
       <h1 className="mb-6 text-2xl font-bold text-brand-900">Inscription élève</h1>
       <p className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">
-        Mise a jour: la liste officielle des ecoles par commune est disponible. Selectionne ton departement, ta commune et ton ecole.
+        Mise à jour: la liste officielle des écoles par commune est disponible. sélectionne ton département, ta commune et ton École.
       </p>
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
         <select className="input md:col-span-2" name="role" value={form.role} onChange={onChange}>
-          <option value="STUDENT">Eleve</option>
+          <option value="STUDENT">Élève</option>
           <option value="TEACHER">Enseignant</option>
           <option value="SCHOOL_ADMIN">Admin scolaire</option>
         </select>
 
         {isStudent ? (
           <select className="input md:col-span-2" name="academicLevel" value={form.academicLevel} onChange={onChange} required>
-            <option value="">Niveau academique</option>
+            <option value="">Niveau académique</option>
             <option value="9e">9e</option>
             <option value="NSI">NSI</option>
             <option value="NSII">NSII</option>
@@ -140,12 +148,12 @@ export default function RegisterPage() {
 
         {isStudent && form.academicLevel === 'NSIV' ? (
           <select className="input md:col-span-2" name="nsivTrack" value={form.nsivTrack} onChange={onChange} required>
-            <option value="ORDINAIRE">Filiere NSIV: Ordinaire</option>
-            <option value="SVT">Filiere NSIV: SVT</option>
-            <option value="SMP">Filiere NSIV: SMP</option>
-            <option value="SES">Filiere NSIV: SES</option>
-            <option value="LLA">Filiere NSIV: LLA</option>
-            <option value="AUTRE">Filiere NSIV: Autre</option>
+            <option value="ORDINAIRE">Filière NSIV : Ordinaire</option>
+            <option value="SVT">Filière NSIV : SVT</option>
+            <option value="SMP">Filière NSIV : SMP</option>
+            <option value="SES">Filière NSIV : SES</option>
+            <option value="LLA">Filière NSIV : LLA</option>
+            <option value="AUTRE">Filière NSIV : Autre</option>
           </select>
         ) : null}
 
@@ -159,19 +167,23 @@ export default function RegisterPage() {
         </select>
         <input className="input" type="date" name="dateOfBirth" value={form.dateOfBirth} onChange={onChange} required />
 
-        <select className="input" name="department" value={form.department} onChange={onDepartmentChange}>
-          <option value="">Département (optionnel)</option>
+        <select className="input" name="department" value={form.department} onChange={onDepartmentChange} required>
+          <option value="">Département (obligatoire)</option>
           {departments.map((d) => (
             <option key={d} value={d}>{d}</option>
           ))}
         </select>
 
-        <select className="input" name="commune" value={form.commune} onChange={onCommuneChange} disabled={!form.department}>
-          <option value="">Commune (optionnel)</option>
+        <select className="input" name="commune" value={form.commune} onChange={onCommuneChange} disabled={!form.department} required>
+          <option value="">Commune (obligatoire)</option>
           {communes.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
+
+        <p className="md:col-span-2 text-xs text-brand-700">
+          Champs obligatoires: département et commune.
+        </p>
 
         <select
           className="input md:col-span-2"
