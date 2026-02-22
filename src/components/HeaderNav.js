@@ -40,6 +40,7 @@ export default function HeaderNav() {
   const publicMobilePanelRef = useRef(null);
   const router = useRouter();
   const pathname = usePathname();
+  const hidePublicMobileMenu = ['/login', '/register', '/forgot-password', '/verify-email'].includes(pathname || '');
 
   const publicStudyTools = useMemo(() => ([
     { href: '/subjects', label: 'Flashcards', icon: '🟦' },
@@ -229,6 +230,12 @@ export default function HeaderNav() {
       document.removeEventListener('keydown', onKeyDown);
     };
   }, [isPublicMobileMenuOpen, mounted]);
+
+  useEffect(() => {
+    if (hidePublicMobileMenu) {
+      setIsPublicMobileMenuOpen(false);
+    }
+  }, [hidePublicMobileMenu]);
 
   const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
   const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
@@ -599,15 +606,17 @@ export default function HeaderNav() {
           </Link>
         ) : (
           <>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:hidden"
-              aria-label="Menu public"
-              title="Menu public"
-              onClick={() => setIsPublicMobileMenuOpen(true)}
-            >
-              ☰
-            </button>
+            {!hidePublicMobileMenu ? (
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:hidden"
+                aria-label="Menu public"
+                title="Menu public"
+                onClick={() => setIsPublicMobileMenuOpen(true)}
+              >
+                ☰
+              </button>
+            ) : null}
             <Link href="/login" className="hidden hover:text-brand-700 md:inline">Connexion</Link>
             <Link
               href="/login"
