@@ -17,6 +17,8 @@ const registerSchema = Joi.object({
   sex: Joi.string().valid('MALE', 'FEMALE', 'OTHER').required(),
   dateOfBirth: Joi.date().iso().required(),
   school: Joi.string().trim().min(2).max(120).required(),
+  department: Joi.string().trim().min(2).max(120).required(),
+  commune: Joi.string().trim().min(2).max(120).required(),
   gradeLevel: Joi.string().trim().min(1).max(50).required(),
   email: Joi.string().email({ tlds: { allow: false } }).required(),
   phone: Joi.string().trim().max(30).allow(null, ''),
@@ -132,9 +134,14 @@ const globalMessageSchema = Joi.object({
 
 const catchupSessionCreateSchema = Joi.object({
   title: Joi.string().trim().min(3).max(180).required(),
+  level: Joi.string().valid('LEVEL_9E', 'NSI', 'NSII', 'NSIII', 'NSIV', 'UNIVERSITAIRE').default('NSIV'),
   subject: Joi.string().trim().min(2).max(120).required(),
+  isFree: Joi.boolean().optional(),
+  price: Joi.number().min(0).max(100000).optional(),
+  maxParticipants: Joi.number().integer().min(1).max(10000).default(60),
   description: Joi.string().trim().max(5000).allow('', null),
-  meetUrl: Joi.string().uri().pattern(/^https:\/\/meet\.google\.com\/.+/i).required(),
+  meetingLink: Joi.string().uri().optional(),
+  meetUrl: Joi.string().uri().optional(),
   invitationScope: Joi.string().valid('GLOBAL', 'TEACHERS', 'TEACHER', 'SCHOOL').default('GLOBAL'),
   targetSchool: Joi.when('invitationScope', {
     is: 'SCHOOL',
@@ -147,23 +154,52 @@ const catchupSessionCreateSchema = Joi.object({
     otherwise: Joi.number().integer().positive().allow(null)
   }),
   invitationMessage: Joi.string().trim().max(1000).allow('', null),
-  startsAt: Joi.date().iso().required(),
-  endsAt: Joi.date().iso().required()
+  startTime: Joi.date().iso().optional(),
+  startsAt: Joi.date().iso().optional(),
+  duration: Joi.number().integer().min(15).max(600).optional(),
+  endsAt: Joi.date().iso().optional()
+}).custom((value, helpers) => {
+  if (!value.meetingLink && !value.meetUrl) {
+    return helpers.error('any.invalid', { message: 'meetingLink ou meetUrl requis.' });
+  }
+  if (!value.startTime && !value.startsAt) {
+    return helpers.error('any.invalid', { message: 'startTime ou startsAt requis.' });
+  }
+  if (!value.duration && !(value.startsAt && value.endsAt)) {
+    return helpers.error('any.invalid', { message: 'duration ou couple startsAt/endsAt requis.' });
+  }
+  if (value.isFree === false && Number(value.price || 0) <= 0) {
+    return helpers.error('any.invalid', { message: 'Prix requis pour une session payante.' });
+  }
+  return value;
 });
 
 const catchupSessionUpdateSchema = Joi.object({
   title: Joi.string().trim().min(3).max(180),
+  level: Joi.string().valid('LEVEL_9E', 'NSI', 'NSII', 'NSIII', 'NSIV', 'UNIVERSITAIRE'),
   subject: Joi.string().trim().min(2).max(120),
+  isFree: Joi.boolean(),
+  price: Joi.number().min(0).max(100000),
+  maxParticipants: Joi.number().integer().min(1).max(10000),
   description: Joi.string().trim().max(5000).allow('', null),
-  meetUrl: Joi.string().uri().pattern(/^https:\/\/meet\.google\.com\/.+/i),
+  meetingLink: Joi.string().uri(),
+  meetUrl: Joi.string().uri(),
   invitationScope: Joi.string().valid('GLOBAL', 'TEACHERS', 'TEACHER', 'SCHOOL'),
   targetSchool: Joi.string().trim().max(160).allow('', null),
   targetTeacherId: Joi.number().integer().positive().allow(null),
   invitationMessage: Joi.string().trim().max(1000).allow('', null),
+  startTime: Joi.date().iso(),
   startsAt: Joi.date().iso(),
+  duration: Joi.number().integer().min(15).max(600),
   endsAt: Joi.date().iso(),
+  status: Joi.string().valid('SCHEDULED', 'COMPLETED', 'CANCELLED'),
   isActive: Joi.boolean()
 }).min(1);
+
+const catchupPaymentSchema = Joi.object({
+  paymentMethod: Joi.string().valid('MONCASH', 'NATCASH', 'CARD', 'BANK_TRANSFER', 'CASH').required(),
+  amount: Joi.number().positive().max(100000).optional()
+});
 
 module.exports = {
   registerSchema,
@@ -184,5 +220,6 @@ module.exports = {
   privateMessageSchema,
   globalMessageSchema,
   catchupSessionCreateSchema,
-  catchupSessionUpdateSchema
+  catchupSessionUpdateSchema,
+  catchupPaymentSchema
 };

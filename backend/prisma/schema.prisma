@@ -52,6 +52,10 @@ model Student {
   sentMessages                                                        Message[]                    @relation("MessageSender")
   nsiv_catchup_sessions_nsiv_catchup_sessions_created_byToStudent     nsiv_catchup_sessions[]      @relation("nsiv_catchup_sessions_created_byToStudent")
   nsiv_catchup_sessions_nsiv_catchup_sessions_target_teacherToStudent nsiv_catchup_sessions[]      @relation("nsiv_catchup_sessions_target_teacherToStudent")
+  remedialEnrollments                                                  RemedialEnrollment[]
+  remedialSessionsCreated                                              RemedialSession[]            @relation("RemedialSessionTeacher")
+  remedialSessionsTargeted                                             RemedialSession[]            @relation("RemedialSessionTargetTeacher")
+  remedialTransactions                                                 RemedialTransaction[]
   passwordResetCodes                                                  PasswordResetCode[]
   personalStudyPlans                                                  PersonalStudyPlan[]
   pomodoroSessions                                                    PomodoroSession[]
@@ -989,6 +993,74 @@ model nsiv_catchup_sessions {
   @@index([target_teacher])
 }
 
+model RemedialSession {
+  id              Int                   @id @default(autoincrement())
+  teacherId       Int                   @map("teacher_id")
+  title           String
+  description     String?
+  level           AcademicLevel
+  subject         String
+  isFree          Boolean               @default(false) @map("is_free")
+  price           Decimal               @default(0) @db.Decimal(10, 2)
+  maxParticipants Int                   @map("max_participants")
+  meetingLink     String                @map("meeting_link")
+  startTime       DateTime              @map("start_time")
+  duration        Int
+  status          RemedialSessionStatus @default(SCHEDULED)
+  invitationScope RemedialAudienceScope @default(GLOBAL) @map("invitation_scope")
+  targetSchool    String?               @map("target_school")
+  targetTeacherId Int?                  @map("target_teacher_id")
+  invitationMessage String?             @map("invitation_message")
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @default(now()) @updatedAt @map("updated_at")
+  teacher         Student               @relation("RemedialSessionTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  targetTeacher   Student?              @relation("RemedialSessionTargetTeacher", fields: [targetTeacherId], references: [id])
+  enrollments     RemedialEnrollment[]
+  transactions    RemedialTransaction[]
+
+  @@index([teacherId, createdAt], map: "remedial_sessions_teacher_id_created_at_idx")
+  @@index([level, status, startTime], map: "remedial_sessions_level_status_start_time_idx")
+  @@index([subject], map: "remedial_sessions_subject_idx")
+  @@index([invitationScope, targetSchool], map: "remedial_sessions_scope_school_idx")
+  @@index([targetTeacherId], map: "remedial_sessions_target_teacher_id_idx")
+  @@map("remedial_sessions")
+}
+
+model RemedialEnrollment {
+  id            Int                  @id @default(autoincrement())
+  sessionId     Int                  @map("session_id")
+  studentId     Int                  @map("student_id")
+  paymentStatus RemedialPaymentStatus @default(PENDING) @map("payment_status")
+  accessGranted Boolean              @default(false) @map("access_granted")
+  createdAt     DateTime             @default(now()) @map("created_at")
+  session       RemedialSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student       Student              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId], map: "remedial_enrollments_session_id_student_id_key")
+  @@index([studentId, createdAt], map: "remedial_enrollments_student_id_created_at_idx")
+  @@index([sessionId, paymentStatus], map: "remedial_enrollments_session_id_payment_status_idx")
+  @@map("remedial_enrollments")
+}
+
+model RemedialTransaction {
+  id                 Int                     @id @default(autoincrement())
+  userId             Int                     @map("user_id")
+  sessionId          Int                     @map("session_id")
+  amount             Decimal                 @db.Decimal(10, 2)
+  platformCommission Decimal                 @map("platform_commission") @db.Decimal(10, 2)
+  teacherAmount      Decimal                 @map("teacher_amount") @db.Decimal(10, 2)
+  status             RemedialTransactionStatus @default(SUCCESS)
+  paymentMethod      RemedialPaymentMethod   @default(MONCASH) @map("payment_method")
+  createdAt          DateTime                @default(now()) @map("created_at")
+  session            RemedialSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user               Student                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt], map: "remedial_transactions_session_id_created_at_idx")
+  @@index([userId, createdAt], map: "remedial_transactions_user_id_created_at_idx")
+  @@index([status], map: "remedial_transactions_status_idx")
+  @@map("transactions")
+}
+
 model probable_exercise_comments {
   id         Int      @id @default(autoincrement())
   subject    String
@@ -1101,6 +1173,40 @@ enum AcademicLevel {
   NSIII
   NSIV
   UNIVERSITAIRE @map("Universitaire")
+}
+
+enum RemedialSessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum RemedialPaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+}
+
+enum RemedialTransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum RemedialPaymentMethod {
+  MONCASH
+  NATCASH
+  CARD
+  BANK_TRANSFER
+  CASH
+}
+
+enum RemedialAudienceScope {
+  GLOBAL
+  TEACHERS
+  TEACHER
+  SCHOOL
 }
 
 enum ConversationType {

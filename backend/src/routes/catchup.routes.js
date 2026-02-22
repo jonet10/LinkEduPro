@@ -7,11 +7,16 @@ const {
   listTargetTeachers,
   createCatchupSession,
   updateCatchupSession,
-  deleteCatchupSession
+  deleteCatchupSession,
+  enrollInCatchupSession,
+  payCatchupSession,
+  getTeacherCatchupDashboard,
+  getStudentCatchupDashboard
 } = require('../controllers/catchup.controller');
 const {
   catchupSessionCreateSchema,
-  catchupSessionUpdateSchema
+  catchupSessionUpdateSchema,
+  catchupPaymentSchema
 } = require('../services/validators');
 
 const router = express.Router();
@@ -20,7 +25,11 @@ router.use(auth);
 
 router.get('/', listCatchupSessions);
 router.get('/teachers', requireRoles(['ADMIN', 'TEACHER']), listTargetTeachers);
+router.get('/dashboard/teacher', requireRoles(['ADMIN', 'TEACHER']), getTeacherCatchupDashboard);
+router.get('/dashboard/student', requireRoles(['STUDENT']), getStudentCatchupDashboard);
 router.post('/', requireRoles(['ADMIN', 'TEACHER']), validate(catchupSessionCreateSchema), createCatchupSession);
+router.post('/:id/enroll', requireRoles(['STUDENT']), enrollInCatchupSession);
+router.post('/:id/pay', requireRoles(['STUDENT']), validate(catchupPaymentSchema), payCatchupSession);
 router.patch('/:id', requireRoles(['ADMIN', 'TEACHER']), validate(catchupSessionUpdateSchema), updateCatchupSession);
 router.delete('/:id', requireRoles(['ADMIN', 'TEACHER']), deleteCatchupSession);
 
