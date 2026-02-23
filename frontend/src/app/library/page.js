@@ -21,11 +21,12 @@ const UPCOMING_LIBRARY_BOOKS = [
     subject: 'Sciences sociales',
     level: '1er et 2e cycle fondamental',
     description:
-      "F.I.C. Ce matériel a pour objectif de faire acquérir aux enfants les habitudes civiques indispensables au développement de leur pays (respect des personnes et des biens, coopération, tolérance...).",
+      "F.I.C. Ce matériel a pour objectif de faire acquérir aux enfants les habitudes civiques indispensables au développement de notre pays (respect des personnes et des biens, coopération, tolérance...).",
     status: 'UPCOMING',
     upcoming: true,
     viewerOnly: true,
     priceHtg: 250,
+    coverImage: '/books/j-aime-haiti.jpg',
     fileUrl: null
   }
 ];
@@ -39,7 +40,7 @@ function formatHTG(value) {
   }).format(amount);
 }
 
-function BookCard({ book }) {
+function BookCard({ book, preordered = false, onPreorder = null }) {
   return (
     <article className="card">
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -48,15 +49,27 @@ function BookCard({ book }) {
           {book.upcoming ? 'Bientôt disponible' : 'Approuvé'}
         </span>
       </div>
+      {book.coverImage ? (
+        <img
+          src={book.coverImage}
+          alt={`Couverture - ${book.title}`}
+          className="mb-3 h-52 w-full rounded-lg border border-brand-100 object-cover"
+        />
+      ) : null}
       <p className="text-sm text-brand-700">{book.description || 'Aucune description'}</p>
       <p className="mt-2 text-xs text-brand-500">{book.subject} | {book.level}</p>
       {book.upcoming ? (
         <div className="mt-4 space-y-2">
           <p className="text-sm font-semibold text-brand-900">Prix: {formatHTG(book.priceHtg)}</p>
           <p className="text-xs text-brand-700">Visualisation uniquement. Le téléchargement sera désactivé.</p>
-          <button type="button" className="btn-secondary" disabled>
-            PDF à venir
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="btn-secondary" disabled>
+              PDF à venir
+            </button>
+            <button type="button" className={`${preordered ? 'btn-secondary' : 'btn-primary'}`} disabled={preordered} onClick={() => onPreorder?.(book)}>
+              {preordered ? 'Précommandé' : `Précommander (${formatHTG(book.priceHtg)})`}
+            </button>
+          </div>
         </div>
       ) : (
         <a className="btn-primary mt-4 inline-block" href={getStorageUrl(book.fileUrl)} target="_blank" rel="noreferrer">Ouvrir le PDF</a>
@@ -75,6 +88,7 @@ export default function LibraryPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [preorderedBooks, setPreorderedBooks] = useState([]);
 
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
@@ -89,6 +103,11 @@ export default function LibraryPage() {
   const canReview = useMemo(() => {
     return student && student.role === 'ADMIN';
   }, [student]);
+
+  const preordersStorageKey = useMemo(() => {
+    if (!student?.id) return 'linkedupro_library_preorders_guest';
+    return `linkedupro_library_preorders_${student.id}`;
+  }, [student?.id]);
 
   async function loadBooks() {
     const token = getToken();
@@ -121,6 +140,28 @@ export default function LibraryPage() {
     setStudent(me);
     loadBooks();
   }, [router]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(preordersStorageKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+      setPreorderedBooks(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setPreorderedBooks([]);
+    }
+  }, [preordersStorageKey]);
+
+  function savePreorder(book) {
+    if (!book?.id) return;
+    if (preorderedBooks.includes(book.id)) return;
+    const next = [...preorderedBooks, book.id];
+    setPreorderedBooks(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(preordersStorageKey, JSON.stringify(next));
+    }
+    setSuccess(`Précommande enregistrée: ${book.title} (${formatHTG(book.priceHtg)}).`);
+  }
 
   async function onSubmitBook(e) {
     e.preventDefault();
@@ -246,7 +287,14 @@ export default function LibraryPage() {
         <h2 className="mb-3 text-2xl font-bold text-brand-900">Livres approuvés</h2>
         {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {approvedBooks.map((book) => <BookCard key={book.id} book={book} />)}
+          {approvedBooks.map((book) => (
+            <BookCard
+              key={book.id}
+              book={book}
+              preordered={preorderedBooks.includes(book.id)}
+              onPreorder={savePreorder}
+            />
+          ))}
         </div>
         {!loading && approvedBooks.length === 0 ? <p className="text-sm text-brand-700">Aucun livre disponible.</p> : null}
       </section>
