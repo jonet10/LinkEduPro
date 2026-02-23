@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { emitRefresh } = require('../services/realtime');
 
 const API_LEVEL_TO_DB = {
   '9e': 'LEVEL_9E',
@@ -117,6 +118,8 @@ async function sendPrivateMessage(req, res, next) {
       });
     });
 
+    emitRefresh([senderId, recipientId], ['messages']);
+
     return res.status(201).json({
       message: 'Message envoyé.',
       data: {
@@ -135,8 +138,30 @@ async function sendPrivateMessage(req, res, next) {
 async function listMessageRecipients(req, res, next) {
   try {
     const userId = req.user.id;
+    const q = String(req.query.q || '').trim();
+    const requestedLimit = Number.parseInt(String(req.query.limit || ''), 10);
+    const limit = Number.isInteger(requestedLimit)
+      ? Math.min(Math.max(requestedLimit, 5), 25)
+      : 15;
+
+    if (q.length < 2) {
+      return res.json({ recipients: [] });
+    }
+
+    const terms = q.split(/\s+/).filter(Boolean).slice(0, 3);
+    const whereByTerm = terms.map((term) => ({
+      OR: [
+        { firstName: { contains: term, mode: 'insensitive' } },
+        { lastName: { contains: term, mode: 'insensitive' } },
+        { school: { contains: term, mode: 'insensitive' } }
+      ]
+    }));
+
     const recipients = await prisma.student.findMany({
-      where: { id: { not: userId } },
+      where: {
+        id: { not: userId },
+        AND: whereByTerm
+      },
       select: {
         id: true,
         firstName: true,
@@ -144,7 +169,8 @@ async function listMessageRecipients(req, res, next) {
         school: true,
         role: true
       },
-      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }]
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
+      take: limit
     });
 
     return res.json({
@@ -155,6 +181,50 @@ async function listMessageRecipients(req, res, next) {
         school: recipient.school,
         role: recipient.role
       }))
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getUnreadMessageSummary(req, res, next) {
+  try {
+    const userId = req.user.id;
+
+    const [unreadMessagesRow, unreadConversationsRow] = await Promise.all([
+      prisma.$queryRaw`
+        SELECT COUNT(m.id)::int AS "unreadMessages"
+        FROM conversation_participants cp
+        INNER JOIN conversations c
+          ON c.id = cp.conversation_id
+         AND c.type = 'PRIVATE'
+        INNER JOIN messages m
+          ON m.conversation_id = cp.conversation_id
+         AND m.sender_id <> cp.user_id
+         AND (cp.last_read_at IS NULL OR m.created_at > cp.last_read_at)
+        WHERE cp.user_id = ${userId}
+      `,
+      prisma.$queryRaw`
+        SELECT COUNT(*)::int AS "unreadConversations"
+        FROM (
+          SELECT cp.conversation_id
+          FROM conversation_participants cp
+          INNER JOIN conversations c
+            ON c.id = cp.conversation_id
+           AND c.type = 'PRIVATE'
+          INNER JOIN messages m
+            ON m.conversation_id = cp.conversation_id
+           AND m.sender_id <> cp.user_id
+           AND (cp.last_read_at IS NULL OR m.created_at > cp.last_read_at)
+          WHERE cp.user_id = ${userId}
+          GROUP BY cp.conversation_id
+        ) unread
+      `
+    ]);
+
+    return res.json({
+      unreadMessages: Number(unreadMessagesRow?.[0]?.unreadMessages || 0),
+      unreadConversations: Number(unreadConversationsRow?.[0]?.unreadConversations || 0)
     });
   } catch (error) {
     return next(error);
@@ -421,6 +491,8 @@ async function sendGlobalMessage(req, res, next) {
         }))
     });
 
+    emitRefresh(uniqueRecipientIds, ['notifications', 'messages']);
+
     return res.status(201).json({
       message: 'Annonce envoyée.',
       conversation: {
@@ -446,6 +518,7 @@ async function sendGlobalMessage(req, res, next) {
 
 module.exports = {
   listMessageRecipients,
+  getUnreadMessageSummary,
   sendPrivateMessage,
   listConversations,
   getConversationById,

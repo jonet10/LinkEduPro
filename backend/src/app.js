@@ -15,6 +15,7 @@ const messageRoutes = require('./routes/message.routes');
 const catchupRoutes = require('./routes/catchup.routes');
 const v2Routes = require('./v2/routes');
 const searchRoutes = require('./search/routes/search.routes');
+const realtimeRoutes = require('./routes/realtime.routes');
 const { focusRouter, pomodoroRouter } = require('./focus/routes/focus.routes');
 const { getStorageRoot } = require('./config/storage');
 
@@ -43,6 +44,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/catchup', catchupRoutes);
 app.use('/api/v2', v2Routes);
 app.use('/api/search', searchRoutes);
+app.use('/api/realtime', realtimeRoutes);
 app.use('/api/focus', focusRouter);
 app.use('/api/pomodoro', pomodoroRouter);
 

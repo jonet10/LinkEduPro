@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { emitRefresh } = require('../services/realtime');
 
 async function listNotifications(req, res, next) {
   try {
@@ -31,6 +32,7 @@ async function markNotificationRead(req, res, next) {
       return res.status(404).json({ message: 'Notification introuvable.' });
     }
 
+    emitRefresh([req.user.id], ['notifications']);
     return res.json({ message: 'Notification marquée comme lue.' });
   } catch (error) {
     return next(error);
@@ -44,6 +46,7 @@ async function markAllNotificationsRead(req, res, next) {
       data: { isRead: true }
     });
 
+    emitRefresh([req.user.id], ['notifications']);
     return res.json({ message: 'Toutes les notifications sont lues.' });
   } catch (error) {
     return next(error);

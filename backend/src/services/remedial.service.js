@@ -1,5 +1,6 @@
 const { Prisma } = require('@prisma/client');
 const prisma = require('../config/prisma');
+const { emitRefresh } = require('./realtime');
 
 const COMMISSION_RATE_RAW = Number(process.env.REMEDIAL_COMMISSION_RATE ?? '0.1');
 const COMMISSION_RATE = Number.isFinite(COMMISSION_RATE_RAW)
@@ -319,6 +320,7 @@ async function createSession({ actor, payload }) {
         entityId: String(created.id)
       }))
     });
+    emitRefresh(recipients.map((user) => user.id), ['notifications']);
   }
 
   return { ok: true, createdId: created.id, notifiedCount: recipients.length };

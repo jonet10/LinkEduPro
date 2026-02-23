@@ -1,7 +1,8 @@
 const prisma = require('../config/prisma');
+const { emitRefresh } = require('./realtime');
 
 async function createNotification({ userId, type, title, message, entityType = null, entityId = null }) {
-  return prisma.userNotification.create({
+  const created = await prisma.userNotification.create({
     data: {
       userId: Number(userId),
       type,
@@ -11,6 +12,9 @@ async function createNotification({ userId, type, title, message, entityType = n
       entityId
     }
   });
+
+  emitRefresh([Number(userId)], ['notifications']);
+  return created;
 }
 
 async function notifyRole(role, payload) {
@@ -34,6 +38,7 @@ async function notifyRole(role, payload) {
     }))
   });
 
+  emitRefresh(users.map((u) => u.id), ['notifications']);
   return { count: users.length };
 }
 

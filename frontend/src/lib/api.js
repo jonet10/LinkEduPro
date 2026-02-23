@@ -1,7 +1,7 @@
 import { clearAuth } from '@/lib/auth';
 import { clearSchoolAuth } from '@/lib/schoolAuth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export async function apiClient(path, options = {}) {
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
