@@ -37,10 +37,10 @@ const LANDING_BOOKS_BY_SUBJECT = {
   ]
 };
 const LANDING_STUDY_TOOLS = [
-  { title: 'Apprendre', desc: 'Parcours guidé et progressif.' },
-  { title: 'Programmes d’étude', desc: 'Organisation intelligente de tes révisions.' },
-  { title: 'Cartes', desc: 'Mémoire active avec flashcards.' },
-  { title: 'Tests d’entraînement', desc: 'Simulation d’examen et correction.' }
+  { title: 'Quiz Bac ciblés', desc: 'Entraînement par matière avec correction immédiate.' },
+  { title: 'Rattrapage live', desc: 'Sessions avec professeurs, gratuites ou payantes.' },
+  { title: 'Rubriques NSIV', desc: 'Contenus structurés pour réviser plus vite.' },
+  { title: 'Communauté scolaire', desc: 'Publications, échanges et défis éducatifs.' }
 ];
 const LANDING_HERO_SLIDES = [
   {
@@ -581,9 +581,9 @@ export default function HomePage() {
         </section>
 
         <section className="card" aria-labelledby="how-title">
-          <h2 id="how-title" className="text-4xl font-black text-brand-900">Comment souhaitez-vous étudier ?</h2>
+          <h2 id="how-title" className="text-4xl font-black text-brand-900">Ce que propose LinkEduPro</h2>
           <p className="mt-3 max-w-3xl text-lg text-brand-700">
-            Maîtrisez vos matières grâce aux cartes, tests d'entraînement, programmes d'étude et activités guidées.
+            Une plateforme éducative haïtienne pour s&apos;entraîner, réviser avec méthode et collaborer avec les professeurs.
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {LANDING_STUDY_TOOLS.map((tool, idx) => (
