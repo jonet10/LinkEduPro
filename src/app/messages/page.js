@@ -46,6 +46,7 @@ export default function MessagesPage() {
 
   const [communityUsers, setCommunityUsers] = useState([]);
   const [recipientQuery, setRecipientQuery] = useState('');
+  const [recipientRoleFilter, setRecipientRoleFilter] = useState('');
   const [recipientId, setRecipientId] = useState('');
   const [selectedRecipientLabel, setSelectedRecipientLabel] = useState('');
   const [searchingRecipients, setSearchingRecipients] = useState(false);
@@ -116,6 +117,11 @@ export default function MessagesPage() {
 
     setToken(currentToken);
     setStudent(currentStudent);
+    if (currentStudent.role === 'TEACHER') {
+      setRecipientRoleFilter('STUDENT');
+    } else if (currentStudent.role === 'STUDENT') {
+      setRecipientRoleFilter('TEACHER');
+    }
 
     loadConversations(currentToken)
       .catch((e) => {
@@ -139,10 +145,12 @@ export default function MessagesPage() {
 
     const timer = setTimeout(async () => {
       try {
-        const data = await apiClient(
-          `/messages/recipients?q=${encodeURIComponent(q)}&limit=15`,
-          { token }
-        );
+        const params = new URLSearchParams({
+          q,
+          limit: '15'
+        });
+        if (recipientRoleFilter) params.set('role', recipientRoleFilter);
+        const data = await apiClient(`/messages/recipients?${params.toString()}`, { token });
         if (recipientSearchSeq.current !== currentSeq) return;
         const users = (data?.recipients || []).map((row) => ({
           id: row.id,
@@ -160,7 +168,7 @@ export default function MessagesPage() {
     }, 250);
 
     return () => clearTimeout(timer);
-  }, [token, recipientQuery]);
+  }, [token, recipientQuery, recipientRoleFilter]);
 
   useEffect(() => {
     if (!token || !selectedConversationId) return;
@@ -330,6 +338,43 @@ export default function MessagesPage() {
 
           <h3 className="text-sm font-semibold text-brand-900">Nouveau message privé</h3>
           <form className="mt-2 space-y-2" onSubmit={handleSendPrivate}>
+            {student?.role !== 'STUDENT' ? (
+              <label className="block text-xs text-brand-700">
+                Mode d'envoi
+                <select
+                  className="input mt-1"
+                  value={recipientRoleFilter}
+                  onChange={(e) => {
+                    setRecipientRoleFilter(e.target.value);
+                    setRecipientId('');
+                    setSelectedRecipientLabel('');
+                    setCommunityUsers([]);
+                  }}
+                >
+                  <option value="">Tous</option>
+                  <option value="STUDENT">Leçon particulière (élèves)</option>
+                  <option value="TEACHER">Professeurs</option>
+                  <option value="ADMIN">Administrateurs</option>
+                </select>
+              </label>
+            ) : (
+              <label className="block text-xs text-brand-700">
+                Destinataire autorisé
+                <select
+                  className="input mt-1"
+                  value={recipientRoleFilter}
+                  onChange={(e) => {
+                    setRecipientRoleFilter(e.target.value);
+                    setRecipientId('');
+                    setSelectedRecipientLabel('');
+                    setCommunityUsers([]);
+                  }}
+                >
+                  <option value="TEACHER">Professeurs</option>
+                  <option value="ADMIN">Administrateurs</option>
+                </select>
+              </label>
+            ) : null}
             <input
               className="input"
               value={recipientQuery}
@@ -341,6 +386,9 @@ export default function MessagesPage() {
               placeholder="Rechercher un destinataire par nom..."
               required
             />
+            {student?.role === 'STUDENT' ? (
+              <p className="text-xs text-brand-700">Tu peux contacter uniquement les professeurs et administrateurs.</p>
+            ) : null}
             {searchingRecipients ? (
               <p className="text-xs text-brand-700">Recherche en cours...</p>
             ) : null}
@@ -373,7 +421,11 @@ export default function MessagesPage() {
               className="input min-h-[90px]"
               value={privateComposerText}
               onChange={(e) => setPrivateComposerText(e.target.value)}
-              placeholder="Votre message..."
+              placeholder={
+                student?.role === 'TEACHER' && recipientRoleFilter === 'STUDENT'
+                  ? 'Consigne de devoir, objectifs, date limite...'
+                  : 'Votre message...'
+              }
               required
             />
             <button type="submit" className="btn-primary w-full" disabled={sendingPrivate || !recipientId}>
