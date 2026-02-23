@@ -117,7 +117,7 @@ export default function SchoolManagementSchoolsPage() {
       setForm(initialForm);
       await reloadSchools();
     } catch (e) {
-      setError(e.message || 'Erreur pendant la création de l'école.');
+      setError(e.message || "Erreur pendant la création de l'école.");
     } finally {
       setCreating(false);
     }
@@ -156,7 +156,7 @@ export default function SchoolManagementSchoolsPage() {
         })
       });
       setEditingSchoolId(null);
-      setSuccess('Informations de l'école mises à jour.');
+      setSuccess("Informations de l'école mises à jour.");
       await reloadSchools();
     } catch (e) {
       setError(e.message || 'Impossible de modifier cette École.');
@@ -194,7 +194,7 @@ export default function SchoolManagementSchoolsPage() {
       setSuccess(data.message || (willSuspend ? 'École suspendue.' : 'École réactivée.'));
       await reloadSchools();
     } catch (e) {
-      setError(e.message || 'Impossible de changer le statut de l'école.');
+      setError(e.message || "Impossible de changer le statut de l'école.");
     } finally {
       setActingSchoolId(null);
     }
@@ -275,7 +275,7 @@ export default function SchoolManagementSchoolsPage() {
           <input className="input sm:col-span-2" placeholder="Téléphone admin (optionnel)" value={form.adminPhone} onChange={(e) => setForm((p) => ({ ...p, adminPhone: e.target.value }))} />
           <div className="sm:col-span-2">
             <button type="submit" className="btn-primary" disabled={creating}>
-              {creating ? 'création...' : 'Ajouter l'école'}
+              {creating ? 'création...' : "Ajouter l'école"}
             </button>
           </div>
         </form>

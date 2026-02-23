@@ -130,7 +130,7 @@ export default function SchoolStudentsPage() {
       return;
     }
     if (!importClassId || !importYearId) {
-      setError('sélectionne la classe et l'année académique.');
+      setError("sélectionne la classe et l'année académique.");
       return;
     }
 
