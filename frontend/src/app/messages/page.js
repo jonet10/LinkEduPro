@@ -374,7 +374,7 @@ export default function MessagesPage() {
                   <option value="ADMIN">Administrateurs</option>
                 </select>
               </label>
-            ) : null}
+            )}
             <input
               className="input"
               value={recipientQuery}
