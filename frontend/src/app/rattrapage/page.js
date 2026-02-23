@@ -24,7 +24,6 @@ export default function RattrapagePage() {
   const [teachers, setTeachers] = useState([]);
   const [teacherStats, setTeacherStats] = useState(null);
   const [studentStats, setStudentStats] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('MONCASH');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
@@ -236,22 +235,20 @@ export default function RattrapagePage() {
   }
 
   async function onPay(sessionId, price) {
-    setError('');
-    setInfo('');
-    try {
-      const data = await apiClient(`/catchup/${sessionId}/pay`, {
-        method: 'POST',
-        token,
-        body: JSON.stringify({
-          paymentMethod,
-          amount: Number(price || 0)
-        })
-      });
-      setInfo(data.message || 'Paiement validé.');
-      await refreshSessions();
-    } catch (e) {
-      setError(e.message || 'Impossible de valider le paiement.');
-    }
+    const params = new URLSearchParams({
+      sessionId: String(sessionId),
+      amount: String(Number(price || 0))
+    });
+    router.push(`/rattrapage/pay?${params.toString()}`);
+  }
+
+  function formatHTG(value) {
+    const amount = Number(value || 0);
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'HTG',
+      maximumFractionDigits: 2
+    }).format(amount);
   }
 
   return (
@@ -267,11 +264,11 @@ export default function RattrapagePage() {
         <div className="grid gap-3 md:grid-cols-4">
           <article className="card">
             <p className="text-xs text-brand-700">Revenus prof</p>
-            <p className="text-2xl font-bold text-brand-900">{teacherStats?.summary?.totalRevenue ?? 0}</p>
+            <p className="text-2xl font-bold text-brand-900">{formatHTG(teacherStats?.summary?.totalRevenue ?? 0)}</p>
           </article>
           <article className="card">
             <p className="text-xs text-brand-700">Commission plateforme</p>
-            <p className="text-2xl font-bold text-brand-900">{teacherStats?.summary?.totalCommission ?? 0}</p>
+            <p className="text-2xl font-bold text-brand-900">{formatHTG(teacherStats?.summary?.totalCommission ?? 0)}</p>
           </article>
           <article className="card">
             <p className="text-xs text-brand-700">Élèves inscrits</p>
@@ -306,7 +303,7 @@ export default function RattrapagePage() {
               Session gratuite
             </label>
             {!form.isFree ? (
-              <input className="input" type="number" min={1} step="0.01" placeholder="Prix" value={form.price} onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))} required />
+              <input className="input" type="number" min={1} step="0.01" placeholder="Prix (HTG)" value={form.price} onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))} required />
             ) : null}
             <input className="input md:col-span-2" placeholder="Lien Google Meet" value={form.meetingLink} onChange={(e) => setForm((p) => ({ ...p, meetingLink: e.target.value }))} required />
             <select className="input" value={form.invitationScope} onChange={(e) => setForm((p) => ({ ...p, invitationScope: e.target.value }))}>
@@ -348,18 +345,6 @@ export default function RattrapagePage() {
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {info ? <p className="text-sm text-green-600">{info}</p> : null}
       {isStudent ? (
-        <div className="card flex flex-wrap items-center gap-2">
-          <p className="text-sm text-brand-700">Méthode de paiement:</p>
-          <select className="input w-full max-w-xs" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-            <option value="MONCASH">MonCash</option>
-            <option value="NATCASH">NatCash</option>
-            <option value="CARD">Carte</option>
-            <option value="BANK_TRANSFER">Virement</option>
-            <option value="CASH">Cash</option>
-          </select>
-        </div>
-      ) : null}
-      {isStudent ? (
         <div className="card">
           <h2 className="text-lg font-semibold text-brand-900">Historique des sessions suivies</h2>
           <div className="mt-2 space-y-2">
@@ -382,7 +367,7 @@ export default function RattrapagePage() {
             <h3 className="text-lg font-semibold text-brand-900">{session.title}</h3>
             {session.description ? <p className="mt-1 text-sm text-brand-700">{session.description}</p> : null}
             <p className="mt-1 text-xs text-brand-700">
-              Niveau: {session.level} | {session.isFree ? 'Gratuite' : `Prix: ${session.price}`} | Places: {session.enrolledCount}/{session.maxParticipants}
+              Niveau: {session.level} | {session.isFree ? 'Gratuite' : `Prix: ${formatHTG(session.price)}`} | Places: {session.enrolledCount}/{session.maxParticipants}
             </p>
             <p className="mt-1 text-xs text-brand-700">
               Audience: {session.invitationScope}
@@ -409,7 +394,7 @@ export default function RattrapagePage() {
                   <button className="btn-secondary" onClick={() => onEnroll(session.id)}>Réserver ma place</button>
                 ) : null}
                 {session.enrollment && session.enrollment.paymentStatus !== 'PAID' && !session.isFree ? (
-                  <button className="btn-primary" onClick={() => onPay(session.id, session.price)}>Payer et débloquer</button>
+                  <button className="btn-primary" onClick={() => onPay(session.id, session.price)}>Payer en HTG (MonCash/NatCash)</button>
                 ) : null}
               </div>
             ) : null}

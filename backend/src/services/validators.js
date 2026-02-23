@@ -197,7 +197,7 @@ const catchupSessionUpdateSchema = Joi.object({
 }).min(1);
 
 const catchupPaymentSchema = Joi.object({
-  paymentMethod: Joi.string().valid('MONCASH', 'NATCASH', 'CARD', 'BANK_TRANSFER', 'CASH').required(),
+  paymentMethod: Joi.string().valid('MONCASH', 'NATCASH').required(),
   amount: Joi.number().positive().max(100000).optional()
 });
 
