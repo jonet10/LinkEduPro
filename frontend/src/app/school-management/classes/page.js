@@ -222,7 +222,7 @@ export default function SchoolClassesPage() {
       });
       await reloadClasses('');
     } catch (e) {
-      setError(e.message || 'Impossible de créer l'année académique.');
+      setError(e.message || "Impossible de créer l'année académique.");
     } finally {
       setCreatingYear(false);
     }
