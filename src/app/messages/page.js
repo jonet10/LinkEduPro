@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
@@ -45,10 +45,14 @@ export default function MessagesPage() {
   const [loadingConversation, setLoadingConversation] = useState(false);
 
   const [communityUsers, setCommunityUsers] = useState([]);
+  const [recipientQuery, setRecipientQuery] = useState('');
   const [recipientId, setRecipientId] = useState('');
+  const [selectedRecipientLabel, setSelectedRecipientLabel] = useState('');
+  const [searchingRecipients, setSearchingRecipients] = useState(false);
   const [privateComposerText, setPrivateComposerText] = useState('');
   const [replyText, setReplyText] = useState('');
   const [sendingPrivate, setSendingPrivate] = useState(false);
+  const recipientSearchSeq = useRef(0);
 
   const [globalAudience, setGlobalAudience] = useState('ALL');
   const [globalLevel, setGlobalLevel] = useState('NSIV');
@@ -113,25 +117,50 @@ export default function MessagesPage() {
     setToken(currentToken);
     setStudent(currentStudent);
 
-    Promise.all([
-      loadConversations(currentToken),
-      apiClient('/messages/recipients', { token: currentToken })
-    ])
-      .then(([, recipientsData]) => {
-        const users = (recipientsData?.recipients || [])
-          .filter((row) => row.id !== currentStudent.id)
-          .map((row) => ({
-            id: row.id,
-            label: `${row.firstName} ${row.lastName} (${row.school})`
-          }));
-        setCommunityUsers(users);
-        if (users[0]) setRecipientId(String(users[0].id));
-      })
+    loadConversations(currentToken)
       .catch((e) => {
         setError(e.message || 'Erreur de chargement messagerie.');
       })
       .finally(() => setLoading(false));
   }, [router]);
+
+  useEffect(() => {
+    if (!token) return;
+
+    const q = recipientQuery.trim();
+    if (q.length < 2) {
+      setCommunityUsers([]);
+      setSearchingRecipients(false);
+      return;
+    }
+
+    const currentSeq = ++recipientSearchSeq.current;
+    setSearchingRecipients(true);
+
+    const timer = setTimeout(async () => {
+      try {
+        const data = await apiClient(
+          `/messages/recipients?q=${encodeURIComponent(q)}&limit=15`,
+          { token }
+        );
+        if (recipientSearchSeq.current !== currentSeq) return;
+        const users = (data?.recipients || []).map((row) => ({
+          id: row.id,
+          label: `${row.firstName} ${row.lastName}${row.school ? ` (${row.school})` : ''}`
+        }));
+        setCommunityUsers(users);
+      } catch (e) {
+        if (recipientSearchSeq.current !== currentSeq) return;
+        setError(e.message || 'Erreur de recherche destinataires.');
+      } finally {
+        if (recipientSearchSeq.current === currentSeq) {
+          setSearchingRecipients(false);
+        }
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [token, recipientQuery]);
 
   useEffect(() => {
     if (!token || !selectedConversationId) return;
@@ -160,7 +189,11 @@ export default function MessagesPage() {
 
     const targetId = Number(recipientId);
     const content = privateComposerText.trim();
-    if (!targetId || !content) return;
+    if (!targetId) {
+      setError('Sélectionne un destinataire depuis les résultats de recherche.');
+      return;
+    }
+    if (!content) return;
 
     setSendingPrivate(true);
     setError('');
@@ -173,6 +206,10 @@ export default function MessagesPage() {
       });
 
       setPrivateComposerText('');
+      setRecipientId('');
+      setRecipientQuery('');
+      setSelectedRecipientLabel('');
+      setCommunityUsers([]);
       await loadConversations(token);
     } catch (e) {
       setError(e.message || 'Erreur envoi message privé.');
@@ -293,17 +330,45 @@ export default function MessagesPage() {
 
           <h3 className="text-sm font-semibold text-brand-900">Nouveau message privé</h3>
           <form className="mt-2 space-y-2" onSubmit={handleSendPrivate}>
-            <select
+            <input
               className="input"
-              value={recipientId}
-              onChange={(e) => setRecipientId(e.target.value)}
+              value={recipientQuery}
+              onChange={(e) => {
+                setRecipientQuery(e.target.value);
+                setRecipientId('');
+                setSelectedRecipientLabel('');
+              }}
+              placeholder="Rechercher un destinataire par nom..."
               required
-            >
-              <option value="">Choisir un destinataire</option>
-              {communityUsers.map((user) => (
-                <option key={user.id} value={user.id}>{user.label}</option>
-              ))}
-            </select>
+            />
+            {searchingRecipients ? (
+              <p className="text-xs text-brand-700">Recherche en cours...</p>
+            ) : null}
+            {recipientQuery.trim().length >= 2 && communityUsers.length > 0 ? (
+              <div className="max-h-48 overflow-auto rounded-lg border border-brand-100 bg-white">
+                {communityUsers.map((user) => (
+                  <button
+                    key={user.id}
+                    type="button"
+                    className="block w-full border-b border-brand-100 px-3 py-2 text-left text-sm text-brand-900 hover:bg-brand-50 last:border-b-0"
+                    onClick={() => {
+                      setRecipientId(String(user.id));
+                      setSelectedRecipientLabel(user.label);
+                      setRecipientQuery(user.label);
+                      setCommunityUsers([]);
+                    }}
+                  >
+                    {user.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            {recipientQuery.trim().length >= 2 && !searchingRecipients && communityUsers.length === 0 ? (
+              <p className="text-xs text-brand-700">Aucun utilisateur trouvé.</p>
+            ) : null}
+            {recipientId && selectedRecipientLabel ? (
+              <p className="text-xs text-green-700">Destinataire sélectionné: {selectedRecipientLabel}</p>
+            ) : null}
             <textarea
               className="input min-h-[90px]"
               value={privateComposerText}

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { clearAuth, getDarkMode, getStudent, getToken, isNsivStudent, setDarkModePreference } from '@/lib/auth';
-import { apiClient } from '@/lib/api';
+import { API_URL, apiClient } from '@/lib/api';
 import { resolveMediaUrl } from '@/lib/media';
 
 function isActivePath(pathname, href) {
@@ -23,6 +23,7 @@ export default function HeaderNav() {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifError, setNotifError] = useState('');
   const [darkMode, setDarkMode] = useState(false);
@@ -38,6 +39,8 @@ export default function HeaderNav() {
   const publicToolsRef = useRef(null);
   const publicSubjectsRef = useRef(null);
   const publicMobilePanelRef = useRef(null);
+  const loadNotificationsRef = useRef(async () => {});
+  const loadUnreadMessagesRef = useRef(async () => {});
   const router = useRouter();
   const pathname = usePathname();
   const hidePublicMobileMenu = ['/login', '/register', '/forgot-password', '/verify-email'].includes(pathname || '');
@@ -104,9 +107,24 @@ export default function HeaderNav() {
       }
     }
 
+    async function loadUnreadMessages() {
+      const token = getToken();
+      if (!token) return;
+      try {
+        const data = await apiClient('/messages/unread-summary', { token });
+        setUnreadMessagesCount(Number(data?.unreadMessages || 0));
+      } catch (_) {
+        // Keep message badge silent if endpoint temporarily fails.
+      }
+    }
+
+    loadNotificationsRef.current = loadNotifications;
+    loadUnreadMessagesRef.current = loadUnreadMessages;
+
     if (!isAuthed) {
       setNotifications([]);
       setUnreadCount(0);
+      setUnreadMessagesCount(0);
       setIsNotifOpen(false);
       setIsQuickMenuOpen(false);
       setIsMobileMenuOpen(false);
@@ -118,8 +136,36 @@ export default function HeaderNav() {
     }
 
     loadNotifications();
-    const timer = setInterval(loadNotifications, 30000);
+    loadUnreadMessages();
+    const timer = setInterval(() => {
+      loadNotifications();
+      loadUnreadMessages();
+    }, 30000);
     return () => clearInterval(timer);
+  }, [isAuthed]);
+
+  useEffect(() => {
+    if (!isAuthed) return undefined;
+
+    const token = getToken();
+    if (!token) return undefined;
+
+    const streamUrl = `${API_URL}/realtime/stream?token=${encodeURIComponent(token)}`;
+    const source = new EventSource(streamUrl);
+
+    const onRefresh = () => {
+      loadNotificationsRef.current();
+      loadUnreadMessagesRef.current();
+    };
+
+    source.addEventListener('connected', onRefresh);
+    source.addEventListener('refresh', onRefresh);
+
+    return () => {
+      source.removeEventListener('connected', onRefresh);
+      source.removeEventListener('refresh', onRefresh);
+      source.close();
+    };
   }, [isAuthed]);
 
   useEffect(() => {
@@ -321,6 +367,7 @@ export default function HeaderNav() {
     setDarkMode(false);
     setNotifications([]);
     setUnreadCount(0);
+    setUnreadMessagesCount(0);
     setIsQuickMenuOpen(false);
     setIsNotifOpen(false);
     setIsMobileMenuOpen(false);
@@ -531,12 +578,17 @@ export default function HeaderNav() {
         {isAuthed ? (
           <Link
             href="/messages"
-            className="hidden rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
+            className="relative hidden rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
             aria-label="Messagerie"
             title="Messagerie"
           >
             <span className="text-base leading-none" aria-hidden="true">💬</span>
             <span>Message</span>
+            {unreadMessagesCount > 0 ? (
+              <span className="absolute -right-2 -top-2 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+              </span>
+            ) : null}
           </Link>
         ) : null}
 
@@ -923,7 +975,14 @@ export default function HeaderNav() {
                   <div>Accueil</div>
                 </Link>
                 <Link href="/messages" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/messages') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
-                  <div className="text-lg">💬</div>
+                  <div className="relative text-lg">
+                    💬
+                    {unreadMessagesCount > 0 ? (
+                      <span className="absolute -right-2 -top-1 rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">
+                        {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                      </span>
+                    ) : null}
+                  </div>
                   <div>Messages</div>
                 </Link>
                 <button
