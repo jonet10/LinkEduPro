@@ -14,16 +14,53 @@ function getStorageUrl(fileUrl) {
   return `${origin}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
 }
 
+const UPCOMING_LIBRARY_BOOKS = [
+  {
+    id: 'upcoming-j-aime-haiti-civique',
+    title: "J'AIME HAITI - INSTRUCTION CIVIQUE ET MORALE",
+    subject: 'Sciences sociales',
+    level: '1er et 2e cycle fondamental',
+    description:
+      "F.I.C. Ce matériel a pour objectif de faire acquérir aux enfants les habitudes civiques indispensables au développement de leur pays (respect des personnes et des biens, coopération, tolérance...).",
+    status: 'UPCOMING',
+    upcoming: true,
+    viewerOnly: true,
+    priceHtg: 250,
+    fileUrl: null
+  }
+];
+
+function formatHTG(value) {
+  const amount = Number(value || 0);
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'HTG',
+    maximumFractionDigits: 2
+  }).format(amount);
+}
+
 function BookCard({ book }) {
   return (
     <article className="card">
       <div className="mb-2 flex items-center justify-between gap-2">
         <h3 className="text-lg font-semibold text-brand-900">{book.title}</h3>
-        <span className="rounded-full bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700">Approuvé</span>
+        <span className={`rounded-full px-2 py-1 text-xs font-semibold ${book.upcoming ? 'bg-amber-50 text-amber-700' : 'bg-brand-50 text-brand-700'}`}>
+          {book.upcoming ? 'Bientôt disponible' : 'Approuvé'}
+        </span>
       </div>
       <p className="text-sm text-brand-700">{book.description || 'Aucune description'}</p>
       <p className="mt-2 text-xs text-brand-500">{book.subject} | {book.level}</p>
-      <a className="btn-primary mt-4 inline-block" href={getStorageUrl(book.fileUrl)} target="_blank" rel="noreferrer">Ouvrir le PDF</a>
+      {book.upcoming ? (
+        <div className="mt-4 space-y-2">
+          <p className="text-sm font-semibold text-brand-900">Prix: {formatHTG(book.priceHtg)}</p>
+          <p className="text-xs text-brand-700">Visualisation uniquement. Le téléchargement sera désactivé.</p>
+          <button type="button" className="btn-secondary" disabled>
+            PDF à venir
+          </button>
+        </div>
+      ) : (
+        <a className="btn-primary mt-4 inline-block" href={getStorageUrl(book.fileUrl)} target="_blank" rel="noreferrer">Ouvrir le PDF</a>
+      )}
     </article>
   );
 }
@@ -63,7 +100,7 @@ export default function LibraryPage() {
     try {
       setError('');
       const data = await apiClient('/library/books', { token });
-      setApprovedBooks(data.approved || []);
+      setApprovedBooks([...(data.approved || []), ...UPCOMING_LIBRARY_BOOKS]);
       setPendingBooks(data.pending || []);
       setRejectedBooks(data.rejected || []);
     } catch (e) {
