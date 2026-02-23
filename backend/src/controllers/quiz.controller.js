@@ -39,7 +39,7 @@ async function getQuizSets(req, res, next) {
     const subject = await prisma.subject.findUnique({ where: { id: subjectId } });
 
     if (!subject) {
-      return res.status(404).json({ message: 'Matiere introuvable.' });
+      return res.status(404).json({ message: 'Matière introuvable.' });
     }
 
     if (!isPhysicsSubjectName(subject.name)) {
@@ -74,7 +74,7 @@ async function getQuizQuestions(req, res, next) {
 
     const subject = await prisma.subject.findUnique({ where: { id: subjectId } });
     if (!subject) {
-      return res.status(404).json({ message: 'Matiere introuvable.' });
+      return res.status(404).json({ message: 'Matière introuvable.' });
     }
 
     let targetSubject = subject;
@@ -166,7 +166,7 @@ async function submitQuiz(req, res, next) {
         isCorrect = normalizeTextAnswer(selectedText) === normalizeTextAnswer(q.correctText);
       } else {
         if (!Number.isInteger(selectedOption)) {
-          throw Object.assign(new Error('Option de reponse manquante.'), { statusCode: 400 });
+          throw Object.assign(new Error('Option de Réponse manquante.'), { statusCode: 400 });
         }
         isCorrect = q.correctOption === selectedOption;
       }
@@ -312,7 +312,7 @@ async function getPremiumInsights(req, res, next) {
     const subjectId = Number(req.params.subjectId);
     const subject = await prisma.subject.findUnique({ where: { id: subjectId } });
     if (!subject) {
-      return res.status(404).json({ message: 'Matiere introuvable.' });
+      return res.status(404).json({ message: 'Matière introuvable.' });
     }
 
     const premiumQuestions = await prisma.question.findMany({

@@ -13,12 +13,12 @@ async function importStudentsFromFile({ schoolId, actor, filePath, classId, acad
 
   const cls = await prisma.schoolClass.findFirst({ where: { id: Number(classId), schoolId: Number(schoolId) } });
   if (!cls) {
-    throw new Error('Classe invalide pour cette ecole.');
+    throw new Error('Classe invalide pour cette École.');
   }
 
   const year = await prisma.schoolAcademicYear.findFirst({ where: { id: Number(academicYearId), schoolId: Number(schoolId) } });
   if (!year) {
-    throw new Error('Annee academique invalide pour cette ecole.');
+    throw new Error('Annee academique invalide pour cette École.');
   }
 
   const errors = [];
@@ -28,12 +28,12 @@ async function importStudentsFromFile({ schoolId, actor, filePath, classId, acad
   for (let i = 0; i < rows.length; i += 1) {
     const rowIndex = i + 2;
     const row = rows[i];
-    const firstName = norm(row.prenom || row.first_name || row.firstname);
+    const firstName = norm(row.Prénom || row.first_name || row.firstname);
     const lastName = norm(row.nom || row.last_name || row.lastname);
     const sex = norm(row.sexe || row.sex).toUpperCase();
 
     if (!firstName || !lastName || !['MALE', 'FEMALE', 'OTHER'].includes(sex)) {
-      errors.push({ row: rowIndex, message: 'Colonnes invalides: nom, prenom, sexe requis.' });
+      errors.push({ row: rowIndex, message: 'Colonnes invalides: nom, Prénom, sexe requis.' });
       continue;
     }
 
@@ -68,7 +68,7 @@ async function importStudentsFromFile({ schoolId, actor, filePath, classId, acad
     const student = toCreate[i];
     const key = `${student.firstName.toLowerCase()}-${student.lastName.toLowerCase()}`;
     if (existingSet.has(key)) {
-      errors.push({ row: student.rowIndex, message: 'Eleve deja present en base.' });
+      errors.push({ row: student.rowIndex, message: 'Élève deja present en base.' });
       continue;
     }
 

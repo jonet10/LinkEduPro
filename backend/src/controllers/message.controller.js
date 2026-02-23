@@ -52,7 +52,7 @@ async function sendPrivateMessage(req, res, next) {
     const content = req.body.content.trim();
 
     if (senderId === recipientId) {
-      return res.status(400).json({ message: 'Vous ne pouvez pas vous envoyer un message.' });
+      return res.status(400).json({ message: 'Vous ne pouvez pas vous envoyér un message.' });
     }
 
     const recipient = await prisma.student.findUnique({
@@ -341,7 +341,7 @@ async function sendGlobalMessage(req, res, next) {
     if (audience === 'LEVEL') {
       targetLevel = API_LEVEL_TO_DB[req.body.level] || null;
       if (!targetLevel) {
-        return res.status(400).json({ message: 'Niveau academique invalide.' });
+        return res.status(400).json({ message: 'Niveau académique invalide.' });
       }
 
       const profiles = await prisma.studentProfile.findMany({

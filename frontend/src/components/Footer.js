@@ -199,7 +199,7 @@ export default function Footer() {
 
       <div className={styles.bottomBar}>
         <div className={styles.bottomInner}>
-          <p className={styles.bottomText}>© {year} LinkEduPro — All rights reserved</p>
+          <p className={styles.bottomText}>© {year} LinkEduPro — All rights réserved</p>
           <p className={styles.bottomText}>Version {PLATFORM_VERSION}</p>
           <div className={styles.bottomLinks}>
             <Link href="/system-status" className={styles.bottomLink}>System Status</Link>

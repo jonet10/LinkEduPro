@@ -1,20 +1,20 @@
 function requireAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'ADMIN') {
-    return res.status(403).json({ message: 'Acces reserve admin.' });
+    return res.status(403).json({ message: 'Acces réserve admin.' });
   }
   return next();
 }
 
 function requireTeacherOrAdmin(req, res, next) {
   if (!req.user || !['TEACHER', 'ADMIN'].includes(req.user.role)) {
-    return res.status(403).json({ message: 'Acces reserve professeur/admin.' });
+    return res.status(403).json({ message: 'Acces réserve professeur/admin.' });
   }
   return next();
 }
 
 function requireSuperAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'ADMIN') {
-    return res.status(403).json({ message: 'Acces reserve super admin.' });
+    return res.status(403).json({ message: 'Acces réserve super admin.' });
   }
 
   const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;

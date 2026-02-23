@@ -492,7 +492,7 @@ async function payForSession({ student, sessionId, paymentMethod, amount }) {
         amount: priceDec,
         platformCommission: commission,
         teacherAmount,
-        status: 'SUCCESS',
+        status: 'success',
         paymentMethod
       }
     });
@@ -517,7 +517,7 @@ async function teacherDashboard(teacherId) {
     include: {
       _count: { select: { enrollments: true } },
       transactions: {
-        where: { status: 'SUCCESS' },
+        where: { status: 'success' },
         select: { amount: true, teacherAmount: true, platformCommission: true, createdAt: true }
       }
     }

@@ -11,7 +11,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "node prisma/seed.js",
-    "school:backup": "node scripts/school-backup.js"
+    "school:backup": "node scripts/school-backup.js",
+    "deploy": "node scripts/deploy.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

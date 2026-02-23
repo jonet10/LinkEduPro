@@ -66,7 +66,7 @@ async function changePassword(req, res, next) {
       data: { passwordHash, mustChangePassword: false }
     });
 
-    return res.json({ message: 'Mot de passe mis a jour.' });
+    return res.json({ message: 'Mot de passe mis à jour.' });
   } catch (error) {
     return next(error);
   }

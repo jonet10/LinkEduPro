@@ -384,7 +384,7 @@ export default function StudyPlansPage() {
 
               {canManagePlan(selectedPlan) ? (
                 <div className="flex gap-2">
-                  <button className="btn-secondary" onClick={() => openEdit(selectedPlan)}>Modifier</button>
+                  <button className="btn-secondary" onClick={() => openEdit(selectedPlan)}>modifier</button>
                   <button className="btn-secondary" onClick={() => onDeletePlan(selectedPlan.id)}>Supprimer</button>
                 </div>
               ) : null}

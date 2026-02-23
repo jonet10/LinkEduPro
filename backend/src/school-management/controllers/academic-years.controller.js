@@ -25,7 +25,7 @@ async function createAcademicYear(req, res, next) {
     await createSchoolLog({
       schoolId,
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'ACADEMIC_YEAR_CREATED',
       entityType: 'SchoolAcademicYear',
       entityId: String(year.id)

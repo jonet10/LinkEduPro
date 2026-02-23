@@ -26,7 +26,7 @@ async function createPaymentType(req, res, next) {
     await createSchoolLog({
       schoolId: Number(schoolId),
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'PAYMENT_TYPE_CREATED',
       entityType: 'SchoolPaymentType',
       entityId: String(paymentType.id)
@@ -65,11 +65,11 @@ async function createPayment(req, res, next) {
     ]);
 
     if (!student || !schoolClass || !academicYear || !paymentType) {
-      return res.status(400).json({ message: 'References paiement invalides pour cette ecole.' });
+      return res.status(400).json({ message: 'References paiement invalides pour cette École.' });
     }
 
     if (student.classId !== schoolClass.id || student.academicYearId !== academicYear.id) {
-      return res.status(400).json({ message: 'Eleve, classe et annee academique incompatibles.' });
+      return res.status(400).json({ message: 'Élève, classe et annee academique incompatibles.' });
     }
 
     const numericAmountPaid = Number(amountPaid);
@@ -170,7 +170,7 @@ async function createPayment(req, res, next) {
     await createSchoolLog({
       schoolId: numericSchoolId,
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'PAYMENT_RECORDED',
       entityType: 'SchoolPayment',
       entityId: String(payment.id),
@@ -225,7 +225,7 @@ async function deletePayment(req, res, next) {
     await createSchoolLog({
       schoolId,
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'PAYMENT_SOFT_DELETED',
       entityType: 'SchoolPayment',
       entityId: String(paymentId)

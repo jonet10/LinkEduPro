@@ -20,7 +20,7 @@ export default function ExamViewerPage() {
   }, [file]);
 
   if (!file) {
-    return <p className="text-sm text-red-600">Aucun fichier PDF selectionne.</p>;
+    return <p className="text-sm text-red-600">Aucun fichier PDF sélectionné.</p>;
   }
 
   return (

@@ -218,7 +218,7 @@ export default function SchoolPaymentsPage() {
       setPaymentTypes((prev) => [...prev, response.paymentType].sort((a, b) => a.name.localeCompare(b.name)));
       setTypeForm({ name: '', description: '' });
     } catch (e) {
-      setError(e.message || 'Erreur lors de la creation du type de paiement.');
+      setError(e.message || 'Erreur lors de la création du type de paiement.');
     } finally {
       setCreatingType(false);
     }
@@ -286,7 +286,7 @@ export default function SchoolPaymentsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-brand-200">
-                  <th className="text-left py-2">Eleve</th>
+                  <th className="text-left py-2">Élève</th>
                   <th className="text-left py-2">Type</th>
                   <th className="text-left py-2">Annee</th>
                   <th className="text-left py-2">Frais total</th>
@@ -353,7 +353,7 @@ export default function SchoolPaymentsPage() {
               onChange={(e) => setTypeForm((prev) => ({ ...prev, description: e.target.value }))}
             />
             <button type="submit" className="btn-primary" disabled={creatingType}>
-              {creatingType ? 'Creation...' : 'Ajouter le type'}
+              {creatingType ? 'création...' : 'Ajouter le type'}
             </button>
           </form>
         </section>

@@ -132,7 +132,7 @@ async function importStudents(req, res, next) {
     await createSchoolLog({
       schoolId,
       actorId: req.schoolUser.id,
-      actorRole: req.schoolUser.role,
+      actorrole: req.schoolUser.role,
       action: 'STUDENTS_IMPORTED',
       entityType: 'SchoolStudent',
       metadata: {
@@ -145,7 +145,7 @@ async function importStudents(req, res, next) {
     await fs.promises.unlink(req.file.path).catch(() => null);
 
     return res.status(201).json({
-      message: 'Import termine.',
+      message: 'Import terminé.',
       createdCount: report.createdCount,
       errors: report.errors
     });
@@ -183,7 +183,7 @@ async function updateStudent(req, res, next) {
       where: { id: studentPk, schoolId, isActive: true }
     });
     if (!existing) {
-      return res.status(404).json({ message: 'Eleve introuvable.' });
+      return res.status(404).json({ message: 'Élève introuvable.' });
     }
 
     const [schoolClass, year] = await Promise.all([
@@ -192,7 +192,7 @@ async function updateStudent(req, res, next) {
     ]);
 
     if (!schoolClass || !year) {
-      return res.status(400).json({ message: 'Classe ou annee academique invalide pour cette ecole.' });
+      return res.status(400).json({ message: 'Classe ou annee academique invalide pour cette École.' });
     }
 
     const duplicate = await prisma.schoolStudent.findFirst({
@@ -205,7 +205,7 @@ async function updateStudent(req, res, next) {
     });
 
     if (duplicate) {
-      return res.status(400).json({ message: 'Matricule deja utilise dans cette ecole.' });
+      return res.status(400).json({ message: 'Matricule deja utilise dans cette École.' });
     }
 
     const updated = await prisma.schoolStudent.update({
@@ -227,7 +227,7 @@ async function updateStudent(req, res, next) {
     await createSchoolLog({
       schoolId,
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'STUDENT_UPDATED',
       entityType: 'SchoolStudent',
       entityId: String(studentPk),
@@ -250,7 +250,7 @@ async function deactivateStudent(req, res, next) {
       where: { id: studentPk, schoolId, isActive: true }
     });
     if (!existing) {
-      return res.status(404).json({ message: 'Eleve introuvable.' });
+      return res.status(404).json({ message: 'Élève introuvable.' });
     }
 
     await prisma.schoolStudent.update({
@@ -261,13 +261,13 @@ async function deactivateStudent(req, res, next) {
     await createSchoolLog({
       schoolId,
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'STUDENT_DEACTIVATED',
       entityType: 'SchoolStudent',
       entityId: String(studentPk)
     });
 
-    return res.json({ message: 'Eleve desactive.' });
+    return res.json({ message: 'Élève désactivé.' });
   } catch (error) {
     return next(error);
   }

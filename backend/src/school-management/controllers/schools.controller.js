@@ -60,7 +60,7 @@ async function createSchool(req, res, next) {
     await createSchoolLog({
       schoolId: created.school.id,
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'SCHOOL_CREATED',
       entityType: 'School',
       entityId: String(created.school.id),
@@ -131,7 +131,7 @@ async function resetSchoolAdminPassword(req, res, next) {
 
     const school = await prisma.school.findUnique({ where: { id: schoolId } });
     if (!school) {
-      return res.status(404).json({ message: 'Ecole introuvable.' });
+      return res.status(404).json({ message: 'École introuvable.' });
     }
 
     const admin = await prisma.schoolAdmin.findFirst({
@@ -140,7 +140,7 @@ async function resetSchoolAdminPassword(req, res, next) {
     });
 
     if (!admin) {
-      return res.status(404).json({ message: 'Admin ecole introuvable.' });
+      return res.status(404).json({ message: 'Admin École introuvable.' });
     }
 
     const tempPassword = generateTemporaryPassword();
@@ -158,7 +158,7 @@ async function resetSchoolAdminPassword(req, res, next) {
     await createSchoolLog({
       schoolId,
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'SCHOOL_ADMIN_PASSWORD_RESET',
       entityType: 'SchoolAdmin',
       entityId: String(admin.id),
@@ -187,7 +187,7 @@ async function updateSchool(req, res, next) {
 
     const existing = await prisma.school.findUnique({ where: { id: schoolId } });
     if (!existing) {
-      return res.status(404).json({ message: 'Ecole introuvable.' });
+      return res.status(404).json({ message: 'École introuvable.' });
     }
 
     const updated = await prisma.school.update({
@@ -209,7 +209,7 @@ async function updateSchool(req, res, next) {
     await createSchoolLog({
       schoolId,
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'SCHOOL_UPDATED',
       entityType: 'School',
       entityId: String(schoolId)
@@ -229,7 +229,7 @@ async function setSchoolStatus(req, res, next) {
 
     const existing = await prisma.school.findUnique({ where: { id: schoolId } });
     if (!existing) {
-      return res.status(404).json({ message: 'Ecole introuvable.' });
+      return res.status(404).json({ message: 'École introuvable.' });
     }
 
     const updated = await prisma.$transaction(async (tx) => {
@@ -238,7 +238,7 @@ async function setSchoolStatus(req, res, next) {
         data: { isActive: Boolean(isActive) }
       });
 
-      // Keep school admins active so they can still connect and see suspension notice.
+      // Keep school'admins active so they can still connect and see suspension notice.
       await tx.schoolAdmin.updateMany({
         where: {
           schoolId,
@@ -253,7 +253,7 @@ async function setSchoolStatus(req, res, next) {
     await createSchoolLog({
       schoolId,
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: isActive ? 'SCHOOL_REACTIVATED' : 'SCHOOL_SUSPENDED',
       entityType: 'School',
       entityId: String(schoolId),
@@ -262,7 +262,7 @@ async function setSchoolStatus(req, res, next) {
 
     return res.json({
       school: updated,
-      message: isActive ? 'Ecole reactivee.' : 'Ecole suspendue.'
+      message: isActive ? 'École réactivée.' : 'École suspendue.'
     });
   } catch (error) {
     return next(error);

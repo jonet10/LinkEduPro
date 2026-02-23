@@ -4,7 +4,7 @@ const defaultBadges = [
   { name: 'Premier Article', description: 'Premier article publie', icon: 'badge-first-article' },
   { name: '10 Articles Publies', description: 'A publie 10 articles', icon: 'badge-ten-articles' },
   { name: '100 Commentaires', description: 'A publie 100 commentaires', icon: 'badge-comments-100' },
-  { name: 'Professeur Verifie', description: 'Profil professeur verifie', icon: 'badge-teacher-verified' },
+  { name: 'Professeur Vérifie', description: 'Profil professeur Vérifie', icon: 'badge-teacher-VERIFIED' },
   { name: 'Professeur Certifie', description: 'Document professeur certifie', icon: 'badge-teacher-certified' },
   { name: 'Leader Educatif', description: 'Score de reputation >= 500', icon: 'badge-leader-educatif' }
 ];

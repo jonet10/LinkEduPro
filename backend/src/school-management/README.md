@@ -11,7 +11,7 @@ This module is isolated from the public students/quiz module:
 - `SUPER_ADMIN`: global access, can create schools.
 - `SCHOOL_ADMIN`: full management on own school.
 - `SCHOOL_ACCOUNTANT`: can create/list payments on own school.
-- `SCHOOL_TEACHER`: reserved for future usage.
+- `SCHOOL_TEACHER`: réserved for future usage.
 
 ## Auth
 1. `POST /api/school-management/login`
@@ -37,7 +37,7 @@ Token payload includes `scope: school-management` and is rejected by the quiz/pu
 `POST /api/school-management/students/schools/:schoolId/import` (`multipart/form-data`, field `file`)
 `GET /api/school-management/students/schools/:schoolId/import-history`
 
-Expected import columns: `nom`, `prenom`, `sexe` (or english aliases).
+Expected import columns: `nom`, `Prénom`, `sexe` (or english aliases).
 Class and academic year are provided in body: `classId`, `academicYearId`.
 
 - Payments

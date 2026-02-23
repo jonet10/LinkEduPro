@@ -10,7 +10,7 @@ async function createClass(req, res, next) {
     });
 
     if (!year) {
-      return res.status(400).json({ message: 'Annee academique invalide pour cette ecole.' });
+      return res.status(400).json({ message: 'Annee academique invalide pour cette École.' });
     }
 
     const schoolClass = await prisma.schoolClass.create({
@@ -26,7 +26,7 @@ async function createClass(req, res, next) {
     await createSchoolLog({
       schoolId: Number(schoolId),
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'CLASS_CREATED',
       entityType: 'SchoolClass',
       entityId: String(schoolClass.id)
@@ -79,7 +79,7 @@ async function updateClass(req, res, next) {
       where: { id: Number(academicYearId), schoolId }
     });
     if (!year) {
-      return res.status(400).json({ message: 'Annee academique invalide pour cette ecole.' });
+      return res.status(400).json({ message: 'Annee academique invalide pour cette École.' });
     }
 
     const updated = await prisma.schoolClass.update({
@@ -99,7 +99,7 @@ async function updateClass(req, res, next) {
     await createSchoolLog({
       schoolId,
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'CLASS_UPDATED',
       entityType: 'SchoolClass',
       entityId: String(classId)
@@ -129,7 +129,7 @@ async function deleteClass(req, res, next) {
 
     if ((existing._count?.students || 0) > 0 || (existing._count?.payments || 0) > 0) {
       return res.status(400).json({
-        message: 'Impossible de supprimer une classe avec des eleves ou paiements lies.'
+        message: 'Impossible de supprimer une classe avec des Élèves ou paiements lies.'
       });
     }
 
@@ -138,7 +138,7 @@ async function deleteClass(req, res, next) {
     await createSchoolLog({
       schoolId,
       actorId: user.id,
-      actorRole: user.role,
+      actorrole: user.role,
       action: 'CLASS_DELETED',
       entityType: 'SchoolClass',
       entityId: String(classId)

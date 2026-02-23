@@ -115,7 +115,7 @@ async function submitBook(req, res, next) {
       await notifyAdmins({
         type: 'BOOK_REVIEW_REQUIRED',
         title: 'Livre a valider',
-        message: `${book.title} a ete soumis et attend validation.`,
+        message: `${book.title} a été soumis et attend validation.`,
         entityType: 'LibraryBook',
         entityId: String(book.id)
       });
@@ -158,7 +158,7 @@ async function reviewBook(req, res, next) {
       userId: reviewed.uploadedBy,
       type: 'BOOK_REVIEW_RESULT',
       title: status === 'APPROVED' ? 'Livre approuve' : 'Livre refuse',
-      message: `${reviewed.title} a ete ${status === 'APPROVED' ? 'approuve' : 'rejete'} par le super admin.`,
+      message: `${reviewed.title} a été ${status === 'APPROVED' ? 'approuve' : 'rejete'} par le super admin.`,
       entityType: 'LibraryBook',
       entityId: String(reviewed.id)
     });

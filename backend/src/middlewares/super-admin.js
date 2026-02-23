@@ -6,7 +6,7 @@ function requireSuperAdmin(req, res, next) {
   }
 
   if (!isConfiguredSuperAdmin(req.user)) {
-    return res.status(403).json({ message: 'Acces reserve au super admin.' });
+    return res.status(403).json({ message: 'Acces réserve au super admin.' });
   }
 
   return next();

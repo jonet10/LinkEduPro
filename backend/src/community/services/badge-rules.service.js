@@ -21,7 +21,7 @@ async function evaluateUserBadges(userId) {
   }
 
   if (user && ['VERIFIED', 'CERTIFIED', 'PREMIUM'].includes(user.teacherLevel)) {
-    await grantBadge(userId, 'Professeur Verifie');
+    await grantBadge(userId, 'Professeur Vérifie');
   }
 
   if (user && ['CERTIFIED', 'PREMIUM'].includes(user.teacherLevel)) {

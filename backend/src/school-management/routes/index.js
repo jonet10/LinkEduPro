@@ -30,7 +30,7 @@ router.use((req, res, next) => {
   if (req.path.startsWith('/dashboard')) return next();
 
   return res.status(403).json({
-    message: 'Compte ecole desactive. Contacte le responsable de la plateforme.'
+    message: 'Compte École désactivé. Contacte le responsable de la plateforme.'
   });
 });
 router.use('/schools', require('./schools.routes'));

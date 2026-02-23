@@ -180,11 +180,11 @@ export default function SchoolClassesPage() {
         body: JSON.stringify(payload)
       });
 
-      setSuccess('Classe creee avec succes.');
+      setSuccess('Classe créée avec succès.');
       setForm((prev) => ({ ...initialForm, academicYearId: prev.academicYearId || '' }));
       await reloadClasses(selectedYearId);
     } catch (e) {
-      setError(e.message || 'Impossible de creer la classe.');
+      setError(e.message || 'Impossible de créer la classe.');
     } finally {
       setCreating(false);
     }
@@ -222,7 +222,7 @@ export default function SchoolClassesPage() {
       });
       await reloadClasses('');
     } catch (e) {
-      setError(e.message || 'Impossible de creer l annee academique.');
+      setError(e.message || 'Impossible de créer l'année académique.');
     } finally {
       setCreatingYear(false);
     }
@@ -254,7 +254,7 @@ export default function SchoolClassesPage() {
         })
       });
       setEditingClassId(null);
-      setSuccess('Classe modifiee avec succes.');
+      setSuccess('Classe modifiée avec succès.');
       await reloadClasses(selectedYearId);
     } catch (e) {
       setError(e.message || 'Impossible de modifier la classe.');
@@ -289,7 +289,7 @@ export default function SchoolClassesPage() {
       <section className="card flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm text-brand-700">Gestion scolaire</p>
-          <h1 className="text-2xl font-bold text-brand-900">Gerer les classes</h1>
+          <h1 className="text-2xl font-bold text-brand-900">Gérer les classes</h1>
         </div>
         <button className="btn-secondary" type="button" onClick={() => router.push('/school-management/dashboard')}>
           Retour dashboard
@@ -336,7 +336,7 @@ export default function SchoolClassesPage() {
                 Definir comme annee active
               </label>
               <button className="btn-primary w-fit" type="submit" disabled={creatingYear}>
-                {creatingYear ? 'Creation...' : 'Ajouter annee (2025-2026)'}
+                {creatingYear ? 'création...' : 'Ajouter annee (2025-2026)'}
               </button>
             </form>
           </article>
@@ -380,7 +380,7 @@ export default function SchoolClassesPage() {
                   value={form.track}
                   onChange={(e) => setForm((prev) => ({ ...prev, track: e.target.value }))}
                 >
-                  <option value="">Filiere NSIV (optionnel)</option>
+                  <option value="">Filière NSIV (optionnel)</option>
                   {NSIV_TRACK_OPTIONS.map((track) => (
                     <option key={track} value={track}>{track}</option>
                   ))}
@@ -422,7 +422,7 @@ export default function SchoolClassesPage() {
                   Generer nom classe
                 </button>
                 <button className="btn-primary" type="submit" disabled={creating}>
-                  {creating ? 'Creation...' : 'Creer la classe'}
+                  {creating ? 'création...' : 'créer la classe'}
                 </button>
               </div>
             </form>
@@ -479,7 +479,7 @@ export default function SchoolClassesPage() {
                   <th className="py-2 text-left">Niveau</th>
                   <th className="py-2 text-left">Annee</th>
                   <th className="py-2 text-left">Capacite</th>
-                  <th className="py-2 text-left">Eleves</th>
+                  <th className="py-2 text-left">Élèves</th>
                   <th className="py-2 text-left">Actions</th>
                 </tr>
               </thead>
@@ -544,7 +544,7 @@ export default function SchoolClassesPage() {
                           ) : (
                             <>
                               <button type="button" className="btn-secondary !px-3 !py-1" onClick={() => startEditClass(item)}>
-                                Modifier
+                                modifier
                               </button>
                               <button type="button" className="btn-secondary !px-3 !py-1" onClick={() => removeClass(item.id)}>
                                 Supprimer

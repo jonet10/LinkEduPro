@@ -18,7 +18,7 @@ async function createQuiz(req, res, next) {
     const payloadQuestions = req.body.questions;
     const invalid = payloadQuestions.find((q) => !q.options.includes(q.correctAnswer));
     if (invalid) {
-      return res.status(400).json({ message: 'Chaque reponse correcte doit exister dans options.' });
+      return res.status(400).json({ message: 'Chaque Réponse correcte doit exister dans options.' });
     }
 
     const quiz = await prisma.levelQuiz.create({

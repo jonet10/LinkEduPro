@@ -18,7 +18,7 @@ export default function SchoolManagementDashboardPage() {
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState('');
-  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [passwordsuccess, setPasswordsuccess] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -79,7 +79,7 @@ export default function SchoolManagementDashboardPage() {
   async function handleChangePassword(e) {
     e.preventDefault();
     setPasswordError('');
-    setPasswordSuccess('');
+    setPasswordsuccess('');
 
     if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
       setPasswordError('Tous les champs sont obligatoires.');
@@ -115,7 +115,7 @@ export default function SchoolManagementDashboardPage() {
       setAdmin(updatedAdmin);
       setSchoolAuth(token, updatedAdmin);
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setPasswordSuccess('Mot de passe mis a jour. Tu peux maintenant utiliser toutes les fonctions.');
+      setPasswordsuccess('Mot de passe mis à jour. Tu peux maintenant utiliser toutes les fonctions.');
       setError('');
 
       if (updatedAdmin.role === 'SUPER_ADMIN') {
@@ -150,10 +150,10 @@ export default function SchoolManagementDashboardPage() {
           {admin?.role === 'SUPER_ADMIN' ? (
             <>
               <button className="btn-secondary" onClick={() => router.push('/school-management/students-global')}>
-                Tous les eleves
+                Tous les Élèves
               </button>
               <button className="btn-primary" onClick={() => router.push('/school-management/schools')}>
-                Ajouter une ecole
+                Ajouter une École
               </button>
             </>
           ) : null}
@@ -167,7 +167,7 @@ export default function SchoolManagementDashboardPage() {
           <h2 className="text-lg font-semibold text-red-700">Compte école désactivé</h2>
           <p className="mt-2 text-sm text-red-700">
             Ton école est actuellement suspendue. Tu peux te connecter, mais tu ne peux pas gérer les paiements,
-            les élèves, les classes ou d autres opérations.
+            les élèves, les classes ou d'autres opérations.
           </p>
           <p className="mt-2 text-sm text-red-700">
             Contacte le responsable de la plateforme LinkEduPro pour réactiver le compte.
@@ -224,7 +224,7 @@ export default function SchoolManagementDashboardPage() {
         <section className="card">
           <h2 className="text-lg font-semibold text-brand-900">Changement de mot de passe obligatoire</h2>
           <p className="mt-1 text-sm text-brand-700">
-            Avant toute operation, modifie ton mot de passe temporaire.
+            Avant toute opération, modifie ton mot de passe temporaire.
           </p>
           <form onSubmit={handleChangePassword} className="mt-4 grid gap-3 sm:grid-cols-3">
             <input
@@ -253,10 +253,10 @@ export default function SchoolManagementDashboardPage() {
             />
             <div className="sm:col-span-3 flex flex-wrap items-center gap-3">
               <button type="submit" className="btn-primary" disabled={passwordLoading}>
-                {passwordLoading ? 'Mise a jour...' : 'Modifier le mot de passe'}
+                {passwordLoading ? 'Mise à jour...' : 'Modifier le mot de passe'}
               </button>
               {passwordError ? <p className="text-sm text-red-600">{passwordError}</p> : null}
-              {passwordSuccess ? <p className="text-sm text-green-700">{passwordSuccess}</p> : null}
+              {passwordsuccess ? <p className="text-sm text-green-700">{passwordsuccess}</p> : null}
             </div>
           </form>
         </section>
@@ -275,7 +275,7 @@ export default function SchoolManagementDashboardPage() {
           <article className="card"><p className="text-sm">Total classes</p><p className="text-3xl font-black">{stats?.totalClasses ?? 0}</p></article>
           <article className="card"><p className="text-sm">Paiements du jour</p><p className="text-3xl font-black">{String(stats?.paymentsToday ?? 0)}</p></article>
           <article className="card"><p className="text-sm">Revenus mensuels</p><p className="text-3xl font-black">{String(stats?.monthlyRevenue ?? 0)}</p></article>
-          <article className="card"><p className="text-sm">Eleves en retard</p><p className="text-3xl font-black">{stats?.lateStudents ?? 0}</p></article>
+          <article className="card"><p className="text-sm">Élèves en retard</p><p className="text-3xl font-black">{stats?.lateStudents ?? 0}</p></article>
         </section>
       )}
     </main>

@@ -15,7 +15,7 @@ const SLIDES = [
   },
   {
     id: 'haiti-students-1',
-    label: 'Eleves NS4 (18+)',
+    label: 'Élèves NS4 (18+)',
     title: 'Des élèves majeurs qui apprennent, publient et progressent',
     image:
       'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80'
