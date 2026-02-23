@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
         method: 'POST',
         body: JSON.stringify({ email: email.trim() })
       });
-      setInfo(data.message || 'Code envoye.');
+      setInfo(data.message || 'Code envoyé.');
       if (data.devCode) {
         setDevCode(data.devCode);
       }
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
             required
           />
           <button className="btn-primary w-full" disabled={loading}>
-            {loading ? 'Envoi...' : 'Envoyer le code email'}
+            {loading ? 'Envoi...' : 'envoyér le code email'}
           </button>
         </form>
       ) : (
@@ -122,7 +122,7 @@ export default function ForgotPasswordPage() {
       {info ? <p className="text-sm text-green-600">{info}</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-      <Link href="/login" className="text-sm text-brand-700 hover:underline">Retour a la connexion</Link>
+      <Link href="/login" className="text-sm text-brand-700 hover:underline">Retour à la connexion</Link>
     </section>
   );
 }

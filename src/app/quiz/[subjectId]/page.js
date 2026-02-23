@@ -65,7 +65,7 @@ export default function QuizPage() {
     String(subject.name).toLowerCase().includes('connaissance')
   );
   const trackLabel = String(currentStudent?.nsivTrack || 'ORDINAIRE').toUpperCase();
-  const filiereLabel = trackLabel === 'SMP' || trackLabel === 'SVT'
+  const FilièreLabel = trackLabel === 'SMP' || trackLabel === 'SVT'
     ? 'SMP/SVT'
     : trackLabel === 'SES' || trackLabel === 'LLA'
       ? 'SES/LLA'
@@ -376,11 +376,11 @@ export default function QuizPage() {
             Baccalaureat d Enseignement General - Simulation d examen
           </h2>
           <p className="mt-1 text-center text-sm text-brand-700">
-            Examens de fin d etudes secondaires | Session d entrainement
+            Examens de fin d’études secondaires | Session d’entraînement
           </p>
           <div className="mt-3 grid gap-2 text-sm text-brand-800 sm:grid-cols-2">
-            <p><span className="font-semibold">Matiere:</span> {examMatterLabel}</p>
-            <p><span className="font-semibold">Filiere:</span> {filiereLabel}</p>
+            <p><span className="font-semibold">Matière:</span> {examMatterLabel}</p>
+            <p><span className="font-semibold">Filière:</span> {FilièreLabel}</p>
             <p><span className="font-semibold">Type:</span> Annales et questions de cours des examens passes</p>
             <p><span className="font-semibold">Niveau:</span> NSIV</p>
           </div>
@@ -403,7 +403,7 @@ export default function QuizPage() {
 
       {quizResult ? (
         <article className="card mt-4 space-y-3">
-          <h2 className="text-xl font-semibold text-brand-900">Quiz termine</h2>
+          <h2 className="text-xl font-semibold text-brand-900">Quiz terminé</h2>
           <p className="text-sm text-brand-700">
             Ton score: <span className="font-semibold">{quizResult.score}/{quizResult.totalQuestions}</span> ({quizResult.percentage}%)
           </p>
@@ -460,24 +460,24 @@ export default function QuizPage() {
           <p className="text-sm text-brand-700">
             {reviewMode === 'failed'
               ? "Voici les questions que tu as echouees."
-              : 'Verifie tes reponses et compare-les avec les bonnes reponses.'}
+              : 'Vérifie tes Réponses et compare-les avec les bonnes Réponses.'}
           </p>
           <div className="space-y-4">
             {displayedReviewItems.map((item, idx) => (
               <div key={`${item.questionId}_${idx}`} className="rounded-lg border border-brand-100 p-3">
                 <p className="font-semibold text-brand-900">{idx + 1}. {item.prompt}</p>
                 <p className={`mt-1 text-sm font-semibold ${item.isCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                  {item.isCorrect ? 'Bonne reponse' : 'Reponse incorrecte'}
+                  {item.isCorrect ? 'Bonne Réponse' : 'Réponse incorrecte'}
                 </p>
                 <div className="mt-3 space-y-2">
                   {item.answerType === 'TEXT' ? (
                     <div className="space-y-2">
                       <div className="rounded border border-brand-100 px-3 py-2 text-sm">
-                        <span className="font-semibold">Ta reponse:</span>{' '}
-                        {item.selectedText || <em>Aucune reponse</em>}
+                        <span className="font-semibold">Ta Réponse:</span>{' '}
+                        {item.selectedText || <em>Aucune Réponse</em>}
                       </div>
                       <div className="rounded border border-green-400 bg-green-50 px-3 py-2 text-sm">
-                        <span className="font-semibold">Reponse attendue:</span> {item.correctText || 'N/A'}
+                        <span className="font-semibold">Réponse attendue:</span> {item.correctText || 'N/A'}
                       </div>
                     </div>
                   ) : (
@@ -493,8 +493,8 @@ export default function QuizPage() {
                       return (
                         <div key={optionIndex} className={`rounded border px-3 py-2 text-sm ${optionClass}`}>
                           <span>{option}</span>
-                          {isSelected ? <span className="ml-2 text-xs font-semibold text-brand-700">(Ta reponse)</span> : null}
-                          {isCorrectOption ? <span className="ml-2 text-xs font-semibold text-green-700">(Bonne reponse)</span> : null}
+                          {isSelected ? <span className="ml-2 text-xs font-semibold text-brand-700">(Ta Réponse)</span> : null}
+                          {isCorrectOption ? <span className="ml-2 text-xs font-semibold text-green-700">(Bonne Réponse)</span> : null}
                         </div>
                       );
                     })
@@ -522,7 +522,7 @@ export default function QuizPage() {
                   {q.answerType === 'TEXT' ? (
                     <textarea
                       className="input min-h-28 w-full"
-                      placeholder="Ecris ta reponse ici..."
+                      placeholder="Ecris ta Réponse ici..."
                       value={answers[q.id]?.selectedText || ''}
                       onChange={(e) => setTextAnswer(q.id, e.target.value)}
                     />

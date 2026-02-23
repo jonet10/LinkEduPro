@@ -35,7 +35,7 @@ export default function InviteProfesseurPage() {
         body: JSON.stringify({ token, firstName, lastName, password })
       });
       setAuth(res.token, res.student);
-      setMessage('Compte professeur cree avec succes.');
+      setMessage('Compte professeur créé avec succès.');
     } catch (e) {
       setError(e.message);
     }
@@ -49,7 +49,7 @@ export default function InviteProfesseurPage() {
         {error ? <p className="text-red-600">{error}</p> : null}
         {message ? <p className="text-green-700">{message}</p> : null}
 
-        <input className="input" placeholder="Prenom" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+        <input className="input" placeholder="Prénom" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
         <input className="input" placeholder="Nom" value={lastName} onChange={(e) => setLastName(e.target.value)} />
         <input className="input" type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
         <button className="btn-primary" onClick={submit}>Activer mon compte</button>

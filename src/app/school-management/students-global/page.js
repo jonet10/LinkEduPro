@@ -56,7 +56,7 @@ export default function SchoolGlobalStudentsPage() {
       try {
         await loadGlobalStudents();
       } catch (e) {
-        setError(e.message || 'Impossible de charger les eleves globaux.');
+        setError(e.message || 'Impossible de charger les Élèves globaux.');
       } finally {
         setLoading(false);
       }
@@ -75,7 +75,7 @@ export default function SchoolGlobalStudentsPage() {
       <section className="card flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm text-brand-700">Super Admin</p>
-          <h1 className="text-2xl font-bold text-brand-900">Tous les eleves de la plateforme</h1>
+          <h1 className="text-2xl font-bold text-brand-900">Tous les Élèves de la plateforme</h1>
           <p className="text-sm text-brand-700">Connecte: {admin?.email}</p>
         </div>
         <button type="button" className="btn-secondary" onClick={() => router.push('/school-management/dashboard')}>
@@ -93,7 +93,7 @@ export default function SchoolGlobalStudentsPage() {
             value={filters.schoolId}
             onChange={(e) => setFilters((p) => ({ ...p, schoolId: e.target.value }))}
           >
-            <option value="">Global (toutes ecoles)</option>
+            <option value="">Global (toutes Écoles)</option>
             {schools.map((school) => (
               <option key={school.id} value={school.id}>{school.name}</option>
             ))}
@@ -103,7 +103,7 @@ export default function SchoolGlobalStudentsPage() {
             value={filters.department}
             onChange={(e) => setFilters((p) => ({ ...p, department: e.target.value }))}
           >
-            <option value="">Tous departements</option>
+            <option value="">Tous départements</option>
             {departments.map((department) => (
               <option key={department} value={department}>{department}</option>
             ))}
@@ -160,9 +160,9 @@ export default function SchoolGlobalStudentsPage() {
       </section>
 
       <section className="card">
-        <h2 className="mb-4 text-lg font-semibold text-brand-900">Eleves ({students.length})</h2>
+        <h2 className="mb-4 text-lg font-semibold text-brand-900">Élèves ({students.length})</h2>
         {students.length === 0 ? (
-          <p className="text-sm text-brand-700">Aucun eleve trouve avec ces filtres.</p>
+          <p className="text-sm text-brand-700">Aucun élève trouvé avec ces filtres.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -173,8 +173,8 @@ export default function SchoolGlobalStudentsPage() {
                   <th className="py-2 text-left">Sexe</th>
                   <th className="py-2 text-left">Classe</th>
                   <th className="py-2 text-left">Annee</th>
-                  <th className="py-2 text-left">Ecole</th>
-                  <th className="py-2 text-left">Departement</th>
+                  <th className="py-2 text-left">École</th>
+                  <th className="py-2 text-left">département</th>
                   <th className="py-2 text-left">Commune</th>
                 </tr>
               </thead>

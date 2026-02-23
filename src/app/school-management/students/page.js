@@ -72,7 +72,7 @@ export default function SchoolStudentsPage() {
         if (classesData.length > 0) setImportClassId(String(classesData[0].id));
         if (yearsData.length > 0) setImportYearId(String(yearsData[0].id));
       } catch (e) {
-        setError(e.message || 'Impossible de charger les eleves.');
+        setError(e.message || 'Impossible de charger les Élèves.');
       } finally {
         setLoading(false);
       }
@@ -126,11 +126,11 @@ export default function SchoolStudentsPage() {
     e.preventDefault();
     if (!admin) return;
     if (!importFile) {
-      setError('Selectionne un fichier .xlsx ou .csv.');
+      setError('sélectionné un fichier .xlsx ou .csv.');
       return;
     }
     if (!importClassId || !importYearId) {
-      setError('Selectionne la classe et l annee academique.');
+      setError('sélectionne la classe et l'année académique.');
       return;
     }
 
@@ -150,7 +150,7 @@ export default function SchoolStudentsPage() {
         body
       });
 
-      setSuccess(`Import termine. ${res.createdCount || 0} eleve(s) ajoute(s).`);
+      setSuccess(`Import terminé. ${res.createdCount || 0} Élève(s) ajouté(s).`);
       setImportFile(null);
       await onFiltersChange(selectedClassId, selectedYearId);
       const historyRes = await apiClient(`/school-management/students/schools/${admin.schoolId}/import-history`, { token });
@@ -193,16 +193,16 @@ export default function SchoolStudentsPage() {
         })
       });
       setEditingStudentId(null);
-      setSuccess('Eleve modifie avec succes.');
+      setSuccess('Élève modifié avec succès.');
       await onFiltersChange(selectedClassId, selectedYearId);
     } catch (e) {
-      setError(e.message || 'Impossible de modifier cet eleve.');
+      setError(e.message || 'Impossible de modifier cet Élève.');
     }
   }
 
   async function deleteStudent(studentIdPk) {
     if (!admin) return;
-    const ok = window.confirm('Desactiver cet eleve ?');
+    const ok = window.confirm('désactiver cet Élève ?');
     if (!ok) return;
     setError('');
     setSuccess('');
@@ -212,10 +212,10 @@ export default function SchoolStudentsPage() {
         method: 'DELETE',
         token
       });
-      setSuccess('Eleve desactive.');
+      setSuccess('Élève désactivé.');
       await onFiltersChange(selectedClassId, selectedYearId);
     } catch (e) {
-      setError(e.message || 'Impossible de desactiver cet eleve.');
+      setError(e.message || 'Impossible de désactiver cet Élève.');
     }
   }
 
@@ -228,7 +228,7 @@ export default function SchoolStudentsPage() {
       <section className="card flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm text-brand-700">Gestion scolaire</p>
-          <h1 className="text-2xl font-bold text-brand-900">Gerer les eleves</h1>
+          <h1 className="text-2xl font-bold text-brand-900">Gérer les Élèves</h1>
         </div>
         <button className="btn-secondary" type="button" onClick={() => router.push('/school-management/dashboard')}>
           Retour dashboard
@@ -297,7 +297,7 @@ export default function SchoolStudentsPage() {
 
       {admin?.role === 'SCHOOL_ADMIN' ? (
         <section className="card">
-          <h2 className="mb-4 text-lg font-semibold text-brand-900">Importer des eleves (.xlsx / .csv)</h2>
+          <h2 className="mb-4 text-lg font-semibold text-brand-900">Importer des Élèves (.xlsx / .csv)</h2>
           <form onSubmit={handleImport} className="grid gap-3 sm:grid-cols-2">
             <select className="input" value={importClassId} onChange={(e) => setImportClassId(e.target.value)} required>
               <option value="">Classe cible</option>
@@ -320,7 +320,7 @@ export default function SchoolStudentsPage() {
             />
             <div className="sm:col-span-2">
               <button type="submit" className="btn-primary" disabled={importing}>
-                {importing ? 'Import en cours...' : 'Importer les eleves'}
+                {importing ? 'Import en cours...' : 'Importer les Élèves'}
               </button>
             </div>
           </form>
@@ -329,7 +329,7 @@ export default function SchoolStudentsPage() {
 
       <section className="card">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold text-brand-900">Liste des eleves ({filteredStudents.length})</h2>
+          <h2 className="text-lg font-semibold text-brand-900">Liste des Élèves ({filteredStudents.length})</h2>
           <button
             type="button"
             className="btn-secondary !px-3 !py-1"
@@ -339,7 +339,7 @@ export default function SchoolStudentsPage() {
           </button>
         </div>
         {filteredStudents.length === 0 ? (
-          <p className="text-sm text-brand-700">Aucun eleve trouve.</p>
+          <p className="text-sm text-brand-700">Aucun élève trouvé.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -435,7 +435,7 @@ export default function SchoolStudentsPage() {
                           ) : (
                             <>
                               <button type="button" className="btn-secondary !px-3 !py-1" onClick={() => startEditStudent(student)}>
-                                Modifier
+                                modifier
                               </button>
                               <button type="button" className="btn-secondary !px-3 !py-1" onClick={() => deleteStudent(student.id)}>
                                 Supprimer
@@ -479,7 +479,7 @@ export default function SchoolStudentsPage() {
       <section className="card">
         <h2 className="mb-4 text-lg font-semibold text-brand-900">Historique des imports</h2>
         {importHistory.length === 0 ? (
-          <p className="text-sm text-brand-700">Aucun import enregistre.</p>
+          <p className="text-sm text-brand-700">Aucun import Enregistré.</p>
         ) : (
           <div className="space-y-2">
             {importHistory.map((item) => {
@@ -487,7 +487,7 @@ export default function SchoolStudentsPage() {
               return (
                 <div key={item.id} className="rounded border border-brand-100 px-3 py-2">
                   <p className="text-sm text-brand-900">
-                    {new Date(item.createdAt).toLocaleString('fr-FR')} - {createdCount} eleve(s) ajoute(s)
+                    {new Date(item.createdAt).toLocaleString('fr-FR')} - {createdCount} Élève(s) ajouté(s)
                   </p>
                 </div>
               );

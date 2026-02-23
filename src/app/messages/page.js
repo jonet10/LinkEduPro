@@ -201,7 +201,7 @@ export default function MessagesPage() {
       setReplyText('');
       await loadConversationById(token, selectedConversation.id);
     } catch (e) {
-      setError(e.message || 'Erreur envoi reponse.');
+      setError(e.message || 'Erreur envoi Réponse.');
     } finally {
       setSendingPrivate(false);
     }
@@ -312,7 +312,7 @@ export default function MessagesPage() {
               required
             />
             <button type="submit" className="btn-primary w-full" disabled={sendingPrivate || !recipientId}>
-              {sendingPrivate ? 'Envoi...' : 'Envoyer'}
+              {sendingPrivate ? 'Envoi...' : 'envoyér'}
             </button>
           </form>
         </article>
@@ -421,7 +421,7 @@ export default function MessagesPage() {
               required
             />
             <button type="submit" className="btn-primary" disabled={sendingGlobal}>
-              {sendingGlobal ? 'Envoi...' : 'Envoyer annonce'}
+              {sendingGlobal ? 'Envoi...' : 'envoyér annonce'}
             </button>
           </form>
         ) : null}

@@ -273,7 +273,7 @@ export default function FocusMusicPlayer() {
 
                 {canManageTracks ? (
                   <div className="mt-2 flex gap-2">
-                    <button type="button" className="btn-secondary" onClick={() => startEditTrack(track)}>Modifier</button>
+                    <button type="button" className="btn-secondary" onClick={() => startEditTrack(track)}>modifier</button>
                     <button type="button" className="btn-secondary" onClick={() => onDeleteTrack(track.id)}>Supprimer</button>
                   </div>
                 ) : null}

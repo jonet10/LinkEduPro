@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
@@ -110,7 +110,7 @@ export default function SubjectsPage() {
           <p className="mt-2 text-sm text-brand-700">
             Accès rapide aux contenus structurés pour la classe NSIV.
           </p>
-          <p className="mt-1 text-sm font-semibold text-brand-800">Filiere active: {nsivTrack}</p>
+          <p className="mt-1 text-sm font-semibold text-brand-800">Filière active : {nsivTrack}</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="font-semibold text-brand-900">Espace NSIV</p>
@@ -148,7 +148,7 @@ export default function SubjectsPage() {
         </p>
         {isNsivSectionVisible ? (
           <p className="mt-1 text-xs font-semibold text-brand-700">
-            Affichage priorise pour ta filiere ({nsivTrack}).
+            Affichage priorise pour ta Filière ({nsivTrack}).
           </p>
         ) : null}
         <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">

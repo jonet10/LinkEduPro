@@ -76,7 +76,7 @@ export default function SchoolManagementSchoolsPage() {
         const data = await apiClient('/school-management/schools', { token });
         setSchools(data.schools || []);
       } catch (e) {
-        setError(e.message || 'Impossible de charger les ecoles.');
+        setError(e.message || 'Impossible de charger les Écoles.');
       } finally {
         setLoading(false);
       }
@@ -112,12 +112,12 @@ export default function SchoolManagementSchoolsPage() {
         body: JSON.stringify(payload)
       });
 
-      setSuccess('Ecole creee avec succes.');
+      setSuccess('École créée avec succès.');
       setCredentials(data.schoolAdmin || null);
       setForm(initialForm);
       await reloadSchools();
     } catch (e) {
-      setError(e.message || 'Erreur pendant la creation de l ecole.');
+      setError(e.message || 'Erreur pendant la création de l'école.');
     } finally {
       setCreating(false);
     }
@@ -156,10 +156,10 @@ export default function SchoolManagementSchoolsPage() {
         })
       });
       setEditingSchoolId(null);
-      setSuccess('Informations de l ecole mises a jour.');
+      setSuccess('Informations de l'école mises à jour.');
       await reloadSchools();
     } catch (e) {
-      setError(e.message || 'Impossible de modifier cette ecole.');
+      setError(e.message || 'Impossible de modifier cette École.');
     } finally {
       setActingSchoolId(null);
     }
@@ -168,8 +168,8 @@ export default function SchoolManagementSchoolsPage() {
   async function toggleSchoolStatus(school) {
     const willSuspend = Boolean(school.isActive);
     const confirmMsg = willSuspend
-      ? 'Suspendre cette ecole pour paiement inactif ?'
-      : 'Reactiver cette ecole ?';
+      ? 'Suspendre cette École pour paiement inactif ?'
+      : 'Réactiver cette École ?';
     const confirmed = window.confirm(confirmMsg);
     if (!confirmed) return;
 
@@ -191,17 +191,17 @@ export default function SchoolManagementSchoolsPage() {
           reason: reason || null
         })
       });
-      setSuccess(data.message || (willSuspend ? 'Ecole suspendue.' : 'Ecole reactivee.'));
+      setSuccess(data.message || (willSuspend ? 'École suspendue.' : 'École réactivée.'));
       await reloadSchools();
     } catch (e) {
-      setError(e.message || 'Impossible de changer le statut de l ecole.');
+      setError(e.message || 'Impossible de changer le statut de l'école.');
     } finally {
       setActingSchoolId(null);
     }
   }
 
   async function resetAdminPassword(school) {
-    const confirmed = window.confirm(`Reinitialiser le mot de passe de l admin pour ${school.name} ?`);
+    const confirmed = window.confirm(`Reinitialiser le mot de passe de l'admin pour ${school.name} ?`);
     if (!confirmed) return;
 
     setActingSchoolId(school.id);
@@ -233,7 +233,7 @@ export default function SchoolManagementSchoolsPage() {
       <section className="card flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm text-brand-700">Super Admin</p>
-          <h1 className="text-2xl font-bold text-brand-900">Gestion des ecoles</h1>
+          <h1 className="text-2xl font-bold text-brand-900">Gestion des Écoles</h1>
           <p className="text-sm text-brand-700">Connecte: {admin?.email}</p>
         </div>
         <button type="button" className="btn-secondary" onClick={() => router.push('/school-management/dashboard')}>
@@ -246,45 +246,45 @@ export default function SchoolManagementSchoolsPage() {
 
       {credentials ? (
         <section className="card space-y-1">
-          <h2 className="text-lg font-semibold text-brand-900">Identifiants admin ecole (creation / reinitialisation)</h2>
+          <h2 className="text-lg font-semibold text-brand-900">Identifiants admin École (création / reinitialisation)</h2>
           <p className="text-sm text-brand-700">Email: <span className="font-semibold text-brand-900">{credentials.email}</span></p>
           <p className="text-sm text-brand-700">Mot de passe temporaire: <span className="font-semibold text-brand-900">{credentials.temporaryPassword}</span></p>
-          <p className="text-xs text-brand-700">Conserve ces informations. L admin de l ecole devra changer son mot de passe a la premiere connexion.</p>
+          <p className="text-xs text-brand-700">Conserve ces informations. l'admin de l'école devra changer son mot de passe a la première connexion.</p>
         </section>
       ) : null}
 
       <section className="card">
-        <h2 className="mb-4 text-xl font-semibold text-brand-900">Ajouter une ecole</h2>
+        <h2 className="mb-4 text-xl font-semibold text-brand-900">Ajouter une École</h2>
         <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-2">
-          <input className="input" placeholder="Nom de l ecole" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} required />
+          <input className="input" placeholder="Nom de l'école" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} required />
           <select className="input" value={form.type} onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))} required>
             <option value="PRIVATE">Privee</option>
             <option value="PUBLIC">Publique</option>
             <option value="OTHER">Autre</option>
           </select>
-          <input className="input" placeholder="Telephone ecole" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} required />
-          <input className="input" type="email" placeholder="Email ecole" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} required />
+          <input className="input" placeholder="Téléphone École" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} required />
+          <input className="input" type="email" placeholder="Email'école" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} required />
           <input className="input sm:col-span-2" placeholder="Adresse" value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} required />
-          <input className="input" placeholder="Departement" value={form.department} onChange={(e) => setForm((p) => ({ ...p, department: e.target.value }))} required />
+          <input className="input" placeholder="département" value={form.department} onChange={(e) => setForm((p) => ({ ...p, department: e.target.value }))} required />
           <input className="input" placeholder="Commune" value={form.commune} onChange={(e) => setForm((p) => ({ ...p, commune: e.target.value }))} required />
           <input className="input" placeholder="Ville" value={form.city} onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))} required />
           <input className="input" placeholder="Pays" value={form.country} onChange={(e) => setForm((p) => ({ ...p, country: e.target.value }))} required />
           <input className="input sm:col-span-2" placeholder="Logo URL (optionnel)" value={form.logo} onChange={(e) => setForm((p) => ({ ...p, logo: e.target.value }))} />
-          <input className="input" placeholder="Prenom admin ecole" value={form.adminFirstName} onChange={(e) => setForm((p) => ({ ...p, adminFirstName: e.target.value }))} required />
-          <input className="input" placeholder="Nom admin ecole" value={form.adminLastName} onChange={(e) => setForm((p) => ({ ...p, adminLastName: e.target.value }))} required />
-          <input className="input sm:col-span-2" placeholder="Telephone admin (optionnel)" value={form.adminPhone} onChange={(e) => setForm((p) => ({ ...p, adminPhone: e.target.value }))} />
+          <input className="input" placeholder="Prénom admin École" value={form.adminFirstName} onChange={(e) => setForm((p) => ({ ...p, adminFirstName: e.target.value }))} required />
+          <input className="input" placeholder="Nom admin École" value={form.adminLastName} onChange={(e) => setForm((p) => ({ ...p, adminLastName: e.target.value }))} required />
+          <input className="input sm:col-span-2" placeholder="Téléphone admin (optionnel)" value={form.adminPhone} onChange={(e) => setForm((p) => ({ ...p, adminPhone: e.target.value }))} />
           <div className="sm:col-span-2">
             <button type="submit" className="btn-primary" disabled={creating}>
-              {creating ? 'Creation...' : 'Ajouter l ecole'}
+              {creating ? 'création...' : 'Ajouter l'école'}
             </button>
           </div>
         </form>
       </section>
 
       <section className="card">
-        <h2 className="mb-4 text-xl font-semibold text-brand-900">Ecoles existantes ({schools.length})</h2>
+        <h2 className="mb-4 text-xl font-semibold text-brand-900">Écoles existantes ({schools.length})</h2>
         {schools.length === 0 ? (
-          <p className="text-sm text-brand-700">Aucune ecole pour le moment.</p>
+          <p className="text-sm text-brand-700">Aucune École pour le moment.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -292,15 +292,15 @@ export default function SchoolManagementSchoolsPage() {
                 <tr className="border-b border-brand-200">
                   <th className="py-2 text-left">Nom</th>
                   <th className="py-2 text-left">Type</th>
-                  <th className="py-2 text-left">Email admin ecole</th>
+                  <th className="py-2 text-left">Email'admin École</th>
                   <th className="py-2 text-left">Email</th>
-                  <th className="py-2 text-left">Departement</th>
+                  <th className="py-2 text-left">département</th>
                   <th className="py-2 text-left">Commune</th>
                   <th className="py-2 text-left">Ville</th>
-                  <th className="py-2 text-left">Telephone</th>
+                  <th className="py-2 text-left">Téléphone</th>
                   <th className="py-2 text-left">Dernier paiement</th>
                   <th className="py-2 text-left">Statut</th>
-                  <th className="py-2 text-left">Eleves</th>
+                  <th className="py-2 text-left">Élèves</th>
                   <th className="py-2 text-left">Classes</th>
                   <th className="py-2 text-left">Actions</th>
                 </tr>
@@ -429,7 +429,7 @@ export default function SchoolManagementSchoolsPage() {
                               className="btn-secondary !px-3 !py-1"
                               onClick={() => startEditSchool(school)}
                             >
-                              Modifier
+                              modifier
                             </button>
                             <button
                               type="button"
@@ -437,7 +437,7 @@ export default function SchoolManagementSchoolsPage() {
                               disabled={actingSchoolId === school.id}
                               onClick={() => toggleSchoolStatus(school)}
                             >
-                              {school.isActive ? 'Suspendre (paiement)' : 'Reactiver'}
+                              {school.isActive ? 'Suspendre (paiement)' : 'Réactiver'}
                             </button>
                             <button
                               type="button"

@@ -49,7 +49,7 @@ export default function NsivPage() {
         <p className="mt-2 text-sm text-brand-700">
           Rubriques organisées pour préparer le bac: cours structurés, exercices probables et progression hebdomadaire.
         </p>
-        <p className="mt-2 text-sm font-semibold text-brand-800">Filiere selectionnee: {nsivTrack}</p>
+        <p className="mt-2 text-sm font-semibold text-brand-800">Filière sélectionnée: {nsivTrack}</p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -84,7 +84,7 @@ export default function NsivPage() {
       </section>
 
       <section className="card">
-        <h2 className="text-xl font-semibold text-brand-900">Recommandations selon ta filiere</h2>
+        <h2 className="text-xl font-semibold text-brand-900">Recommandations selon ta Filière</h2>
         <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-brand-700">
           {nsivTrack === 'SVT' ? (
             <>
