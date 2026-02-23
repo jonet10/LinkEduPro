@@ -24,6 +24,7 @@ export default function RattrapagePage() {
   const [teachers, setTeachers] = useState([]);
   const [teacherStats, setTeacherStats] = useState(null);
   const [studentStats, setStudentStats] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
@@ -235,11 +236,29 @@ export default function RattrapagePage() {
   }
 
   async function onPay(sessionId, price) {
-    const params = new URLSearchParams({
-      sessionId: String(sessionId),
-      amount: String(Number(price || 0))
-    });
-    router.push(`/rattrapage/pay?${params.toString()}`);
+    setError('');
+    setInfo('');
+    try {
+      if ((paymentMethod === 'MONCASH' || paymentMethod === 'NATCASH') && typeof window !== 'undefined') {
+        const accepted = window.confirm(
+          `Mode simulation ${paymentMethod}: aucun débit réel ne sera fait. Continuer ?`
+        );
+        if (!accepted) return;
+      }
+
+      const data = await apiClient(`/catchup/${sessionId}/pay`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({
+          paymentMethod,
+          amount: Number(price || 0)
+        })
+      });
+      setInfo(data.message || 'Paiement validé.');
+      await refreshSessions();
+    } catch (e) {
+      setError(e.message || 'Impossible de valider le paiement.');
+    }
   }
 
   function formatHTG(value) {
@@ -345,6 +364,23 @@ export default function RattrapagePage() {
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {info ? <p className="text-sm text-green-600">{info}</p> : null}
       {isStudent ? (
+        <div className="card flex flex-wrap items-center gap-2">
+          <p className="text-sm text-brand-700">Méthode de paiement :</p>
+          <select className="input w-full max-w-xs" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+            <option value="CASH">Cash</option>
+            <option value="CARD">Carte</option>
+            <option value="BANK_TRANSFER">Virement</option>
+            <option value="MONCASH">MonCash (simulation)</option>
+            <option value="NATCASH">NatCash (simulation)</option>
+          </select>
+          {(paymentMethod === 'MONCASH' || paymentMethod === 'NATCASH') ? (
+            <p className="w-full rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              Mode test actif: {paymentMethod} est simulé pour le moment (pas d’API externe, pas de débit réel).
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+      {isStudent ? (
         <div className="card">
           <h2 className="text-lg font-semibold text-brand-900">Historique des sessions suivies</h2>
           <div className="mt-2 space-y-2">
@@ -394,7 +430,7 @@ export default function RattrapagePage() {
                   <button className="btn-secondary" onClick={() => onEnroll(session.id)}>Réserver ma place</button>
                 ) : null}
                 {session.enrollment && session.enrollment.paymentStatus !== 'PAID' && !session.isFree ? (
-                  <button className="btn-primary" onClick={() => onPay(session.id, session.price)}>Payer en HTG (MonCash/NatCash)</button>
+                  <button className="btn-primary" onClick={() => onPay(session.id, session.price)}>Payer ({formatHTG(session.price)})</button>
                 ) : null}
               </div>
             ) : null}
