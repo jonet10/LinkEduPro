@@ -578,14 +578,14 @@ export default function HeaderNav() {
         {isAuthed ? (
           <Link
             href="/messages"
-            className="relative hidden rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
+            className="hidden rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
             aria-label="Messagerie"
             title="Messagerie"
           >
             <span className="text-base leading-none" aria-hidden="true">💬</span>
             <span>Message</span>
             {unreadMessagesCount > 0 ? (
-              <span className="absolute -right-2 -top-2 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                 {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
               </span>
             ) : null}
