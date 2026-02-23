@@ -26,6 +26,7 @@ export default function BlogPage() {
   const [tags, setTags] = useState([]);
   const [search, setSearch] = useState('');
   const [postTypeFilter, setPostTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [error, setError] = useState('');
@@ -48,12 +49,6 @@ export default function BlogPage() {
   const [commentInputs, setCommentInputs] = useState({});
   const [commentImageUrls, setCommentImageUrls] = useState({});
   const [uploadingCommentImage, setUploadingCommentImage] = useState({});
-  const [reviewForms, setReviewForms] = useState({});
-  const [reviewingComment, setReviewingComment] = useState({});
-  const [reviewSummary, setReviewSummary] = useState({
-    stats: { pending: 0, corrected: 0, pinnedBest: 0 },
-    pendingItems: []
-  });
   const createGalleryInputRef = useRef(null);
   const createCameraInputRef = useRef(null);
   const editGalleryInputRef = useRef(null);
@@ -62,7 +57,7 @@ export default function BlogPage() {
   const token = useMemo(() => getToken(), []);
   const student = useMemo(() => getStudent(), []);
   const canCreatePost = Boolean(token);
-  const canSeeReviewSummary = Boolean(student && ['TEACHER', 'ADMIN'].includes(student.role));
+  const canModeratePosts = Boolean(student && ['TEACHER', 'ADMIN'].includes(student.role));
   const selectedPost = useMemo(
     () => items.find((post) => post.id === expandedPostId) || null,
     [items, expandedPostId]
@@ -95,26 +90,17 @@ export default function BlogPage() {
         search
       });
       if (postTypeFilter) params.set('postType', postTypeFilter);
+      if (canModeratePosts && statusFilter) params.set('status', statusFilter);
       const requests = [
         apiClient(`/community/blog/posts?${params.toString()}`, { token }),
         apiClient('/community/blog/categories', { token }),
         apiClient('/community/blog/tags', { token })
       ];
-      if (canSeeReviewSummary) {
-        requests.push(apiClient('/community/blog/review-summary', { token }));
-      }
-
-      const [postRes, catRes, tagRes, summaryRes] = await Promise.all(requests);
+      const [postRes, catRes, tagRes] = await Promise.all(requests);
       setItems(postRes.items || []);
       setPagination(postRes.pagination || { page: 1, totalPages: 1, total: 0 });
       setCategories(catRes.categories || []);
       setTags(tagRes.tags || []);
-      if (canSeeReviewSummary && summaryRes) {
-        setReviewSummary({
-          stats: summaryRes.stats || { pending: 0, corrected: 0, pinnedBest: 0 },
-          pendingItems: summaryRes.pendingItems || []
-        });
-      }
     } catch (e) {
       setError(e.message);
     }
@@ -281,23 +267,24 @@ export default function BlogPage() {
     try {
       const data = await apiClient(`/community/blog/posts/${postId}/comments`, { token });
       setCommentsByPost((prev) => ({ ...prev, [postId]: data.comments || [] }));
-      setReviewForms((prev) => {
-        const next = { ...prev };
-        (data.comments || []).forEach((comment) => {
-          if (!next[comment.id]) {
-            next[comment.id] = {
-              correctionStatus: comment.correctionStatus || 'PENDING',
-              score: comment.score ?? '',
-              maxScore: comment.maxScore ?? '',
-              teacherFeedback: comment.teacherFeedback || '',
-              pinBest: Boolean(comment.isPinnedBest)
-            };
-          }
-        });
-        return next;
-      });
     } catch (e) {
       setActionError(e.message || 'Erreur chargement commentaires.');
+    }
+  }
+
+  async function approvePostByModerator(postId) {
+    if (!token) return;
+    setActionError('');
+    setActionInfo('');
+    try {
+      await apiClient(`/community/blog/posts/${postId}/approve`, {
+        method: 'PATCH',
+        token
+      });
+      setActionInfo('Post validé avec succès.');
+      await load();
+    } catch (e) {
+      setActionError(e.message || 'Erreur pendant la validation du post.');
     }
   }
 
@@ -368,55 +355,6 @@ export default function BlogPage() {
     }
   }
 
-  function updateReviewForm(commentId, key, value) {
-    setReviewForms((prev) => ({
-      ...prev,
-      [commentId]: {
-        correctionStatus: 'PENDING',
-        score: '',
-        maxScore: '',
-        teacherFeedback: '',
-        pinBest: false,
-        ...(prev[commentId] || {}),
-        [key]: value
-      }
-    }));
-  }
-
-  async function reviewCommentByTeacher(postId, commentId) {
-    if (!token) return;
-    const draft = reviewForms[commentId] || {};
-    try {
-      setReviewingComment((prev) => ({ ...prev, [commentId]: true }));
-      await apiClient(`/community/blog/comments/${commentId}/review`, {
-        method: 'PATCH',
-        token,
-        body: JSON.stringify({
-          correctionStatus: draft.correctionStatus || 'PENDING',
-          score: draft.score === '' ? null : Number(draft.score),
-          maxScore: draft.maxScore === '' ? null : Number(draft.maxScore),
-          teacherFeedback: draft.teacherFeedback || null,
-          pinBest: Boolean(draft.pinBest)
-        })
-      });
-      await Promise.all([loadComments(postId), load()]);
-      setActionInfo('Correction enregistrée.');
-      setActionError('');
-    } catch (e) {
-      setActionError(e.message || 'Erreur correction commentaire.');
-    } finally {
-      setReviewingComment((prev) => ({ ...prev, [commentId]: false }));
-    }
-  }
-
-  async function openPendingForReview(item) {
-    if (!item?.postId) return;
-    setExpandedPostId(item.postId);
-    setOpenComments((prev) => ({ ...prev, [item.postId]: true }));
-    await loadComments(item.postId);
-    setTimeout(() => scrollToPostTop(item.postId, true), 0);
-  }
-
   async function sharePost(post) {
     const link = `${window.location.origin}/blog/post/${post.id}`;
     const payload = {
@@ -458,7 +396,7 @@ export default function BlogPage() {
 
   function renderPostCard(post, options = {}) {
     const canEdit = student && (student.role === 'ADMIN' || student.id === post.authorId);
-    const canReviewExerciseAnswers = student && ['TEACHER', 'ADMIN'].includes(student.role) && post.postType === 'EXERCISE';
+    const canApprovePending = canModeratePosts && !post.isApproved;
     const isExpanded = expandedPostId === post.id;
     const isPriority = Boolean(options.isPriority);
 
@@ -480,7 +418,19 @@ export default function BlogPage() {
           <span className="rounded border border-brand-100 px-2 py-1">
             {post.audienceScope === 'GLOBAL' ? 'Global' : post.audienceScope === 'INTER_SCHOOL' ? 'Inter-école' : 'École'}
           </span>
+          {post.isApproved ? (
+            <span className="rounded border border-green-300 bg-green-50 px-2 py-1 text-green-700">Validé</span>
+          ) : (
+            <span className="rounded border border-amber-300 bg-amber-50 px-2 py-1 text-amber-700">En attente</span>
+          )}
         </div>
+        {canApprovePending ? (
+          <div>
+            <button className="btn-primary !py-1.5 !text-xs" onClick={() => approvePostByModerator(post.id)}>
+              Valider ce post
+            </button>
+          </div>
+        ) : null}
 
         {post.imageUrl ? (
           <img
@@ -507,6 +457,9 @@ export default function BlogPage() {
                 {openComments[post.id] ? 'Masquer commentaires' : 'Voir commentaires'}
               </button>
               <button className="btn-secondary" onClick={() => sharePost(post)}>Partager</button>
+              {canApprovePending ? (
+                <button className="btn-primary" onClick={() => approvePostByModerator(post.id)}>Valider ce post</button>
+              ) : null}
             </div>
 
             {openComments[post.id] ? (
@@ -514,19 +467,6 @@ export default function BlogPage() {
                 {(commentsByPost[post.id] || []).map((comment) => (
                   <div key={comment.id} className="rounded border border-brand-100 p-2 text-sm">
                     <p className="font-semibold">{comment.author?.firstName} {comment.author?.lastName}</p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
-                      <span className={`rounded border px-2 py-0.5 ${comment.correctionStatus === 'CORRECTED' ? 'border-green-300 bg-green-50 text-green-700' : 'border-amber-300 bg-amber-50 text-amber-700'}`}>
-                        {comment.correctionStatus === 'CORRECTED' ? 'Corrigé' : 'Non corrigé'}
-                      </span>
-                      {comment.isPinnedBest ? (
-                        <span className="rounded border border-brand-300 bg-brand-50 px-2 py-0.5 text-brand-700">Meilleure réponse</span>
-                      ) : null}
-                      {(comment.score !== null && comment.score !== undefined && comment.maxScore) ? (
-                        <span className="rounded border border-brand-100 px-2 py-0.5 text-brand-700">
-                          Barème: {comment.score}/{comment.maxScore}
-                        </span>
-                      ) : null}
-                    </div>
                     <p className="mt-1 text-justify">{comment.content}</p>
                     {comment.imageUrl ? (
                       <img
@@ -547,72 +487,6 @@ export default function BlogPage() {
                         </button>
                       ))}
                     </div>
-                    {comment.teacherFeedback ? (
-                      <p className="mt-2 rounded border border-brand-100 bg-brand-50 px-2 py-1 text-xs text-brand-800">
-                        Feedback professeur: {comment.teacherFeedback}
-                      </p>
-                    ) : null}
-                    {comment.corrector ? (
-                      <p className="mt-1 text-[11px] text-brand-700">
-                        Corrigé par {comment.corrector.firstName} {comment.corrector.lastName}
-                        {comment.correctedAt ? ` le ${new Date(comment.correctedAt).toLocaleString()}` : ''}
-                      </p>
-                    ) : null}
-                    {canReviewExerciseAnswers ? (
-                      <div className="mt-3 rounded border border-brand-100 p-2">
-                        <p className="text-xs font-semibold text-brand-900">Correction guidée</p>
-                        <div className="mt-2 grid gap-2 md:grid-cols-2">
-                          <select
-                            className="input"
-                            value={reviewForms[comment.id]?.correctionStatus || 'PENDING'}
-                            onChange={(e) => updateReviewForm(comment.id, 'correctionStatus', e.target.value)}
-                          >
-                            <option value="PENDING">Non corrigé</option>
-                            <option value="CORRECTED">Corrigé</option>
-                          </select>
-                          <label className="inline-flex items-center gap-2 text-xs text-brand-700">
-                            <input
-                              type="checkbox"
-                              checked={Boolean(reviewForms[comment.id]?.pinBest)}
-                              onChange={(e) => updateReviewForm(comment.id, 'pinBest', e.target.checked)}
-                            />
-                            Épingler meilleure réponse
-                          </label>
-                          <input
-                            className="input"
-                            type="number"
-                            min={0}
-                            placeholder="Score"
-                            value={reviewForms[comment.id]?.score ?? ''}
-                            onChange={(e) => updateReviewForm(comment.id, 'score', e.target.value)}
-                          />
-                          <input
-                            className="input"
-                            type="number"
-                            min={1}
-                            placeholder="Barème max"
-                            value={reviewForms[comment.id]?.maxScore ?? ''}
-                            onChange={(e) => updateReviewForm(comment.id, 'maxScore', e.target.value)}
-                          />
-                        </div>
-                        <textarea
-                          className="input mt-2 min-h-[70px]"
-                          placeholder="Feedback professeur"
-                          value={reviewForms[comment.id]?.teacherFeedback || ''}
-                          onChange={(e) => updateReviewForm(comment.id, 'teacherFeedback', e.target.value)}
-                        />
-                        <div className="mt-2">
-                          <button
-                            type="button"
-                            className="btn-primary"
-                            disabled={Boolean(reviewingComment[comment.id])}
-                            onClick={() => reviewCommentByTeacher(post.id, comment.id)}
-                          >
-                            {reviewingComment[comment.id] ? 'Enregistrement...' : 'Enregistrer correction'}
-                          </button>
-                        </div>
-                      </div>
-                    ) : null}
                   </div>
                 ))}
                 {(commentsByPost[post.id] || []).length === 0 ? <p className="text-sm text-brand-700">Aucun commentaire.</p> : null}
@@ -756,57 +630,26 @@ export default function BlogPage() {
 
       <section className="card space-y-4">
         <h1 className="text-2xl font-semibold">Blog Global LinkEduPro</h1>
-        <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]">
+        <div className="grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
           <input className="input" placeholder="Recherche posts" value={search} onChange={(e) => setSearch(e.target.value)} />
           <select className="input" value={postTypeFilter} onChange={(e) => setPostTypeFilter(e.target.value)}>
             <option value="">Tous contenus</option>
             <option value="EXERCISE">Exercices</option>
             <option value="ARTICLE">Articles</option>
           </select>
+          {canModeratePosts ? (
+            <select className="input" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="">Tous statuts</option>
+              <option value="PENDING">En attente de validation</option>
+              <option value="APPROVED">Validés</option>
+            </select>
+          ) : null}
           <button className="btn-primary" onClick={() => { setPage(1); load(); }}>Rechercher</button>
         </div>
         {error ? <p className="text-red-600">{error}</p> : null}
         {actionError ? <p className="text-red-600">{actionError}</p> : null}
         {actionInfo ? <p className="text-green-600">{actionInfo}</p> : null}
       </section>
-
-      {canSeeReviewSummary ? (
-        <section className="card space-y-3">
-          <h2 className="text-xl font-semibold">Copies à corriger</h2>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <article className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-              <p className="text-xs uppercase tracking-wide text-amber-800">En attente</p>
-              <p className="mt-1 text-2xl font-bold text-amber-900">{reviewSummary.stats.pending}</p>
-            </article>
-            <article className="rounded-lg border border-green-200 bg-green-50 p-3">
-              <p className="text-xs uppercase tracking-wide text-green-800">Corrigées</p>
-              <p className="mt-1 text-2xl font-bold text-green-900">{reviewSummary.stats.corrected}</p>
-            </article>
-            <article className="rounded-lg border border-brand-200 bg-brand-50 p-3">
-              <p className="text-xs uppercase tracking-wide text-brand-800">Meilleures épinglées</p>
-              <p className="mt-1 text-2xl font-bold text-brand-900">{reviewSummary.stats.pinnedBest}</p>
-            </article>
-          </div>
-          <div className="space-y-2">
-            {reviewSummary.pendingItems.length === 0 ? (
-              <p className="text-sm text-brand-700">Aucune copie en attente.</p>
-            ) : (
-              reviewSummary.pendingItems.map((item) => (
-                <div key={item.commentId} className="flex flex-wrap items-center justify-between gap-2 rounded border border-brand-100 p-2 text-sm">
-                  <div>
-                    <p className="font-semibold text-brand-900">{item.studentName}</p>
-                    <p className="text-brand-700">{item.postTitle}</p>
-                    <p className="text-xs text-brand-700">{new Date(item.createdAt).toLocaleString()}</p>
-                  </div>
-                  <button type="button" className="btn-primary" onClick={() => openPendingForReview(item)}>
-                    Corriger
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-      ) : null}
 
       {canCreatePost ? (
         <section className="card space-y-4">

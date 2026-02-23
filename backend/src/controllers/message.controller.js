@@ -46,9 +46,25 @@ function mapConversation(conversation, unreadCount = 0) {
   };
 }
 
+function resolveAllowedRecipientRoles(senderRole, roleFilter) {
+  const normalizedFilter = String(roleFilter || '').trim().toUpperCase();
+
+  // Restriction demandee: un eleve ne peut pas contacter un autre eleve.
+  if (senderRole === 'STUDENT') {
+    const allowed = ['TEACHER', 'ADMIN'];
+    if (normalizedFilter && allowed.includes(normalizedFilter)) return [normalizedFilter];
+    return allowed;
+  }
+
+  const allowedForStaff = ['STUDENT', 'TEACHER', 'ADMIN'];
+  if (normalizedFilter && allowedForStaff.includes(normalizedFilter)) return [normalizedFilter];
+  return allowedForStaff;
+}
+
 async function sendPrivateMessage(req, res, next) {
   try {
     const senderId = req.user.id;
+    const senderRole = req.user.role;
     const recipientId = Number(req.body.recipientId);
     const content = req.body.content.trim();
 
@@ -58,11 +74,15 @@ async function sendPrivateMessage(req, res, next) {
 
     const recipient = await prisma.student.findUnique({
       where: { id: recipientId },
-      select: { id: true }
+      select: { id: true, role: true }
     });
 
     if (!recipient) {
       return res.status(404).json({ message: 'Destinataire introuvable.' });
+    }
+
+    if (senderRole === 'STUDENT' && recipient.role === 'STUDENT') {
+      return res.status(403).json({ message: 'Les élèves ne peuvent pas contacter directement d’autres élèves.' });
     }
 
     const privateKey = buildPrivateConversationKey(senderId, recipientId);
@@ -138,7 +158,9 @@ async function sendPrivateMessage(req, res, next) {
 async function listMessageRecipients(req, res, next) {
   try {
     const userId = req.user.id;
+    const userRole = req.user.role;
     const q = String(req.query.q || '').trim();
+    const roleFilter = req.query.role;
     const requestedLimit = Number.parseInt(String(req.query.limit || ''), 10);
     const limit = Number.isInteger(requestedLimit)
       ? Math.min(Math.max(requestedLimit, 5), 25)
@@ -160,6 +182,7 @@ async function listMessageRecipients(req, res, next) {
     const recipients = await prisma.student.findMany({
       where: {
         id: { not: userId },
+        role: { in: resolveAllowedRecipientRoles(userRole, roleFilter) },
         AND: whereByTerm
       },
       select: {
