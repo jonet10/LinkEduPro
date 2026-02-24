@@ -244,6 +244,14 @@ export default function HomePage() {
       secondaryLabel: 'Voir mes progrès'
     };
   }, [isAdminRole, isTeacherRole, student]);
+  const challengeLeaderHandle = useMemo(
+    () => (Array.isArray(homeChallenge.items) && homeChallenge.items.length ? homeChallenge.items[0].handle : ''),
+    [homeChallenge.items]
+  );
+  const selectedChallengeItem = useMemo(
+    () => (homeChallenge.items || []).find((item) => item.handle === selectedChallengeHandle) || null,
+    [homeChallenge.items, selectedChallengeHandle]
+  );
 
   const managerQuickActions = useMemo(() => {
     if (isAdminRole) {
@@ -481,6 +489,33 @@ export default function HomePage() {
     }
   }
 
+  async function shareChallengeChoice() {
+    if (!selectedChallengeHandle) {
+      setChallengeFeedback('Choisis d’abord une personne à partager.');
+      return;
+    }
+
+    const candidate = selectedChallengeItem;
+    const candidateLabel = candidate?.title || selectedChallengeHandle;
+    const text = `Je soutiens ${candidateLabel} (${selectedChallengeHandle}) sur LinkEduPro !`;
+    const url = typeof window !== 'undefined' ? `${window.location.origin}/` : '';
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Mon choix de la semaine - LinkEduPro',
+          text,
+          url
+        });
+      } else {
+        await navigator.clipboard.writeText(`${text} ${url}`.trim());
+      }
+      setChallengeFeedback('Ton choix est prêt à être partagé.');
+    } catch (_) {
+      setChallengeFeedback('Impossible de partager pour le moment.');
+    }
+  }
+
   function closeCalendarNotice() {
     if (typeof window !== 'undefined') {
       localStorage.setItem(CALENDAR_NOTICE_KEY, '1');
@@ -670,6 +705,9 @@ export default function HomePage() {
                       {getParticipantInitials(item.title)}
                     </div>
                   )}
+                  {item.handle === challengeLeaderHandle ? (
+                    <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">⭐ En tête</span>
+                  ) : null}
                 </div>
                 <p className="text-base font-semibold text-brand-900">{item.title}</p>
                 <p className="mt-1 text-sm text-brand-700">{item.handle} · {item.category}</p>
@@ -928,13 +966,16 @@ export default function HomePage() {
                     {getParticipantInitials(item.title)}
                   </div>
                 )}
+                {item.handle === challengeLeaderHandle ? (
+                  <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">⭐ En tête</span>
+                ) : null}
               </div>
               <p className="text-sm font-semibold text-brand-900">{item.title}</p>
               <p className="mt-1 text-xs text-brand-700">{item.handle}</p>
               <p className="mt-2 text-xs font-semibold text-brand-500">{item.category}</p>
               <p className="mt-1 text-xs text-brand-700">Votes: {item.votes || 0}</p>
               {selectedChallengeHandle === item.handle ? (
-                <p className="mt-1 text-xs font-semibold text-brand-900">Sélectionné</p>
+                <p className="mt-1 text-xs font-semibold text-emerald-700">🏅 Je me reconnais ici</p>
               ) : null}
             </button>
           ))}
@@ -949,6 +990,14 @@ export default function HomePage() {
           />
           {homeChallenge.myVote ? (
             <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={shareChallengeChoice}
+                disabled={challengeSubmitting || challengeDeleting || !selectedChallengeHandle}
+              >
+                📢 Partager mon choix
+              </button>
               <button
                 type="button"
                 className="btn-primary"
@@ -967,14 +1016,24 @@ export default function HomePage() {
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={submitChallengeVote}
-              disabled={challengeSubmitting || challengeDeleting}
-            >
-              {challengeSubmitting ? 'Envoi...' : 'Voter maintenant'}
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={shareChallengeChoice}
+                disabled={challengeSubmitting || challengeDeleting || !selectedChallengeHandle}
+              >
+                📢 Partager mon choix
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={submitChallengeVote}
+                disabled={challengeSubmitting || challengeDeleting}
+              >
+                {challengeSubmitting ? 'Envoi...' : 'Voter maintenant'}
+              </button>
+            </div>
           )}
         </div>
         {homeChallenge.myVote ? (
