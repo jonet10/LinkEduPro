@@ -73,7 +73,8 @@ const updateConfigSchema = Joi.object({
       title: Joi.string().trim().min(2).max(120).required(),
       handle: Joi.string().trim().min(2).max(120).required(),
       category: Joi.string().trim().min(2).max(80).required(),
-      search: Joi.string().trim().min(2).max(180).required()
+      search: Joi.string().trim().min(2).max(180).required(),
+      photoUrl: Joi.string().trim().max(500).allow('', null).optional()
     })
   ).max(12).optional()
 });

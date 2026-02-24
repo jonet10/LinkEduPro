@@ -5,10 +5,10 @@ const fs = require('fs');
 const { touchPresence, getOnlineStats } = require('../services/online-presence.service');
 
 const DEFAULT_TIKTOK_CREATORS = [
-  { title: 'Maths en 60 secondes', handle: '@mathsfacile.ht', category: 'Mathématiques', search: 'maths bac haiti' },
-  { title: 'Chimie visuelle', handle: '@chimie.simple', category: 'Chimie', search: 'chimie exercices' },
-  { title: 'Histoire-Géo active', handle: '@histgeo.smart', category: 'Histoire-Géo', search: 'histoire geographie revision' },
-  { title: 'Philo en pratique', handle: '@philo.express', category: 'Philosophie', search: 'philosophie terminale' }
+  { title: 'Maths en 60 secondes', handle: '@mathsfacile.ht', category: 'Mathématiques', search: 'maths bac haiti', photoUrl: '' },
+  { title: 'Chimie visuelle', handle: '@chimie.simple', category: 'Chimie', search: 'chimie exercices', photoUrl: '' },
+  { title: 'Histoire-Géo active', handle: '@histgeo.smart', category: 'Histoire-Géo', search: 'histoire geographie revision', photoUrl: '' },
+  { title: 'Philo en pratique', handle: '@philo.express', category: 'Philosophie', search: 'philosophie terminale', photoUrl: '' }
 ];
 
 function getLimit(value, fallback = 6) {
@@ -435,7 +435,8 @@ function sanitizeTiktokCreators(raw) {
       title: String(item?.title || '').trim(),
       handle: String(item?.handle || '').trim(),
       category: String(item?.category || '').trim(),
-      search: String(item?.search || '').trim()
+      search: String(item?.search || '').trim(),
+      photoUrl: String(item?.photoUrl || '').trim()
     }))
     .filter((item) => item.title && item.handle && item.category && item.search)
     .slice(0, 12);

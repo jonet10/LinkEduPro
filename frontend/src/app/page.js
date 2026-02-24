@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getToken, getStudent, isNsivStudent } from '@/lib/auth';
+import { resolveMediaUrl } from '@/lib/media';
 import VerifiedTestimonials from '@/components/VerifiedTestimonials';
 
 const CALENDAR_NOTICE_KEY = 'linkedupro_calendar_notice_2025_2026_seen';
@@ -107,6 +108,13 @@ function getWeekCountdownLabel(now = new Date()) {
   const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
   const minutes = totalMinutes % 60;
   return `${days}j ${hours}h ${minutes}m`;
+}
+
+function getParticipantInitials(title) {
+  const words = String(title || '').trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return 'P';
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return `${words[0][0] || ''}${words[1][0] || ''}`.toUpperCase();
 }
 
 function getDailyObjective(student) {
@@ -650,6 +658,19 @@ export default function HomePage() {
                 rel="noreferrer"
                 className={`palette-card palette-${(idx % 4) + 1} rounded-xl border border-brand-100 p-4`}
               >
+                <div className="mb-2 flex items-center gap-2">
+                  {resolveMediaUrl(item.photoUrl) ? (
+                    <img
+                      src={resolveMediaUrl(item.photoUrl)}
+                      alt={item.title}
+                      className="h-10 w-10 rounded-full border border-brand-100 object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-100 bg-white/80 text-xs font-bold text-brand-900">
+                      {getParticipantInitials(item.title)}
+                    </div>
+                  )}
+                </div>
                 <p className="text-base font-semibold text-brand-900">{item.title}</p>
                 <p className="mt-1 text-sm text-brand-700">{item.handle} · {item.category}</p>
                 <p className="mt-2 text-xs font-semibold text-brand-500">Votes: {item.votes || 0}</p>
@@ -895,6 +916,19 @@ export default function HomePage() {
               onClick={() => setSelectedChallengeHandle(item.handle)}
               className={`rounded-xl border border-brand-100 p-4 palette-card palette-${(idx % 4) + 1}`}
             >
+              <div className="mb-2 flex items-center gap-2">
+                {resolveMediaUrl(item.photoUrl) ? (
+                  <img
+                    src={resolveMediaUrl(item.photoUrl)}
+                    alt={item.title}
+                    className="h-10 w-10 rounded-full border border-brand-100 object-cover"
+                  />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-100 bg-white/80 text-xs font-bold text-brand-900">
+                    {getParticipantInitials(item.title)}
+                  </div>
+                )}
+              </div>
               <p className="text-sm font-semibold text-brand-900">{item.title}</p>
               <p className="mt-1 text-xs text-brand-700">{item.handle}</p>
               <p className="mt-2 text-xs font-semibold text-brand-500">{item.category}</p>
