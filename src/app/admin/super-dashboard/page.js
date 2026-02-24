@@ -80,7 +80,7 @@ export default function SuperDashboardPage() {
 
   function addTiktokRow() {
     setTiktokEditors((prev) => (
-      [...prev, { title: '', handle: '', category: '', search: '' }].slice(0, 12)
+      [...prev, { title: '', handle: '', category: '', search: '', photoUrl: '' }].slice(0, 12)
     ));
   }
 
@@ -97,7 +97,8 @@ export default function SuperDashboardPage() {
         title: String(row?.title || '').trim(),
         handle: String(row?.handle || '').trim(),
         category: String(row?.category || '').trim(),
-        search: String(row?.search || '').trim()
+        search: String(row?.search || '').trim(),
+        photoUrl: String(row?.photoUrl || '').trim()
       }))
       .filter((row) => row.title && row.handle && row.category && row.search)
       .slice(0, 12);
@@ -343,7 +344,7 @@ export default function SuperDashboardPage() {
 
         <div className="space-y-3">
           {tiktokEditors.map((row, index) => (
-            <div key={`${index}-${row.handle || 'model'}`} className="grid grid-cols-1 gap-2 rounded-lg border border-brand-100 p-3 md:grid-cols-5">
+            <div key={`${index}-${row.handle || 'model'}`} className="grid grid-cols-1 gap-2 rounded-lg border border-brand-100 p-3 md:grid-cols-6">
               <input
                 className="input"
                 placeholder="Titre"
@@ -367,6 +368,12 @@ export default function SuperDashboardPage() {
                 placeholder="Mots-clés de recherche"
                 value={row.search || ''}
                 onChange={(e) => updateTiktokRow(index, 'search', e.target.value)}
+              />
+              <input
+                className="input"
+                placeholder="Photo URL (optionnel)"
+                value={row.photoUrl || ''}
+                onChange={(e) => updateTiktokRow(index, 'photoUrl', e.target.value)}
               />
               <button
                 type="button"
