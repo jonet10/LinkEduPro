@@ -1,6 +1,7 @@
 const { Prisma } = require('@prisma/client');
 const prisma = require('../config/prisma');
 const { emitRefresh } = require('./realtime');
+const { isMoncashEnabled, buildOrderReference, createMoncashPayment } = require('./moncash.service');
 
 const COMMISSION_RATE_RAW = Number(process.env.REMEDIAL_COMMISSION_RATE ?? '0.1');
 const COMMISSION_RATE = Number.isFinite(COMMISSION_RATE_RAW)
@@ -507,6 +508,57 @@ async function payForSession({ student, sessionId, paymentMethod, amount }) {
   return { ok: true, message: 'Paiement validé. Accès accordé.' };
 }
 
+async function createMoncashCheckout({ student, sessionId, amount }) {
+  if (student.role !== 'STUDENT') {
+    return { ok: false, status: 403, message: 'Paiement réservé aux élèves.' };
+  }
+  if (!isMoncashEnabled()) {
+    return { ok: false, status: 503, message: 'MonCash non configuré sur le serveur.' };
+  }
+
+  const session = await prisma.remedialSession.findUnique({
+    where: { id: sessionId }
+  });
+  if (!session || session.status !== 'SCHEDULED') {
+    return { ok: false, status: 404, message: 'Session indisponible.' };
+  }
+  if (session.isFree) {
+    return { ok: false, status: 400, message: 'Session gratuite: aucun paiement requis.' };
+  }
+
+  const enrollment = await prisma.remedialEnrollment.findUnique({
+    where: { sessionId_studentId: { sessionId, studentId: student.id } }
+  });
+  if (!enrollment) {
+    return { ok: false, status: 404, message: 'Inscription introuvable. Réserve d’abord ta place.' };
+  }
+  if (enrollment.paymentStatus === 'PAID') {
+    return { ok: true, alreadyPaid: true, message: 'Paiement déjà validé.' };
+  }
+
+  const expectedAmount = Number(session.price || 0);
+  const askedAmount = Number(amount ?? expectedAmount);
+  if (!Number.isFinite(askedAmount) || askedAmount < expectedAmount) {
+    return { ok: false, status: 400, message: 'Montant insuffisant.' };
+  }
+
+  const orderId = buildOrderReference({
+    sessionId,
+    studentId: student.id
+  });
+  const payment = await createMoncashPayment({
+    amount: expectedAmount,
+    orderId
+  });
+
+  return {
+    ok: true,
+    provider: 'MONCASH',
+    orderId,
+    redirectUrl: payment.redirectUrl
+  };
+}
+
 async function teacherDashboard(teacherId) {
   const teacher = await prisma.student.findUnique({ where: { id: teacherId }, select: { id: true, role: true } });
   if (!teacher || !['TEACHER', 'ADMIN'].includes(teacher.role)) {
@@ -655,6 +707,7 @@ module.exports = {
   deleteSession,
   enrollStudent,
   payForSession,
+  createMoncashCheckout,
   teacherDashboard,
   studentDashboard
 };

@@ -83,8 +83,17 @@ export default function RattrapagePage() {
     if (typeof window === 'undefined') return;
     const query = new URLSearchParams(window.location.search);
     const sessionParam = Number(query.get('session') || 0);
+    const payment = String(query.get('payment') || '').trim().toLowerCase();
+    const provider = String(query.get('provider') || '').trim().toLowerCase();
     if (sessionParam > 0) {
       setHighlightedSessionId(sessionParam);
+    }
+    if (provider === 'moncash') {
+      if (payment === 'success') {
+        setInfo('Paiement MonCash validé. Accès accordé.');
+      } else if (payment === 'failed') {
+        setError('Paiement MonCash non validé.');
+      }
     }
   }, []);
 
@@ -239,7 +248,7 @@ export default function RattrapagePage() {
     setError('');
     setInfo('');
     try {
-      if ((paymentMethod === 'MONCASH' || paymentMethod === 'NATCASH') && typeof window !== 'undefined') {
+      if (paymentMethod === 'NATCASH' && typeof window !== 'undefined') {
         const accepted = window.confirm(
           `Mode simulation ${paymentMethod}: aucun débit réel ne sera fait. Continuer ?`
         );
@@ -254,6 +263,12 @@ export default function RattrapagePage() {
           amount: Number(price || 0)
         })
       });
+
+      if (paymentMethod === 'MONCASH' && data.redirectUrl && typeof window !== 'undefined') {
+        window.location.assign(data.redirectUrl);
+        return;
+      }
+
       setInfo(data.message || 'Paiement validé.');
       await refreshSessions();
     } catch (e) {
@@ -370,10 +385,15 @@ export default function RattrapagePage() {
             <option value="CASH">Cash</option>
             <option value="CARD">Carte</option>
             <option value="BANK_TRANSFER">Virement</option>
-            <option value="MONCASH">MonCash (simulation)</option>
+            <option value="MONCASH">MonCash</option>
             <option value="NATCASH">NatCash (simulation)</option>
           </select>
-          {(paymentMethod === 'MONCASH' || paymentMethod === 'NATCASH') ? (
+          {paymentMethod === 'MONCASH' ? (
+            <p className="w-full rounded border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-800">
+              En cliquant sur payer, tu seras redirigé vers MonCash pour finaliser la transaction.
+            </p>
+          ) : null}
+          {paymentMethod === 'NATCASH' ? (
             <p className="w-full rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
               Mode test actif: {paymentMethod} est simulé pour le moment (pas d’API externe, pas de débit réel).
             </p>

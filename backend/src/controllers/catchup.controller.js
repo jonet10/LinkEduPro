@@ -6,6 +6,7 @@ const {
   deleteSession,
   enrollStudent,
   payForSession,
+  createMoncashCheckout,
   teacherDashboard,
   studentDashboard
 } = require('../services/remedial.service');
@@ -156,7 +157,24 @@ async function payCatchupSession(req, res, next) {
       return res.status(400).json({ message: 'Session invalide.' });
     }
 
-    const result = await payForSession({
+    let result;
+    if (req.body.paymentMethod === 'MONCASH') {
+      result = await createMoncashCheckout({
+        student: req.user,
+        sessionId,
+        amount: req.body.amount
+      });
+      if (!result.ok) return res.status(result.status).json({ message: result.message });
+      if (result.alreadyPaid) return res.json({ message: result.message });
+      return res.status(202).json({
+        message: 'Redirection MonCash requise.',
+        provider: 'MONCASH',
+        redirectUrl: result.redirectUrl,
+        orderId: result.orderId
+      });
+    }
+
+    result = await payForSession({
       student: req.user,
       sessionId,
       paymentMethod: req.body.paymentMethod,
