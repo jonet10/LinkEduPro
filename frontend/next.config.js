@@ -18,6 +18,8 @@ const backendOrigin = resolveBackendOrigin();
 
 const nextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   images: {
     remotePatterns: [
       {
