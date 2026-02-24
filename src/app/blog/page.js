@@ -422,7 +422,7 @@ export default function BlogPage() {
       <article
         id={`blog-post-${post.id}`}
         key={post.id}
-        className={`overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm ${isPriority ? 'ring-2 ring-brand-300' : ''}`}
+        className={`overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm ${isPriority ? 'ring-2 ring-brand-300' : ''}`}
       >
         <div className="space-y-3 p-4">
           <div className="flex items-start justify-between gap-3">
@@ -431,10 +431,10 @@ export default function BlogPage() {
                 {getInitials(post.author?.firstName, post.author?.lastName)}
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">
+                <p className="text-sm font-semibold text-brand-900">
                   {post.author?.firstName} {post.author?.lastName}
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-brand-700">
                   {post.author?.role}
                   {post.author?.role === 'TEACHER' ? ` · ${post.author?.teacherLevel || ''}` : ''}
                   {post.createdAt ? ` · ${formatRelativeTime(post.createdAt)}` : ''}
@@ -443,7 +443,7 @@ export default function BlogPage() {
             </div>
             <button
               type="button"
-              className="rounded-full px-2 py-1 text-slate-400 hover:bg-slate-100"
+              className="rounded-full px-2 py-1 text-brand-700 hover:bg-brand-50"
               onClick={() => togglePost(post.id)}
               aria-label="Ouvrir publication"
             >
@@ -453,7 +453,7 @@ export default function BlogPage() {
 
           <button
             type="button"
-            className="w-full text-left text-lg font-semibold text-slate-900 hover:text-brand-700"
+            className="w-full text-left text-lg font-semibold text-brand-900 hover:text-brand-700"
             onClick={() => togglePost(post.id)}
           >
             {post.title}
@@ -483,7 +483,7 @@ export default function BlogPage() {
           <img
             src={resolveMediaUrl(post.imageUrl)}
             alt={post.title}
-            className="max-h-[480px] w-full border-y border-slate-200 object-cover"
+            className="max-h-[480px] w-full border-y border-brand-100 object-cover"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = '/images/article-placeholder.svg';
@@ -491,26 +491,26 @@ export default function BlogPage() {
           />
         ) : null}
 
-        {!isExpanded && post.excerpt ? <p className="px-4 py-3 text-sm text-slate-700">{post.excerpt}</p> : null}
+        {!isExpanded && post.excerpt ? <p className="px-4 py-3 text-sm text-brand-700">{post.excerpt}</p> : null}
 
         {isExpanded ? (
           <>
-            <p className="px-4 py-3 text-justify text-slate-800">{post.content}</p>
-            <p className="px-4 text-sm text-slate-500">👍 {post._count?.likes || 0} · 💬 {post._count?.comments || 0}</p>
+            <p className="px-4 py-3 text-justify text-brand-900">{post.content}</p>
+            <p className="px-4 text-sm text-brand-700">👍 {post._count?.likes || 0} · 💬 {post._count?.comments || 0}</p>
 
-            <div className="mt-3 grid grid-cols-3 border-y border-slate-200 px-3 py-1">
-              <button className="rounded-lg px-2 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onClick={() => likePost(post.id)}>👍 J’aime</button>
-              <button className="rounded-lg px-2 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onClick={() => toggleCommentsPanel(post.id)}>
+            <div className="mt-3 grid grid-cols-3 border-y border-brand-100 px-3 py-1">
+              <button className="rounded-lg px-2 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => likePost(post.id)}>👍 J’aime</button>
+              <button className="rounded-lg px-2 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => toggleCommentsPanel(post.id)}>
                 💬 {openComments[post.id] ? 'Masquer' : 'Commenter'}
               </button>
-              <button className="rounded-lg px-2 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onClick={() => sharePost(post)}>↗ Partager</button>
+              <button className="rounded-lg px-2 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => sharePost(post)}>↗ Partager</button>
             </div>
 
             {openComments[post.id] ? (
-              <div className="space-y-2 bg-slate-50 p-3">
+              <div className="space-y-2 bg-brand-50 p-3">
                 {(commentsByPost[post.id] || []).map((comment) => (
-                  <div key={comment.id} className="rounded-xl border border-slate-200 bg-white p-3 text-sm">
-                    <p className="font-semibold text-slate-900">{comment.author?.firstName} {comment.author?.lastName}</p>
+                  <div key={comment.id} className="rounded-xl border border-brand-100 bg-white p-3 text-sm">
+                    <p className="font-semibold text-brand-900">{comment.author?.firstName} {comment.author?.lastName}</p>
                     <p className="mt-1 text-justify">{comment.content}</p>
                     {comment.imageUrl ? (
                       <img
@@ -595,14 +595,14 @@ export default function BlogPage() {
                 <textarea className="input min-h-[120px]" value={editForm.content} onChange={(e) => setEditForm((prev) => ({ ...prev, content: e.target.value }))} placeholder="Contenu" />
 
                 <div className="grid gap-3 md:grid-cols-2">
-                  <label className="text-sm text-slate-700">
+                  <label className="text-sm text-brand-700">
                     Type
                     <select className="input mt-1" value={editForm.postType} onChange={(e) => setEditForm((prev) => ({ ...prev, postType: e.target.value }))}>
                       <option value="ARTICLE">Article</option>
                       <option value="EXERCISE">Exercice</option>
                     </select>
                   </label>
-                  <label className="text-sm text-slate-700">
+                  <label className="text-sm text-brand-700">
                     Portée
                     <select className="input mt-1" value={editForm.audienceScope || 'GLOBAL'} onChange={(e) => setEditForm((prev) => ({ ...prev, audienceScope: e.target.value }))}>
                       <option value="GLOBAL">Global</option>
@@ -612,7 +612,7 @@ export default function BlogPage() {
                   </label>
 
                   {editForm.audienceScope === 'SCHOOL' ? (
-                    <label className="text-sm text-slate-700">
+                    <label className="text-sm text-brand-700">
                       School ID
                       <input className="input mt-1" type="number" value={editForm.schoolId} onChange={(e) => setEditForm((prev) => ({ ...prev, schoolId: e.target.value }))} />
                     </label>
@@ -621,7 +621,7 @@ export default function BlogPage() {
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div>
-                    <p className="mb-2 text-sm font-semibold text-slate-700">Catégories</p>
+                    <p className="mb-2 text-sm font-semibold text-brand-700">Catégories</p>
                     <div className="flex flex-wrap gap-2">
                       {categories.map((cat) => (
                         <label key={`edit_cat_${cat.id}`} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
@@ -633,7 +633,7 @@ export default function BlogPage() {
                   </div>
 
                   <div>
-                    <p className="mb-2 text-sm font-semibold text-slate-700">Tags</p>
+                    <p className="mb-2 text-sm font-semibold text-brand-700">Tags</p>
                     <div className="flex flex-wrap gap-2">
                       {tags.map((tag) => (
                         <label key={`edit_tag_${tag.id}`} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
@@ -661,7 +661,7 @@ export default function BlogPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl space-y-5 bg-slate-100 px-3 py-6 md:px-4">
+    <main className="mx-auto max-w-4xl space-y-5 px-3 py-6 md:px-4">
       {expandedPostId ? (
         selectedPost ? (
           renderPostCard(selectedPost, { isPriority: true })
@@ -672,9 +672,9 @@ export default function BlogPage() {
         )
       ) : null}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-900">Fil d’actualité LinkEduPro</h1>
-        <p className="mt-1 text-sm text-slate-600">Retrouve les publications de ta communauté comme sur un réseau social.</p>
+      <section className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
+        <h1 className="text-2xl font-bold text-brand-900">Fil d’actualité LinkEduPro</h1>
+        <p className="mt-1 text-sm text-brand-700">Retrouve les publications de ta communauté comme sur un réseau social.</p>
         <div className="grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
           <input className="input" placeholder="Recherche posts" value={search} onChange={(e) => setSearch(e.target.value)} />
           <select className="input" value={postTypeFilter} onChange={(e) => setPostTypeFilter(e.target.value)}>
@@ -697,20 +697,23 @@ export default function BlogPage() {
       </section>
 
       {canCreatePost ? (
-        <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="space-y-4 rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-800">
               {getInitials(student?.firstName, student?.lastName)}
             </div>
-            <div className="flex-1 rounded-full border border-slate-300 bg-slate-50 px-4 py-2 text-sm text-slate-500">
-              Quoi de neuf, {student?.firstName || 'utilisateur'} ?
-            </div>
+            <input
+              className="input flex-1 rounded-full"
+              value={form.content}
+              onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
+              placeholder={`Quoi de neuf, ${student?.firstName || 'utilisateur'} ?`}
+            />
           </div>
-          <div className="grid grid-cols-2 gap-2 border-y border-slate-200 py-2 md:grid-cols-4">
-            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100" onClick={() => onPickImage('create', 'camera')}>📷 Photo</button>
-            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100" onClick={() => onPickImage('create', 'gallery')}>🖼️ Galerie</button>
-            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100" onClick={() => setForm((prev) => ({ ...prev, postType: 'EXERCISE' }))}>🧠 Exercice</button>
-            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100" onClick={() => setForm((prev) => ({ ...prev, audienceScope: 'GLOBAL' }))}>🌍 Public</button>
+          <div className="grid grid-cols-2 gap-2 border-y border-brand-100 py-2 md:grid-cols-4">
+            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => onPickImage('create', 'camera')}>📷 Photo</button>
+            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => onPickImage('create', 'gallery')}>🖼️ Galerie</button>
+            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => setForm((prev) => ({ ...prev, postType: 'EXERCISE' }))}>🧠 Exercice</button>
+            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => setForm((prev) => ({ ...prev, audienceScope: 'GLOBAL' }))}>🌍 Public</button>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
@@ -800,15 +803,15 @@ export default function BlogPage() {
           {createInfo ? <p className="text-sm text-green-600">{createInfo}</p> : null}
 
           <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-500">Connecté en tant que {student?.role || 'USER'}</p>
+            <p className="text-xs text-brand-700">Connecté en tant que {student?.role || 'USER'}</p>
             <button className="btn-primary" disabled={creating} onClick={createPost}>{creating ? 'Publication...' : 'Publier'}</button>
           </div>
         </section>
       ) : null}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <p className="text-sm text-slate-600">Categories: {categories.map((c) => c.name).join(', ') || 'Aucune'}</p>
-        <p className="text-sm text-slate-600">Tags: {tags.map((t) => t.name).join(', ') || 'Aucun'}</p>
+      <section className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
+        <p className="text-sm text-brand-700">Categories: {categories.map((c) => c.name).join(', ') || 'Aucune'}</p>
+        <p className="text-sm text-brand-700">Tags: {tags.map((t) => t.name).join(', ') || 'Aucun'}</p>
       </section>
 
       {items
