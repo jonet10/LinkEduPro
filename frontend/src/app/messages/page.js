@@ -67,6 +67,7 @@ export default function MessagesPage() {
   const [globalContent, setGlobalContent] = useState('');
   const [sendingGlobal, setSendingGlobal] = useState(false);
   const [showNewMessageComposer, setShowNewMessageComposer] = useState(false);
+  const isDarkMode = Boolean(student?.darkMode);
 
   const privateConversations = useMemo(
     () => conversations.filter((c) => c.type === 'PRIVATE'),
@@ -307,11 +308,11 @@ export default function MessagesPage() {
 
       <div className="grid gap-4 lg:grid-cols-[340px,1fr]">
         <aside className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 bg-[#0e1f3a] p-4 text-white">
+          <div className="border-b border-brand-100 bg-brand-900 p-4 text-white">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <h2 className="text-base font-semibold">WhatsApp LinkEduPro</h2>
-                <p className="text-xs text-slate-300">Discussions privées</p>
+                <h2 className="text-base font-semibold">Messagerie LinkEduPro</h2>
+                <p className="text-xs text-slate-300">Discussions privées instantanées</p>
               </div>
               <button
                 type="button"
@@ -327,7 +328,7 @@ export default function MessagesPage() {
             <div className="border-b border-slate-200 bg-slate-50 p-3">
               <form className="space-y-2" onSubmit={handleSendPrivate}>
                 {student?.role !== 'STUDENT' ? (
-                  <label className="block text-xs text-slate-600">
+                  <label className="block text-xs text-brand-700">
                     Mode d'envoi
                     <select
                       className="input mt-1"
@@ -346,7 +347,7 @@ export default function MessagesPage() {
                     </select>
                   </label>
                 ) : (
-                  <label className="block text-xs text-slate-600">
+                  <label className="block text-xs text-brand-700">
                     Destinataire autorisé
                     <select
                       className="input mt-1"
@@ -374,14 +375,14 @@ export default function MessagesPage() {
                   placeholder="Chercher un contact..."
                   required
                 />
-                {searchingRecipients ? <p className="text-xs text-slate-500">Recherche...</p> : null}
+                {searchingRecipients ? <p className="text-xs text-brand-700">Recherche...</p> : null}
                 {recipientQuery.trim().length >= 2 && communityUsers.length > 0 ? (
                   <div className="max-h-40 overflow-auto rounded-lg border border-slate-200 bg-white">
                     {communityUsers.map((user) => (
                       <button
                         key={user.id}
                         type="button"
-                        className="block w-full border-b border-slate-100 px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-50 last:border-b-0"
+                        className="block w-full border-b border-brand-100 px-3 py-2 text-left text-sm text-brand-900 hover:bg-brand-50 last:border-b-0"
                         onClick={() => {
                           setRecipientId(String(user.id));
                           setSelectedRecipientLabel(user.label);
@@ -420,17 +421,17 @@ export default function MessagesPage() {
                 onClick={() => setSelectedConversationId(conversation.id)}
                 className={`w-full border-b px-3 py-3 text-left text-sm ${
                   selectedConversationId === conversation.id
-                    ? 'border-l-4 border-l-emerald-500 bg-emerald-50'
-                    : 'border-transparent bg-white hover:bg-slate-50'
+                    ? 'border-l-4 border-l-emerald-500 bg-brand-50'
+                    : 'border-transparent bg-white hover:bg-brand-50'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate font-semibold text-slate-900">{conversationLabel(conversation, student?.id)}</p>
-                    <p className="mt-0.5 line-clamp-1 text-xs text-slate-600">{conversation.lastMessage?.content || 'Aucun message'}</p>
+                    <p className="truncate font-semibold text-brand-900">{conversationLabel(conversation, student?.id)}</p>
+                    <p className="mt-0.5 line-clamp-1 text-xs text-brand-700">{conversation.lastMessage?.content || 'Aucun message'}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[11px] text-slate-500">{formatTimeShort(conversation.lastMessage?.createdAt || conversation.createdAt)}</p>
+                    <p className="text-[11px] text-brand-700">{formatTimeShort(conversation.lastMessage?.createdAt || conversation.createdAt)}</p>
                     {conversation.unreadCount > 0 ? (
                       <span className="mt-1 inline-block rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white">
                         {conversation.unreadCount}
@@ -441,13 +442,13 @@ export default function MessagesPage() {
               </button>
             ))}
             {privateConversations.length === 0 ? (
-              <p className="px-3 py-3 text-xs text-slate-500">Aucune conversation privée.</p>
+              <p className="px-3 py-3 text-xs text-brand-700">Aucune conversation privée.</p>
             ) : null}
           </div>
         </aside>
 
         <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 bg-[#0e1f3a] px-4 py-3 text-white">
+          <div className="border-b border-brand-100 bg-brand-900 px-4 py-3 text-white">
             <h2 className="text-sm font-semibold">
               {selectedConversation
                 ? conversationLabel(selectedConversation, student?.id)
@@ -458,8 +459,8 @@ export default function MessagesPage() {
             </p>
           </div>
 
-          <div className="max-h-[520px] space-y-2 overflow-auto bg-[#efeae2] p-3">
-            {loadingConversation ? <p className="text-sm text-slate-600">Chargement...</p> : null}
+          <div className="max-h-[520px] space-y-2 overflow-auto bg-brand-50 p-3">
+            {loadingConversation ? <p className="text-sm text-brand-700">Chargement...</p> : null}
             {!loadingConversation && selectedConversation?.messages?.length ? (
               selectedConversation.messages.map((message) => {
                 const mine = message.sender.id === student?.id;
@@ -468,23 +469,23 @@ export default function MessagesPage() {
                     key={message.id}
                     className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
                       mine
-                        ? 'ml-auto bg-[#d9fdd3] text-slate-800'
-                        : 'mr-auto bg-white text-slate-800'
+                        ? (isDarkMode ? 'ml-auto bg-brand-500 text-white' : 'ml-auto bg-[#d9fdd3] text-brand-900')
+                        : 'mr-auto bg-white text-brand-900'
                     }`}
                   >
                     {!mine ? (
-                      <p className="text-xs font-semibold text-slate-500">
+                      <p className="text-xs font-semibold text-brand-700">
                         {message.sender.firstName} {message.sender.lastName}
                       </p>
                     ) : null}
                     <p className="mt-0.5 whitespace-pre-wrap">{message.content}</p>
-                    <p className="mt-1 text-right text-[11px] text-slate-500">{formatTimeShort(message.createdAt)}</p>
+                    <p className={`mt-1 text-right text-[11px] ${mine && isDarkMode ? 'text-white/80' : 'text-brand-700'}`}>{formatTimeShort(message.createdAt)}</p>
                   </div>
                 );
               })
             ) : null}
             {!loadingConversation && !selectedConversation?.messages?.length ? (
-              <p className="text-sm text-slate-600">Sélectionne une conversation pour voir les messages.</p>
+              <p className="text-sm text-brand-700">Sélectionne une conversation pour voir les messages.</p>
             ) : null}
           </div>
 
