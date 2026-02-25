@@ -736,27 +736,8 @@ export default function BlogPage() {
             <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => onPickImage('create', 'camera')}>📷 Photo</button>
             <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => onPickImage('create', 'gallery')}>🖼️ Galerie</button>
           </div>
-
-          <div className="grid gap-3 md:grid-cols-1">
-            <input className="input" placeholder="Petit résumé (optionnel)" value={form.excerpt} onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))} />
-          </div>
-
-          <div className="grid gap-2 md:grid-cols-2">
-            <input className="input" placeholder="Image URL (optionnel)" value={form.imageUrl} onChange={(e) => setForm((prev) => ({ ...prev, imageUrl: e.target.value }))} />
-            <div className="space-y-2 rounded-lg border border-brand-100 px-3 py-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Photo</p>
-              <div className="flex flex-wrap gap-2">
-                <button type="button" className="btn-secondary !px-3 !py-1 text-xs" onClick={() => onPickImage('create', 'camera')}>
-                  Prendre une photo
-                </button>
-                <button type="button" className="btn-secondary !px-3 !py-1 text-xs" onClick={() => onPickImage('create', 'gallery')}>
-                  Importer depuis l'appareil
-                </button>
-              </div>
-              <input ref={createGalleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
-              <input ref={createCameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
-            </div>
-          </div>
+          <input ref={createGalleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
+          <input ref={createCameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
           {uploadingCreateImage ? <p className="text-xs text-brand-700">Upload image...</p> : null}
           {form.imageUrl ? (
             <img
