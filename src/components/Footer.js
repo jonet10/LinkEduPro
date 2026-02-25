@@ -21,7 +21,7 @@ const footerSections = [
   {
     title: 'Resources',
     links: [
-      { label: 'Blog / News', href: '/blog' },
+      { label: 'Forum', href: '/blog' },
       { label: 'FAQ', href: '/faq' },
       { label: 'Documentation', href: '/documentation' },
       { label: 'Changelog', href: '/changelog' },
