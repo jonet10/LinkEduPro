@@ -29,6 +29,20 @@ function normalizeAudienceScope(value, isGlobal, schoolId) {
   return 'INTER_SCHOOL';
 }
 
+function generateTitleFromContent({ title, content, excerpt, postType }) {
+  const direct = sanitizeText(title || '', 180);
+  if (direct) return direct;
+
+  const source = sanitizeText(excerpt || content || '', 180);
+  if (!source) {
+    return postType === 'EXERCISE' ? 'Demande d’aide sur un exercice' : 'Publication communauté';
+  }
+
+  const compact = source.replace(/\s+/g, ' ').trim();
+  if (compact.length <= 80) return compact;
+  return `${compact.slice(0, 77).trim()}...`;
+}
+
 async function createPost(req, res, next) {
   try {
     const user = await prisma.student.findUnique({ where: { id: req.user.id } });
@@ -58,7 +72,12 @@ async function createPost(req, res, next) {
     const post = await prisma.blogPost.create({
       data: {
         authorId: req.user.id,
-        title: sanitizeText(req.body.title, 180),
+        title: generateTitleFromContent({
+          title: req.body.title,
+          content: req.body.content,
+          excerpt: req.body.excerpt,
+          postType
+        }),
         excerpt: sanitizeText(req.body.excerpt || '', 400) || null,
         imageUrl: req.body.imageUrl ? String(req.body.imageUrl).trim() : null,
         content: sanitizeText(req.body.content, 10000),

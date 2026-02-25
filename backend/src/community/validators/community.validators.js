@@ -6,7 +6,7 @@ const imageUrlSchema = Joi.alternatives().try(
 );
 
 const createPostSchema = Joi.object({
-  title: Joi.string().trim().min(5).max(180).required(),
+  title: Joi.string().trim().min(2).max(180).allow('', null).optional(),
   content: Joi.string().trim().min(20).max(10000).required(),
   excerpt: Joi.string().trim().max(400).allow('', null),
   imageUrl: imageUrlSchema.allow('', null),

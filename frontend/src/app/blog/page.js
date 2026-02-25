@@ -706,7 +706,7 @@ export default function BlogPage() {
               className="input flex-1 rounded-full"
               value={form.content}
               onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
-              placeholder={`Quoi de neuf, ${student?.firstName || 'utilisateur'} ?`}
+              placeholder={`Besoin d'aide sur un exercice, ${student?.firstName || 'utilisateur'} ?`}
             />
           </div>
           <div className="grid grid-cols-2 gap-2 border-y border-brand-100 py-2 md:grid-cols-4">
@@ -716,9 +716,8 @@ export default function BlogPage() {
             <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => setForm((prev) => ({ ...prev, audienceScope: 'GLOBAL' }))}>🌍 Public</button>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
-            <input className="input" placeholder="Titre" value={form.title} onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))} />
-            <input className="input" placeholder="Extrait (optionnel)" value={form.excerpt} onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))} />
+          <div className="grid gap-3 md:grid-cols-1">
+            <input className="input" placeholder="Petit résumé (optionnel)" value={form.excerpt} onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))} />
           </div>
 
           <div className="grid gap-2 md:grid-cols-2">
@@ -746,7 +745,7 @@ export default function BlogPage() {
             />
           ) : null}
 
-          <textarea className="input min-h-[140px]" placeholder="Contenu de l’article" value={form.content} onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))} />
+          <textarea className="input min-h-[140px]" placeholder="Explique ton exercice ou ta question en détail (énoncé, ce que tu as essayé, où tu bloques)." value={form.content} onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))} />
 
           <div className="grid gap-3 md:grid-cols-2">
             <label className="text-sm text-slate-700">
