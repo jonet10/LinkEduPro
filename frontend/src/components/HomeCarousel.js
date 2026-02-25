@@ -8,7 +8,7 @@ import SmartSearchSection from '@/components/search/SmartSearchSection';
 const SLIDES = [
   {
     id: 'haiti-school-1',
-    label: 'Écoles haïtiennes',
+    label: 'Écoles',
     title: 'Un réseau académique connecté pour Haïti',
     image:
       'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80'
@@ -57,7 +57,7 @@ const CONTEST_CARDS = [
 ];
 
 const INTRO_TEXT =
-  "LinkEduPro est une plateforme éducative moderne et intégrée, conçue pour connecter élèves, professeurs et écoles haïtiennes dans un réseau académique national et international. Elle offre aux élèves NS4 (18 ans et plus) un espace sécurisé pour apprendre, réviser, publier des contenus académiques et accéder à des opportunités nationales et internationales.";
+  "LinkEduPro est une plateforme éducative moderne et intégrée, conçue pour connecter élèves, professeurs et écoles dans un réseau académique national et international. Elle offre aux élèves NS4 (18 ans et plus) un espace sécurisé pour apprendre, réviser, publier des contenus académiques et accéder à des opportunités nationales et internationales.";
 
 export default function HomeCarousel({ isAuthed = false }) {
   const [index, setIndex] = useState(0);

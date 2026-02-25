@@ -593,7 +593,7 @@ export default function HomePage() {
         <section className="landing-hero card">
           <div>
             <p className="landing-kicker">LinkEduPro</p>
-            <h1 className="landing-title">LinkEduPro, c&apos;est une plateforme éducative haïtienne qui relie élèves, professeurs et écoles.</h1>
+            <h1 className="landing-title">LinkEduPro, c&apos;est une plateforme éducative qui relie élèves, professeurs et écoles.</h1>
             <ul className="mt-5 space-y-2 text-base text-brand-900">
               <li>Un espace unique pour apprendre, pratiquer et publier des contenus académiques.</li>
               <li>Des quiz, exercices, rattrapages, challenges et outils de suivi des performances.</li>
@@ -643,7 +643,7 @@ export default function HomePage() {
         <section className="card" aria-labelledby="how-title">
           <h2 id="how-title" className="text-4xl font-black text-brand-900">Ce que propose LinkEduPro</h2>
           <p className="mt-3 max-w-3xl text-lg text-brand-700">
-            Une plateforme éducative haïtienne pour s&apos;entraîner, réviser avec méthode et collaborer avec les professeurs.
+            Une plateforme éducative pour s&apos;entraîner, réviser avec méthode et collaborer avec les professeurs.
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {LANDING_STUDY_TOOLS.map((tool, idx) => (
