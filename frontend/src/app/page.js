@@ -39,10 +39,10 @@ const LANDING_BOOKS_BY_SUBJECT = {
   ]
 };
 const LANDING_STUDY_TOOLS = [
-  { title: 'Quiz Bac ciblés', desc: 'Entraînement par matière avec correction immédiate.' },
-  { title: 'Rattrapage live', desc: 'Sessions avec professeurs, gratuites ou payantes.' },
-  { title: 'Rubriques NSIV', desc: 'Contenus structurés pour réviser plus vite.' },
-  { title: 'Communauté scolaire', desc: 'Publications, échanges et défis éducatifs.' }
+  { title: 'Quiz Bac ciblés', desc: 'Entraînement par matière avec correction immédiate.', icon: 'target' },
+  { title: 'Rattrapage live', desc: 'Sessions avec professeurs, gratuites ou payantes.', icon: 'video' },
+  { title: 'Rubriques NSIV', desc: 'Contenus structurés pour réviser plus vite.', icon: 'nsiv' },
+  { title: 'Communauté scolaire', desc: 'Publications, échanges et défis éducatifs.', icon: 'collection' }
 ];
 const LANDING_HERO_SLIDES = [
   {
@@ -632,6 +632,9 @@ export default function HomePage() {
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {LANDING_STUDY_TOOLS.map((tool, idx) => (
               <article key={tool.title} className={`landing-tool-card landing-tool-${idx + 1}`}>
+                <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
+                  <SectionIcon name={tool.icon || 'collection'} className="h-5 w-5" />
+                </div>
                 <p className="text-2xl font-bold text-brand-900">{tool.title}</p>
                 <p className="mt-2 text-sm text-brand-700">{tool.desc}</p>
               </article>
