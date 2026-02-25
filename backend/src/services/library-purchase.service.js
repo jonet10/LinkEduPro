@@ -1,6 +1,15 @@
 const prisma = require('../config/prisma');
 const { createMoncashPayment, buildLibraryOrderReference, parseLibraryOrderReference } = require('./moncash.service');
 
+const LIBRARY_COMMISSION_RATE_RAW = Number(process.env.LIBRARY_COMMISSION_RATE ?? '0.10');
+const LIBRARY_COMMISSION_RATE = Number.isFinite(LIBRARY_COMMISSION_RATE_RAW)
+  ? Math.min(Math.max(LIBRARY_COMMISSION_RATE_RAW, 0), 0.95)
+  : 0.10;
+
+function round2(value) {
+  return Math.round(Number(value || 0) * 100) / 100;
+}
+
 async function createLibraryCheckout({ buyer, bookId, paymentMethod = 'MONCASH' }) {
   const targetBookId = Number(bookId);
   if (!Number.isInteger(targetBookId) || targetBookId <= 0) {
@@ -75,13 +84,21 @@ async function confirmLibraryPurchaseByReference({ orderRef, providerTxId, amoun
   if (!purchase) return { ok: false, status: 404, message: 'Achat introuvable.' };
   if (purchase.status === 'PAID') return { ok: true, alreadyPaid: true };
 
+  const amountValue = Number.isFinite(Number(amount)) && Number(amount) > 0
+    ? Number(amount)
+    : Number(purchase.amount || 0);
+  const platformCommission = round2(amountValue * LIBRARY_COMMISSION_RATE);
+  const sellerAmount = round2(amountValue - platformCommission);
+
   await prisma.libraryPurchase.update({
     where: { id: purchase.id },
     data: {
       status: 'PAID',
       providerTxId: providerTxId || purchase.providerTxId,
       paidAt: new Date(),
-      amount: Number.isFinite(Number(amount)) && Number(amount) > 0 ? Number(amount) : purchase.amount
+      amount: amountValue,
+      platformCommission,
+      sellerAmount
     }
   });
 
@@ -89,6 +106,7 @@ async function confirmLibraryPurchaseByReference({ orderRef, providerTxId, amoun
 }
 
 module.exports = {
+  LIBRARY_COMMISSION_RATE,
   createLibraryCheckout,
   confirmLibraryPurchaseByReference
 };

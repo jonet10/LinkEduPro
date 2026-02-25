@@ -3,10 +3,14 @@ const prisma = require('../config/prisma');
 const { emitRefresh } = require('./realtime');
 const { isMoncashEnabled, buildOrderReference, createMoncashPayment } = require('./moncash.service');
 
-const COMMISSION_RATE_RAW = Number(process.env.REMEDIAL_COMMISSION_RATE ?? '0.1');
+const COMMISSION_RATE_RAW = Number(process.env.REMEDIAL_COMMISSION_RATE ?? '0.15');
 const COMMISSION_RATE = Number.isFinite(COMMISSION_RATE_RAW)
   ? Math.min(Math.max(COMMISSION_RATE_RAW, 0), 0.95)
-  : 0.1;
+  : 0.15;
+const LIBRARY_RATE_RAW = Number(process.env.LIBRARY_COMMISSION_RATE ?? '0.10');
+const LIBRARY_RATE = Number.isFinite(LIBRARY_RATE_RAW)
+  ? Math.min(Math.max(LIBRARY_RATE_RAW, 0), 0.95)
+  : 0.10;
 
 function decimal(value) {
   return new Prisma.Decimal(value || 0);
@@ -589,6 +593,43 @@ async function teacherDashboard(teacherId) {
 
   const totalStudents = sessions.reduce((sum, s) => sum + Number(s._count.enrollments || 0), 0);
 
+  const libraryPurchases = await prisma.libraryPurchase.findMany({
+    where: {
+      status: 'PAID',
+      ...(teacher.role === 'TEACHER' ? { book: { uploadedBy: teacherId } } : {})
+    },
+    include: {
+      book: {
+        select: {
+          id: true,
+          title: true,
+          uploadedBy: true
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  const libraryRevenue = libraryPurchases.reduce((sum, row) => sum + Number(row.sellerAmount || 0), 0);
+  const libraryCommission = libraryPurchases.reduce((sum, row) => sum + Number(row.platformCommission || 0), 0);
+  const librarySales = libraryPurchases.length;
+
+  const salesByBookMap = new Map();
+  libraryPurchases.forEach((row) => {
+    const key = String(row.bookId);
+    const existing = salesByBookMap.get(key) || {
+      bookId: row.bookId,
+      title: row.book?.title || 'Livre',
+      salesCount: 0,
+      revenue: 0,
+      commission: 0
+    };
+    existing.salesCount += 1;
+    existing.revenue += Number(row.sellerAmount || 0);
+    existing.commission += Number(row.platformCommission || 0);
+    salesByBookMap.set(key, existing);
+  });
+
   const statsByLevelMap = new Map();
   sessions.forEach((s) => {
     const current = statsByLevelMap.get(s.level) || { level: s.level, sessions: 0, enrollments: 0 };
@@ -601,11 +642,18 @@ async function teacherDashboard(teacherId) {
     ok: true,
     data: {
       summary: {
-        totalRevenue,
-        totalCommission,
+        totalRevenue: totalRevenue + libraryRevenue,
+        totalCommission: totalCommission + libraryCommission,
+        totalRemedialRevenue: totalRevenue,
+        totalLibraryRevenue: libraryRevenue,
+        totalRemedialCommission: totalCommission,
+        totalLibraryCommission: libraryCommission,
         totalStudents,
         totalSessions: sessions.length,
-        commissionRate: COMMISSION_RATE
+        totalLibrarySales: librarySales,
+        commissionRate: COMMISSION_RATE,
+        commissionRateRemedial: COMMISSION_RATE,
+        commissionRateLibrary: LIBRARY_RATE
       },
       revenuesBySession: sessions.map((s) => ({
         sessionId: s.id,
@@ -626,7 +674,21 @@ async function teacherDashboard(teacherId) {
         status: s.status,
         enrollments: Number(s._count.enrollments || 0)
       })),
-      statsByLevel: Array.from(statsByLevelMap.values())
+      statsByLevel: Array.from(statsByLevelMap.values()),
+      library: {
+        salesCount: librarySales,
+        revenuesByBook: Array.from(salesByBookMap.values()),
+        recentPurchases: libraryPurchases.slice(0, 20).map((row) => ({
+          id: row.id,
+          bookId: row.bookId,
+          bookTitle: row.book?.title || null,
+          amount: Number(row.amount || 0),
+          sellerAmount: Number(row.sellerAmount || 0),
+          platformCommission: Number(row.platformCommission || 0),
+          paidAt: row.paidAt,
+          createdAt: row.createdAt
+        }))
+      }
     }
   };
 }
