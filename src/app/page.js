@@ -650,11 +650,9 @@ export default function HomePage() {
               <article key={tool.title} className={`landing-tool-card landing-tool-${idx + 1}`}>
                 <img
                   src={tool.iconImage}
-                  alt={`Icône ${tool.title}`}
-                  className="mb-3 h-10 w-10 rounded-full border border-[#d8c6bf]/70 object-cover shadow-sm"
+                  alt={tool.title}
+                  className="landing-tool-image"
                 />
-                <p className="text-2xl font-bold text-brand-900">{tool.title}</p>
-                <p className="mt-2 text-sm text-brand-700">{tool.desc}</p>
               </article>
             ))}
           </div>
