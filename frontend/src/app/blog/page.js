@@ -688,10 +688,18 @@ export default function BlogPage() {
       ) : null}
 
       <section className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
-        <h1 className="text-2xl font-bold text-brand-900">Fil d’actualité LinkEduPro</h1>
-        <p className="mt-1 text-sm text-brand-700">Retrouve les publications de ta communauté comme sur un réseau social.</p>
+        <h1 className="text-2xl font-bold text-brand-900">Forum LinkEduPro</h1>
+        <p className="mt-1 text-sm text-brand-700">Pose une question, partage une solution et échange avec la communauté.</p>
+        <div className="mt-3 rounded-xl border border-brand-100 bg-brand-50/40 p-3">
+          <p className="text-sm font-semibold text-brand-900">Comment ça marche ?</p>
+          <div className="mt-2 grid gap-2 text-sm text-brand-700 md:grid-cols-3">
+            <p><strong>1.</strong> Décris ton besoin clairement (contexte + objectif).</p>
+            <p><strong>2.</strong> Explique ce que tu as déjà essayé et où ça bloque.</p>
+            <p><strong>3.</strong> Consulte les réponses, applique, puis remercie la communauté.</p>
+          </div>
+        </div>
         <div className="grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
-          <input className="input" placeholder="Recherche posts" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input className="input" placeholder="Recherche forum" value={search} onChange={(e) => setSearch(e.target.value)} />
           <select className="input" value={postTypeFilter} onChange={(e) => setPostTypeFilter(e.target.value)}>
             <option value="">Tous contenus</option>
             <option value="EXERCISE">Exercices</option>

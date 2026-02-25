@@ -65,7 +65,7 @@ export default async function PublicBlogPostPage({ params }) {
         <section className="card space-y-3">
           <h1 className="text-2xl font-semibold text-brand-900">Article introuvable</h1>
           <p className="text-sm text-brand-700">Ce lien ne correspond pas a une publication publique.</p>
-          <Link href="/blog" className="btn-secondary inline-flex">Voir le blog</Link>
+          <Link href="/blog" className="btn-secondary inline-flex">Voir le forum</Link>
         </section>
       </main>
     );
@@ -90,7 +90,7 @@ export default async function PublicBlogPostPage({ params }) {
         {post.excerpt ? <p className="text-base text-brand-800">{post.excerpt}</p> : null}
         <p className="whitespace-pre-wrap text-justify text-brand-900">{post.content}</p>
         <div className="pt-2">
-          <Link href={`/blog?post=${post.id}`} className="btn-secondary inline-flex">Ouvrir dans le blog</Link>
+          <Link href={`/blog?post=${post.id}`} className="btn-secondary inline-flex">Ouvrir dans le forum</Link>
         </div>
       </article>
     </main>

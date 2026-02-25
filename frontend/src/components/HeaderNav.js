@@ -333,7 +333,7 @@ export default function HeaderNav() {
       { href: '/subjects', label: 'Rubriques', icon: '📘' },
       { href: '/progress', label: 'Progrès', icon: '📈' },
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
-      { href: '/blog', label: 'Blog', icon: '📝' },
+      { href: '/blog', label: 'Forum', icon: '📝' },
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : []),
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
     ];
@@ -354,7 +354,7 @@ export default function HeaderNav() {
   const mobileToolItems = useMemo(
     () => [
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
-      { href: '/blog', label: 'Blog', icon: '📝' },
+      { href: '/blog', label: 'Forum', icon: '📝' },
       { href: '/search', label: 'Recherche', icon: '🔎' }
     ],
     []
