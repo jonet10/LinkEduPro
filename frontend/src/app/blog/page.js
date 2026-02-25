@@ -76,6 +76,21 @@ export default function BlogPage() {
   const student = useMemo(() => getStudent(), []);
   const canCreatePost = Boolean(token);
   const canModeratePosts = Boolean(student && ['TEACHER', 'ADMIN'].includes(student.role));
+  const composerPrompt = useMemo(() => {
+    const firstName = student?.firstName || 'utilisateur';
+    if (student?.role === 'ADMIN') return `Annonce ou mise à jour à partager aujourd'hui, ${firstName} ?`;
+    if (student?.role === 'TEACHER') return `Quel conseil, exercice ou correction veux-tu publier, ${firstName} ?`;
+    return `Besoin d'aide sur un exercice, ${firstName} ?`;
+  }, [student?.firstName, student?.role]);
+  const contentPlaceholder = useMemo(() => {
+    if (student?.role === 'ADMIN') {
+      return 'Rédige ton annonce: objectif, public cible, consignes et prochaines étapes.';
+    }
+    if (student?.role === 'TEACHER') {
+      return "Partage un exercice, une explication ou une correction guidée (objectif, méthode, solution).";
+    }
+    return "Explique ton exercice ou ta question en détail (énoncé, ce que tu as essayé, où tu bloques).";
+  }, [student?.role]);
   const selectedPost = useMemo(
     () => items.find((post) => post.id === expandedPostId) || null,
     [items, expandedPostId]
@@ -706,7 +721,7 @@ export default function BlogPage() {
               className="input flex-1 rounded-full"
               value={form.content}
               onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
-              placeholder={`Besoin d'aide sur un exercice, ${student?.firstName || 'utilisateur'} ?`}
+              placeholder={composerPrompt}
             />
           </div>
           <div className="grid grid-cols-2 gap-2 border-y border-brand-100 py-2 md:grid-cols-4">
@@ -745,7 +760,7 @@ export default function BlogPage() {
             />
           ) : null}
 
-          <textarea className="input min-h-[140px]" placeholder="Explique ton exercice ou ta question en détail (énoncé, ce que tu as essayé, où tu bloques)." value={form.content} onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))} />
+          <textarea className="input min-h-[140px]" placeholder={contentPlaceholder} value={form.content} onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))} />
 
           <div className="grid gap-3 md:grid-cols-2">
             <label className="text-sm text-slate-700">
