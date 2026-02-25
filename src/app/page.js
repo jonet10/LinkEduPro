@@ -6,6 +6,7 @@ import { apiClient } from '@/lib/api';
 import { getToken, getStudent, isNsivStudent } from '@/lib/auth';
 import { resolveMediaUrl } from '@/lib/media';
 import VerifiedTestimonials from '@/components/VerifiedTestimonials';
+import SectionIcon from '@/components/ui/SectionIcon';
 
 const CALENDAR_NOTICE_KEY = 'linkedupro_calendar_notice_2025_2026_seen';
 const LANDING_SUBJECTS = [
@@ -256,18 +257,18 @@ export default function HomePage() {
   const managerQuickActions = useMemo(() => {
     if (isAdminRole) {
       return [
-        { href: '/admin/super-dashboard', title: 'Supervision globale', desc: 'Suivre les Élèves, Écoles et activités.', icon: '📊' },
-        { href: '/school-management/dashboard', title: 'Gestion scolaire', desc: 'Piloter classes, Élèves et paiements.', icon: '🏫' },
-        { href: '/messages', title: 'Communication', desc: 'Publier annonces et Gérer les messages.', icon: '💬' },
-        { href: '/blog', title: 'Contenus communauté', desc: 'Valider et organiser les publications.', icon: '🗂️' }
+        { href: '/admin/super-dashboard', title: 'Supervision globale', desc: 'Suivre les Élèves, Écoles et activités.', icon: 'chart' },
+        { href: '/school-management/dashboard', title: 'Gestion scolaire', desc: 'Piloter classes, Élèves et paiements.', icon: 'school' },
+        { href: '/messages', title: 'Communication', desc: 'Publier annonces et Gérer les messages.', icon: 'message' },
+        { href: '/blog', title: 'Contenus communauté', desc: 'Valider et organiser les publications.', icon: 'collection' }
       ];
     }
 
     return [
-      { href: '/blog', title: 'Publications pédagogiques', desc: 'Poster supports, conseils et ressources.', icon: '📝' },
-      { href: '/rattrapage', title: 'Sessions rattrapage', desc: 'Programmer et suivre les sessions live.', icon: '🎥' },
-      { href: '/messages', title: 'Messagerie', desc: 'Répondre aux Élèves et diffuser des annonces.', icon: '📨' },
-      { href: '/library', title: 'Ressources', desc: 'Partager des PDF et références utiles.', icon: '📚' }
+      { href: '/blog', title: 'Publications pédagogiques', desc: 'Poster supports, conseils et ressources.', icon: 'write' },
+      { href: '/rattrapage', title: 'Sessions rattrapage', desc: 'Programmer et suivre les sessions live.', icon: 'video' },
+      { href: '/messages', title: 'Messagerie', desc: 'Répondre aux Élèves et diffuser des annonces.', icon: 'mail' },
+      { href: '/library', title: 'Ressources', desc: 'Partager des PDF et références utiles.', icon: 'library' }
     ];
   }, [isAdminRole]);
   const activeLandingBooks = useMemo(
@@ -845,14 +846,18 @@ export default function HomePage() {
           <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 lift-card palette-card palette-1">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">🎓</span>
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                  <SectionIcon name="nsiv" />
+                </span>
                 Espace NSIV
               </p>
               <p className="mt-1 text-sm text-brand-700">Tableau complet des rubriques et progression.</p>
             </Link>
             <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 lift-card palette-card palette-2">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">🎯</span>
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                  <SectionIcon name="target" />
+                </span>
                 Exercices probables
               </p>
               <p className="mt-1 text-sm text-brand-700">Sujets récurrents du Bac NSIV.</p>
@@ -870,28 +875,36 @@ export default function HomePage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-1">
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">🧭</span>
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                    <SectionIcon name="compass" />
+                  </span>
                   Rubriques du jour
                 </p>
                 <p className="mt-1 text-sm text-brand-700">Révision ciblée par matière.</p>
               </Link>
               <Link href="/probable-exercises" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-2">
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">🎯</span>
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                    <SectionIcon name="target" />
+                  </span>
                   Exercices probables
                 </p>
                 <p className="mt-1 text-sm text-brand-700">Sujets les plus fréquents à l&apos;examen.</p>
               </Link>
               <Link href="/focus" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-3">
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">⏱️</span>
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                    <SectionIcon name="focus" />
+                  </span>
                   Session Focus
                 </p>
                 <p className="mt-1 text-sm text-brand-700">Concentration en 25 minutes.</p>
               </Link>
               <Link href="/library" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-4">
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">📚</span>
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                    <SectionIcon name="library" />
+                  </span>
                   Bibliothèque
                 </p>
                 <p className="mt-1 text-sm text-brand-700">PDF, ressources et fiches utiles.</p>
@@ -922,7 +935,9 @@ export default function HomePage() {
             {managerQuickActions.map((action, idx) => (
               <Link key={action.href} href={action.href} className={`rounded-xl border border-brand-100 p-4 lift-card palette-card palette-${(idx % 4) + 1}`}>
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">{action.icon || '✨'}</span>
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                    <SectionIcon name={action.icon || 'collection'} />
+                  </span>
                   {action.title}
                 </p>
                 <p className="mt-1 text-sm text-brand-700">{action.desc}</p>
