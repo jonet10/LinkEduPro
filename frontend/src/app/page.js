@@ -256,18 +256,18 @@ export default function HomePage() {
   const managerQuickActions = useMemo(() => {
     if (isAdminRole) {
       return [
-        { href: '/admin/super-dashboard', title: 'Supervision globale', desc: 'Suivre les Élèves, Écoles et activités.' },
-        { href: '/school-management/dashboard', title: 'Gestion scolaire', desc: 'Piloter classes, Élèves et paiements.' },
-        { href: '/messages', title: 'Communication', desc: 'Publier annonces et Gérer les messages.' },
-        { href: '/blog', title: 'Contenus communauté', desc: 'Valider et organiser les publications.' }
+        { href: '/admin/super-dashboard', title: 'Supervision globale', desc: 'Suivre les Élèves, Écoles et activités.', icon: '📊' },
+        { href: '/school-management/dashboard', title: 'Gestion scolaire', desc: 'Piloter classes, Élèves et paiements.', icon: '🏫' },
+        { href: '/messages', title: 'Communication', desc: 'Publier annonces et Gérer les messages.', icon: '💬' },
+        { href: '/blog', title: 'Contenus communauté', desc: 'Valider et organiser les publications.', icon: '🗂️' }
       ];
     }
 
     return [
-      { href: '/blog', title: 'Publications pédagogiques', desc: 'Poster supports, conseils et ressources.' },
-      { href: '/rattrapage', title: 'Sessions rattrapage', desc: 'Programmer et suivre les sessions live.' },
-      { href: '/messages', title: 'Messagerie', desc: 'Répondre aux Élèves et diffuser des annonces.' },
-      { href: '/library', title: 'Ressources', desc: 'Partager des PDF et références utiles.' }
+      { href: '/blog', title: 'Publications pédagogiques', desc: 'Poster supports, conseils et ressources.', icon: '📝' },
+      { href: '/rattrapage', title: 'Sessions rattrapage', desc: 'Programmer et suivre les sessions live.', icon: '🎥' },
+      { href: '/messages', title: 'Messagerie', desc: 'Répondre aux Élèves et diffuser des annonces.', icon: '📨' },
+      { href: '/library', title: 'Ressources', desc: 'Partager des PDF et références utiles.', icon: '📚' }
     ];
   }, [isAdminRole]);
   const activeLandingBooks = useMemo(
@@ -844,11 +844,17 @@ export default function HomePage() {
           <p className="mt-2 text-sm text-brand-700">Accès direct aux rubriques principales de Terminale.</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 lift-card palette-card palette-1">
-              <p className="font-semibold text-brand-900">Espace NSIV</p>
+              <p className="flex items-center gap-2 font-semibold text-brand-900">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">🎓</span>
+                Espace NSIV
+              </p>
               <p className="mt-1 text-sm text-brand-700">Tableau complet des rubriques et progression.</p>
             </Link>
             <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 lift-card palette-card palette-2">
-              <p className="font-semibold text-brand-900">Exercices probables</p>
+              <p className="flex items-center gap-2 font-semibold text-brand-900">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">🎯</span>
+                Exercices probables
+              </p>
               <p className="mt-1 text-sm text-brand-700">Sujets récurrents du Bac NSIV.</p>
             </Link>
           </div>
@@ -863,19 +869,31 @@ export default function HomePage() {
             <h2 className="mb-3 text-xl font-semibold text-brand-900">Plan rapide du jour</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-1">
-                <p className="text-sm font-semibold text-brand-900">Rubriques du jour</p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">🧭</span>
+                  Rubriques du jour
+                </p>
                 <p className="mt-1 text-sm text-brand-700">Révision ciblée par matière.</p>
               </Link>
               <Link href="/probable-exercises" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-2">
-                <p className="text-sm font-semibold text-brand-900">Exercices probables</p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">🎯</span>
+                  Exercices probables
+                </p>
                 <p className="mt-1 text-sm text-brand-700">Sujets les plus fréquents à l&apos;examen.</p>
               </Link>
               <Link href="/focus" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-3">
-                <p className="text-sm font-semibold text-brand-900">Session Focus</p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">⏱️</span>
+                  Session Focus
+                </p>
                 <p className="mt-1 text-sm text-brand-700">Concentration en 25 minutes.</p>
               </Link>
               <Link href="/library" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-4">
-                <p className="text-sm font-semibold text-brand-900">Bibliothèque</p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">📚</span>
+                  Bibliothèque
+                </p>
                 <p className="mt-1 text-sm text-brand-700">PDF, ressources et fiches utiles.</p>
               </Link>
             </div>
@@ -903,7 +921,10 @@ export default function HomePage() {
           <div className="grid gap-3 sm:grid-cols-2">
             {managerQuickActions.map((action, idx) => (
               <Link key={action.href} href={action.href} className={`rounded-xl border border-brand-100 p-4 lift-card palette-card palette-${(idx % 4) + 1}`}>
-                <p className="text-sm font-semibold text-brand-900">{action.title}</p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-base">{action.icon || '✨'}</span>
+                  {action.title}
+                </p>
                 <p className="mt-1 text-sm text-brand-700">{action.desc}</p>
               </Link>
             ))}
