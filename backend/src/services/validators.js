@@ -127,6 +127,10 @@ const reviewLibraryBookSchema = Joi.object({
   status: Joi.string().valid('APPROVED', 'REJECTED').required()
 });
 
+const createLibraryPurchaseSchema = Joi.object({
+  paymentMethod: Joi.string().valid('MONCASH').default('MONCASH')
+});
+
 const privateMessageSchema = Joi.object({
   recipientId: Joi.number().integer().positive().required(),
   content: Joi.string().trim().min(1).max(5000).required()
@@ -227,6 +231,7 @@ module.exports = {
   submitQuizSchema,
   createLibraryBookSchema,
   reviewLibraryBookSchema,
+  createLibraryPurchaseSchema,
   privateMessageSchema,
   globalMessageSchema,
   catchupSessionCreateSchema,

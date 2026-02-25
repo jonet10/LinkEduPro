@@ -52,6 +52,7 @@ model Student {
   focusStatistics                                                     FocusStatistic[]
   homeChallengeVotes                                                  HomeChallengeVote[]
   reviewedLibraryBooks                                                LibraryBook[]                @relation("LibraryBookReviewer")
+  libraryPurchases                                                    LibraryPurchase[]
   uploadedLibraryBooks                                                LibraryBook[]                @relation("LibraryBookUploader")
   sentMessages                                                        Message[]                    @relation("MessageSender")
   nsiv_catchup_sessions_nsiv_catchup_sessions_created_byToStudent     nsiv_catchup_sessions[]      @relation("nsiv_catchup_sessions_created_byToStudent")
@@ -652,11 +653,34 @@ model LibraryBook {
   updatedAt   DateTime          @updatedAt
   reviewer    Student?          @relation("LibraryBookReviewer", fields: [reviewedBy], references: [id], map: "LibraryBook_reviewedBy_fkey")
   uploader    Student           @relation("LibraryBookUploader", fields: [uploadedBy], references: [id], onDelete: Cascade, map: "LibraryBook_uploadedBy_fkey")
+  purchases   LibraryPurchase[]
 
   @@index([isDeleted, createdAt], map: "LibraryBook_isDeleted_createdAt_idx")
   @@index([status, createdAt], map: "LibraryBook_status_createdAt_idx")
   @@index([uploadedBy, createdAt], map: "LibraryBook_uploadedBy_createdAt_idx")
   @@map("library_books")
+}
+
+model LibraryPurchase {
+  id             Int                   @id(map: "LibraryPurchase_pkey") @default(autoincrement())
+  bookId         Int
+  buyerId        Int
+  amount         Decimal               @db.Decimal(10, 2)
+  currency       String                @default("HTG")
+  status         LibraryPurchaseStatus @default(PENDING)
+  paymentMethod  RemedialPaymentMethod @default(MONCASH)
+  orderRef       String?               @unique(map: "LibraryPurchase_orderRef_key")
+  providerTxId   String?
+  paidAt         DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  book           LibraryBook           @relation(fields: [bookId], references: [id], onDelete: Cascade, map: "LibraryPurchase_bookId_fkey")
+  buyer          Student               @relation(fields: [buyerId], references: [id], onDelete: Cascade, map: "LibraryPurchase_buyerId_fkey")
+
+  @@unique([bookId, buyerId], map: "LibraryPurchase_bookId_buyerId_key")
+  @@index([buyerId, createdAt], map: "LibraryPurchase_buyerId_createdAt_idx")
+  @@index([bookId, status], map: "LibraryPurchase_bookId_status_idx")
+  @@map("library_purchases")
 }
 
 model UserNotification {
@@ -1208,6 +1232,13 @@ enum LibraryBookStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum LibraryPurchaseStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
 }
 
 enum EducationLevel {

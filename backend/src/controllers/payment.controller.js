@@ -1,6 +1,7 @@
 const prisma = require('../config/prisma');
 const { payForSession } = require('../services/remedial.service');
-const { isMoncashEnabled, parseOrderReference, retrieveMoncashPayment } = require('../services/moncash.service');
+const { isMoncashEnabled, parseOrderReference, parseLibraryOrderReference, retrieveMoncashPayment } = require('../services/moncash.service');
+const { confirmLibraryPurchaseByReference } = require('../services/library-purchase.service');
 
 function resolveProviderStatus(payload) {
   const raw = String(
@@ -80,7 +81,7 @@ function isWebhookAuthorized(req) {
 
 async function paymentReturn(req, res) {
   const frontendBase = String(process.env.FRONTEND_URL || '').trim();
-  const fallbackPath = '/rattrapage';
+  let fallbackPath = '/rattrapage';
   const query = new URLSearchParams();
 
   const transactionId = String(req.query.transactionId || '').trim();
@@ -103,9 +104,7 @@ async function paymentReturn(req, res) {
         status = 'failed';
       } else {
         const parsed = parseOrderReference(payment.reference);
-        if (!parsed || !parsed.sessionId || !parsed.studentId) {
-          status = 'failed';
-        } else {
+        if (parsed && parsed.sessionId && parsed.studentId) {
           sessionId = parsed.sessionId;
           const student = await prisma.student.findUnique({
             where: { id: parsed.studentId },
@@ -122,6 +121,19 @@ async function paymentReturn(req, res) {
               amount: payment.amount
             });
             if (!result.ok) status = 'failed';
+          }
+        } else {
+          const libraryRef = parseLibraryOrderReference(payment.reference);
+          if (!libraryRef) {
+            status = 'failed';
+          } else {
+            fallbackPath = '/library';
+            const confirmResult = await confirmLibraryPurchaseByReference({
+              orderRef: payment.reference,
+              providerTxId: payment.transactionId,
+              amount: payment.amount
+            });
+            if (!confirmResult.ok) status = 'failed';
           }
         }
       }
@@ -178,38 +190,59 @@ async function paymentWebhook(req, res, next) {
       }
 
       const parsedRef = parseOrderReference(payment.reference);
-      if (!parsedRef || !parsedRef.sessionId || !parsedRef.studentId) {
-        return res.status(400).json({
-          message: 'Référence MonCash invalide.',
-          accepted: false
+      if (parsedRef && parsedRef.sessionId && parsedRef.studentId) {
+        const student = await prisma.student.findUnique({
+          where: { id: parsedRef.studentId },
+          select: { id: true, role: true }
+        });
+        if (!student) {
+          return res.status(404).json({ message: 'Étudiant introuvable.', accepted: false });
+        }
+
+        const result = await payForSession({
+          student,
+          sessionId: parsedRef.sessionId,
+          paymentMethod: 'MONCASH',
+          amount: payment.amount
+        });
+
+        if (!result.ok) {
+          return res.status(result.status || 400).json({
+            message: result.message,
+            accepted: false
+          });
+        }
+
+        return res.json({
+          message: 'Paiement MonCash validé via webhook.',
+          accepted: true
         });
       }
 
-      const student = await prisma.student.findUnique({
-        where: { id: parsedRef.studentId },
-        select: { id: true, role: true }
-      });
-      if (!student) {
-        return res.status(404).json({ message: 'Étudiant introuvable.', accepted: false });
-      }
+      const libraryRef = parseLibraryOrderReference(payment.reference);
+      if (libraryRef) {
+        const confirmResult = await confirmLibraryPurchaseByReference({
+          orderRef: payment.reference,
+          providerTxId: payment.transactionId,
+          amount: payment.amount
+        });
 
-      const result = await payForSession({
-        student,
-        sessionId: parsedRef.sessionId,
-        paymentMethod: 'MONCASH',
-        amount: payment.amount
-      });
+        if (!confirmResult.ok) {
+          return res.status(confirmResult.status || 400).json({
+            message: confirmResult.message,
+            accepted: false
+          });
+        }
 
-      if (!result.ok) {
-        return res.status(result.status || 400).json({
-          message: result.message,
-          accepted: false
+        return res.json({
+          message: 'Achat livre MonCash validé via webhook.',
+          accepted: true
         });
       }
 
-      return res.json({
-        message: 'Paiement MonCash validé via webhook.',
-        accepted: true
+      return res.status(400).json({
+        message: 'Référence MonCash invalide.',
+        accepted: false
       });
     }
 

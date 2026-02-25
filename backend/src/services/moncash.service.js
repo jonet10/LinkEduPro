@@ -36,6 +36,11 @@ function buildOrderReference({ sessionId, studentId }) {
   return `LEP-${Number(sessionId)}-${Number(studentId)}-${now}`;
 }
 
+function buildLibraryOrderReference({ bookId, buyerId }) {
+  const now = Date.now();
+  return `LIB-${Number(bookId)}-${Number(buyerId)}-${now}`;
+}
+
 function parseOrderReference(reference) {
   const raw = String(reference || '').trim();
   const match = /^LEP-(\d+)-(\d+)-\d+$/i.exec(raw);
@@ -43,6 +48,16 @@ function parseOrderReference(reference) {
   return {
     sessionId: Number(match[1]),
     studentId: Number(match[2])
+  };
+}
+
+function parseLibraryOrderReference(reference) {
+  const raw = String(reference || '').trim();
+  const match = /^LIB-(\d+)-(\d+)-\d+$/i.exec(raw);
+  if (!match) return null;
+  return {
+    bookId: Number(match[1]),
+    buyerId: Number(match[2])
   };
 }
 
@@ -130,7 +145,9 @@ module.exports = {
   getMoncashConfig,
   isMoncashEnabled,
   buildOrderReference,
+  buildLibraryOrderReference,
   parseOrderReference,
+  parseLibraryOrderReference,
   createMoncashPayment,
   retrieveMoncashPayment
 };

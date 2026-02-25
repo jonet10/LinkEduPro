@@ -40,7 +40,7 @@ function formatHTG(value) {
   }).format(amount);
 }
 
-function BookCard({ book, preordered = false, onPreorder = null }) {
+function BookCard({ book, preordered = false, onPreorder = null, onPurchase = null, purchasingId = null }) {
   return (
     <article className="card">
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -72,9 +72,14 @@ function BookCard({ book, preordered = false, onPreorder = null }) {
             </button>
           </div>
         </div>
-      ) : book.isPaid ? (
-        <button type="button" className="btn-secondary mt-4" disabled>
-          Livre payant ({formatHTG(book.price)}) - Achat bientot disponible
+      ) : book.isPaid && !book.canAccess ? (
+        <button
+          type="button"
+          className="btn-primary mt-4"
+          onClick={() => onPurchase?.(book)}
+          disabled={purchasingId === book.id}
+        >
+          {purchasingId === book.id ? 'Redirection...' : `Acheter (${formatHTG(book.price)})`}
         </button>
       ) : (
         <a className="btn-primary mt-4 inline-block" href={getStorageUrl(book.fileUrl)} target="_blank" rel="noreferrer">Ouvrir le PDF</a>
@@ -93,6 +98,7 @@ export default function LibraryPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [purchasingId, setPurchasingId] = useState(null);
   const [preorderedBooks, setPreorderedBooks] = useState([]);
 
   const [title, setTitle] = useState('');
@@ -148,6 +154,17 @@ export default function LibraryPage() {
     setStudent(me);
     loadBooks();
   }, [router]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const query = new URLSearchParams(window.location.search);
+    const provider = String(query.get('provider') || '').trim().toLowerCase();
+    const payment = String(query.get('payment') || '').trim().toLowerCase();
+    if (provider === 'moncash') {
+      if (payment === 'success') setSuccess('Achat validé. Le livre est maintenant accessible.');
+      if (payment === 'failed') setError('Paiement non validé.');
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -247,6 +264,36 @@ export default function LibraryPage() {
     }
   }
 
+  async function purchaseBook(book) {
+    const token = getToken();
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      setError('');
+      setSuccess('');
+      setPurchasingId(book.id);
+      const data = await apiClient(`/library/books/${book.id}/purchase`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({ paymentMethod: 'MONCASH' })
+      });
+
+      if (data.redirectUrl && typeof window !== 'undefined') {
+        window.location.assign(data.redirectUrl);
+        return;
+      }
+      setSuccess(data.message || 'Achat validé.');
+      await loadBooks();
+    } catch (e) {
+      setError(e.message || 'Impossible de lancer cet achat.');
+    } finally {
+      setPurchasingId(null);
+    }
+  }
+
   return (
     <section className="space-y-6">
       <div className="card">
@@ -327,6 +374,8 @@ export default function LibraryPage() {
               book={book}
               preordered={preorderedBooks.includes(book.id)}
               onPreorder={savePreorder}
+              onPurchase={purchaseBook}
+              purchasingId={purchasingId}
             />
           ))}
         </div>
