@@ -49,15 +49,16 @@ function BookCard({ book, preordered = false, onPreorder = null }) {
           {book.upcoming ? 'Bientôt disponible' : 'Approuvé'}
         </span>
       </div>
-      {book.coverImage ? (
+      {(book.coverImageUrl || book.coverImage) ? (
         <img
-          src={book.coverImage}
+          src={getStorageUrl(book.coverImageUrl || book.coverImage)}
           alt={`Couverture - ${book.title}`}
           className="mb-3 h-52 w-full rounded-lg border border-brand-100 object-cover"
         />
       ) : null}
       <p className="text-sm text-brand-700">{book.description || 'Aucune description'}</p>
       <p className="mt-2 text-xs text-brand-500">{book.subject} | {book.level}</p>
+      {book.isPaid && !book.upcoming ? <p className="mt-2 text-sm font-semibold text-brand-900">Prix: {formatHTG(book.price)}</p> : null}
       {book.upcoming ? (
         <div className="mt-4 space-y-2">
           <p className="text-sm font-semibold text-brand-900">Prix: {formatHTG(book.priceHtg)}</p>
@@ -71,6 +72,10 @@ function BookCard({ book, preordered = false, onPreorder = null }) {
             </button>
           </div>
         </div>
+      ) : book.isPaid ? (
+        <button type="button" className="btn-secondary mt-4" disabled>
+          Livre payant ({formatHTG(book.price)}) - Achat bientot disponible
+        </button>
       ) : (
         <a className="btn-primary mt-4 inline-block" href={getStorageUrl(book.fileUrl)} target="_blank" rel="noreferrer">Ouvrir le PDF</a>
       )}
@@ -94,7 +99,10 @@ export default function LibraryPage() {
   const [subject, setSubject] = useState('');
   const [level, setLevel] = useState('');
   const [description, setDescription] = useState('');
-  const [file, setFile] = useState(null);
+  const [isPaid, setIsPaid] = useState(false);
+  const [price, setPrice] = useState('');
+  const [coverImage, setCoverImage] = useState(null);
+  const [pdfFile, setPdfFile] = useState(null);
 
   const canUpload = useMemo(() => {
     return student && ['ADMIN', 'TEACHER'].includes(student.role);
@@ -166,8 +174,12 @@ export default function LibraryPage() {
   async function onSubmitBook(e) {
     e.preventDefault();
 
-    if (!file) {
+    if (!pdfFile) {
       setError('Fichier PDF requis.');
+      return;
+    }
+    if (isPaid && Number(price || 0) <= 0) {
+      setError('Prix requis pour un livre payant.');
       return;
     }
 
@@ -187,7 +199,10 @@ export default function LibraryPage() {
       form.append('subject', subject);
       form.append('level', level);
       form.append('description', description);
-      form.append('file', file);
+      form.append('isPaid', String(isPaid));
+      form.append('price', String(isPaid ? Number(price || 0) : 0));
+      form.append('file', pdfFile);
+      if (coverImage) form.append('coverImage', coverImage);
 
       await apiClient('/library/books', {
         method: 'POST',
@@ -199,7 +214,10 @@ export default function LibraryPage() {
       setSubject('');
       setLevel('');
       setDescription('');
-      setFile(null);
+      setIsPaid(false);
+      setPrice('');
+      setCoverImage(null);
+      setPdfFile(null);
       setSuccess('Livre soumis avec succès.');
       await loadBooks();
     } catch (e) {
@@ -247,7 +265,15 @@ export default function LibraryPage() {
             <input className="input" placeholder="Titre" value={title} onChange={(e) => setTitle(e.target.value)} required />
             <input className="input" placeholder="Matière" value={subject} onChange={(e) => setSubject(e.target.value)} required />
             <input className="input" placeholder="Niveau" value={level} onChange={(e) => setLevel(e.target.value)} required />
-            <input className="input" type="file" accept="application/pdf,.pdf" onChange={(e) => setFile(e.target.files?.[0] || null)} required />
+            <input className="input" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" onChange={(e) => setCoverImage(e.target.files?.[0] || null)} />
+            <input className="input md:col-span-2" type="file" accept="application/pdf,.pdf" onChange={(e) => setPdfFile(e.target.files?.[0] || null)} required />
+            <label className="inline-flex items-center gap-2 text-sm text-brand-800">
+              <input type="checkbox" checked={isPaid} onChange={(e) => setIsPaid(e.target.checked)} />
+              Livre payant
+            </label>
+            {isPaid ? (
+              <input className="input" type="number" min={1} step="0.01" placeholder="Prix (HTG)" value={price} onChange={(e) => setPrice(e.target.value)} required />
+            ) : null}
             <textarea
               className="input md:col-span-2"
               placeholder="Description"
@@ -270,6 +296,14 @@ export default function LibraryPage() {
               <article key={book.id} className="rounded-xl border border-brand-100 p-4">
                 <h3 className="font-semibold text-brand-900">{book.title}</h3>
                 <p className="text-sm text-brand-700">{book.subject} | {book.level}</p>
+                {book.coverImageUrl ? (
+                  <img
+                    src={getStorageUrl(book.coverImageUrl)}
+                    alt={`Couverture - ${book.title}`}
+                    className="mt-2 h-40 w-full rounded border border-brand-100 object-cover"
+                  />
+                ) : null}
+                {book.isPaid ? <p className="mt-2 text-sm font-semibold text-brand-900">Prix: {formatHTG(book.price)}</p> : null}
                 <p className="mt-1 text-xs text-brand-500">Ajouté par: {book.uploadedBy?.firstName} {book.uploadedBy?.lastName}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <a className="btn-secondary" href={getStorageUrl(book.fileUrl)} target="_blank" rel="noreferrer">Voir PDF</a>

@@ -110,7 +110,17 @@ const createLibraryBookSchema = Joi.object({
   title: Joi.string().trim().min(3).max(180).required(),
   subject: Joi.string().trim().min(2).max(120).required(),
   level: Joi.string().trim().min(2).max(80).required(),
-  description: Joi.string().trim().max(500).allow('', null)
+  description: Joi.string().trim().max(500).allow('', null),
+  isPaid: Joi.boolean().default(false),
+  price: Joi.number().min(0).max(100000).default(0)
+}).custom((value, helpers) => {
+  if (value.isPaid && Number(value.price || 0) <= 0) {
+    return helpers.error('any.invalid', { message: 'Prix requis pour un livre payant.' });
+  }
+  if (!value.isPaid && Number(value.price || 0) !== 0) {
+    value.price = 0;
+  }
+  return value;
 });
 
 const reviewLibraryBookSchema = Joi.object({
@@ -197,7 +207,7 @@ const catchupSessionUpdateSchema = Joi.object({
 }).min(1);
 
 const catchupPaymentSchema = Joi.object({
-  paymentMethod: Joi.string().valid('MONCASH', 'NATCASH').required(),
+  paymentMethod: Joi.string().valid('MONCASH', 'NATCASH', 'CARD', 'BANK_TRANSFER', 'CASH').required(),
   amount: Joi.number().positive().max(100000).optional()
 });
 

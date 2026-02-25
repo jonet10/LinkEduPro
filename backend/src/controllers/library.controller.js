@@ -10,7 +10,10 @@ function toClientBook(book) {
     subject: book.subject,
     level: book.level,
     description: book.description,
+    coverImageUrl: book.coverImageUrl,
     fileUrl: book.fileUrl,
+    isPaid: Boolean(book.isPaid),
+    price: Number(book.price || 0),
     status: book.status,
     uploadedBy: book.uploader
       ? {
@@ -69,12 +72,18 @@ async function listBooks(req, res, next) {
 
 async function submitBook(req, res, next) {
   try {
-    if (!req.file) {
+    const pdfFile = req.files?.file?.[0];
+    const coverFile = req.files?.coverImage?.[0];
+
+    if (!pdfFile) {
       return res.status(400).json({ message: 'Fichier PDF requis.' });
     }
 
     const autoApprove = isConfiguredSuperAdmin(req.user);
-    const fileUrl = `/storage/library-books/${path.basename(req.file.path)}`;
+    const fileUrl = `/storage/library-books/pdfs/${path.basename(pdfFile.path)}`;
+    const coverImageUrl = coverFile ? `/storage/library-books/covers/${path.basename(coverFile.path)}` : null;
+    const isPaid = String(req.body.isPaid || 'false').toLowerCase() === 'true';
+    const price = isPaid ? Number(req.body.price || 0) : 0;
 
     const book = await prisma.libraryBook.create({
       data: {
@@ -82,7 +91,10 @@ async function submitBook(req, res, next) {
         subject: req.body.subject,
         level: req.body.level,
         description: req.body.description || null,
+        coverImageUrl,
         fileUrl,
+        isPaid,
+        price,
         status: autoApprove ? 'APPROVED' : 'PENDING',
         uploadedBy: req.user.id,
         reviewedBy: autoApprove ? req.user.id : null,

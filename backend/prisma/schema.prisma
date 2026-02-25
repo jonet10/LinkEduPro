@@ -638,7 +638,10 @@ model LibraryBook {
   subject     String
   level       String
   description String?
+  coverImageUrl String?
   fileUrl     String
+  isPaid      Boolean           @default(false)
+  price       Decimal           @default(0) @db.Decimal(10, 2)
   status      LibraryBookStatus @default(PENDING)
   isDeleted   Boolean           @default(false)
   deletedAt   DateTime?
