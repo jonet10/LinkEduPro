@@ -295,17 +295,29 @@ export default function RattrapagePage() {
       </div>
 
       {canManage ? (
-        <div className="grid gap-3 md:grid-cols-4">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           <article className="card">
-            <p className="text-xs text-brand-700">Revenus prof</p>
+            <p className="text-xs text-brand-700">Revenus total (livres + rattrapage)</p>
             <p className="text-2xl font-bold text-brand-900">{formatHTG(teacherStats?.summary?.totalRevenue ?? 0)}</p>
           </article>
           <article className="card">
-            <p className="text-xs text-brand-700">Commission plateforme</p>
+            <p className="text-xs text-brand-700">Commission plateforme totale</p>
             <p className="text-2xl font-bold text-brand-900">{formatHTG(teacherStats?.summary?.totalCommission ?? 0)}</p>
           </article>
           <article className="card">
-            <p className="text-xs text-brand-700">Élèves inscrits</p>
+            <p className="text-xs text-brand-700">Revenus rattrapage (85%)</p>
+            <p className="text-2xl font-bold text-brand-900">{formatHTG(teacherStats?.summary?.totalRemedialRevenue ?? 0)}</p>
+          </article>
+          <article className="card">
+            <p className="text-xs text-brand-700">Revenus livres (90%)</p>
+            <p className="text-2xl font-bold text-brand-900">{formatHTG(teacherStats?.summary?.totalLibraryRevenue ?? 0)}</p>
+          </article>
+          <article className="card">
+            <p className="text-xs text-brand-700">Ventes de livres</p>
+            <p className="text-2xl font-bold text-brand-900">{teacherStats?.summary?.totalLibrarySales ?? 0}</p>
+          </article>
+          <article className="card">
+            <p className="text-xs text-brand-700">Élèves inscrits rattrapage</p>
             <p className="text-2xl font-bold text-brand-900">{teacherStats?.summary?.totalStudents ?? 0}</p>
           </article>
           <article className="card">
