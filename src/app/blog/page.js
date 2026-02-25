@@ -202,10 +202,10 @@ export default function BlogPage() {
         excerpt: form.excerpt.trim(),
         imageUrl: form.imageUrl.trim() || null,
         content: form.content.trim(),
-        postType: form.postType,
-        audienceScope: form.audienceScope,
-        isGlobal: form.audienceScope === 'GLOBAL',
-        schoolId: form.audienceScope === 'SCHOOL' ? Number(form.schoolId || 0) : null,
+        postType: 'ARTICLE',
+        audienceScope: 'GLOBAL',
+        isGlobal: true,
+        schoolId: null,
         categoryIds: form.categoryIds,
         tagIds: form.tagIds
       };
@@ -724,11 +724,9 @@ export default function BlogPage() {
               placeholder={composerPrompt}
             />
           </div>
-          <div className="grid grid-cols-2 gap-2 border-y border-brand-100 py-2 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 border-y border-brand-100 py-2">
             <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => onPickImage('create', 'camera')}>📷 Photo</button>
             <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => onPickImage('create', 'gallery')}>🖼️ Galerie</button>
-            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => setForm((prev) => ({ ...prev, postType: 'EXERCISE' }))}>🧠 Exercice</button>
-            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => setForm((prev) => ({ ...prev, audienceScope: 'GLOBAL' }))}>🌍 Public</button>
           </div>
 
           <div className="grid gap-3 md:grid-cols-1">
@@ -761,31 +759,6 @@ export default function BlogPage() {
           ) : null}
 
           <textarea className="input min-h-[140px]" placeholder={contentPlaceholder} value={form.content} onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))} />
-
-          <div className="grid gap-3 md:grid-cols-2">
-            <label className="text-sm text-slate-700">
-              Type
-              <select className="input mt-1" value={form.postType} onChange={(e) => setForm((prev) => ({ ...prev, postType: e.target.value }))}>
-                <option value="ARTICLE">Article</option>
-                <option value="EXERCISE">Exercice (prof/admin)</option>
-              </select>
-            </label>
-            <label className="text-sm text-slate-700">
-              Portée
-              <select className="input mt-1" value={form.audienceScope || 'GLOBAL'} onChange={(e) => setForm((prev) => ({ ...prev, audienceScope: e.target.value }))}>
-                <option value="GLOBAL">Global</option>
-                <option value="INTER_SCHOOL">Inter-école</option>
-                <option value="SCHOOL">École spécifique</option>
-              </select>
-            </label>
-
-            {form.audienceScope === 'SCHOOL' ? (
-              <label className="text-sm text-slate-700">
-                School ID
-                <input className="input mt-1" type="number" value={form.schoolId} onChange={(e) => setForm((prev) => ({ ...prev, schoolId: e.target.value }))} placeholder="Ex: 1" />
-              </label>
-            ) : null}
-          </div>
 
           <div className="grid gap-3 md:grid-cols-2">
             <div>
