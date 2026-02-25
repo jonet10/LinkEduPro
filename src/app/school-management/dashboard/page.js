@@ -73,7 +73,7 @@ export default function SchoolManagementDashboardPage() {
 
   function logout() {
     clearSchoolAuth();
-    router.push('/school-management/login');
+    router.push('/');
   }
 
   async function handleChangePassword(e) {
