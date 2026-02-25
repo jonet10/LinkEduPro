@@ -24,7 +24,7 @@ export default function RattrapagePage() {
   const [teachers, setTeachers] = useState([]);
   const [teacherStats, setTeacherStats] = useState(null);
   const [studentStats, setStudentStats] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('CASH');
+  const [paymentMethod, setPaymentMethod] = useState('MONCASH');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
@@ -276,6 +276,21 @@ export default function RattrapagePage() {
     }
   }
 
+  async function onConfirmPresence(sessionId) {
+    setError('');
+    setInfo('');
+    try {
+      const data = await apiClient(`/catchup/${sessionId}/confirm-presence`, {
+        method: 'POST',
+        token
+      });
+      setInfo(data.message || 'Présence confirmée.');
+      await refreshSessions();
+    } catch (e) {
+      setError(e.message || 'Impossible de confirmer la présence.');
+    }
+  }
+
   function formatHTG(value) {
     const amount = Number(value || 0);
     return new Intl.NumberFormat('fr-FR', {
@@ -394,9 +409,6 @@ export default function RattrapagePage() {
         <div className="card flex flex-wrap items-center gap-2">
           <p className="text-sm text-brand-700">Méthode de paiement :</p>
           <select className="input w-full max-w-xs" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-            <option value="CASH">Cash</option>
-            <option value="CARD">Carte</option>
-            <option value="BANK_TRANSFER">Virement</option>
             <option value="MONCASH">MonCash</option>
             <option value="NATCASH">NatCash (simulation)</option>
           </select>
@@ -437,6 +449,11 @@ export default function RattrapagePage() {
             <p className="mt-1 text-xs text-brand-700">
               Niveau: {session.level} | {session.isFree ? 'Gratuite' : `Prix: ${formatHTG(session.price)}`} | Places: {session.enrolledCount}/{session.maxParticipants}
             </p>
+            {canManage ? (
+              <p className="mt-1 text-xs text-brand-700">
+                Présences confirmées: {session.confirmedCount || 0}
+              </p>
+            ) : null}
             <p className="mt-1 text-xs text-brand-700">
               Audience: {session.invitationScope}
               {session.targetSchool ? ` | École: ${session.targetSchool}` : ''}
@@ -463,6 +480,9 @@ export default function RattrapagePage() {
                 ) : null}
                 {session.enrollment && session.enrollment.paymentStatus !== 'PAID' && !session.isFree ? (
                   <button className="btn-primary" onClick={() => onPay(session.id, session.price)}>Payer ({formatHTG(session.price)})</button>
+                ) : null}
+                {session.enrollment && session.isFree && !session.enrollment.accessGranted ? (
+                  <button className="btn-primary" onClick={() => onConfirmPresence(session.id)}>Confirmer ma présence</button>
                 ) : null}
               </div>
             ) : null}

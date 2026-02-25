@@ -9,6 +9,7 @@ const {
   updateCatchupSession,
   deleteCatchupSession,
   enrollInCatchupSession,
+  confirmCatchupPresence,
   payCatchupSession,
   getTeacherCatchupDashboard,
   getStudentCatchupDashboard
@@ -29,6 +30,7 @@ router.get('/dashboard/teacher', requireRoles(['ADMIN', 'TEACHER']), getTeacherC
 router.get('/dashboard/student', requireRoles(['STUDENT']), getStudentCatchupDashboard);
 router.post('/', requireRoles(['ADMIN', 'TEACHER']), validate(catchupSessionCreateSchema), createCatchupSession);
 router.post('/:id/enroll', requireRoles(['STUDENT']), enrollInCatchupSession);
+router.post('/:id/confirm-presence', requireRoles(['STUDENT']), confirmCatchupPresence);
 router.post('/:id/pay', requireRoles(['STUDENT']), validate(catchupPaymentSchema), payCatchupSession);
 router.patch('/:id', requireRoles(['ADMIN', 'TEACHER']), validate(catchupSessionUpdateSchema), updateCatchupSession);
 router.delete('/:id', requireRoles(['ADMIN', 'TEACHER']), deleteCatchupSession);

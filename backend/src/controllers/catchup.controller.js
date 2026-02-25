@@ -5,6 +5,7 @@ const {
   updateSession,
   deleteSession,
   enrollStudent,
+  confirmFreeSessionParticipation,
   payForSession,
   createMoncashCheckout,
   teacherDashboard,
@@ -187,6 +188,24 @@ async function payCatchupSession(req, res, next) {
   }
 }
 
+async function confirmCatchupPresence(req, res, next) {
+  try {
+    const sessionId = Number(req.params.id);
+    if (!Number.isInteger(sessionId) || sessionId <= 0) {
+      return res.status(400).json({ message: 'Session invalide.' });
+    }
+
+    const result = await confirmFreeSessionParticipation({
+      student: req.user,
+      sessionId
+    });
+    if (!result.ok) return res.status(result.status).json({ message: result.message });
+    return res.json({ message: result.message });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function getTeacherCatchupDashboard(req, res, next) {
   try {
     const result = await teacherDashboard(req.user.id);
@@ -221,6 +240,7 @@ module.exports = {
   updateCatchupSession,
   deleteCatchupSession,
   enrollInCatchupSession,
+  confirmCatchupPresence,
   payCatchupSession,
   getTeacherCatchupDashboard,
   getStudentCatchupDashboard

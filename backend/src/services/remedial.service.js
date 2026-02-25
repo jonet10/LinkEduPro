@@ -68,7 +68,7 @@ function isSessionExpired(session) {
   return Date.now() > end;
 }
 
-function mapSessionForResponse(session, enrollment) {
+function mapSessionForResponse(session, enrollment, confirmedCount = 0) {
   const startsAt = session.startTime;
   const endsAt = new Date(new Date(session.startTime).getTime() + Number(session.duration || 0) * 60000);
 
@@ -104,6 +104,7 @@ function mapSessionForResponse(session, enrollment) {
       ? `${session.targetTeacher.firstName || ''} ${session.targetTeacher.lastName || ''}`.trim()
       : null,
     enrolledCount: session._count?.enrollments || 0,
+    confirmedCount: Number(confirmedCount || 0),
     spotsLeft: Math.max(0, Number(session.maxParticipants || 0) - Number(session._count?.enrollments || 0)),
     enrollment: enrollment
       ? {
@@ -194,13 +195,31 @@ async function listSessions({ viewer, page = 1, pageSize = 20, level, subject })
     })
   ]);
 
+  const confirmedRows = sessions.length
+    ? await prisma.remedialEnrollment.groupBy({
+      by: ['sessionId'],
+      where: {
+        sessionId: { in: sessions.map((s) => s.id) },
+        accessGranted: true
+      },
+      _count: { _all: true }
+    })
+    : [];
+  const confirmedBySession = new Map(
+    confirmedRows.map((row) => [Number(row.sessionId), Number(row._count?._all || 0)])
+  );
+
   return {
     total,
     page: Math.max(page, 1),
     pageSize: take,
     sessions: sessions.map((session) => {
       const enrollment = Array.isArray(session.enrollments) ? session.enrollments[0] : null;
-      const mapped = mapSessionForResponse(session, enrollment);
+      const mapped = mapSessionForResponse(
+        session,
+        enrollment,
+        confirmedBySession.get(Number(session.id)) || 0
+      );
 
       let canAccessMeeting = false;
       if (viewer.role === 'ADMIN') canAccessMeeting = true;
@@ -430,16 +449,19 @@ async function enrollStudent({ student, sessionId }) {
     where: { sessionId_studentId: { sessionId, studentId: student.id } }
   });
   if (existing) {
+    const freeNeedsConfirmation = session.isFree && !existing.accessGranted;
     return {
       ok: true,
       enrollment: existing,
       requiresPayment: existing.paymentStatus !== 'PAID',
-      message: existing.paymentStatus === 'PAID' ? 'Déjà inscrit.' : 'Paiement en attente.'
+      message: freeNeedsConfirmation
+        ? 'Inscription enregistrée. Confirme ta présence pour accéder au lien.'
+        : (existing.paymentStatus === 'PAID' ? 'Déjà inscrit.' : 'Paiement en attente.')
     };
   }
 
   const paymentStatus = session.isFree ? 'PAID' : 'PENDING';
-  const accessGranted = session.isFree;
+  const accessGranted = false;
   const enrollment = await prisma.remedialEnrollment.create({
     data: {
       sessionId,
@@ -453,8 +475,47 @@ async function enrollStudent({ student, sessionId }) {
     ok: true,
     enrollment,
     requiresPayment: !session.isFree,
-    message: session.isFree ? 'Inscription validée.' : 'Inscription créée. Paiement requis.'
+    message: session.isFree
+      ? 'Inscription enregistrée. Confirme ta présence pour accéder au lien.'
+      : 'Inscription créée. Paiement requis.'
   };
+}
+
+async function confirmFreeSessionParticipation({ student, sessionId }) {
+  if (student.role !== 'STUDENT') {
+    return { ok: false, status: 403, message: 'Confirmation réservée aux élèves.' };
+  }
+
+  await syncSessionStatuses();
+  const session = await prisma.remedialSession.findUnique({
+    where: { id: sessionId }
+  });
+  if (!session || session.status !== 'SCHEDULED' || isSessionExpired(session)) {
+    return { ok: false, status: 404, message: 'Session indisponible.' };
+  }
+  if (!session.isFree) {
+    return { ok: false, status: 400, message: 'La confirmation manuelle est réservée aux sessions gratuites.' };
+  }
+
+  const enrollment = await prisma.remedialEnrollment.findUnique({
+    where: { sessionId_studentId: { sessionId, studentId: student.id } }
+  });
+  if (!enrollment) {
+    return { ok: false, status: 404, message: 'Inscription introuvable. Réserve d’abord ta place.' };
+  }
+  if (enrollment.accessGranted) {
+    return { ok: true, message: 'Présence déjà confirmée.' };
+  }
+
+  await prisma.remedialEnrollment.update({
+    where: { sessionId_studentId: { sessionId, studentId: student.id } },
+    data: {
+      paymentStatus: 'PAID',
+      accessGranted: true
+    }
+  });
+
+  return { ok: true, message: 'Présence confirmée. Accès accordé.' };
 }
 
 async function payForSession({ student, sessionId, paymentMethod, amount }) {
@@ -775,6 +836,7 @@ module.exports = {
   updateSession,
   deleteSession,
   enrollStudent,
+  confirmFreeSessionParticipation,
   payForSession,
   createMoncashCheckout,
   teacherDashboard,
