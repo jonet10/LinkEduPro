@@ -593,22 +593,29 @@ async function teacherDashboard(teacherId) {
 
   const totalStudents = sessions.reduce((sum, s) => sum + Number(s._count.enrollments || 0), 0);
 
-  const libraryPurchases = await prisma.libraryPurchase.findMany({
-    where: {
-      status: 'PAID',
-      ...(teacher.role === 'TEACHER' ? { book: { uploadedBy: teacherId } } : {})
-    },
-    include: {
-      book: {
-        select: {
-          id: true,
-          title: true,
-          uploadedBy: true
+  // Keep catchup dashboard available even if library purchase migrations are not yet applied.
+  let libraryPurchases = [];
+  try {
+    libraryPurchases = await prisma.libraryPurchase.findMany({
+      where: {
+        status: 'PAID',
+        ...(teacher.role === 'TEACHER' ? { book: { uploadedBy: teacherId } } : {})
+      },
+      include: {
+        book: {
+          select: {
+            id: true,
+            title: true,
+            uploadedBy: true
+          }
         }
-      }
-    },
-    orderBy: { createdAt: 'desc' }
-  });
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  } catch (error) {
+    const knownSchemaIssue = error?.code === 'P2021' || error?.code === 'P2022';
+    if (!knownSchemaIssue) throw error;
+  }
 
   const libraryRevenue = libraryPurchases.reduce((sum, row) => sum + Number(row.sellerAmount || 0), 0);
   const libraryCommission = libraryPurchases.reduce((sum, row) => sum + Number(row.platformCommission || 0), 0);
