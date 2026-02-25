@@ -115,7 +115,7 @@ export default function SubjectsPage() {
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 text-brand-900">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                   <SectionIcon name="nsiv" />
                 </span>
                 Espace NSIV
@@ -124,7 +124,7 @@ export default function SubjectsPage() {
             </Link>
             <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 text-brand-900">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                   <SectionIcon name="target" />
                 </span>
                 Exercices les plus probables
@@ -133,7 +133,7 @@ export default function SubjectsPage() {
             </Link>
             <Link href="/focus" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 text-brand-900">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                   <SectionIcon name="focus" />
                 </span>
                 Focus & entraînement
@@ -142,7 +142,7 @@ export default function SubjectsPage() {
             </Link>
             <Link href="/rattrapage" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 text-brand-900">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                   <SectionIcon name="video" />
                 </span>
                 Rattrapage Google Meet
@@ -151,7 +151,7 @@ export default function SubjectsPage() {
             </Link>
             <Link href="/subjects" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 text-brand-900">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                   <SectionIcon name="globe" />
                 </span>
                 Histoire-Géographie NSIV
@@ -160,7 +160,7 @@ export default function SubjectsPage() {
             </Link>
             <Link href="/subjects" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 text-brand-900">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                   <SectionIcon name="brain" />
                 </span>
                 Connaissance générale NSIV

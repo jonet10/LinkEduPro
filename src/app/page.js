@@ -846,7 +846,7 @@ export default function HomePage() {
           <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 lift-card palette-card palette-1">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                   <SectionIcon name="nsiv" />
                 </span>
                 Espace NSIV
@@ -855,7 +855,7 @@ export default function HomePage() {
             </Link>
             <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 lift-card palette-card palette-2">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                   <SectionIcon name="target" />
                 </span>
                 Exercices probables
@@ -875,7 +875,7 @@ export default function HomePage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-1">
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                     <SectionIcon name="compass" />
                   </span>
                   Rubriques du jour
@@ -884,7 +884,7 @@ export default function HomePage() {
               </Link>
               <Link href="/probable-exercises" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-2">
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                     <SectionIcon name="target" />
                   </span>
                   Exercices probables
@@ -893,7 +893,7 @@ export default function HomePage() {
               </Link>
               <Link href="/focus" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-3">
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                     <SectionIcon name="focus" />
                   </span>
                   Session Focus
@@ -902,7 +902,7 @@ export default function HomePage() {
               </Link>
               <Link href="/library" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-4">
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                     <SectionIcon name="library" />
                   </span>
                   Bibliothèque
@@ -935,7 +935,7 @@ export default function HomePage() {
             {managerQuickActions.map((action, idx) => (
               <Link key={action.href} href={action.href} className={`rounded-xl border border-brand-100 p-4 lift-card palette-card palette-${(idx % 4) + 1}`}>
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-brand-900">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
                     <SectionIcon name={action.icon || 'collection'} />
                   </span>
                   {action.title}
