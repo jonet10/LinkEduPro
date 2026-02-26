@@ -52,9 +52,9 @@ async function createPost(req, res, next) {
 
     const requestedSchoolId = req.body.schoolId ? Number(req.body.schoolId) : null;
     const requestedIsGlobal = req.body.isGlobal !== false;
-    const audienceScope = normalizeAudienceScope(req.body.audienceScope, requestedIsGlobal, requestedSchoolId);
-    const isGlobal = audienceScope === 'GLOBAL';
-    const schoolId = audienceScope === 'SCHOOL' ? requestedSchoolId : null;
+    let audienceScope = normalizeAudienceScope(req.body.audienceScope, requestedIsGlobal, requestedSchoolId);
+    let isGlobal = audienceScope === 'GLOBAL';
+    let schoolId = audienceScope === 'SCHOOL' ? requestedSchoolId : null;
     const postType = normalizePostType(req.body.postType);
     const categoryIds = (req.body.categoryIds || []).map(Number);
     const tagIds = (req.body.tagIds || []).map(Number);
@@ -64,6 +64,13 @@ async function createPost(req, res, next) {
     }
     if (postType === 'EXERCISE' && !['TEACHER', 'ADMIN'].includes(user.role)) {
       return res.status(403).json({ message: 'Seuls les professeurs et admins peuvent publier un exercice.' });
+    }
+
+    // Les publications des élèves restent dans le forum global.
+    if (user.role === 'STUDENT') {
+      audienceScope = 'GLOBAL';
+      isGlobal = true;
+      schoolId = null;
     }
 
     const isSuperAdmin = user.role === 'ADMIN' && process.env.SUPER_ADMIN_EMAIL && user.email === process.env.SUPER_ADMIN_EMAIL;
