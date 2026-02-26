@@ -253,15 +253,16 @@ export default function BlogPage() {
     setUpdateError('');
     setUpdateInfo('');
     try {
+      const isStudentRole = student?.role === 'STUDENT';
       const payload = {
         title: editForm.title.trim(),
         excerpt: editForm.excerpt.trim(),
         imageUrl: editForm.imageUrl.trim() || null,
         content: editForm.content.trim(),
-        postType: editForm.postType,
-        audienceScope: editForm.audienceScope,
-        isGlobal: editForm.audienceScope === 'GLOBAL',
-        schoolId: editForm.audienceScope === 'SCHOOL' ? Number(editForm.schoolId || 0) : null,
+        postType: isStudentRole ? 'ARTICLE' : editForm.postType,
+        audienceScope: isStudentRole ? 'GLOBAL' : editForm.audienceScope,
+        isGlobal: isStudentRole ? true : editForm.audienceScope === 'GLOBAL',
+        schoolId: isStudentRole ? null : (editForm.audienceScope === 'SCHOOL' ? Number(editForm.schoolId || 0) : null),
         categoryIds: editForm.categoryIds,
         tagIds: editForm.tagIds
       };
@@ -610,30 +611,32 @@ export default function BlogPage() {
                 ) : null}
                 <textarea className="input min-h-[120px]" value={editForm.content} onChange={(e) => setEditForm((prev) => ({ ...prev, content: e.target.value }))} placeholder="Contenu" />
 
-                <div className="grid gap-3 md:grid-cols-2">
-                  <label className="text-sm text-brand-700">
-                    Type
-                    <select className="input mt-1" value={editForm.postType} onChange={(e) => setEditForm((prev) => ({ ...prev, postType: e.target.value }))}>
-                      <option value="ARTICLE">Article</option>
-                      <option value="EXERCISE">Exercice</option>
-                    </select>
-                  </label>
-                  <label className="text-sm text-brand-700">
-                    Portée
-                    <select className="input mt-1" value={editForm.audienceScope || 'GLOBAL'} onChange={(e) => setEditForm((prev) => ({ ...prev, audienceScope: e.target.value }))}>
-                      <option value="GLOBAL">Global</option>
-                      <option value="INTER_SCHOOL">Inter-école</option>
-                      <option value="SCHOOL">École spécifique</option>
-                    </select>
-                  </label>
-
-                  {editForm.audienceScope === 'SCHOOL' ? (
+                {canModeratePosts ? (
+                  <div className="grid gap-3 md:grid-cols-2">
                     <label className="text-sm text-brand-700">
-                      School ID
-                      <input className="input mt-1" type="number" value={editForm.schoolId} onChange={(e) => setEditForm((prev) => ({ ...prev, schoolId: e.target.value }))} />
+                      Type
+                      <select className="input mt-1" value={editForm.postType} onChange={(e) => setEditForm((prev) => ({ ...prev, postType: e.target.value }))}>
+                        <option value="ARTICLE">Article</option>
+                        <option value="EXERCISE">Exercice</option>
+                      </select>
                     </label>
-                  ) : null}
-                </div>
+                    <label className="text-sm text-brand-700">
+                      Portée
+                      <select className="input mt-1" value={editForm.audienceScope || 'GLOBAL'} onChange={(e) => setEditForm((prev) => ({ ...prev, audienceScope: e.target.value }))}>
+                        <option value="GLOBAL">Global</option>
+                        <option value="INTER_SCHOOL">Inter-école</option>
+                        <option value="SCHOOL">École spécifique</option>
+                      </select>
+                    </label>
+
+                    {editForm.audienceScope === 'SCHOOL' ? (
+                      <label className="text-sm text-brand-700">
+                        School ID
+                        <input className="input mt-1" type="number" value={editForm.schoolId} onChange={(e) => setEditForm((prev) => ({ ...prev, schoolId: e.target.value }))} />
+                      </label>
+                    ) : null}
+                  </div>
+                ) : null}
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <div>
@@ -646,6 +649,7 @@ export default function BlogPage() {
                         </label>
                       ))}
                     </div>
+                    {categories.length === 0 ? <p className="text-xs text-brand-700">Aucune catégorie disponible.</p> : null}
                   </div>
 
                   <div>
@@ -658,6 +662,7 @@ export default function BlogPage() {
                         </label>
                       ))}
                     </div>
+                    {tags.length === 0 ? <p className="text-xs text-brand-700">Aucun tag disponible.</p> : null}
                   </div>
                 </div>
 
@@ -761,6 +766,7 @@ export default function BlogPage() {
                   </label>
                 ))}
               </div>
+              {categories.length === 0 ? <p className="text-xs text-brand-700">Aucune catégorie disponible.</p> : null}
             </div>
 
             <div>
@@ -773,6 +779,7 @@ export default function BlogPage() {
                   </label>
                 ))}
               </div>
+              {tags.length === 0 ? <p className="text-xs text-brand-700">Aucun tag disponible.</p> : null}
             </div>
           </div>
 
