@@ -13,6 +13,7 @@ export default function ProbableExercisesPage() {
   const [commentDrafts, setCommentDrafts] = useState({});
   const [feedback, setFeedback] = useState('');
   const [submittingKey, setSubmittingKey] = useState('');
+  const [expandedSubjects, setExpandedSubjects] = useState({});
   const [student, setStudent] = useState(null);
   const [token, setToken] = useState(null);
 
@@ -33,6 +34,15 @@ export default function ProbableExercisesPage() {
     if (key === 'MATHEMATIQUE') return normalized.includes('MATHEMAT');
     if (key === 'CHIMIE') return normalized.includes('CHIM');
     return false;
+  }
+
+  function isExpandedSubject(subject) {
+    return Boolean(expandedSubjects[subject]);
+  }
+
+  function getVisibleTopics(subject, topics) {
+    if (!Array.isArray(topics)) return [];
+    return isExpandedSubject(subject) ? topics : topics.slice(0, 6);
   }
 
   useEffect(() => {
@@ -197,7 +207,7 @@ export default function ProbableExercisesPage() {
                 <article key={subjectItem.subject} className="card space-y-3">
                   <h2 className="text-xl font-semibold text-brand-900">{subjectItem.subject}</h2>
                   <div className="space-y-2">
-                    {(subjectItem.topics || []).map((topicItem) => (
+                    {getVisibleTopics(subjectItem.subject, subjectItem.topics).map((topicItem) => (
                       <div key={`${subjectItem.subject}_${topicItem.topic}`} className="rounded-lg border border-brand-100 px-3 py-2">
                         <p className="font-semibold text-brand-900">{topicItem.topic}</p>
                         <p className="text-xs text-brand-700">Apparitions: {topicItem.frequency}</p>
@@ -268,6 +278,20 @@ export default function ProbableExercisesPage() {
                         </div>
                       </div>
                     ))}
+                    {(subjectItem.topics || []).length > 6 ? (
+                      <button
+                        type="button"
+                        className="btn-secondary !px-3 !py-1 text-xs"
+                        onClick={() =>
+                          setExpandedSubjects((prev) => ({
+                            ...prev,
+                            [subjectItem.subject]: !prev[subjectItem.subject]
+                          }))
+                        }
+                      >
+                        {isExpandedSubject(subjectItem.subject) ? 'Voir moins' : `Voir plus (${(subjectItem.topics || []).length - 6})`}
+                      </button>
+                    ) : null}
                     {(subjectItem.topics || []).length === 0 ? (
                       <p className="text-sm text-brand-700">Aucune donnée disponible.</p>
                     ) : null}

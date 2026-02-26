@@ -56,6 +56,7 @@ export default function BlogPage() {
   const [actionInfo, setActionInfo] = useState('');
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [deletingPostId, setDeletingPostId] = useState(null);
   const [uploadingCreateImage, setUploadingCreateImage] = useState(false);
   const [uploadingEditImage, setUploadingEditImage] = useState(false);
   const [editingPostId, setEditingPostId] = useState(null);
@@ -323,6 +324,36 @@ export default function BlogPage() {
     }
   }
 
+  async function deletePost(postId) {
+    if (!token || !postId) return;
+    const confirmed = typeof window === 'undefined'
+      ? true
+      : window.confirm('Supprimer cette publication ?');
+    if (!confirmed) return;
+
+    setDeletingPostId(postId);
+    setActionError('');
+    setActionInfo('');
+    try {
+      await apiClient(`/community/blog/posts/${postId}`, {
+        method: 'DELETE',
+        token
+      });
+      setActionInfo('Publication supprimée.');
+      if (expandedPostId === postId) {
+        setExpandedPostId(null);
+      }
+      if (editingPostId === postId) {
+        setEditingPostId(null);
+      }
+      await load();
+    } catch (e) {
+      setActionError(e.message || 'Erreur lors de la suppression.');
+    } finally {
+      setDeletingPostId(null);
+    }
+  }
+
   async function toggleCommentsPanel(postId) {
     setOpenComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
     if (!commentsByPost[postId]) {
@@ -579,7 +610,16 @@ export default function BlogPage() {
         {canEdit ? (
           <div>
             {editingPostId !== post.id ? (
-              <button className="btn-secondary" onClick={() => openEdit(post)}>modifier</button>
+              <div className="flex flex-wrap gap-2 px-4 pb-4">
+                <button className="btn-secondary" onClick={() => openEdit(post)}>modifier</button>
+                <button
+                  className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                  onClick={() => deletePost(post.id)}
+                  disabled={deletingPostId === post.id}
+                >
+                  {deletingPostId === post.id ? 'Suppression...' : 'Supprimer'}
+                </button>
+              </div>
             ) : (
               <div className="mt-3 space-y-3 rounded-lg border border-brand-100 p-3">
                 <p className="text-sm font-semibold">modifier la publication</p>
