@@ -63,19 +63,37 @@ export default function RattrapagePage() {
       return;
     }
 
-    Promise.all([
+    Promise.allSettled([
       apiClient('/catchup?page=1&pageSize=100', { token }),
       canManage ? apiClient('/catchup/teachers', { token }) : Promise.resolve({ teachers: [] }),
       canManage ? apiClient('/catchup/dashboard/teacher', { token }) : Promise.resolve(null),
       isStudent ? apiClient('/catchup/dashboard/student?page=1&pageSize=8', { token }) : Promise.resolve(null)
     ])
-      .then(([sessionsData, teachersData, teacherData, studentData]) => {
-        setSessions(sessionsData.sessions || []);
-        setTeachers(teachersData.teachers || []);
-        setTeacherStats(teacherData);
-        setStudentStats(studentData);
+      .then(([sessionsRes, teachersRes, teacherDashRes, studentDashRes]) => {
+        if (sessionsRes.status === 'fulfilled') {
+          setSessions(sessionsRes.value.sessions || []);
+        } else {
+          setError(sessionsRes.reason?.message || 'Impossible de charger les rattrapages.');
+        }
+
+        if (teachersRes.status === 'fulfilled') {
+          setTeachers(teachersRes.value.teachers || []);
+        } else {
+          setTeachers([]);
+        }
+
+        if (teacherDashRes.status === 'fulfilled') {
+          setTeacherStats(teacherDashRes.value);
+        } else {
+          setTeacherStats(null);
+        }
+
+        if (studentDashRes.status === 'fulfilled') {
+          setStudentStats(studentDashRes.value);
+        } else {
+          setStudentStats(null);
+        }
       })
-      .catch((e) => setError(e.message || 'Impossible de charger les rattrapages.'))
       .finally(() => setLoading(false));
   }, [token, canView, router, canManage, isStudent]);
 
@@ -136,7 +154,8 @@ export default function RattrapagePage() {
       });
       await refreshSessions();
     } catch (e2) {
-      setError(e2.message || 'Erreur création rattrapage.');
+      const details = Array.isArray(e2?.data?.details) ? e2.data.details.join(' | ') : '';
+      setError(details || e2.message || 'Erreur création rattrapage.');
     } finally {
       setSaving(false);
     }
