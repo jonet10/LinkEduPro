@@ -328,26 +328,34 @@ async function createSession({ actor, payload }) {
     };
   })();
 
-  const recipients = await prisma.student.findMany({
-    where: recipientWhere,
-    select: { id: true }
-  });
-
-  if (recipients.length) {
-    await prisma.userNotification.createMany({
-      data: recipients.map((user) => ({
-        userId: user.id,
-        type: 'REMEDIAL_SESSION_NEW',
-        title: data.isFree ? 'Nouvelle session gratuite' : 'Nouvelle session payante',
-        message: data.invitationMessage || `${data.subject} · ${data.title}`,
-        entityType: 'CATCHUP_SESSION',
-        entityId: String(created.id)
-      }))
+  let notifiedCount = 0;
+  try {
+    const recipients = await prisma.student.findMany({
+      where: recipientWhere,
+      select: { id: true }
     });
-    emitRefresh(recipients.map((user) => user.id), ['notifications']);
+
+    if (recipients.length) {
+      await prisma.userNotification.createMany({
+        data: recipients.map((user) => ({
+          userId: user.id,
+          type: 'REMEDIAL_SESSION_NEW',
+          title: data.isFree ? 'Nouvelle session gratuite' : 'Nouvelle session payante',
+          message: data.invitationMessage || `${data.subject} · ${data.title}`,
+          entityType: 'CATCHUP_SESSION',
+          entityId: String(created.id)
+        }))
+      });
+      emitRefresh(recipients.map((user) => user.id), ['notifications']);
+      notifiedCount = recipients.length;
+    }
+  } catch (error) {
+    // A notification failure should not block session creation.
+    // eslint-disable-next-line no-console
+    console.error('[catchup] notification error after session create:', error?.message || error);
   }
 
-  return { ok: true, createdId: created.id, notifiedCount: recipients.length };
+  return { ok: true, createdId: created.id, notifiedCount };
 }
 
 async function updateSession({ actor, sessionId, payload }) {
