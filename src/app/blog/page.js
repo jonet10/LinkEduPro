@@ -222,7 +222,8 @@ export default function BlogPage() {
       setPage(1);
       await load();
     } catch (e) {
-      setCreateError(e.message || 'Erreur lors de la création de l’article.');
+      const details = Array.isArray(e?.data?.details) ? e.data.details.join(' | ') : '';
+      setCreateError(details || e.message || 'Erreur lors de la création de l’article.');
     } finally {
       setCreating(false);
     }
