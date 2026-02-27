@@ -405,8 +405,31 @@ export default function RattrapagePage() {
                 ))}
               </select>
             ) : null}
-            <input className="input" type="datetime-local" value={form.startTime} onChange={(e) => setForm((p) => ({ ...p, startTime: e.target.value }))} required />
-            <input className="input" type="number" min={15} max={600} step={5} value={form.duration} onChange={(e) => setForm((p) => ({ ...p, duration: e.target.value }))} required />
+            <label className="text-sm text-brand-700">
+              Date et heure
+              <input
+                className="input mt-1"
+                type="datetime-local"
+                value={form.startTime}
+                onChange={(e) => setForm((p) => ({ ...p, startTime: e.target.value }))}
+                required
+              />
+            </label>
+            <label className="text-sm text-brand-700">
+              Durée (minutes)
+              <input
+                className="input mt-1"
+                type="number"
+                min={15}
+                max={600}
+                step={5}
+                placeholder="Ex: 60"
+                value={form.duration}
+                onChange={(e) => setForm((p) => ({ ...p, duration: e.target.value }))}
+                required
+              />
+              <span className="mt-1 block text-xs text-brand-700">Entre 15 et 600 minutes.</span>
+            </label>
             <textarea className="input md:col-span-2" placeholder="Description (optionnel)" value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
             <textarea className="input md:col-span-2" placeholder="Message d'annonce personnalisé (optionnel)" value={form.invitationMessage} onChange={(e) => setForm((p) => ({ ...p, invitationMessage: e.target.value }))} />
             {!editingId ? (

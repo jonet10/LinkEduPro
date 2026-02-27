@@ -783,12 +783,26 @@ async function reviewReport(req, res, next) {
 async function softDeletePost(req, res, next) {
   try {
     const postId = Number(req.params.postId);
-    const post = await prisma.blogPost.findUnique({ where: { id: postId } });
+    const post = await prisma.blogPost.findUnique({
+      where: { id: postId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            role: true
+          }
+        }
+      }
+    });
     if (!post || post.isDeleted) {
       return res.status(404).json({ message: 'Post introuvable.' });
     }
 
-    if (req.user.role !== 'ADMIN' && req.user.id !== post.authorId) {
+    const isAdmin = req.user.role === 'ADMIN';
+    const isOwner = req.user.id === post.authorId;
+    const isTeacherDeletingStudentPost = req.user.role === 'TEACHER' && post.author?.role === 'STUDENT';
+
+    if (!isAdmin && !isOwner && !isTeacherDeletingStudentPost) {
       return res.status(403).json({ message: 'Action non autorisee.' });
     }
 

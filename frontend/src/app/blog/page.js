@@ -462,6 +462,11 @@ export default function BlogPage() {
 
   function renderPostCard(post, options = {}) {
     const canEdit = student && (student.role === 'ADMIN' || student.id === post.authorId);
+    const canDelete = Boolean(student && (
+      student.role === 'ADMIN'
+      || student.id === post.authorId
+      || (student.role === 'TEACHER' && post.author?.role === 'STUDENT')
+    ));
     const canApprovePending = canModeratePosts && !post.isApproved;
     const isExpanded = expandedPostId === post.id;
     const isPriority = Boolean(options.isPriority);
@@ -607,18 +612,20 @@ export default function BlogPage() {
           </>
         ) : null}
 
-        {canEdit ? (
+        {canEdit || canDelete ? (
           <div>
             {editingPostId !== post.id ? (
               <div className="flex flex-wrap gap-2 px-4 pb-4">
-                <button className="btn-secondary" onClick={() => openEdit(post)}>modifier</button>
-                <button
-                  className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
-                  onClick={() => deletePost(post.id)}
-                  disabled={deletingPostId === post.id}
-                >
-                  {deletingPostId === post.id ? 'Suppression...' : 'Supprimer'}
-                </button>
+                {canEdit ? <button className="btn-secondary" onClick={() => openEdit(post)}>modifier</button> : null}
+                {canDelete ? (
+                  <button
+                    className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                    onClick={() => deletePost(post.id)}
+                    disabled={deletingPostId === post.id}
+                  >
+                    {deletingPostId === post.id ? 'Suppression...' : 'Supprimer'}
+                  </button>
+                ) : null}
               </div>
             ) : (
               <div className="mt-3 space-y-3 rounded-lg border border-brand-100 p-3">
