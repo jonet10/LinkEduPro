@@ -123,6 +123,23 @@ const createLibraryBookSchema = Joi.object({
   return value;
 });
 
+const updateLibraryBookSchema = Joi.object({
+  title: Joi.string().trim().min(3).max(180).optional(),
+  subject: Joi.string().trim().min(2).max(120).optional(),
+  level: Joi.string().trim().min(2).max(80).optional(),
+  description: Joi.string().trim().max(500).allow('', null).optional(),
+  isPaid: Joi.boolean().optional(),
+  price: Joi.number().min(0).max(100000).optional()
+}).custom((value, helpers) => {
+  if (value.isPaid === true && Number(value.price || 0) <= 0) {
+    return helpers.error('any.invalid', { message: 'Prix requis pour un livre payant.' });
+  }
+  if (value.isPaid === false && value.price !== undefined && Number(value.price || 0) !== 0) {
+    value.price = 0;
+  }
+  return value;
+});
+
 const reviewLibraryBookSchema = Joi.object({
   status: Joi.string().valid('APPROVED', 'REJECTED').required()
 });
@@ -230,6 +247,7 @@ module.exports = {
   quizQuerySchema,
   submitQuizSchema,
   createLibraryBookSchema,
+  updateLibraryBookSchema,
   reviewLibraryBookSchema,
   createLibraryPurchaseSchema,
   privateMessageSchema,

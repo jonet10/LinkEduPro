@@ -213,6 +213,90 @@ async function reviewBook(req, res, next) {
   }
 }
 
+async function updateBook(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    const book = await prisma.libraryBook.findFirst({
+      where: { id, isDeleted: false },
+      include: {
+        uploader: { select: { id: true, firstName: true, lastName: true, role: true } },
+        reviewer: { select: { id: true, firstName: true, lastName: true } },
+        purchases: {
+          where: { buyerId: req.user.id },
+          select: { status: true }
+        }
+      }
+    });
+
+    if (!book) {
+      return res.status(404).json({ message: 'Livre introuvable.' });
+    }
+
+    const owner = book.uploadedBy === req.user.id;
+    const admin = req.user.role === 'ADMIN';
+    if (!owner && !admin) {
+      return res.status(403).json({ message: 'Action non autorisee.' });
+    }
+
+    const pdfFile = req.files?.file?.[0];
+    const coverFile = req.files?.coverImage?.[0];
+    const body = req.body || {};
+    const hasBodyChanges = ['title', 'subject', 'level', 'description', 'isPaid', 'price']
+      .some((key) => body[key] !== undefined);
+    if (!hasBodyChanges && !pdfFile && !coverFile) {
+      return res.status(400).json({ message: 'Aucune modification detectee.' });
+    }
+
+    const nextIsPaid = body.isPaid !== undefined
+      ? String(body.isPaid).toLowerCase() === 'true'
+      : book.isPaid;
+
+    const nextPrice = nextIsPaid
+      ? (body.price !== undefined ? Number(body.price || 0) : Number(book.price || 0))
+      : 0;
+
+    const isSuperAdmin = isConfiguredSuperAdmin(req.user);
+    const updated = await prisma.libraryBook.update({
+      where: { id },
+      data: {
+        ...(body.title !== undefined ? { title: String(body.title).trim() } : {}),
+        ...(body.subject !== undefined ? { subject: String(body.subject).trim() } : {}),
+        ...(body.level !== undefined ? { level: String(body.level).trim() } : {}),
+        ...(body.description !== undefined ? { description: String(body.description || '').trim() || null } : {}),
+        ...(body.isPaid !== undefined ? { isPaid: nextIsPaid } : {}),
+        ...(body.price !== undefined || body.isPaid !== undefined ? { price: nextPrice } : {}),
+        ...(pdfFile ? { fileUrl: `/storage/library-books/pdfs/${path.basename(pdfFile.path)}` } : {}),
+        ...(coverFile ? { coverImageUrl: `/storage/library-books/covers/${path.basename(coverFile.path)}` } : {}),
+        ...(isSuperAdmin
+          ? { status: 'APPROVED', reviewedBy: req.user.id, reviewedAt: new Date() }
+          : { status: 'PENDING', reviewedBy: null, reviewedAt: null })
+      },
+      include: {
+        uploader: { select: { id: true, firstName: true, lastName: true, role: true } },
+        reviewer: { select: { id: true, firstName: true, lastName: true } },
+        purchases: {
+          where: { buyerId: req.user.id },
+          select: { status: true }
+        }
+      }
+    });
+
+    if (!isSuperAdmin) {
+      await notifyAdmins({
+        type: 'BOOK_REVIEW_REQUIRED',
+        title: 'Livre modifie a valider',
+        message: `${updated.title} a été modifié et attend validation.`,
+        entityType: 'LibraryBook',
+        entityId: String(updated.id)
+      });
+    }
+
+    return res.json({ book: toClientBook(updated, req.user) });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function purchaseBook(req, res, next) {
   try {
     const id = Number(req.params.id);
@@ -275,6 +359,7 @@ module.exports = {
   listBooks,
   submitBook,
   reviewBook,
+  updateBook,
   purchaseBook,
   softDeleteBook
 };
