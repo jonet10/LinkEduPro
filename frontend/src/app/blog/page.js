@@ -478,50 +478,61 @@ export default function BlogPage() {
         className={`overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm ${isPriority ? 'ring-2 ring-brand-300' : ''}`}
       >
         <div className="space-y-3 p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-800">
-                {getInitials(post.author?.firstName, post.author?.lastName)}
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-brand-900">
-                  {post.author?.firstName} {post.author?.lastName}
-                </p>
+          <button
+            type="button"
+            className="w-full text-left"
+            onClick={() => togglePost(post.id)}
+            aria-label="Ouvrir publication"
+          >
+            <div className="flex items-start gap-3">
+              {post.imageUrl ? (
+                <img
+                  src={resolveMediaUrl(post.imageUrl)}
+                  alt={post.title}
+                  className="h-24 w-24 flex-shrink-0 rounded-lg border border-brand-100 object-cover sm:h-28 sm:w-36"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/images/article-placeholder.svg';
+                  }}
+                />
+              ) : (
+                <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-lg border border-brand-100 bg-brand-50 text-xs font-semibold text-brand-700 sm:h-28 sm:w-36">
+                  LinkEduPro
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
                 <p className="text-xs text-brand-700">
-                  {post.author?.role}
+                  {post.author?.firstName} {post.author?.lastName}
+                  {` · ${post.author?.role || ''}`}
                   {post.author?.role === 'TEACHER' ? ` · ${post.author?.teacherLevel || ''}` : ''}
                   {post.createdAt ? ` · ${formatRelativeTime(post.createdAt)}` : ''}
                 </p>
+                <p className="mt-1 text-xl font-semibold leading-snug text-brand-900">{post.title}</p>
+                <p
+                  className="mt-1 text-sm text-brand-700"
+                  style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {post.excerpt || post.content}
+                </p>
               </div>
             </div>
-            <button
-              type="button"
-              className="rounded-full px-2 py-1 text-brand-700 hover:bg-brand-50"
-              onClick={() => togglePost(post.id)}
-              aria-label="Ouvrir publication"
-            >
-              •••
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className="w-full text-left text-lg font-semibold text-brand-900 hover:text-brand-700"
-            onClick={() => togglePost(post.id)}
-          >
-            {post.title}
           </button>
 
           <div className="flex flex-wrap gap-2 text-xs">
-          <span className="rounded border border-brand-100 px-2 py-1">{post.postType === 'EXERCISE' ? 'Exercice' : 'Article'}</span>
-          <span className="rounded border border-brand-100 px-2 py-1">
-            {post.audienceScope === 'GLOBAL' ? 'Global' : post.audienceScope === 'INTER_SCHOOL' ? 'Inter-école' : 'École'}
-          </span>
-          {post.isApproved ? (
-            <span className="rounded border border-green-300 bg-green-50 px-2 py-1 text-green-700">Validé</span>
-          ) : (
-            <span className="rounded border border-amber-300 bg-amber-50 px-2 py-1 text-amber-700">En attente</span>
-          )}
+            <span className="rounded border border-brand-100 px-2 py-1">{post.postType === 'EXERCISE' ? 'Exercice' : 'Article'}</span>
+            <span className="rounded border border-brand-100 px-2 py-1">
+              {post.audienceScope === 'GLOBAL' ? 'Global' : post.audienceScope === 'INTER_SCHOOL' ? 'Inter-école' : 'École'}
+            </span>
+            {post.isApproved ? (
+              <span className="rounded border border-green-300 bg-green-50 px-2 py-1 text-green-700">Validé</span>
+            ) : (
+              <span className="rounded border border-amber-300 bg-amber-50 px-2 py-1 text-amber-700">En attente</span>
+            )}
           </div>
           {canApprovePending ? (
             <div>
@@ -531,20 +542,6 @@ export default function BlogPage() {
             </div>
           ) : null}
         </div>
-
-        {post.imageUrl ? (
-          <img
-            src={resolveMediaUrl(post.imageUrl)}
-            alt={post.title}
-            className="max-h-[480px] w-full border-y border-brand-100 object-cover"
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = '/images/article-placeholder.svg';
-            }}
-          />
-        ) : null}
-
-        {!isExpanded && post.excerpt ? <p className="px-4 py-3 text-sm text-brand-700">{post.excerpt}</p> : null}
 
         {isExpanded ? (
           <>
