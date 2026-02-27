@@ -128,6 +128,7 @@ export default function LibraryPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [editingBookId, setEditingBookId] = useState(null);
   const [purchasingId, setPurchasingId] = useState(null);
   const [preorderedBooks, setPreorderedBooks] = useState([]);
 
@@ -224,7 +225,7 @@ export default function LibraryPage() {
   async function onSubmitBook(e) {
     e.preventDefault();
 
-    if (!pdfFile) {
+    if (!editingBookId && !pdfFile) {
       setError('Fichier PDF requis.');
       return;
     }
@@ -254,8 +255,8 @@ export default function LibraryPage() {
       form.append('file', pdfFile);
       if (coverImage) form.append('coverImage', coverImage);
 
-      await apiClient('/library/books', {
-        method: 'POST',
+      await apiClient(editingBookId ? `/library/books/${editingBookId}` : '/library/books', {
+        method: editingBookId ? 'PATCH' : 'POST',
         token,
         body: form
       });
@@ -268,13 +269,51 @@ export default function LibraryPage() {
       setPrice('');
       setCoverImage(null);
       setPdfFile(null);
-      setSuccess('Livre soumis avec succès.');
+      setEditingBookId(null);
+      setSuccess(editingBookId ? 'Livre modifié avec succès.' : 'Livre soumis avec succès.');
       await loadBooks();
     } catch (e) {
-      setError(e.message || 'Erreur lors de la soumission du livre.');
+      setError(e.message || (editingBookId ? 'Erreur lors de la modification du livre.' : 'Erreur lors de la soumission du livre.'));
     } finally {
       setUploading(false);
     }
+  }
+
+  function canEditBook(book) {
+    if (!canUpload || !book || typeof book.id !== 'number') return false;
+    if (student?.role === 'ADMIN') return true;
+    return Number(book.uploadedBy?.id) === Number(student?.id);
+  }
+
+  function startEditBook(book) {
+    setEditingBookId(book.id);
+    setTitle(book.title || '');
+    setSubject(book.subject || '');
+    setLevel(book.level || '');
+    setDescription(book.description || '');
+    setIsPaid(Boolean(book.isPaid));
+    setPrice(book.isPaid ? String(book.price || '') : '');
+    setCoverImage(null);
+    setPdfFile(null);
+    setError('');
+    setSuccess(`Modification: ${book.title}`);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  function cancelEditBook() {
+    setEditingBookId(null);
+    setTitle('');
+    setSubject('');
+    setLevel('');
+    setDescription('');
+    setIsPaid(false);
+    setPrice('');
+    setCoverImage(null);
+    setPdfFile(null);
+    setError('');
+    setSuccess('');
   }
 
   async function reviewBook(id, status) {
@@ -340,13 +379,13 @@ export default function LibraryPage() {
 
       {canUpload ? (
         <section className="card">
-          <h2 className="mb-3 text-xl font-bold text-brand-900">Ajouter un livre PDF</h2>
+          <h2 className="mb-3 text-xl font-bold text-brand-900">{editingBookId ? 'Modifier un livre PDF' : 'Ajouter un livre PDF'}</h2>
           <form className="grid gap-3 md:grid-cols-2" onSubmit={onSubmitBook}>
             <input className="input" placeholder="Titre" value={title} onChange={(e) => setTitle(e.target.value)} required />
             <input className="input" placeholder="Matière" value={subject} onChange={(e) => setSubject(e.target.value)} required />
             <input className="input" placeholder="Niveau" value={level} onChange={(e) => setLevel(e.target.value)} required />
             <input className="input" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" onChange={(e) => setCoverImage(e.target.files?.[0] || null)} />
-            <input className="input md:col-span-2" type="file" accept="application/pdf,.pdf" onChange={(e) => setPdfFile(e.target.files?.[0] || null)} required />
+            <input className="input md:col-span-2" type="file" accept="application/pdf,.pdf" onChange={(e) => setPdfFile(e.target.files?.[0] || null)} required={!editingBookId} />
             <label className="inline-flex items-center gap-2 text-sm text-brand-800">
               <input type="checkbox" checked={isPaid} onChange={(e) => setIsPaid(e.target.checked)} />
               Livre payant
@@ -362,8 +401,13 @@ export default function LibraryPage() {
               rows={3}
             />
             <button className="btn-primary md:col-span-2" disabled={uploading} type="submit">
-              {uploading ? 'Envoi en cours...' : 'Soumettre le livre'}
+              {uploading ? (editingBookId ? 'Mise à jour...' : 'Envoi en cours...') : (editingBookId ? 'Sauvegarder les modifications' : 'Soumettre le livre')}
             </button>
+            {editingBookId ? (
+              <button className="btn-secondary md:col-span-2" onClick={cancelEditBook} type="button">
+                Annuler la modification
+              </button>
+            ) : null}
           </form>
         </section>
       ) : null}
@@ -387,6 +431,9 @@ export default function LibraryPage() {
                 <p className="mt-1 text-xs text-brand-500">Ajouté par: {book.uploadedBy?.firstName} {book.uploadedBy?.lastName}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <a className="btn-secondary" href={getStorageUrl(book.fileUrl)} target="_blank" rel="noreferrer">Voir PDF</a>
+                  {canEditBook(book) ? (
+                    <button className="btn-secondary" onClick={() => startEditBook(book)} type="button">Modifier</button>
+                  ) : null}
                   <button className="btn-primary" onClick={() => reviewBook(book.id, 'APPROVED')} type="button">Approuver</button>
                   <button className="btn-secondary" onClick={() => reviewBook(book.id, 'REJECTED')} type="button">Rejeter</button>
                 </div>
@@ -402,14 +449,20 @@ export default function LibraryPage() {
         {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {approvedBooks.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              preordered={preorderedBooks.includes(book.id)}
-              onPreorder={savePreorder}
-              onPurchase={purchaseBook}
-              purchasingId={purchasingId}
-            />
+            <div key={book.id} className="space-y-2">
+              <BookCard
+                book={book}
+                preordered={preorderedBooks.includes(book.id)}
+                onPreorder={savePreorder}
+                onPurchase={purchaseBook}
+                purchasingId={purchasingId}
+              />
+              {canEditBook(book) ? (
+                <button type="button" className="btn-secondary w-full" onClick={() => startEditBook(book)}>
+                  Modifier ce livre
+                </button>
+              ) : null}
+            </div>
           ))}
         </div>
         {!loading && approvedBooks.length === 0 ? <p className="text-sm text-brand-700">Aucun livre disponible.</p> : null}
