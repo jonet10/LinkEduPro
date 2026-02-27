@@ -12,6 +12,21 @@ function toDatetimeLocal(value) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+function minutesBetween(startValue, endValue) {
+  const start = new Date(startValue);
+  const end = new Date(endValue);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
+  const diff = Math.round((end.getTime() - start.getTime()) / 60000);
+  return diff > 0 ? diff : null;
+}
+
+function addMinutesLocal(startValue, durationValue) {
+  const start = new Date(startValue);
+  const duration = Number(durationValue || 0);
+  if (Number.isNaN(start.getTime()) || !Number.isFinite(duration) || duration <= 0) return '';
+  return toDatetimeLocal(new Date(start.getTime() + duration * 60000));
+}
+
 export default function RattrapagePage() {
   const router = useRouter();
   const token = useMemo(() => getToken(), []);
@@ -45,6 +60,7 @@ export default function RattrapagePage() {
     targetTeacherId: '',
     invitationMessage: '',
     startTime: '',
+    endTime: '',
     duration: '60'
   });
 
@@ -122,6 +138,15 @@ export default function RattrapagePage() {
     setError('');
     setInfo('');
     try {
+      const startDate = new Date(form.startTime);
+      const endDate = form.endTime ? new Date(form.endTime) : null;
+      if (Number.isNaN(startDate.getTime())) {
+        throw new Error('Date de début invalide.');
+      }
+      if (endDate && Number.isNaN(endDate.getTime())) {
+        throw new Error('Heure de fin invalide.');
+      }
+      const computedDuration = minutesBetween(form.startTime, form.endTime) || Number(form.duration || 0);
       await apiClient('/catchup', {
         method: 'POST',
         token,
@@ -130,8 +155,9 @@ export default function RattrapagePage() {
           isFree: Boolean(form.isFree),
           price: form.isFree ? 0 : Number(form.price || 0),
           maxParticipants: Number(form.maxParticipants || 0),
-          startTime: new Date(form.startTime).toISOString(),
-          duration: Number(form.duration || 0),
+          startTime: startDate.toISOString(),
+          endsAt: endDate ? endDate.toISOString() : null,
+          duration: computedDuration,
           targetTeacherId: form.invitationScope === 'TEACHER' ? Number(form.targetTeacherId || 0) : null
         })
       });
@@ -150,6 +176,7 @@ export default function RattrapagePage() {
         targetTeacherId: '',
         invitationMessage: '',
         startTime: '',
+        endTime: '',
         duration: '60'
       });
       await refreshSessions();
@@ -177,6 +204,7 @@ export default function RattrapagePage() {
       targetTeacherId: session.targetTeacherId ? String(session.targetTeacherId) : '',
       invitationMessage: session.invitationMessage || '',
       startTime: toDatetimeLocal(session.startTime || session.startsAt),
+      endTime: toDatetimeLocal(session.endsAt || (session.startTime ? new Date(new Date(session.startTime).getTime() + Number(session.duration || 0) * 60000) : null)),
       duration: session.duration ? String(session.duration) : '60'
     });
     setError('');
@@ -189,6 +217,15 @@ export default function RattrapagePage() {
     setError('');
     setInfo('');
     try {
+      const startDate = new Date(form.startTime);
+      const endDate = form.endTime ? new Date(form.endTime) : null;
+      if (Number.isNaN(startDate.getTime())) {
+        throw new Error('Date de début invalide.');
+      }
+      if (endDate && Number.isNaN(endDate.getTime())) {
+        throw new Error('Heure de fin invalide.');
+      }
+      const computedDuration = minutesBetween(form.startTime, form.endTime) || Number(form.duration || 0);
       await apiClient(`/catchup/${editingId}`, {
         method: 'PATCH',
         token,
@@ -197,8 +234,9 @@ export default function RattrapagePage() {
           isFree: Boolean(form.isFree),
           price: form.isFree ? 0 : Number(form.price || 0),
           maxParticipants: Number(form.maxParticipants || 0),
-          startTime: new Date(form.startTime).toISOString(),
-          duration: Number(form.duration || 0),
+          startTime: startDate.toISOString(),
+          endsAt: endDate ? endDate.toISOString() : null,
+          duration: computedDuration,
           targetTeacherId: form.invitationScope === 'TEACHER' ? Number(form.targetTeacherId || 0) : null
         })
       });
@@ -218,6 +256,7 @@ export default function RattrapagePage() {
         targetTeacherId: '',
         invitationMessage: '',
         startTime: '',
+        endTime: '',
         duration: '60'
       });
       await refreshSessions();
@@ -246,6 +285,65 @@ export default function RattrapagePage() {
       return;
     }
     await onCreate(e);
+  }
+
+  function onStartTimeChange(value) {
+    setForm((prev) => {
+      const next = { ...prev, startTime: value };
+      if (next.duration) {
+        next.endTime = addMinutesLocal(value, next.duration);
+      }
+      return next;
+    });
+  }
+
+  function onDurationChange(value) {
+    setForm((prev) => ({
+      ...prev,
+      duration: value,
+      endTime: prev.startTime ? addMinutesLocal(prev.startTime, value) : prev.endTime
+    }));
+  }
+
+  function onEndTimeChange(value) {
+    setForm((prev) => {
+      const computed = minutesBetween(prev.startTime, value);
+      return {
+        ...prev,
+        endTime: value,
+        duration: computed ? String(computed) : prev.duration
+      };
+    });
+  }
+
+  function onRepublish(session) {
+    setEditingId(null);
+    const sourceStart = session.startTime || session.startsAt;
+    const sourceEnd = session.endsAt || (sourceStart ? new Date(new Date(sourceStart).getTime() + Number(session.duration || 0) * 60000) : null);
+    setForm({
+      title: session.title || '',
+      level: session.level || 'NSIV',
+      subject: session.subject || 'Physique',
+      isFree: Boolean(session.isFree),
+      price: session.price != null ? String(session.price) : '0',
+      maxParticipants: session.maxParticipants ? String(session.maxParticipants) : '60',
+      description: session.description || '',
+      meetingLink: session.meetingLink || session.meetUrl || '',
+      invitationScope: session.invitationScope || 'GLOBAL',
+      targetSchool: session.targetSchool || '',
+      targetTeacherId: session.targetTeacherId ? String(session.targetTeacherId) : '',
+      invitationMessage: session.invitationMessage || '',
+      startTime: '',
+      endTime: '',
+      duration: session.duration ? String(session.duration) : '60'
+    });
+    setInfo(`Session chargée pour republication. Choisis une nouvelle date/heure de début et de fin.`);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    if (sourceStart || sourceEnd) {
+      // Keep previous values available as a hint in the form placeholders via info message only.
+    }
   }
 
   async function onEnroll(sessionId) {
@@ -319,8 +417,91 @@ export default function RattrapagePage() {
     }).format(amount);
   }
 
+  function getSessionEndDate(session) {
+    const start = new Date(session.startTime || session.startsAt);
+    if (Number.isNaN(start.getTime())) return null;
+    if (session.endsAt) {
+      const end = new Date(session.endsAt);
+      if (!Number.isNaN(end.getTime())) return end;
+    }
+    return new Date(start.getTime() + Number(session.duration || 0) * 60000);
+  }
+
+  function isArchivedSession(session) {
+    if (session.status && session.status !== 'SCHEDULED') return true;
+    const end = getSessionEndDate(session);
+    if (!end) return false;
+    return end.getTime() <= Date.now();
+  }
+
+  const activeSessions = canManage
+    ? sessions.filter((session) => !isArchivedSession(session))
+    : sessions;
+  const archivedSessions = canManage
+    ? sessions.filter((session) => isArchivedSession(session))
+    : [];
+
+  function renderSessionCard(session) {
+    const endDate = getSessionEndDate(session);
+    return (
+      <article key={session.id} className={`card ${highlightedSessionId === session.id ? 'ring-2 ring-brand-400' : ''}`}>
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">{session.subject}</p>
+        <h3 className="text-lg font-semibold text-brand-900">{session.title}</h3>
+        {session.description ? <p className="mt-1 text-sm text-brand-700">{session.description}</p> : null}
+        <p className="mt-1 text-xs text-brand-700">
+          Niveau: {session.level} | {session.isFree ? 'Gratuite' : `Prix: ${formatHTG(session.price)}`} | Places: {session.enrolledCount}/{session.maxParticipants}
+        </p>
+        {canManage ? (
+          <p className="mt-1 text-xs text-brand-700">
+            Présences confirmées: {session.confirmedCount || 0}
+          </p>
+        ) : null}
+        <p className="mt-1 text-xs text-brand-700">
+          Audience: {session.invitationScope}
+          {session.targetSchool ? ` | École: ${session.targetSchool}` : ''}
+          {session.targetTeacherName ? ` | Prof: ${session.targetTeacherName}` : ''}
+        </p>
+        {session.invitationMessage ? (
+          <p className="mt-2 rounded border border-brand-100 bg-brand-50 px-2 py-1 text-sm text-brand-800">
+            {session.invitationMessage}
+          </p>
+        ) : null}
+        <p className="mt-2 text-sm text-brand-700">Début: {new Date(session.startTime || session.startsAt).toLocaleString()}</p>
+        {endDate ? <p className="text-sm text-brand-700">Fin: {endDate.toLocaleString()}</p> : null}
+        <p className="text-sm text-brand-700">Durée: {session.duration} minutes</p>
+        {session.canAccessMeeting && session.meetUrl ? (
+          <a href={session.meetUrl} target="_blank" rel="noopener noreferrer" className="btn-primary mt-3 inline-block">
+            Rejoindre Google Meet
+          </a>
+        ) : (
+          <p className="mt-2 text-sm text-amber-700">Lien Meet verrouillé jusqu’à validation de l’accès.</p>
+        )}
+        {isStudent ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {!session.enrollment ? (
+              <button className="btn-secondary" onClick={() => onEnroll(session.id)}>Réserver ma place</button>
+            ) : null}
+            {session.enrollment && session.enrollment.paymentStatus !== 'PAID' && !session.isFree ? (
+              <button className="btn-primary" onClick={() => onPay(session.id, session.price)}>Payer ({formatHTG(session.price)})</button>
+            ) : null}
+            {session.enrollment && session.isFree && !session.enrollment.accessGranted ? (
+              <button className="btn-primary" onClick={() => onConfirmPresence(session.id)}>Confirmer ma présence</button>
+            ) : null}
+          </div>
+        ) : null}
+        {canManage ? (
+          <div className="mt-3 flex gap-2">
+            <button className="btn-secondary" onClick={() => startEdit(session)}>Modifier</button>
+            <button className="btn-secondary" onClick={() => onDelete(session.id)}>Supprimer</button>
+            <button className="btn-secondary" onClick={() => onRepublish(session)}>Reprogrammer</button>
+          </div>
+        ) : null}
+      </article>
+    );
+  }
+
   return (
-    <section className="space-y-5">
+    <section className="space-y-5 rattrapage-shell">
       <div className="card">
         <h1 className="text-3xl font-bold text-brand-900">Sessions de rattrapage</h1>
         <p className="mt-2 text-sm text-brand-700">
@@ -411,7 +592,7 @@ export default function RattrapagePage() {
                 className="input mt-1"
                 type="datetime-local"
                 value={form.startTime}
-                onChange={(e) => setForm((p) => ({ ...p, startTime: e.target.value }))}
+                onChange={(e) => onStartTimeChange(e.target.value)}
                 required
               />
             </label>
@@ -425,10 +606,20 @@ export default function RattrapagePage() {
                 step={5}
                 placeholder="Ex: 60"
                 value={form.duration}
-                onChange={(e) => setForm((p) => ({ ...p, duration: e.target.value }))}
+                onChange={(e) => onDurationChange(e.target.value)}
                 required
               />
               <span className="mt-1 block text-xs text-brand-700">Entre 15 et 600 minutes.</span>
+            </label>
+            <label className="text-sm text-brand-700 md:col-span-2">
+              Heure de fin
+              <input
+                className="input mt-1"
+                type="datetime-local"
+                value={form.endTime}
+                onChange={(e) => onEndTimeChange(e.target.value)}
+                required
+              />
             </label>
             <textarea className="input md:col-span-2" placeholder="Description (optionnel)" value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
             <textarea className="input md:col-span-2" placeholder="Message d'annonce personnalisé (optionnel)" value={form.invitationMessage} onChange={(e) => setForm((p) => ({ ...p, invitationMessage: e.target.value }))} />
@@ -482,62 +673,24 @@ export default function RattrapagePage() {
         </div>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {sessions.map((session) => (
-          <article key={session.id} className={`card ${highlightedSessionId === session.id ? 'ring-2 ring-brand-400' : ''}`}>
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">{session.subject}</p>
-            <h3 className="text-lg font-semibold text-brand-900">{session.title}</h3>
-            {session.description ? <p className="mt-1 text-sm text-brand-700">{session.description}</p> : null}
-            <p className="mt-1 text-xs text-brand-700">
-              Niveau: {session.level} | {session.isFree ? 'Gratuite' : `Prix: ${formatHTG(session.price)}`} | Places: {session.enrolledCount}/{session.maxParticipants}
-            </p>
-            {canManage ? (
-              <p className="mt-1 text-xs text-brand-700">
-                Présences confirmées: {session.confirmedCount || 0}
-              </p>
-            ) : null}
-            <p className="mt-1 text-xs text-brand-700">
-              Audience: {session.invitationScope}
-              {session.targetSchool ? ` | École: ${session.targetSchool}` : ''}
-              {session.targetTeacherName ? ` | Prof: ${session.targetTeacherName}` : ''}
-            </p>
-            {session.invitationMessage ? (
-              <p className="mt-2 rounded border border-brand-100 bg-brand-50 px-2 py-1 text-sm text-brand-800">
-                {session.invitationMessage}
-              </p>
-            ) : null}
-            <p className="mt-2 text-sm text-brand-700">Début: {new Date(session.startTime || session.startsAt).toLocaleString()}</p>
-            <p className="text-sm text-brand-700">Durée: {session.duration} minutes</p>
-            {session.canAccessMeeting && session.meetUrl ? (
-              <a href={session.meetUrl} target="_blank" rel="noopener noreferrer" className="btn-primary mt-3 inline-block">
-                Rejoindre Google Meet
-              </a>
-            ) : (
-              <p className="mt-2 text-sm text-amber-700">Lien Meet verrouillé jusqu’à validation de l’accès.</p>
-            )}
-            {isStudent ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {!session.enrollment ? (
-                  <button className="btn-secondary" onClick={() => onEnroll(session.id)}>Réserver ma place</button>
-                ) : null}
-                {session.enrollment && session.enrollment.paymentStatus !== 'PAID' && !session.isFree ? (
-                  <button className="btn-primary" onClick={() => onPay(session.id, session.price)}>Payer ({formatHTG(session.price)})</button>
-                ) : null}
-                {session.enrollment && session.isFree && !session.enrollment.accessGranted ? (
-                  <button className="btn-primary" onClick={() => onConfirmPresence(session.id)}>Confirmer ma présence</button>
-                ) : null}
-              </div>
-            ) : null}
-            {canManage ? (
-              <div className="mt-3 flex gap-2">
-                <button className="btn-secondary" onClick={() => startEdit(session)}>Modifier</button>
-                <button className="btn-secondary" onClick={() => onDelete(session.id)}>Supprimer</button>
-              </div>
-            ) : null}
-          </article>
-        ))}
-        {!loading && sessions.length === 0 ? <p className="text-sm text-brand-700">Aucune session planifiée pour le moment.</p> : null}
+      <div className="card">
+        <h2 className="text-lg font-semibold text-brand-900">Sessions actives</h2>
+        <div className="mt-3 grid gap-4 md:grid-cols-2">
+          {activeSessions.map((session) => renderSessionCard(session))}
+          {!loading && activeSessions.length === 0 ? <p className="text-sm text-brand-700">Aucune session active pour le moment.</p> : null}
+        </div>
       </div>
+
+      {canManage ? (
+        <div className="card">
+          <h2 className="text-lg font-semibold text-brand-900">Archives</h2>
+          <p className="mt-1 text-sm text-brand-700">Anciennes sessions terminées. Tu peux les reprogrammer rapidement.</p>
+          <div className="mt-3 grid gap-4 md:grid-cols-2">
+            {archivedSessions.map((session) => renderSessionCard(session))}
+            {!loading && archivedSessions.length === 0 ? <p className="text-sm text-brand-700">Aucune session archivée.</p> : null}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
