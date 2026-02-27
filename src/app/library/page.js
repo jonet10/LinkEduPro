@@ -31,6 +31,36 @@ const UPCOMING_LIBRARY_BOOKS = [
   }
 ];
 
+const DEFAULT_LIBRARY_BOOKS = [
+  {
+    id: 'seed-zophysique-2021',
+    title: 'Zophysique 2021',
+    subject: 'Physique',
+    level: 'NSIV',
+    description: 'Recueil Zophysique 2021.',
+    status: 'APPROVED',
+    upcoming: false,
+    isPaid: true,
+    price: 500,
+    canAccess: false,
+    coverImageUrl: '/storage/library-books/covers/zophysique-2021-cover.jpg',
+    fileUrl: '/storage/library-books/pdfs/zophysique-2021.pdf'
+  }
+];
+
+function mergeBooks(primary = [], extras = []) {
+  const merged = [...primary];
+  const known = new Set(primary.map((item) => `${String(item.title || '').toLowerCase()}::${String(item.fileUrl || '')}`));
+  extras.forEach((item) => {
+    const key = `${String(item.title || '').toLowerCase()}::${String(item.fileUrl || '')}`;
+    if (!known.has(key)) {
+      merged.push(item);
+      known.add(key);
+    }
+  });
+  return merged;
+}
+
 function formatHTG(value) {
   const amount = Number(value || 0);
   return new Intl.NumberFormat('fr-FR', {
@@ -133,11 +163,14 @@ export default function LibraryPage() {
     try {
       setError('');
       const data = await apiClient('/library/books', { token });
-      setApprovedBooks([...(data.approved || []), ...UPCOMING_LIBRARY_BOOKS]);
+      setApprovedBooks(mergeBooks([...(data.approved || []), ...UPCOMING_LIBRARY_BOOKS], DEFAULT_LIBRARY_BOOKS));
       setPendingBooks(data.pending || []);
       setRejectedBooks(data.rejected || []);
     } catch (e) {
       setError(e.message || 'Impossible de charger la bibliothèque');
+      setApprovedBooks([...UPCOMING_LIBRARY_BOOKS, ...DEFAULT_LIBRARY_BOOKS]);
+      setPendingBooks([]);
+      setRejectedBooks([]);
     } finally {
       setLoading(false);
     }
