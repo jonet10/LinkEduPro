@@ -336,6 +336,34 @@ export default function LibraryPage() {
     }
   }
 
+  function canDeleteBook(book) {
+    if (!book || typeof book.id !== 'number' || !student) return false;
+    if (student.role === 'ADMIN') return true;
+    return canUpload && Number(book.uploadedBy?.id) === Number(student.id);
+  }
+
+  async function deleteBook(id) {
+    const token = getToken();
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    if (typeof window !== 'undefined' && !window.confirm('Supprimer ce livre ?')) return;
+
+    try {
+      setError('');
+      setSuccess('');
+      await apiClient(`/library/books/${id}`, {
+        method: 'DELETE',
+        token
+      });
+      setSuccess('Livre supprimé.');
+      await loadBooks();
+    } catch (e) {
+      setError(e.message || 'Impossible de supprimer ce livre.');
+    }
+  }
+
   async function purchaseBook(book) {
     const token = getToken();
     if (!token) {
@@ -434,6 +462,9 @@ export default function LibraryPage() {
                   {canEditBook(book) ? (
                     <button className="btn-secondary" onClick={() => startEditBook(book)} type="button">Modifier</button>
                   ) : null}
+                  {canDeleteBook(book) ? (
+                    <button className="btn-secondary" onClick={() => deleteBook(book.id)} type="button">Supprimer</button>
+                  ) : null}
                   <button className="btn-primary" onClick={() => reviewBook(book.id, 'APPROVED')} type="button">Approuver</button>
                   <button className="btn-secondary" onClick={() => reviewBook(book.id, 'REJECTED')} type="button">Rejeter</button>
                 </div>
@@ -462,6 +493,11 @@ export default function LibraryPage() {
                   Modifier ce livre
                 </button>
               ) : null}
+              {canDeleteBook(book) ? (
+                <button type="button" className="btn-secondary w-full" onClick={() => deleteBook(book.id)}>
+                  Supprimer ce livre
+                </button>
+              ) : null}
             </div>
           ))}
         </div>
@@ -473,7 +509,14 @@ export default function LibraryPage() {
           <h2 className="mb-3 text-xl font-bold text-brand-900">Livres rejetés</h2>
           <div className="space-y-2 text-sm text-brand-700">
             {rejectedBooks.map((book) => (
-              <p key={book.id}>{book.title} ({book.subject} | {book.level})</p>
+              <div key={book.id} className="flex flex-wrap items-center justify-between gap-2 rounded border border-brand-100 px-3 py-2">
+                <p>{book.title} ({book.subject} | {book.level})</p>
+                {canDeleteBook(book) ? (
+                  <button type="button" className="btn-secondary" onClick={() => deleteBook(book.id)}>
+                    Supprimer
+                  </button>
+                ) : null}
+              </div>
             ))}
           </div>
         </section>
