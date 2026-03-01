@@ -1,12 +1,14 @@
-﻿require('dotenv').config();
+require('dotenv').config();
 const app = require('./app');
 const prisma = require('./config/prisma');
+const { seedDefaultLibraryBooks } = require('./services/library-seed.service');
 
 const port = process.env.PORT || 5000;
 
 async function start() {
   try {
     await prisma.$connect();
+    await seedDefaultLibraryBooks();
     app.listen(port, () => {
       console.log(`Backend running on http://localhost:${port}`);
     });
