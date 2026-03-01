@@ -320,7 +320,7 @@ export default function HeaderNav() {
     if (!isAuthed) return [];
     return [
       { href: '/', label: 'Accueil', icon: '🏠' },
-      { href: '/focus', label: 'Focus', icon: '🎧' },
+      { href: '/video-lessons', label: 'Classe Numerique', icon: '🎬' },
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
       { href: '/subjects', label: 'Rubriques', icon: '📘' },
@@ -335,7 +335,7 @@ export default function HeaderNav() {
   const mobileStudyItems = useMemo(
     () => [
       { href: '/subjects', label: 'Rubriques', icon: '📘' },
-      { href: '/focus', label: 'Focus', icon: '🎧' },
+      { href: '/video-lessons', label: 'Classe Numerique', icon: '🎬' },
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
       { href: '/progress', label: 'Progrès', icon: '📈' },

@@ -188,14 +188,14 @@ export default function SubjectsPage() {
               </p>
               <p className="mt-1 text-sm text-brand-700">Analyse des sujets récurrents du Bac NSIV.</p>
             </Link>
-            <Link href="/focus" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
+            <Link href="/video-lessons" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                  <SectionIcon name="focus" />
+                  <SectionIcon name="video" />
                 </span>
-                Focus & entraînement
+                Classe Numerique
               </p>
-              <p className="mt-1 text-sm text-brand-700">Sessions de concentration et suivi quotidien.</p>
+              <p className="mt-1 text-sm text-brand-700">Leçons et exercices vidéo, gratuits ou payants.</p>
             </Link>
             <Link href="/rattrapage" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
               <p className="flex items-center gap-2 font-semibold text-brand-900">
