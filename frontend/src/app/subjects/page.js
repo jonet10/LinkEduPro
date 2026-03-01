@@ -57,10 +57,22 @@ export default function SubjectsPage() {
   const [subjects, setSubjects] = useState([]);
   const [canSeeProbableExercises, setCanSeeProbableExercises] = useState(false);
   const [isNsivSectionVisible, setIsNsivSectionVisible] = useState(false);
+  const [isPublicView, setIsPublicView] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
   const currentStudent = useMemo(() => getStudent(), []);
   const nsivTrack = String(currentStudent?.nsivTrack || 'ORDINAIRE').toUpperCase();
+  const publicSubjects = useMemo(
+    () => ([
+      { name: 'Mathématiques', description: 'Algèbre, géométrie et logique appliquée.' },
+      { name: 'Physique', description: 'Mécanique, électricité et optique.' },
+      { name: 'Chimie', description: 'Réactions, stœchiométrie et solutions.' },
+      { name: 'Histoire-Géographie', description: 'Méthode, repères et exercices guidés.' },
+      { name: 'Philosophie', description: 'Dissertations, notions clés et analyses.' },
+      { name: 'Connaissance générale', description: 'Culture générale et sujets NSIV.' }
+    ]),
+    []
+  );
   const visibleSubjects = useMemo(() => {
     const filtered = !isNsivSectionVisible ? subjects : subjects.filter((subject) => {
       const normalized = normalizeSubjectName(subject.name);
@@ -82,7 +94,7 @@ export default function SubjectsPage() {
     const token = getToken();
     const student = getStudent();
     if (!token) {
-      router.push('/login');
+      setIsPublicView(true);
       return;
     }
     const isNsiv = isNsivStudent(student);
@@ -93,6 +105,51 @@ export default function SubjectsPage() {
       .then(setSubjects)
       .catch((e) => setError(e.message || 'Impossible de charger les matières'));
   }, [router]);
+
+  if (isPublicView) {
+    return (
+      <section className="space-y-5">
+        <article className="card public-card grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-brand-900">Apprendre par matière</h1>
+            <p className="mt-2 text-sm text-brand-700">
+              Découvre les rubriques et les types d’entraînement disponibles sur LinkEduPro.
+              Connecte-toi pour accéder aux quiz complets et au suivi personnalisé.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link href="/register" className="btn-primary">Créer un compte</Link>
+              <Link href="/login" className="btn-secondary">Se connecter</Link>
+            </div>
+          </div>
+          <div className="public-hero-media">
+            <img src="/images/tool-rubriques-nsiv.png" alt="Rubriques et apprentissage guidé" />
+          </div>
+        </article>
+
+        <article className="card public-card public-card-delay-1">
+          <h2 className="text-xl font-semibold text-brand-900">Ce que tu peux faire</h2>
+          <ul className="mt-3 space-y-2 text-sm text-brand-700">
+            <li>Apprendre avec des rubriques classées par matière.</li>
+            <li>Tester tes connaissances avec des séries d’entraînement.</li>
+            <li>Suivre ta progression après connexion.</li>
+          </ul>
+        </article>
+
+        <section className="card public-card public-card-delay-2">
+          <h2 className="text-xl font-semibold text-brand-900">Rubriques phares</h2>
+          <p className="mt-2 text-sm text-brand-700">Aperçu des matières disponibles.</p>
+          <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {publicSubjects.map((subject) => (
+              <article key={subject.name} className="rounded-lg border border-brand-100 p-4 public-card public-card-delay-3">
+                <h3 className="text-lg font-semibold text-brand-900">{subject.name}</h3>
+                <p className="mt-2 text-sm text-brand-700">{subject.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      </section>
+    );
+  }
 
   return (
     <section>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
@@ -34,6 +35,7 @@ export default function RattrapagePage() {
   const canManage = student?.role === 'ADMIN' || student?.role === 'TEACHER';
   const isStudent = student?.role === 'STUDENT';
   const canView = Boolean(student);
+  const [isPublicView, setIsPublicView] = useState(false);
 
   const [sessions, setSessions] = useState([]);
   const [teachers, setTeachers] = useState([]);
@@ -71,7 +73,8 @@ export default function RattrapagePage() {
 
   useEffect(() => {
     if (!token) {
-      router.push('/login');
+      setIsPublicView(true);
+      setLoading(false);
       return;
     }
     if (!canView) {
@@ -497,6 +500,45 @@ export default function RattrapagePage() {
           </div>
         ) : null}
       </article>
+    );
+  }
+
+  if (isPublicView) {
+    return (
+      <section className="space-y-5 rattrapage-shell">
+        <div className="card public-card grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-brand-900">Live / rattrapage</h1>
+            <p className="mt-2 text-sm text-brand-700">
+              Des sessions live animées par des professeurs pour rattraper un chapitre ou se préparer aux examens.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link href="/register" className="btn-primary">Créer un compte</Link>
+              <Link href="/login" className="btn-secondary">Se connecter</Link>
+            </div>
+          </div>
+          <div className="public-hero-media">
+            <img src="/images/tool-rattrapage-live.png" alt="Sessions de rattrapage en direct" />
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <article className="card public-card public-card-delay-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Exemple de session</p>
+            <h2 className="mt-2 text-lg font-semibold text-brand-900">Physique — Électricité</h2>
+            <p className="mt-2 text-sm text-brand-700">Session guidée avec exercices + corrections.</p>
+            <p className="mt-2 text-xs text-brand-700">Durée: 60 min • Format: Google Meet</p>
+          </article>
+          <article className="card public-card public-card-delay-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Pour les élèves</p>
+            <ul className="mt-2 space-y-2 text-sm text-brand-700">
+              <li>Réserve ta place et reçois le lien après validation.</li>
+              <li>Choisis des sessions gratuites ou payantes.</li>
+              <li>Rejoins les professeurs en direct.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
     );
   }
 

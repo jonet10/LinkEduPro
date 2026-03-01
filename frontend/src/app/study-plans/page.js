@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
@@ -31,6 +32,7 @@ export default function StudyPlansPage() {
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [editingPlanId, setEditingPlanId] = useState(null);
+  const [isPublicView, setIsPublicView] = useState(false);
 
   const [filterLevel, setFilterLevel] = useState('');
   const [filterSubject, setFilterSubject] = useState('');
@@ -62,7 +64,7 @@ export default function StudyPlansPage() {
 
   useEffect(() => {
     if (!token) {
-      router.push('/login');
+      setIsPublicView(true);
       return;
     }
     if (student?.role === 'STUDENT') {
@@ -152,6 +154,47 @@ export default function StudyPlansPage() {
     loadPlans();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [student?.role]);
+
+  if (isPublicView) {
+    return (
+      <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
+        <section className="card public-card grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-center">
+          <div>
+            <h1 className="text-2xl font-semibold text-brand-900">Programmes d’étude</h1>
+            <p className="text-sm text-brand-700">
+              Les plans de cours structurent les chapitres par matière et par niveau.
+              Connecte-toi pour accéder aux contenus complets ou publier tes plans.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-3">
+              <Link href="/register" className="btn-primary">Créer un compte</Link>
+              <Link href="/login" className="btn-secondary">Se connecter</Link>
+            </div>
+          </div>
+          <div className="public-hero-media">
+            <img src="/images/tool-quiz-bac.png" alt="Plans de cours structurés" />
+          </div>
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-3">
+          <article className="card public-card public-card-delay-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Terminale</p>
+            <h2 className="mt-2 text-lg font-semibold text-brand-900">Physique — Chapitre 3</h2>
+            <p className="mt-2 text-sm text-brand-700">Mécanique avancée + séries d’exercices corrigés.</p>
+          </article>
+          <article className="card public-card public-card-delay-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">NSIV</p>
+            <h2 className="mt-2 text-lg font-semibold text-brand-900">Mathématiques — Chapitre 2</h2>
+            <p className="mt-2 text-sm text-brand-700">Fonctions, limites et méthodes de résolution guidées.</p>
+          </article>
+          <article className="card public-card public-card-delay-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">9e</p>
+            <h2 className="mt-2 text-lg font-semibold text-brand-900">Histoire-Géo — Chapitre 1</h2>
+            <p className="mt-2 text-sm text-brand-700">Repères essentiels + quiz de validation rapide.</p>
+          </article>
+        </section>
+      </main>
+    );
+  }
 
   if (!token || student?.role === 'STUDENT') {
     return null;

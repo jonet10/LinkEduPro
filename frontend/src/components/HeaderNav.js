@@ -46,7 +46,6 @@ export default function HeaderNav() {
   const hidePublicMobileMenu = ['/login', '/register', '/forgot-password', '/verify-email'].includes(pathname || '');
 
   const publicStudyTools = useMemo(() => ([
-    { href: '/subjects', label: 'Flashcards', icon: '🟦' },
     { href: '/subjects', label: 'Apprendre', icon: '🧠' },
     { href: '/study-plans', label: "Programmes d'étude", icon: '🗂️' },
     { href: '/subjects', label: "Test d'entraînement", icon: '🧪' },
@@ -288,12 +287,6 @@ export default function HeaderNav() {
   const canSeeCatchup = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeStudyPlans = isAuthed && student?.role !== 'STUDENT';
   const avatarUrl = avatarBroken ? null : resolveMediaUrl(student?.photoUrl);
-  const showBackButton = Boolean(pathname) && pathname !== '/';
-
-  function onBack() {
-    router.push('/');
-  }
-
   function resolveNotificationHref(notification) {
     const entityId = notification?.entityId ? String(notification.entityId) : '';
     if (notification?.entityType === 'CATCHUP_SESSION' && entityId) {
@@ -450,39 +443,7 @@ export default function HeaderNav() {
 
   return (
     <>
-      {showBackButton ? (
-        <button
-          type="button"
-          className="absolute left-2 rounded-md border border-brand-100 bg-white/90 px-2 py-1 text-sm text-brand-900 shadow-sm hover:bg-brand-50 md:hidden"
-          onClick={onBack}
-          title="Retour"
-          aria-label="Retour"
-        >
-          <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-            <path
-              d="M15 18l-6-6 6-6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      ) : null}
-
       <div className="flex w-full items-center justify-end gap-2 text-sm md:w-auto md:justify-start">
-        {showBackButton ? (
-          <button
-            type="button"
-            className="hidden rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:inline-flex"
-            onClick={onBack}
-            title="Retour"
-            aria-label="Retour"
-          >
-            Retour
-          </button>
-        ) : null}
         <button
           type="button"
           className="hidden rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:inline-flex"
@@ -877,14 +838,6 @@ export default function HeaderNav() {
                         <span>👤 Profil</span>
                         <span className="text-slate-400">›</span>
                       </Link>
-                      <button
-                        type="button"
-                        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-white/10"
-                        onClick={onBack}
-                      >
-                        <span>↩ Retour</span>
-                        <span className="text-slate-400">›</span>
-                      </button>
                       <button
                         type="button"
                         className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-white/10"

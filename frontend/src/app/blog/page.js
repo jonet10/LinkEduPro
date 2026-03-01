@@ -63,6 +63,9 @@ export default function BlogPage() {
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [form, setForm] = useState(emptyForm());
   const [editForm, setEditForm] = useState(emptyForm());
+  const [publicItems, setPublicItems] = useState([]);
+  const [publicLoading, setPublicLoading] = useState(false);
+  const [publicError, setPublicError] = useState('');
   const [openComments, setOpenComments] = useState({});
   const [commentsByPost, setCommentsByPost] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
@@ -448,6 +451,20 @@ export default function BlogPage() {
   }, [page]);
 
   useEffect(() => {
+    if (token) return;
+    setPublicLoading(true);
+    setPublicError('');
+    apiClient('/public/blog/recent?limit=6')
+      .then((data) => {
+        setPublicItems(data.items || []);
+      })
+      .catch((e) => {
+        setPublicError(e.message || 'Impossible de charger les publications publiques.');
+      })
+      .finally(() => setPublicLoading(false));
+  }, [token]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const postId = Number(params.get('post') || 0);
     if (postId > 0) {
@@ -722,6 +739,69 @@ export default function BlogPage() {
           </div>
         ) : null}
       </article>
+    );
+  }
+
+  if (!token) {
+    return (
+      <main className="mx-auto max-w-4xl space-y-5 px-3 py-6 md:px-4">
+        <section className="card public-card grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-brand-900">Solutions expertes</h1>
+            <p className="mt-1 text-sm text-brand-700">
+              Consulte des publications validées et connecte-toi pour poser des questions ou publier tes ressources.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-3">
+              <a href="/register" className="btn-primary">Créer un compte</a>
+              <a href="/login" className="btn-secondary">Se connecter</a>
+            </div>
+          </div>
+          <div className="public-hero-media">
+            <img src="/images/tool-communaute-scolaire.png" alt="Communauté et solutions expertes" />
+          </div>
+        </section>
+
+        <section className="card public-card public-card-delay-1">
+          <h2 className="text-xl font-semibold text-brand-900">Publications récentes</h2>
+          {publicLoading ? <p className="mt-2 text-sm text-brand-700">Chargement...</p> : null}
+          {publicError ? <p className="mt-2 text-sm text-red-600">{publicError}</p> : null}
+          <div className="mt-4 grid gap-4">
+            {publicItems.map((post) => (
+              <article key={post.id} className="rounded-xl border border-brand-100 bg-white p-4 public-card public-card-delay-2">
+                <div className="flex items-start gap-3">
+                  {post.imageUrl ? (
+                    <img
+                      src={resolveMediaUrl(post.imageUrl)}
+                      alt={post.title}
+                      className="h-20 w-20 rounded-lg border border-brand-100 object-cover"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '/images/article-placeholder.svg';
+                      }}
+                    />
+                  ) : (
+                    <div className="flex h-20 w-20 items-center justify-center rounded-lg border border-brand-100 bg-brand-50 text-xs font-semibold text-brand-700">
+                      LinkEduPro
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-brand-700">
+                      {post.author?.firstName} {post.author?.lastName} · {post.author?.role || 'Membre'}
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-brand-900">{post.title}</p>
+                    <p className="mt-1 text-sm text-brand-700">
+                      {post.excerpt || 'Publication communautaire LinkEduPro.'}
+                    </p>
+                  </div>
+                </div>
+              </article>
+            ))}
+            {!publicLoading && publicItems.length === 0 ? (
+              <p className="text-sm text-brand-700">Aucune publication publique pour le moment.</p>
+            ) : null}
+          </div>
+        </section>
+      </main>
     );
   }
 

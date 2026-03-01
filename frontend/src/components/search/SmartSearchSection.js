@@ -9,7 +9,7 @@ import SearchResults from './SearchResults';
 import SearchSuggestions from './SearchSuggestions';
 import styles from './Search.module.css';
 
-export default function SmartSearchSection({ className = '' }) {
+export default function SmartSearchSection({ className = '', initialQuery = '' }) {
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({
     category: 'all',
@@ -27,6 +27,7 @@ export default function SmartSearchSection({ className = '' }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const rootRef = useRef(null);
+  const initialAppliedRef = useRef(false);
 
   const flatNavigationItems = useMemo(() => {
     if (!query.trim()) {
@@ -122,6 +123,14 @@ export default function SmartSearchSection({ className = '' }) {
       setLoadingResults(false);
     }
   }
+
+  useEffect(() => {
+    const seed = String(initialQuery || '').trim();
+    if (!seed || initialAppliedRef.current) return;
+    initialAppliedRef.current = true;
+    setQuery(seed);
+    runSearch(1, seed);
+  }, [initialQuery]);
 
   function onChangeFilter(key, value) {
     setFilters((prev) => ({ ...prev, [key]: value }));

@@ -591,7 +591,7 @@ export default function HomePage() {
         ) : null}
 
         <section className="landing-hero card">
-          <div>
+          <div className="landing-hero-copy">
             <p className="landing-kicker">LinkEduPro</p>
             <h1 className="landing-title">LinkEduPro, c&apos;est une plateforme éducative qui relie élèves, professeurs et écoles.</h1>
             <ul className="mt-5 space-y-2 text-base text-brand-900">
