@@ -18,6 +18,7 @@ export default function LoginPage() {
   const [resending, setResending] = useState(false);
   const [updatingEmail, setUpdatingEmail] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [redirectPath, setRedirectPath] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -25,6 +26,10 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search);
     const message = params.get('message');
     const verified = params.get('verified');
+    const redirect = String(params.get('redirect') || '').trim();
+    if (redirect) {
+      setRedirectPath(redirect);
+    }
     if (!message) return;
 
     if (verified === '1') {
@@ -50,7 +55,11 @@ export default function LoginPage() {
         body: JSON.stringify({ identifier, password })
       });
       setAuth(data.token, data.student);
-      router.push('/');
+      if (redirectPath && redirectPath.startsWith('/')) {
+        router.push(redirectPath);
+      } else {
+        router.push('/');
+      }
     } catch (err) {
       setError(err.message || 'Erreur de connexion');
       if (err.code === 'EMAIL_NOT_VERIFIED') {
