@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getDepartments, getCommunes, getSchools } from '@/lib/schools';
 
+const CONTACT_EMAIL = 'infolinkedupro@gmail.com';
+const CONTACT_WHATSAPP_URL = 'https://wa.me/50938378375';
+
 const initialState = {
-  role: 'STUDENT',
   academicLevel: '',
   nsivTrack: 'ORDINAIRE',
   firstName: '',
@@ -35,7 +37,6 @@ export default function RegisterPage() {
   const schools = useMemo(() => getSchools(form.department, form.commune), [form.department, form.commune]);
 
   const onChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  const isStudent = form.role === 'STUDENT';
 
   const onDepartmentChange = (e) => {
     const department = e.target.value;
@@ -81,14 +82,8 @@ export default function RegisterPage() {
       : chosenSchool;
 
     try {
-      if (!isStudent) {
-        setError("L'inscription directe est disponible uniquement pour les Élèves. Utilisez l'invitation enseignant ou la gestion scolaire.");
-        setLoading(false);
-        return;
-      }
-
       const payload = {
-        role: form.role,
+        role: 'STUDENT',
         academicLevel: form.academicLevel,
         nsivTrack: form.academicLevel === 'NSIV' ? form.nsivTrack : undefined,
         firstName: form.firstName,
@@ -121,30 +116,22 @@ export default function RegisterPage() {
 
   return (
     <section className="mx-auto max-w-2xl card">
-      <h1 className="mb-6 text-2xl font-bold text-brand-900">Inscription élève</h1>
+      <h1 className="mb-6 text-2xl font-bold text-brand-900">Inscription élève et universitaire</h1>
       <p className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">
-        Mise à jour: la liste officielle des écoles par commune est disponible. sélectionne ton département, ta commune et ton École.
+        Inscription directe réservée aux élèves (secondaire et universitaire). Sélectionne ton département, ta commune et ton École.
       </p>
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
-        <select className="input md:col-span-2" name="role" value={form.role} onChange={onChange}>
-          <option value="STUDENT">Élève</option>
-          <option value="TEACHER">Enseignant</option>
-          <option value="SCHOOL_ADMIN">Admin scolaire</option>
+        <select className="input md:col-span-2" name="academicLevel" value={form.academicLevel} onChange={onChange} required>
+          <option value="">Niveau académique</option>
+          <option value="9e">9e</option>
+          <option value="NSI">NSI</option>
+          <option value="NSII">NSII</option>
+          <option value="NSIII">NSIII</option>
+          <option value="NSIV">NSIV</option>
+          <option value="Universitaire">Universitaire</option>
         </select>
 
-        {isStudent ? (
-          <select className="input md:col-span-2" name="academicLevel" value={form.academicLevel} onChange={onChange} required>
-            <option value="">Niveau académique</option>
-            <option value="9e">9e</option>
-            <option value="NSI">NSI</option>
-            <option value="NSII">NSII</option>
-            <option value="NSIII">NSIII</option>
-            <option value="NSIV">NSIV</option>
-            <option value="Universitaire">Universitaire</option>
-          </select>
-        ) : null}
-
-        {isStudent && form.academicLevel === 'NSIV' ? (
+        {form.academicLevel === 'NSIV' ? (
           <select className="input md:col-span-2" name="nsivTrack" value={form.nsivTrack} onChange={onChange} required>
             <option value="ORDINAIRE">Filière NSIV : Ordinaire</option>
             <option value="SVT">Filière NSIV : SVT</option>
@@ -216,6 +203,29 @@ export default function RegisterPage() {
           {loading ? 'Inscription...' : 'Créer mon compte'}
         </button>
       </form>
+
+      <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="font-semibold">Vous êtes enseignant ou admin scolaire ?</p>
+        <p className="mt-1">
+          L&apos;inscription se fait sur demande validée par l&apos;équipe LinkEduPro.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <a
+            className="btn-primary"
+            href={`${CONTACT_WHATSAPP_URL}?text=Bonjour%20LinkEduPro%2C%20je%20souhaite%20faire%20une%20demande%20d%27inscription%20enseignant.`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Je suis enseignant
+          </a>
+          <a
+            className="btn-secondary"
+            href={`mailto:${CONTACT_EMAIL}?subject=Demande%20d%27inscription%20admin%20scolaire`}
+          >
+            Je suis admin scolaire
+          </a>
+        </div>
+      </div>
     </section>
   );
 }
