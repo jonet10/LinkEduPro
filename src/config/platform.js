@@ -6,7 +6,7 @@ export const CHANGELOG_ENTRIES = [
     date: '2026-02-17',
     highlights: [
       'Extension du profil utilisateur (photo, adresse, mode nocturne).',
-      'Module Focus Mode: musique par niveau, sessions Pomodoro, statistiques journalières.',
+      'Module Classe Numerique: publication de leçons et exercices vidéo (gratuits ou payants).',
       'Workflow de contenus par niveau avec validation administrateur.',
       'Nouveau socle quiz niveau (quizzes, questions, résultats).'
     ]

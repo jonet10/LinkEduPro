@@ -3,9 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getToken } from '@/lib/auth';
-import FocusMusicPlayer from '@/components/focus/FocusMusicPlayer';
-import PomodoroTimer from '@/components/focus/PomodoroTimer';
-import FocusStatsDashboard from '@/components/focus/FocusStatsDashboard';
 
 export default function FocusPage() {
   const router = useRouter();
@@ -13,24 +10,15 @@ export default function FocusPage() {
   useEffect(() => {
     if (!getToken()) {
       router.push('/login');
+      return;
     }
+    router.replace('/video-lessons');
   }, [router]);
 
   return (
-    <section className="space-y-6">
-      <div className="card">
-        <h1 className="text-3xl font-black text-brand-900">Focus Module</h1>
-        <p className="mt-2 text-sm text-brand-700">
-          Musique de concentration, Pomodoro configurable et statistiques d'étude quotidiennes / hebdomadaires.
-        </p>
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-2">
-        <FocusMusicPlayer />
-        <PomodoroTimer />
-      </div>
-
-      <FocusStatsDashboard />
+    <section className="card">
+      <h1 className="text-2xl font-black text-brand-900">Redirection en cours...</h1>
+      <p className="mt-2 text-sm text-brand-700">Le module Focus a été remplacé par Classe Numerique.</p>
     </section>
   );
 }

@@ -150,7 +150,7 @@ function getDailyObjective(student) {
   const byTrack = {
     SVT: {
       title: 'Objectif du jour - Filière SVT',
-      description: 'Travaille 1 série SVT, puis fais 15 minutes de Focus pour consolider.',
+      description: 'Travaille 1 série SVT, puis visionne une courte leçon vidéo pour consolider.',
       ctaLabel: 'Lancer SVT',
       ctaHref: '/subjects'
     },
@@ -180,9 +180,9 @@ function getDailyObjective(student) {
     },
     ORDINAIRE: {
       title: 'Objectif du jour - Filière Ordinaire',
-      description: 'Fais 1 quiz de base et 1 session Focus pour rester constant.',
+      description: 'Fais 1 quiz de base et 1 vidéo d’entraînement pour rester constant.',
       ctaLabel: 'Lancer ma session',
-      ctaHref: '/focus'
+      ctaHref: '/video-lessons'
     }
   };
 
@@ -933,14 +933,14 @@ export default function HomePage() {
                 </p>
                 <p className="mt-1 text-sm text-brand-700">Sujets les plus fréquents à l&apos;examen.</p>
               </Link>
-              <Link href="/focus" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-3">
+              <Link href="/video-lessons" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-3">
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                    <SectionIcon name="focus" />
+                    <SectionIcon name="video" />
                   </span>
-                  Session Focus
+                  Classe Numerique
                 </p>
-                <p className="mt-1 text-sm text-brand-700">Concentration en 25 minutes.</p>
+                <p className="mt-1 text-sm text-brand-700">Leçons et exercices vidéo gratuits ou payants.</p>
               </Link>
               <Link href="/library" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-4">
                 <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">

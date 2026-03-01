@@ -57,9 +57,9 @@ export default function NsivPage() {
           <h2 className="text-xl font-semibold text-brand-900">Exercices probables</h2>
           <p className="mt-2 text-sm text-brand-700">Sujets les plus fréquents analysés à partir des épreuves.</p>
         </Link>
-        <Link href="/focus" className="card hover:bg-brand-50">
-          <h2 className="text-xl font-semibold text-brand-900">Focus</h2>
-          <p className="mt-2 text-sm text-brand-700">Sessions Pomodoro et musique de concentration.</p>
+        <Link href="/video-lessons" className="card hover:bg-brand-50">
+          <h2 className="text-xl font-semibold text-brand-900">Classe Numerique</h2>
+          <p className="mt-2 text-sm text-brand-700">Leçons et exercices vidéo gratuits ou payants.</p>
         </Link>
         <Link href="/rattrapage" className="card hover:bg-brand-50">
           <h2 className="text-xl font-semibold text-brand-900">Rattrapage Google Meet</h2>
