@@ -14,7 +14,6 @@ const initialState = {
   sex: 'MALE',
   dateOfBirth: '',
   school: '',
-  gradeLevel: '',
   email: '',
   phone: '',
   password: '',
@@ -99,7 +98,6 @@ export default function RegisterPage() {
         school: schoolLabel,
         department: form.department,
         commune: form.commune,
-        gradeLevel: form.gradeLevel,
         email: form.email,
         phone: form.phone,
         password: form.password
@@ -206,7 +204,6 @@ export default function RegisterPage() {
           onChange={onChange}
         />
 
-        <input className="input" name="gradeLevel" placeholder="Niveau / Classe" value={form.gradeLevel} onChange={onChange} required />
         <input className="input" type="email" name="email" placeholder="Email" value={form.email} onChange={onChange} required />
         <input className="input" name="phone" placeholder="Téléphone (optionnel)" value={form.phone} onChange={onChange} />
         <input className="input md:col-span-2" type="password" name="password" placeholder="Mot de passe" value={form.password} onChange={onChange} required />

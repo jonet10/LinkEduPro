@@ -129,6 +129,9 @@ async function updateMyProfile(req, res, next) {
       if (!desiredAcademicLevel) {
         return res.status(400).json({ message: 'Niveau invalide.' });
       }
+      if (gradeLevel === undefined) {
+        data.gradeLevel = ACADEMIC_LEVEL_TO_API[desiredAcademicLevel] || existing.gradeLevel;
+      }
     }
 
     const requestedTrack = nsivTrack !== undefined

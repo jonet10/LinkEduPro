@@ -19,7 +19,7 @@ const registerSchema = Joi.object({
   school: Joi.string().trim().min(2).max(120).required(),
   department: Joi.string().trim().min(2).max(120).required(),
   commune: Joi.string().trim().min(2).max(120).required(),
-  gradeLevel: Joi.string().trim().min(1).max(50).required(),
+  gradeLevel: Joi.string().trim().min(1).max(50).optional().allow('', null),
   email: Joi.string().email({ tlds: { allow: false } }).required(),
   phone: Joi.string().trim().max(30).allow(null, ''),
   password: Joi.string().min(6).max(128).required()

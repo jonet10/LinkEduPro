@@ -62,7 +62,6 @@ export default function ProfilePage() {
     address: '',
     password: '',
     level: '',
-    gradeLevel: '',
     nsivTrack: 'ORDINAIRE',
     department: '',
     commune: '',
@@ -98,7 +97,6 @@ export default function ProfilePage() {
           address: p.address || '',
           password: '',
           level: normalizeAcademicLevel(p.academicLevel || p.level),
-          gradeLevel: p.gradeLevel || '',
           nsivTrack: p.nsivTrack || 'ORDINAIRE',
           department: parsedSchool.department,
           commune: parsedSchool.commune,
@@ -220,7 +218,6 @@ export default function ProfilePage() {
         phone: form.phone || null,
         address: form.address || null,
         school: schoolLabel || null,
-        gradeLevel: form.gradeLevel || null,
         nsivTrack: profile.role === 'STUDENT' && form.level === 'NSIV' ? form.nsivTrack : null
       };
       if (profile.role === 'STUDENT' && form.level) {
@@ -277,7 +274,6 @@ export default function ProfilePage() {
       address: profile.address || '',
       password: '',
       level: normalizeAcademicLevel(profile.academicLevel || profile.level),
-      gradeLevel: profile.gradeLevel || '',
       nsivTrack: profile.nsivTrack || 'ORDINAIRE',
       department: parsedSchool.department,
       commune: parsedSchool.commune,
@@ -302,7 +298,7 @@ export default function ProfilePage() {
       <div className="card">
         <h1 className="mb-4 text-2xl font-bold text-brand-900">Profil utilisateur</h1>
         <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">
-          Mise à jour disponible: la base des Écoles a été enrichie. Vérifie ton École et ta classe puis sauvegarde ton profil.
+          Mise à jour disponible: la base des Écoles a été enrichie. Vérifie ton École et ton niveau académique puis sauvegarde ton profil.
         </div>
 
         <div className="mb-6 flex flex-col items-center gap-3 sm:flex-row sm:items-start">
@@ -400,16 +396,6 @@ export default function ProfilePage() {
               onChange={(e) => onChangeField('schoolInput', e.target.value)}
               disabled={!editMode}
               placeholder="Saisis le nom de ton École si elle n'est pas listée"
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium">Niveau / Classe</label>
-            <input
-              className="input"
-              value={form.gradeLevel}
-              onChange={(e) => onChangeField('gradeLevel', e.target.value)}
-              disabled={!editMode}
-              placeholder="Ex: NSIV, Terminale A, Philo"
             />
           </div>
           <div className="sm:col-span-2">

@@ -198,6 +198,9 @@ async function register(req, res, next) {
     if (!parsedAcademicLevel) {
       return res.status(400).json({ message: 'Niveau académique invalide.' });
     }
+    const normalizedGradeLevel = typeof gradeLevel === 'string' && gradeLevel.trim()
+      ? gradeLevel.trim()
+      : parsedAcademicLevel;
 
     let normalizedNsivTrack = null;
     if (parsedAcademicLevel === 'NSIV') {
@@ -231,7 +234,7 @@ async function register(req, res, next) {
           sex,
           dateOfBirth: new Date(dateOfBirth),
           school: schoolLabel,
-          gradeLevel,
+          gradeLevel: normalizedGradeLevel,
           email: normalizedEmail,
           phone: phone || null,
           passwordHash,
