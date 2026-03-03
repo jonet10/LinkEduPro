@@ -9,6 +9,7 @@ FRONTEND_URL=https://linkedupro.com
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/linkedupro?schema=public
 JWT_SECRET=CHANGE_ME
 JWT_EXPIRES_IN=12h
+JWT_EXPIRES_IN_MOBILE=365d
 SUPER_ADMIN_EMAIL=infolinkedupro@gmail.com
 SCHOOL_SUPER_ADMIN_EMAIL=superadmin@linkedupro.local
 SCHOOL_SUPER_ADMIN_PASSWORD=ChangeMe123!

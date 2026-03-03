@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
 import { apiClient } from '@/lib/api';
 import { setAuth } from '@/lib/auth';
 
@@ -50,9 +51,10 @@ export default function LoginPage() {
     setShowUpdateEmail(false);
     setLoading(true);
     try {
+      const platform = Capacitor.isNativePlatform() ? Capacitor.getPlatform() : 'web';
       const data = await apiClient('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ identifier, password })
+        body: JSON.stringify({ identifier, password, platform })
       });
       setAuth(data.token, data.student);
       if (redirectPath && redirectPath.startsWith('/')) {

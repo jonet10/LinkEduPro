@@ -292,7 +292,7 @@ async function register(req, res, next) {
 
 async function login(req, res, next) {
   try {
-    const { identifier, password } = req.body;
+    const { identifier, password, platform } = req.body;
     const normalizedIdentifier = identifier.trim();
     const emailIdentifier = normalizedIdentifier.includes('@') ? normalizeEmail(normalizedIdentifier) : null;
 
@@ -326,7 +326,10 @@ async function login(req, res, next) {
       data: { lastLoginAt: loggedAt }
     });
 
-    const token = generateToken(student);
+    const isMobileApp = platform === 'android' || platform === 'ios';
+    const token = generateToken(student, isMobileApp
+      ? { expiresIn: process.env.JWT_EXPIRES_IN_MOBILE || '365d' }
+      : undefined);
     return res.json({
       token,
       student: sanitizeStudent({

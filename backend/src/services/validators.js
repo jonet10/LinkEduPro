@@ -27,7 +27,8 @@ const registerSchema = Joi.object({
 
 const loginSchema = Joi.object({
   identifier: Joi.string().required(),
-  password: Joi.string().required()
+  password: Joi.string().required(),
+  platform: Joi.string().valid('web', 'android', 'ios').default('web')
 });
 
 const acceptTeacherInviteSchema = Joi.object({
