@@ -30,14 +30,12 @@ export default function HeaderNav() {
   const [avatarBroken, setAvatarBroken] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isPublicToolsOpen, setIsPublicToolsOpen] = useState(false);
-  const [isPublicSubjectsOpen, setIsPublicSubjectsOpen] = useState(false);
   const [isPublicMobileMenuOpen, setIsPublicMobileMenuOpen] = useState(false);
 
   const quickMenuRef = useRef(null);
   const notifRef = useRef(null);
   const mobilePanelRef = useRef(null);
   const publicToolsRef = useRef(null);
-  const publicSubjectsRef = useRef(null);
   const publicMobilePanelRef = useRef(null);
   const loadNotificationsRef = useRef(async () => {});
   const loadUnreadMessagesRef = useRef(async () => {});
@@ -56,15 +54,6 @@ export default function HeaderNav() {
   const publicTeacherTools = useMemo(() => ([
     { href: '/blog', label: 'Publier des ressources', icon: '📝' },
     { href: '/rattrapage', label: 'Live / rattrapage', icon: '📅' }
-  ]), []);
-
-  const publicSubjects = useMemo(() => ([
-    { href: '/subjects?topic=francais', label: 'Français', icon: '📖' },
-    { href: '/subjects?topic=philosophie', label: 'Philosophie', icon: '💭' },
-    { href: '/subjects?topic=histoire-geo', label: 'Histoire et géographie', icon: '🌍' },
-    { href: '/subjects?topic=mathematiques', label: 'Mathématiques', icon: '➗' },
-    { href: '/subjects?topic=chimie', label: 'Chimie', icon: '🧪' },
-    { href: '/subjects?topic=physique', label: 'Physique', icon: '⚡' }
   ]), []);
 
   useEffect(() => {
@@ -129,7 +118,6 @@ export default function HeaderNav() {
       setIsMobileMenuOpen(false);
       setIsMobileNotifOpen(false);
       setIsPublicToolsOpen(false);
-      setIsPublicSubjectsOpen(false);
       setIsPublicMobileMenuOpen(false);
       return;
     }
@@ -203,17 +191,6 @@ export default function HeaderNav() {
     document.addEventListener('mousedown', onClickOutside);
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, [isPublicToolsOpen]);
-
-  useEffect(() => {
-    if (!isPublicSubjectsOpen) return undefined;
-    function onClickOutside(event) {
-      if (publicSubjectsRef.current && !publicSubjectsRef.current.contains(event.target)) {
-        setIsPublicSubjectsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, [isPublicSubjectsOpen]);
 
   useEffect(() => {
     if (!isMobileMenuOpen || !mounted) return undefined;
@@ -461,7 +438,6 @@ export default function HeaderNav() {
               className="rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50"
               onClick={() => {
                 setIsPublicToolsOpen((v) => !v);
-                setIsPublicSubjectsOpen(false);
               }}
               aria-label="Outils pour étudier"
             >
@@ -492,39 +468,6 @@ export default function HeaderNav() {
                       href={item.href}
                       className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-brand-50"
                       onClick={() => setIsPublicToolsOpen(false)}
-                    >
-                      <span>{item.icon}</span>
-                      <span>{item.label}</span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-
-        {!isAuthed ? (
-          <div className="relative hidden md:block" ref={publicSubjectsRef}>
-            <button
-              type="button"
-              className="rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50"
-              onClick={() => {
-                setIsPublicSubjectsOpen((v) => !v);
-                setIsPublicToolsOpen(false);
-              }}
-              aria-label="Matières"
-            >
-              Matières ▾
-            </button>
-            {isPublicSubjectsOpen ? (
-              <div className="absolute left-0 z-50 mt-2 w-[320px] rounded-xl border border-brand-100 bg-white p-3 shadow-xl">
-                <div className="grid grid-cols-1 gap-1">
-                  {publicSubjects.map((item) => (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-brand-50"
-                      onClick={() => setIsPublicSubjectsOpen(false)}
                     >
                       <span>{item.icon}</span>
                       <span>{item.label}</span>
@@ -716,23 +659,6 @@ export default function HeaderNav() {
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Outils pour étudier</p>
                   <div className="space-y-1">
                     {publicStudyTools.map((item) => (
-                      <Link
-                        key={item.label}
-                        href={item.href}
-                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-brand-50"
-                        onClick={() => setIsPublicMobileMenuOpen(false)}
-                      >
-                        <span>{item.icon}</span>
-                        <span>{item.label}</span>
-                      </Link>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="mt-3 rounded-xl border border-brand-100 p-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Matières</p>
-                  <div className="space-y-1">
-                    {publicSubjects.map((item) => (
                       <Link
                         key={item.label}
                         href={item.href}
