@@ -151,7 +151,13 @@ export default function VideoLessonsPage() {
         setVideos(mapped);
       }
     } catch (e) {
-      setError(e.message || 'Impossible de charger les contenus vidéo.');
+      const message = String(e?.message || '');
+      if (message.toLowerCase().includes('niveau utilisateur non défini')) {
+        // For users without an academic level yet, keep the catalog empty without surfacing a blocking red error.
+        setError('');
+      } else {
+        setError(message || 'Impossible de charger les contenus vidéo.');
+      }
       setVideos([]);
     } finally {
       setLoading(false);

@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom';
 import { clearAuth, getDarkMode, getStudent, getToken, isNsivStudent, setDarkModePreference } from '@/lib/auth';
 import { API_URL, apiClient } from '@/lib/api';
 import { resolveMediaUrl } from '@/lib/media';
+import { pushNotice } from '@/lib/notices';
 
 function isActivePath(pathname, href) {
   if (!pathname) return false;
@@ -39,6 +40,9 @@ export default function HeaderNav() {
   const publicMobilePanelRef = useRef(null);
   const loadNotificationsRef = useRef(async () => {});
   const loadUnreadMessagesRef = useRef(async () => {});
+  const hasInitializedNoticeRefs = useRef(false);
+  const prevUnreadCountRef = useRef(0);
+  const prevUnreadMessagesRef = useRef(0);
   const router = useRouter();
   const pathname = usePathname();
   const hidePublicMobileMenu = ['/login', '/register', '/forgot-password', '/verify-email'].includes(pathname || '');
@@ -154,6 +158,46 @@ export default function HeaderNav() {
       source.close();
     };
   }, [isAuthed]);
+
+  useEffect(() => {
+    if (!isAuthed) {
+      hasInitializedNoticeRefs.current = false;
+      prevUnreadCountRef.current = 0;
+      prevUnreadMessagesRef.current = 0;
+      return;
+    }
+
+    if (!hasInitializedNoticeRefs.current) {
+      hasInitializedNoticeRefs.current = true;
+      prevUnreadCountRef.current = unreadCount;
+      prevUnreadMessagesRef.current = unreadMessagesCount;
+      return;
+    }
+
+    const notifDelta = unreadCount - prevUnreadCountRef.current;
+    const msgDelta = unreadMessagesCount - prevUnreadMessagesRef.current;
+
+    if (notifDelta > 0) {
+      void pushNotice({
+        title: 'Nouvelle activité',
+        body: notifDelta === 1
+          ? 'Vous avez 1 nouvelle notification.'
+          : `Vous avez ${notifDelta} nouvelles notifications.`
+      });
+    }
+
+    if (msgDelta > 0) {
+      void pushNotice({
+        title: 'Nouveau message',
+        body: msgDelta === 1
+          ? 'Vous avez reçu 1 nouveau message.'
+          : `Vous avez reçu ${msgDelta} nouveaux messages.`
+      });
+    }
+
+    prevUnreadCountRef.current = unreadCount;
+    prevUnreadMessagesRef.current = unreadMessagesCount;
+  }, [isAuthed, unreadCount, unreadMessagesCount]);
 
   useEffect(() => {
     if (!isQuickMenuOpen) return undefined;
