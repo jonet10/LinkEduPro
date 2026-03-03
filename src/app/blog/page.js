@@ -44,7 +44,6 @@ export default function BlogPage() {
   const [tags, setTags] = useState([]);
   const [search, setSearch] = useState('');
   const [postTypeFilter, setPostTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [error, setError] = useState('');
@@ -127,7 +126,6 @@ export default function BlogPage() {
         search
       });
       if (postTypeFilter) params.set('postType', postTypeFilter);
-      if (canModeratePosts && statusFilter) params.set('status', statusFilter);
       const requests = [
         apiClient(`/community/blog/posts?${params.toString()}`, { token }),
         apiClient('/community/blog/categories', { token }),
@@ -154,10 +152,8 @@ export default function BlogPage() {
     });
   }
 
-  function moderationMessage(status) {
-    return status === 'APPROVED'
-      ? 'Article publié avec succès.'
-      : 'Article soumis. Il sera visible après validation par un admin ou un professeur.';
+  function moderationMessage() {
+    return 'Article publié avec succès.';
   }
 
   async function uploadImage(file, target) {
@@ -220,8 +216,7 @@ export default function BlogPage() {
         body: JSON.stringify(payload)
       });
 
-      const status = data?.moderation?.status || (data?.post?.isApproved ? 'APPROVED' : 'PENDING');
-      setCreateInfo(moderationMessage(status));
+      setCreateInfo(moderationMessage());
       setForm(emptyForm());
       setPage(1);
       await load();
@@ -277,8 +272,7 @@ export default function BlogPage() {
         body: JSON.stringify(payload)
       });
 
-      const status = data?.moderation?.status || (data?.post?.isApproved ? 'APPROVED' : 'PENDING');
-      setUpdateInfo(status === 'APPROVED' ? 'Publication modifiée et validée.' : 'Publication modifiée. Elle repasse en attente de validation.');
+      setUpdateInfo('Publication modifiée avec succès.');
       setEditingPostId(null);
       await load();
     } catch (e) {
@@ -308,22 +302,6 @@ export default function BlogPage() {
       setCommentsByPost((prev) => ({ ...prev, [postId]: data.comments || [] }));
     } catch (e) {
       setActionError(e.message || 'Erreur chargement commentaires.');
-    }
-  }
-
-  async function approvePostByModerator(postId) {
-    if (!token) return;
-    setActionError('');
-    setActionInfo('');
-    try {
-      await apiClient(`/community/blog/posts/${postId}/approve`, {
-        method: 'PATCH',
-        token
-      });
-      setActionInfo('Post validé avec succès.');
-      await load();
-    } catch (e) {
-      setActionError(e.message || 'Erreur pendant la validation du post.');
     }
   }
 
@@ -484,7 +462,6 @@ export default function BlogPage() {
       || student.id === post.authorId
       || (student.role === 'TEACHER' && post.author?.role === 'STUDENT')
     ));
-    const canApprovePending = canModeratePosts && !post.isApproved;
     const isExpanded = expandedPostId === post.id;
     const isPriority = Boolean(options.isPriority);
 
@@ -545,19 +522,8 @@ export default function BlogPage() {
             <span className="rounded border border-brand-100 px-2 py-1">
               {post.audienceScope === 'GLOBAL' ? 'Global' : post.audienceScope === 'INTER_SCHOOL' ? 'Inter-école' : 'École'}
             </span>
-            {post.isApproved ? (
-              <span className="rounded border border-green-300 bg-green-50 px-2 py-1 text-green-700">Validé</span>
-            ) : (
-              <span className="rounded border border-amber-300 bg-amber-50 px-2 py-1 text-amber-700">En attente</span>
-            )}
+            <span className="rounded border border-green-300 bg-green-50 px-2 py-1 text-green-700">Publié</span>
           </div>
-          {canApprovePending ? (
-            <div>
-              <button className="btn-primary !py-1.5 !text-xs" onClick={() => approvePostByModerator(post.id)}>
-                Valider ce post
-              </button>
-            </div>
-          ) : null}
         </div>
 
         {isExpanded ? (
@@ -828,20 +794,13 @@ export default function BlogPage() {
             <p><strong>3.</strong> Consulte les réponses, applique, puis remercie la communauté.</p>
           </div>
         </div>
-        <div className="grid gap-2 md:grid-cols-[1fr_auto_auto_auto]">
+        <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]">
           <input className="input" placeholder="Recherche forum" value={search} onChange={(e) => setSearch(e.target.value)} />
           <select className="input" value={postTypeFilter} onChange={(e) => setPostTypeFilter(e.target.value)}>
             <option value="">Tous contenus</option>
             <option value="EXERCISE">Exercices</option>
             <option value="ARTICLE">Articles</option>
           </select>
-          {canModeratePosts ? (
-            <select className="input" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="">Tous statuts</option>
-              <option value="PENDING">En attente de validation</option>
-              <option value="APPROVED">Validés</option>
-            </select>
-          ) : null}
           <button className="btn-primary" onClick={() => { setPage(1); load(); }}>Rechercher</button>
         </div>
         {error ? <p className="text-red-600">{error}</p> : null}

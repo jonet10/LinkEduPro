@@ -50,6 +50,8 @@ export default function MessagesPage() {
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [loadingConversation, setLoadingConversation] = useState(false);
+  const [deletingConversation, setDeletingConversation] = useState(false);
+  const [deletingMessageId, setDeletingMessageId] = useState(0);
 
   const [communityUsers, setCommunityUsers] = useState([]);
   const [recipientQuery, setRecipientQuery] = useState('');
@@ -262,6 +264,52 @@ export default function MessagesPage() {
     }
   }
 
+  async function handleDeleteConversation() {
+    if (!token || !selectedConversation?.id) return;
+    const ok = typeof window === 'undefined'
+      ? true
+      : window.confirm('Supprimer cette conversation ?');
+    if (!ok) return;
+
+    setDeletingConversation(true);
+    setError('');
+    try {
+      await apiClient(`/messages/conversations/${selectedConversation.id}`, {
+        method: 'DELETE',
+        token
+      });
+      setSelectedConversation(null);
+      setSelectedConversationId(null);
+      await loadConversations(token);
+    } catch (e) {
+      setError(e.message || 'Erreur de suppression conversation.');
+    } finally {
+      setDeletingConversation(false);
+    }
+  }
+
+  async function handleDeleteMessage(messageId) {
+    if (!token || !selectedConversation?.id || !messageId) return;
+    const ok = typeof window === 'undefined'
+      ? true
+      : window.confirm('Supprimer ce message ?');
+    if (!ok) return;
+
+    setDeletingMessageId(messageId);
+    setError('');
+    try {
+      await apiClient(`/messages/${messageId}`, {
+        method: 'DELETE',
+        token
+      });
+      await loadConversations(token);
+    } catch (e) {
+      setError(e.message || 'Erreur de suppression message.');
+    } finally {
+      setDeletingMessageId(0);
+    }
+  }
+
   async function handleSendGlobal(event) {
     event.preventDefault();
     if (!token || student?.role !== 'ADMIN') return;
@@ -449,14 +497,28 @@ export default function MessagesPage() {
 
         <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-brand-100 bg-brand-900 px-4 py-3 text-white">
-            <h2 className="text-sm font-semibold">
-              {selectedConversation
-                ? conversationLabel(selectedConversation, student?.id)
-                : 'Sélectionne une conversation'}
-            </h2>
-            <p className="text-xs text-slate-300">
-              {selectedConversation?.type === 'PRIVATE' ? 'En ligne récemment' : 'Annonce globale'}
-            </p>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold">
+                  {selectedConversation
+                    ? conversationLabel(selectedConversation, student?.id)
+                    : 'Sélectionne une conversation'}
+                </h2>
+                <p className="text-xs text-slate-300">
+                  {selectedConversation?.type === 'PRIVATE' ? 'En ligne récemment' : 'Annonce globale'}
+                </p>
+              </div>
+              {selectedConversation ? (
+                <button
+                  type="button"
+                  className="rounded-md border border-white/30 px-2 py-1 text-[11px] hover:bg-white/10"
+                  onClick={handleDeleteConversation}
+                  disabled={deletingConversation}
+                >
+                  {deletingConversation ? 'Suppression...' : 'Supprimer'}
+                </button>
+              ) : null}
+            </div>
           </div>
 
           <div className="max-h-[520px] space-y-2 overflow-auto bg-brand-50 p-3">
@@ -479,7 +541,19 @@ export default function MessagesPage() {
                       </p>
                     ) : null}
                     <p className="mt-0.5 whitespace-pre-wrap">{message.content}</p>
-                    <p className={`mt-1 text-right text-[11px] ${mine && isDarkMode ? 'text-white/80' : 'text-brand-700'}`}>{formatTimeShort(message.createdAt)}</p>
+                    <div className="mt-1 flex items-center justify-end gap-2">
+                      <p className={`text-right text-[11px] ${mine && isDarkMode ? 'text-white/80' : 'text-brand-700'}`}>{formatTimeShort(message.createdAt)}</p>
+                      {(mine || student?.role === 'ADMIN') ? (
+                        <button
+                          type="button"
+                          className={`text-[11px] underline ${mine && isDarkMode ? 'text-white/80' : 'text-brand-700'}`}
+                          onClick={() => handleDeleteMessage(message.id)}
+                          disabled={deletingMessageId === message.id}
+                        >
+                          {deletingMessageId === message.id ? '...' : 'Supprimer'}
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                 );
               })

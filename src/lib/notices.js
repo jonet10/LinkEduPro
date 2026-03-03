@@ -27,6 +27,15 @@ async function ensureNativeNoticeReady() {
   return true;
 }
 
+export async function prepareNotices() {
+  if (typeof window === 'undefined') return false;
+  try {
+    return await ensureNativeNoticeReady();
+  } catch (_) {
+    return false;
+  }
+}
+
 export async function pushNotice({ title, body }) {
   if (typeof window === 'undefined') return;
 

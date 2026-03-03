@@ -7,7 +7,7 @@ import { createPortal } from 'react-dom';
 import { clearAuth, getDarkMode, getStudent, getToken, isNsivStudent, setDarkModePreference } from '@/lib/auth';
 import { API_URL, apiClient } from '@/lib/api';
 import { resolveMediaUrl } from '@/lib/media';
-import { pushNotice } from '@/lib/notices';
+import { prepareNotices, pushNotice } from '@/lib/notices';
 
 function isActivePath(pathname, href) {
   if (!pathname) return false;
@@ -198,6 +198,11 @@ export default function HeaderNav() {
     prevUnreadCountRef.current = unreadCount;
     prevUnreadMessagesRef.current = unreadMessagesCount;
   }, [isAuthed, unreadCount, unreadMessagesCount]);
+
+  useEffect(() => {
+    if (!isAuthed) return;
+    void prepareNotices();
+  }, [isAuthed]);
 
   useEffect(() => {
     if (!isQuickMenuOpen) return undefined;
