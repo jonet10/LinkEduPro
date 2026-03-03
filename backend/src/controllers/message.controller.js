@@ -539,11 +539,129 @@ async function sendGlobalMessage(req, res, next) {
   }
 }
 
+async function deleteConversation(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const conversationId = Number(req.params.id);
+
+    if (!Number.isInteger(conversationId) || conversationId <= 0) {
+      return res.status(400).json({ message: 'Conversation invalide.' });
+    }
+
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: {
+        participants: {
+          select: { userId: true }
+        }
+      }
+    });
+
+    if (!conversation) {
+      return res.status(404).json({ message: 'Conversation introuvable.' });
+    }
+
+    const participantIds = conversation.participants.map((p) => p.userId);
+    if (!participantIds.includes(userId)) {
+      return res.status(403).json({ message: 'Acces refuse a cette conversation.' });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      if (conversation.type === 'PRIVATE') {
+        await tx.conversation.delete({ where: { id: conversationId } });
+        return;
+      }
+
+      await tx.conversationParticipant.delete({
+        where: {
+          conversationId_userId: {
+            conversationId,
+            userId
+          }
+        }
+      });
+
+      const remaining = await tx.conversationParticipant.count({
+        where: { conversationId }
+      });
+
+      if (remaining === 0) {
+        await tx.conversation.delete({ where: { id: conversationId } });
+      }
+    });
+
+    emitRefresh(participantIds, ['messages']);
+    return res.json({ message: 'Conversation supprimée.' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deleteMessage(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const messageId = Number(req.params.messageId);
+
+    if (!Number.isInteger(messageId) || messageId <= 0) {
+      return res.status(400).json({ message: 'Message invalide.' });
+    }
+
+    const message = await prisma.message.findUnique({
+      where: { id: messageId },
+      select: {
+        id: true,
+        senderId: true,
+        conversationId: true,
+        conversation: {
+          select: {
+            participants: {
+              select: { userId: true }
+            }
+          }
+        }
+      }
+    });
+
+    if (!message) {
+      return res.status(404).json({ message: 'Message introuvable.' });
+    }
+
+    const participantIds = (message.conversation?.participants || []).map((p) => p.userId);
+    if (!participantIds.includes(userId)) {
+      return res.status(403).json({ message: 'Acces refuse a ce message.' });
+    }
+
+    const canDelete = req.user.role === 'ADMIN' || message.senderId === userId;
+    if (!canDelete) {
+      return res.status(403).json({ message: 'Action non autorisee.' });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.message.delete({ where: { id: messageId } });
+
+      const remainingMessages = await tx.message.count({
+        where: { conversationId: message.conversationId }
+      });
+
+      if (remainingMessages === 0) {
+        await tx.conversation.delete({ where: { id: message.conversationId } });
+      }
+    });
+
+    emitRefresh(participantIds, ['messages']);
+    return res.json({ message: 'Message supprimé.' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   listMessageRecipients,
   getUnreadMessageSummary,
   sendPrivateMessage,
   listConversations,
   getConversationById,
-  sendGlobalMessage
+  sendGlobalMessage,
+  deleteConversation,
+  deleteMessage
 };

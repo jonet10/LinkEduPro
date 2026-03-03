@@ -73,8 +73,7 @@ async function createPost(req, res, next) {
       schoolId = null;
     }
 
-    const isSuperAdmin = user.role === 'ADMIN' && process.env.SUPER_ADMIN_EMAIL && user.email === process.env.SUPER_ADMIN_EMAIL;
-    const autoApproved = isSuperAdmin || ['ADMIN', 'TEACHER'].includes(user.role);
+    const autoApproved = true;
 
     const post = await prisma.blogPost.create({
       data: {
@@ -109,7 +108,7 @@ async function createPost(req, res, next) {
     });
 
     await addReputationPoints(req.user.id, 'ARTICLE_PUBLISHED');
-    if (autoApproved && user.role === 'TEACHER') {
+    if (user.role === 'TEACHER') {
       await addReputationPoints(req.user.id, 'ARTICLE_APPROVED');
     }
     await evaluateUserBadges(req.user.id);
@@ -123,11 +122,9 @@ async function createPost(req, res, next) {
     });
 
     await notifyAdmins({
-      type: autoApproved ? 'BLOG_POST_CREATED' : 'BLOG_POST_PENDING',
-      title: autoApproved ? 'Nouveau post publie' : 'Post en attente de validation',
-      message: autoApproved
-        ? `${user.firstName} ${user.lastName} a publie "${post.title}".`
-        : `${user.firstName} ${user.lastName} a soumis "${post.title}" pour validation.`,
+      type: 'BLOG_POST_CREATED',
+      title: 'Nouveau post publie',
+      message: `${user.firstName} ${user.lastName} a publie "${post.title}".`,
       entityType: 'Post',
       entityId: String(post.id)
     });
@@ -135,8 +132,8 @@ async function createPost(req, res, next) {
     return res.status(201).json({
       post,
       moderation: {
-        status: post.isApproved ? 'APPROVED' : 'PENDING',
-        requiresReview: !post.isApproved
+        status: 'APPROVED',
+        requiresReview: false
       }
     });
   } catch (error) {
@@ -166,8 +163,7 @@ async function updatePost(req, res, next) {
       return res.status(403).json({ message: 'Action non autorisee.' });
     }
 
-    const isSuperAdmin = actor.role === 'ADMIN' && process.env.SUPER_ADMIN_EMAIL && actor.email === process.env.SUPER_ADMIN_EMAIL;
-    const autoApproved = isSuperAdmin || ['ADMIN', 'TEACHER'].includes(actor.role);
+    const autoApproved = true;
 
     const requestedIsGlobal = req.body.isGlobal !== undefined ? req.body.isGlobal : existing.isGlobal;
     const requestedSchoolId = req.body.schoolId !== undefined ? (req.body.schoolId ? Number(req.body.schoolId) : null) : existing.schoolId;
@@ -242,8 +238,8 @@ async function updatePost(req, res, next) {
     return res.json({
       post: updated,
       moderation: {
-        status: updated.isApproved ? 'APPROVED' : 'PENDING',
-        requiresReview: !updated.isApproved
+        status: 'APPROVED',
+        requiresReview: false
       }
     });
   } catch (error) {

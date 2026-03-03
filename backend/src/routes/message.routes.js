@@ -8,7 +8,9 @@ const {
   sendPrivateMessage,
   listConversations,
   getConversationById,
-  sendGlobalMessage
+  sendGlobalMessage,
+  deleteConversation,
+  deleteMessage
 } = require('../controllers/message.controller');
 const {
   privateMessageSchema,
@@ -24,6 +26,8 @@ router.get('/unread-summary', getUnreadMessageSummary);
 router.post('/private', validate(privateMessageSchema), sendPrivateMessage);
 router.get('/conversations', listConversations);
 router.get('/conversations/:id', getConversationById);
+router.delete('/conversations/:id', deleteConversation);
+router.delete('/:messageId', deleteMessage);
 router.post('/global', requireRoles(['ADMIN']), validate(globalMessageSchema), sendGlobalMessage);
 
 module.exports = router;

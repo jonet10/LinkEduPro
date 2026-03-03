@@ -8,7 +8,6 @@ const {
   createPost,
   updatePost,
   listPosts,
-  approvePost,
   likePost,
   createComment,
   reviewComment,
@@ -55,7 +54,6 @@ router.patch('/comments/:commentId/review', requireTeacherOrAdmin, validate(revi
 router.post('/posts/:postId/report', validate(reportPostSchema), reportPost);
 router.delete('/posts/:postId', softDeletePost);
 
-router.patch('/posts/:postId/approve', requireTeacherOrAdmin, approvePost);
 router.patch('/comments/:commentId/helpful', requireSuperAdmin, markCommentHelpful);
 router.post('/categories', requireSuperAdmin, validate(createCategorySchema), createCategory);
 router.post('/tags', requireSuperAdmin, validate(createTagSchema), createTag);
