@@ -70,10 +70,23 @@ export default function BlogPage() {
   const [commentInputs, setCommentInputs] = useState({});
   const [commentImageUrls, setCommentImageUrls] = useState({});
   const [uploadingCommentImage, setUploadingCommentImage] = useState({});
+  const [viewerImageUrl, setViewerImageUrl] = useState('');
+  const [viewerImageAlt, setViewerImageAlt] = useState('');
   const createGalleryInputRef = useRef(null);
   const createCameraInputRef = useRef(null);
   const editGalleryInputRef = useRef(null);
   const editCameraInputRef = useRef(null);
+
+  function openImageViewer(url, alt) {
+    if (!url) return;
+    setViewerImageUrl(url);
+    setViewerImageAlt(alt || 'Image publication');
+  }
+
+  function closeImageViewer() {
+    setViewerImageUrl('');
+    setViewerImageAlt('');
+  }
 
   const token = useMemo(() => getToken(), []);
   const student = useMemo(() => getStudent(), []);
@@ -455,6 +468,15 @@ export default function BlogPage() {
     scrollToPostTop(expandedPostId, false);
   }, [expandedPostId, items.length]);
 
+  useEffect(() => {
+    if (!viewerImageUrl) return undefined;
+    function onKeyDown(event) {
+      if (event.key === 'Escape') closeImageViewer();
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [viewerImageUrl]);
+
   function renderPostCard(post, options = {}) {
     const canEdit = student && (student.role === 'ADMIN' || student.id === post.authorId);
     const canDelete = Boolean(student && (
@@ -483,7 +505,12 @@ export default function BlogPage() {
                 <img
                   src={resolveMediaUrl(post.imageUrl)}
                   alt={post.title}
-                  className="h-24 w-24 flex-shrink-0 rounded-lg border border-brand-100 object-cover sm:h-28 sm:w-36"
+                  className="h-24 w-24 flex-shrink-0 cursor-zoom-in rounded-lg border border-brand-100 object-cover sm:h-28 sm:w-36"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openImageViewer(resolveMediaUrl(post.imageUrl), post.title);
+                  }}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = '/images/article-placeholder.svg';
@@ -549,7 +576,8 @@ export default function BlogPage() {
                       <img
                         src={resolveMediaUrl(comment.imageUrl)}
                         alt="Réponse"
-                        className="mt-2 max-h-40 w-full rounded border border-brand-100 object-cover"
+                        className="mt-2 max-h-40 w-full cursor-zoom-in rounded border border-brand-100 object-cover"
+                        onClick={() => openImageViewer(resolveMediaUrl(comment.imageUrl), 'Réponse')}
                       />
                     ) : null}
                     <div className="mt-2 flex flex-wrap gap-1">
@@ -739,7 +767,8 @@ export default function BlogPage() {
                     <img
                       src={resolveMediaUrl(post.imageUrl)}
                       alt={post.title}
-                      className="h-20 w-20 rounded-lg border border-brand-100 object-cover"
+                      className="h-20 w-20 cursor-zoom-in rounded-lg border border-brand-100 object-cover"
+                      onClick={() => openImageViewer(resolveMediaUrl(post.imageUrl), post.title)}
                       onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = '/images/article-placeholder.svg';
@@ -767,6 +796,26 @@ export default function BlogPage() {
             ) : null}
           </div>
         </section>
+
+        {viewerImageUrl ? (
+          <div className="fixed inset-0 z-[120] bg-black/85 p-4" onClick={closeImageViewer}>
+            <button
+              type="button"
+              className="absolute right-4 top-4 rounded-md border border-white/30 bg-black/40 px-3 py-1 text-sm text-white"
+              onClick={closeImageViewer}
+            >
+              Fermer
+            </button>
+            <div className="flex h-full w-full items-center justify-center">
+              <img
+                src={viewerImageUrl}
+                alt={viewerImageAlt}
+                className="max-h-[90vh] max-w-[96vw] rounded-lg object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+        ) : null}
       </main>
     );
   }
@@ -890,6 +939,26 @@ export default function BlogPage() {
         <p className="text-sm">Page {pagination.page} / {pagination.totalPages}</p>
         <button className="btn-secondary" disabled={pagination.page >= pagination.totalPages} onClick={() => setPage((p) => p + 1)}>Suivant</button>
       </section>
+
+      {viewerImageUrl ? (
+        <div className="fixed inset-0 z-[120] bg-black/85 p-4" onClick={closeImageViewer}>
+          <button
+            type="button"
+            className="absolute right-4 top-4 rounded-md border border-white/30 bg-black/40 px-3 py-1 text-sm text-white"
+            onClick={closeImageViewer}
+          >
+            Fermer
+          </button>
+          <div className="flex h-full w-full items-center justify-center">
+            <img
+              src={viewerImageUrl}
+              alt={viewerImageAlt}
+              className="max-h-[90vh] max-w-[96vw] rounded-lg object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
