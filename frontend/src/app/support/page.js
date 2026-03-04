@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 
-const QUICK_AMOUNTS = [10, 25, 50, 100, 250];
+const QUICK_AMOUNTS = [10, 20, 50, 100, 150, 200, 250];
 
 export default function SupportPage() {
   const [student, setStudent] = useState(null);
