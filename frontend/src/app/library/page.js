@@ -186,9 +186,29 @@ export default function LibraryPage() {
 
   async function onSubmitBook(e) {
     e.preventDefault();
+    const normalizedTitle = String(title || '').trim();
+    const normalizedSubject = String(subject || '').trim();
+    const normalizedLevel = String(level || '').trim();
+    const normalizedDescription = String(description || '').trim();
 
     if (!editingBookId && !pdfFile) {
       setError('Fichier PDF requis.');
+      return;
+    }
+    if (normalizedTitle.length < 3) {
+      setError('Titre invalide (minimum 3 caractères).');
+      return;
+    }
+    if (normalizedSubject.length < 2) {
+      setError('Matière invalide (minimum 2 caractères).');
+      return;
+    }
+    if (normalizedLevel.length < 2) {
+      setError('Niveau invalide.');
+      return;
+    }
+    if (normalizedDescription.length > 500) {
+      setError('Description trop longue (maximum 500 caractères).');
       return;
     }
     if (isPaid && Number(price || 0) <= 0) {
@@ -208,10 +228,10 @@ export default function LibraryPage() {
       setUploading(true);
 
       const form = new FormData();
-      form.append('title', title);
-      form.append('subject', subject);
-      form.append('level', level);
-      form.append('description', description);
+      form.append('title', normalizedTitle);
+      form.append('subject', normalizedSubject);
+      form.append('level', normalizedLevel);
+      form.append('description', normalizedDescription);
       form.append('isPaid', String(isPaid));
       form.append('price', String(isPaid ? Number(price || 0) : 0));
       if (pdfFile) form.append('file', pdfFile);
@@ -235,7 +255,8 @@ export default function LibraryPage() {
       setSuccess(editingBookId ? 'Livre modifié avec succès.' : 'Livre soumis avec succès.');
       await loadBooks();
     } catch (e) {
-      setError(e.message || (editingBookId ? 'Erreur lors de la modification du livre.' : 'Erreur lors de la soumission du livre.'));
+      const details = Array.isArray(e?.data?.details) ? e.data.details.join(' | ') : '';
+      setError(details || e.message || (editingBookId ? 'Erreur lors de la modification du livre.' : 'Erreur lors de la soumission du livre.'));
     } finally {
       setUploading(false);
     }
