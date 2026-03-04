@@ -96,7 +96,7 @@ export default function LibraryPage() {
 
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
-  const [level, setLevel] = useState('');
+  const [selectedLevels, setSelectedLevels] = useState([]);
   const [description, setDescription] = useState('');
   const [isPaid, setIsPaid] = useState(false);
   const [price, setPrice] = useState('');
@@ -188,7 +188,7 @@ export default function LibraryPage() {
     e.preventDefault();
     const normalizedTitle = String(title || '').trim();
     const normalizedSubject = String(subject || '').trim();
-    const normalizedLevel = String(level || '').trim();
+    const normalizedLevels = selectedLevels.map((item) => String(item || '').trim()).filter(Boolean);
     const normalizedDescription = String(description || '').trim();
 
     if (!editingBookId && !pdfFile) {
@@ -203,8 +203,8 @@ export default function LibraryPage() {
       setError('Matière invalide (minimum 2 caractères).');
       return;
     }
-    if (normalizedLevel.length < 2) {
-      setError('Niveau invalide.');
+    if (!normalizedLevels.length) {
+      setError('Sélectionne au moins un niveau.');
       return;
     }
     if (normalizedDescription.length > 2000) {
@@ -230,7 +230,7 @@ export default function LibraryPage() {
       const form = new FormData();
       form.append('title', normalizedTitle);
       form.append('subject', normalizedSubject);
-      form.append('level', normalizedLevel);
+      form.append('level', normalizedLevels.join(', '));
       form.append('description', normalizedDescription);
       form.append('isPaid', String(isPaid));
       form.append('price', String(isPaid ? Number(price || 0) : 0));
@@ -245,7 +245,7 @@ export default function LibraryPage() {
 
       setTitle('');
       setSubject('');
-      setLevel('');
+      setSelectedLevels([]);
       setDescription('');
       setIsPaid(false);
       setPrice('');
@@ -272,7 +272,12 @@ export default function LibraryPage() {
     setEditingBookId(book.id);
     setTitle(book.title || '');
     setSubject(book.subject || '');
-    setLevel(book.level || '');
+    setSelectedLevels(
+      String(book.level || '')
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean)
+    );
     setDescription(book.description || '');
     setIsPaid(Boolean(book.isPaid));
     setPrice(book.isPaid ? String(book.price || '') : '');
@@ -289,7 +294,7 @@ export default function LibraryPage() {
     setEditingBookId(null);
     setTitle('');
     setSubject('');
-    setLevel('');
+    setSelectedLevels([]);
     setDescription('');
     setIsPaid(false);
     setPrice('');
@@ -394,15 +399,28 @@ export default function LibraryPage() {
           <form className="grid gap-3 md:grid-cols-2" onSubmit={onSubmitBook}>
             <input className="input" placeholder="Titre" value={title} onChange={(e) => setTitle(e.target.value)} required />
             <input className="input" placeholder="Matière" value={subject} onChange={(e) => setSubject(e.target.value)} required />
-            <select className="input" value={level} onChange={(e) => setLevel(e.target.value)} required>
-              <option value="" disabled>Sélectionner un niveau</option>
-              {LIBRARY_LEVEL_OPTIONS.map((item) => (
-                <option key={item} value={item}>{item}</option>
-              ))}
-              {level && !LIBRARY_LEVEL_OPTIONS.includes(level) ? (
-                <option value={level}>{level}</option>
-              ) : null}
-            </select>
+            <div className="space-y-2 rounded-lg border border-brand-100 p-3 md:col-span-2">
+              <p className="text-sm font-medium text-brand-900">Niveaux concernés (choix multiple)</p>
+              <div className="flex flex-wrap gap-3">
+                {LIBRARY_LEVEL_OPTIONS.map((item) => (
+                  <label key={item} className="inline-flex items-center gap-2 text-sm text-brand-800">
+                    <input
+                      type="checkbox"
+                      checked={selectedLevels.includes(item)}
+                      onChange={(e) => {
+                        setSelectedLevels((prev) => (
+                          e.target.checked
+                            ? [...prev, item]
+                            : prev.filter((level) => level !== item)
+                        ));
+                        setError('');
+                      }}
+                    />
+                    {item}
+                  </label>
+                ))}
+              </div>
+            </div>
             <label className="space-y-1 text-sm text-brand-800">
               <span className="font-medium text-brand-900">Image de couverture (optionnel)</span>
               <input
