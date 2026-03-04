@@ -49,6 +49,7 @@ function BookCard({ book, preordered = false, onPreorder = null, onPurchase = nu
         />
       ) : null}
       <p className="text-sm text-brand-700">{book.description || 'Aucune description'}</p>
+      {book.author ? <p className="mt-2 text-sm text-brand-800">Auteur: {book.author}</p> : null}
       <p className="mt-2 text-xs text-brand-500">{book.subject} | {book.level}</p>
       {book.isPaid && !book.upcoming ? <p className="mt-2 text-sm font-semibold text-brand-900">Prix: {formatHTG(book.price)}</p> : null}
       {book.upcoming ? (
@@ -95,6 +96,7 @@ export default function LibraryPage() {
   const [preorderedBooks, setPreorderedBooks] = useState([]);
 
   const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
   const [subject, setSubject] = useState('');
   const [selectedLevels, setSelectedLevels] = useState([]);
   const [description, setDescription] = useState('');
@@ -102,10 +104,21 @@ export default function LibraryPage() {
   const [price, setPrice] = useState('');
   const [coverImage, setCoverImage] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const canUpload = useMemo(() => {
     return student && ['ADMIN', 'TEACHER'].includes(student.role);
   }, [student]);
+
+  const filteredApprovedBooks = useMemo(() => {
+    const q = String(searchTerm || '').trim().toLowerCase();
+    if (!q) return approvedBooks;
+    return approvedBooks.filter((book) => {
+      const titleMatch = String(book.title || '').toLowerCase().includes(q);
+      const authorMatch = String(book.author || '').toLowerCase().includes(q);
+      return titleMatch || authorMatch;
+    });
+  }, [approvedBooks, searchTerm]);
 
   const canReview = useMemo(() => {
     return student && student.role === 'ADMIN';
@@ -187,6 +200,7 @@ export default function LibraryPage() {
   async function onSubmitBook(e) {
     e.preventDefault();
     const normalizedTitle = String(title || '').trim();
+    const normalizedAuthor = String(author || '').trim();
     const normalizedSubject = String(subject || '').trim();
     const normalizedLevels = selectedLevels.map((item) => String(item || '').trim()).filter(Boolean);
     const normalizedDescription = String(description || '').trim();
@@ -197,6 +211,10 @@ export default function LibraryPage() {
     }
     if (normalizedTitle.length < 3) {
       setError('Titre invalide (minimum 3 caractères).');
+      return;
+    }
+    if (normalizedAuthor.length < 2) {
+      setError('Auteur invalide (minimum 2 caractères).');
       return;
     }
     if (normalizedSubject.length < 2) {
@@ -229,6 +247,7 @@ export default function LibraryPage() {
 
       const form = new FormData();
       form.append('title', normalizedTitle);
+      form.append('author', normalizedAuthor);
       form.append('subject', normalizedSubject);
       form.append('level', normalizedLevels.join(', '));
       form.append('description', normalizedDescription);
@@ -244,6 +263,7 @@ export default function LibraryPage() {
       });
 
       setTitle('');
+      setAuthor('');
       setSubject('');
       setSelectedLevels([]);
       setDescription('');
@@ -271,6 +291,7 @@ export default function LibraryPage() {
   function startEditBook(book) {
     setEditingBookId(book.id);
     setTitle(book.title || '');
+    setAuthor(book.author || '');
     setSubject(book.subject || '');
     setSelectedLevels(
       String(book.level || '')
@@ -293,6 +314,7 @@ export default function LibraryPage() {
   function cancelEditBook() {
     setEditingBookId(null);
     setTitle('');
+    setAuthor('');
     setSubject('');
     setSelectedLevels([]);
     setDescription('');
@@ -398,6 +420,7 @@ export default function LibraryPage() {
           <h2 className="mb-3 text-xl font-bold text-brand-900">{editingBookId ? 'Modifier un livre PDF' : 'Ajouter un livre PDF'}</h2>
           <form className="grid gap-3 md:grid-cols-2" onSubmit={onSubmitBook}>
             <input className="input" placeholder="Titre" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <input className="input" placeholder="Auteur" value={author} onChange={(e) => setAuthor(e.target.value)} required />
             <input className="input" placeholder="Matière" value={subject} onChange={(e) => setSubject(e.target.value)} required />
             <div className="space-y-2 rounded-lg border border-brand-100 p-3 md:col-span-2">
               <p className="text-sm font-medium text-brand-900">Niveaux concernés (choix multiple)</p>
@@ -479,6 +502,7 @@ export default function LibraryPage() {
             {pendingBooks.map((book) => (
               <article key={book.id} className="rounded-xl border border-brand-100 p-4">
                 <h3 className="font-semibold text-brand-900">{book.title}</h3>
+                {book.author ? <p className="text-sm text-brand-700">Auteur: {book.author}</p> : null}
                 <p className="text-sm text-brand-700">{book.subject} | {book.level}</p>
                 {book.coverImageUrl ? (
                   <img
@@ -508,10 +532,18 @@ export default function LibraryPage() {
       ) : null}
 
       <section>
-        <h2 className="mb-3 text-2xl font-bold text-brand-900">Livres approuvés</h2>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-2xl font-bold text-brand-900">Livres approuvés</h2>
+          <input
+            className="input w-full md:w-96"
+            placeholder="Rechercher par titre ou auteur"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
         {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {approvedBooks.map((book) => (
+          {filteredApprovedBooks.map((book) => (
             <div key={book.id} className="space-y-2">
               <BookCard
                 book={book}
@@ -533,7 +565,7 @@ export default function LibraryPage() {
             </div>
           ))}
         </div>
-        {!loading && approvedBooks.length === 0 ? <p className="text-sm text-brand-700">Aucun livre disponible.</p> : null}
+        {!loading && filteredApprovedBooks.length === 0 ? <p className="text-sm text-brand-700">Aucun livre trouvé pour cette recherche.</p> : null}
       </section>
 
       {canUpload && rejectedBooks.length > 0 ? (
@@ -542,7 +574,7 @@ export default function LibraryPage() {
           <div className="space-y-2 text-sm text-brand-700">
             {rejectedBooks.map((book) => (
               <div key={book.id} className="flex flex-wrap items-center justify-between gap-2 rounded border border-brand-100 px-3 py-2">
-                <p>{book.title} ({book.subject} | {book.level})</p>
+                <p>{book.title}{book.author ? ` - ${book.author}` : ''} ({book.subject} | {book.level})</p>
                 {canDeleteBook(book) ? (
                   <button type="button" className="btn-secondary" onClick={() => deleteBook(book.id)}>
                     Supprimer
