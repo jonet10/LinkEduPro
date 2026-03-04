@@ -111,7 +111,7 @@ const createLibraryBookSchema = Joi.object({
   title: Joi.string().trim().min(3).max(180).required(),
   subject: Joi.string().trim().min(2).max(120).required(),
   level: Joi.string().trim().min(2).max(80).required(),
-  description: Joi.string().trim().max(500).allow('', null),
+  description: Joi.string().trim().max(2000).allow('', null),
   isPaid: Joi.boolean().default(false),
   price: Joi.number().min(0).max(100000).default(0)
 }).custom((value, helpers) => {
@@ -128,7 +128,7 @@ const updateLibraryBookSchema = Joi.object({
   title: Joi.string().trim().min(3).max(180).optional(),
   subject: Joi.string().trim().min(2).max(120).optional(),
   level: Joi.string().trim().min(2).max(80).optional(),
-  description: Joi.string().trim().max(500).allow('', null).optional(),
+  description: Joi.string().trim().max(2000).allow('', null).optional(),
   isPaid: Joi.boolean().optional(),
   price: Joi.number().min(0).max(100000).optional()
 }).custom((value, helpers) => {
