@@ -109,6 +109,7 @@ const submitQuizSchema = Joi.object({
 
 const createLibraryBookSchema = Joi.object({
   title: Joi.string().trim().min(3).max(180).required(),
+  author: Joi.string().trim().min(2).max(160).required(),
   subject: Joi.string().trim().min(2).max(120).required(),
   level: Joi.string().trim().min(2).max(80).required(),
   description: Joi.string().trim().max(2000).allow('', null),
@@ -126,6 +127,7 @@ const createLibraryBookSchema = Joi.object({
 
 const updateLibraryBookSchema = Joi.object({
   title: Joi.string().trim().min(3).max(180).optional(),
+  author: Joi.string().trim().min(2).max(160).optional(),
   subject: Joi.string().trim().min(2).max(120).optional(),
   level: Joi.string().trim().min(2).max(80).optional(),
   description: Joi.string().trim().max(2000).allow('', null).optional(),

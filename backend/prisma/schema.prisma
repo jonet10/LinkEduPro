@@ -636,6 +636,7 @@ model TeacherInvitation {
 model LibraryBook {
   id          Int               @id(map: "LibraryBook_pkey") @default(autoincrement())
   title       String
+  author      String?
   subject     String
   level       String
   description String?

@@ -17,6 +17,7 @@ describe('library validators integration', () => {
   test('accepts valid create payload', async () => {
     const res = await request(app).post('/books').send({
       title: 'Physique NS4 Tome 1',
+      author: 'Auteur Test',
       subject: 'Physique',
       level: 'NS4',
       description: 'Revision complete'

@@ -14,6 +14,7 @@ function toClientBook(book, viewer) {
   return {
     id: book.id,
     title: book.title,
+    author: book.author,
     subject: book.subject,
     level: book.level,
     description: book.description,
@@ -101,6 +102,7 @@ async function submitBook(req, res, next) {
     const book = await prisma.libraryBook.create({
       data: {
         title: req.body.title,
+        author: req.body.author ? String(req.body.author).trim() : null,
         subject: req.body.subject,
         level: req.body.level,
         description: req.body.description || null,
@@ -241,7 +243,7 @@ async function updateBook(req, res, next) {
     const pdfFile = req.files?.file?.[0];
     const coverFile = req.files?.coverImage?.[0];
     const body = req.body || {};
-    const hasBodyChanges = ['title', 'subject', 'level', 'description', 'isPaid', 'price']
+    const hasBodyChanges = ['title', 'author', 'subject', 'level', 'description', 'isPaid', 'price']
       .some((key) => body[key] !== undefined);
     if (!hasBodyChanges && !pdfFile && !coverFile) {
       return res.status(400).json({ message: 'Aucune modification detectee.' });
@@ -260,6 +262,7 @@ async function updateBook(req, res, next) {
       where: { id },
       data: {
         ...(body.title !== undefined ? { title: String(body.title).trim() } : {}),
+        ...(body.author !== undefined ? { author: String(body.author || '').trim() || null } : {}),
         ...(body.subject !== undefined ? { subject: String(body.subject).trim() } : {}),
         ...(body.level !== undefined ? { level: String(body.level).trim() } : {}),
         ...(body.description !== undefined ? { description: String(body.description || '').trim() || null } : {}),
