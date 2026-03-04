@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
@@ -11,6 +11,23 @@ function formatHtg(value) {
     currency: 'HTG',
     maximumFractionDigits: 0
   }).format(Number(value || 0));
+}
+
+function toIsoDateOnly(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const y = date.getFullYear();
+  const m = `${date.getMonth() + 1}`.padStart(2, '0');
+  const d = `${date.getDate()}`.padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function escapeCsv(value) {
+  const raw = String(value ?? '');
+  if (raw.includes('"') || raw.includes(',') || raw.includes('\n')) {
+    return `"${raw.replace(/"/g, '""')}"`;
+  }
+  return raw;
 }
 
 export default function SuperDashboardPage() {
@@ -41,6 +58,12 @@ export default function SuperDashboardPage() {
   const [challengeTheme, setChallengeTheme] = useState('TIKTOKERS');
   const [savingTiktok, setSavingTiktok] = useState(false);
   const [platformDonations, setPlatformDonations] = useState([]);
+  const [donationFilters, setDonationFilters] = useState({
+    status: '',
+    dateFrom: '',
+    dateTo: '',
+    q: ''
+  });
 
   useEffect(() => {
     const token = getToken();
@@ -174,12 +197,77 @@ export default function SuperDashboardPage() {
     }
   }
 
+  const filteredDonations = useMemo(() => {
+    return platformDonations.filter((row) => {
+      const matchesStatus = !donationFilters.status || row.status === donationFilters.status;
+
+      const rowDate = toIsoDateOnly(row.createdAt);
+      const matchesFrom = !donationFilters.dateFrom || (rowDate && rowDate >= donationFilters.dateFrom);
+      const matchesTo = !donationFilters.dateTo || (rowDate && rowDate <= donationFilters.dateTo);
+
+      const q = String(donationFilters.q || '').trim().toLowerCase();
+      const haystack = [
+        row.donorName,
+        row.donorEmail,
+        row.orderRef,
+        row.paymentMethod,
+        row.status
+      ].join(' ').toLowerCase();
+      const matchesQ = !q || haystack.includes(q);
+
+      return matchesStatus && matchesFrom && matchesTo && matchesQ;
+    });
+  }, [platformDonations, donationFilters]);
+
+  const successfulDonations = filteredDonations.filter((row) => row.status === 'SUCCESS');
+  const totalDonationAmount = successfulDonations.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+
+  function exportDonationsCsv() {
+    const header = [
+      'id',
+      'donor_name',
+      'donor_email',
+      'donor_role',
+      'amount',
+      'currency',
+      'payment_method',
+      'status',
+      'order_ref',
+      'provider_tx_id',
+      'created_at',
+      'paid_at'
+    ];
+
+    const lines = filteredDonations.map((row) => ([
+      row.id,
+      row.donorName,
+      row.donorEmail || '',
+      row.donorRole || '',
+      row.amount,
+      row.currency,
+      row.paymentMethod,
+      row.status,
+      row.orderRef || '',
+      row.providerTxId || '',
+      row.createdAt ? new Date(row.createdAt).toISOString() : '',
+      row.paidAt ? new Date(row.paidAt).toISOString() : ''
+    ].map(escapeCsv).join(',')));
+
+    const csv = [header.join(','), ...lines].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dons-linkedu-${Date.now()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
   if (loading) {
     return <main className="mx-auto max-w-6xl px-4 py-8">Chargement...</main>;
   }
-
-  const successfulDonations = platformDonations.filter((row) => row.status === 'SUCCESS');
-  const totalDonationAmount = successfulDonations.reduce((sum, row) => sum + Number(row.amount || 0), 0);
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
@@ -200,7 +288,43 @@ export default function SuperDashboardPage() {
       ) : null}
 
       <section className="card space-y-3">
-        <h2 className="text-xl font-semibold">Dons LinkEduPro (plateforme)</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-semibold">Dons LinkEduPro (plateforme)</h2>
+          <button className="btn-secondary" type="button" onClick={exportDonationsCsv} disabled={filteredDonations.length === 0}>
+            Export CSV
+          </button>
+        </div>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+          <select
+            className="input"
+            value={donationFilters.status}
+            onChange={(e) => setDonationFilters((prev) => ({ ...prev, status: e.target.value }))}
+          >
+            <option value="">Tous statuts</option>
+            <option value="SUCCESS">SUCCESS</option>
+            <option value="PENDING">PENDING</option>
+            <option value="FAILED">FAILED</option>
+            <option value="REFUNDED">REFUNDED</option>
+          </select>
+          <input
+            className="input"
+            type="date"
+            value={donationFilters.dateFrom}
+            onChange={(e) => setDonationFilters((prev) => ({ ...prev, dateFrom: e.target.value }))}
+          />
+          <input
+            className="input"
+            type="date"
+            value={donationFilters.dateTo}
+            onChange={(e) => setDonationFilters((prev) => ({ ...prev, dateTo: e.target.value }))}
+          />
+          <input
+            className="input"
+            placeholder="Recherche donateur/référence"
+            value={donationFilters.q}
+            onChange={(e) => setDonationFilters((prev) => ({ ...prev, q: e.target.value }))}
+          />
+        </div>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <div className="rounded-lg border border-brand-100 p-3">
             <p className="text-sm text-brand-700">Total confirmé</p>
@@ -212,11 +336,11 @@ export default function SuperDashboardPage() {
           </div>
           <div className="rounded-lg border border-brand-100 p-3">
             <p className="text-sm text-brand-700">Transactions totales</p>
-            <p className="text-2xl font-bold text-brand-900">{platformDonations.length}</p>
+            <p className="text-2xl font-bold text-brand-900">{filteredDonations.length}</p>
           </div>
         </div>
 
-        {platformDonations.length === 0 ? (
+        {filteredDonations.length === 0 ? (
           <p className="text-sm text-brand-700">Aucun don enregistré.</p>
         ) : (
           <div className="overflow-auto">
@@ -234,7 +358,7 @@ export default function SuperDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {platformDonations.map((row) => (
+                {filteredDonations.map((row) => (
                   <tr key={row.id}>
                     <td>{row.donorName}</td>
                     <td>{row.donorEmail || '-'}</td>
