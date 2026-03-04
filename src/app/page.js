@@ -213,6 +213,14 @@ export default function HomePage() {
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
   const [activeLandingSubject, setActiveLandingSubject] = useState(LANDING_SUBJECTS[0].id);
   const [landingHeroIndex, setLandingHeroIndex] = useState(0);
+  const [platformDonationAmount, setPlatformDonationAmount] = useState('');
+  const [platformDonationBusy, setPlatformDonationBusy] = useState(false);
+  const [platformDonationFeedback, setPlatformDonationFeedback] = useState('');
+  const [platformDonationSummary, setPlatformDonationSummary] = useState({
+    totalCollected: 0,
+    totalDonations: 0,
+    totalDonors: 0
+  });
 
   const myRanking = useMemo(() => {
     if (!student?.id) return null;
@@ -327,6 +335,35 @@ export default function HomePage() {
         setError(e.message || 'Erreur de chargement des données communautaires');
         setReady(true);
       });
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    apiClient('/platform-donations/summary')
+      .then((data) => {
+        if (!isMounted) return;
+        setPlatformDonationSummary({
+          totalCollected: Number(data?.totalCollected || 0),
+          totalDonations: Number(data?.totalDonations || 0),
+          totalDonors: Number(data?.totalDonors || 0)
+        });
+      })
+      .catch(() => {});
+
+    if (typeof window !== 'undefined') {
+      const query = new URLSearchParams(window.location.search);
+      const provider = String(query.get('provider') || '').trim().toLowerCase();
+      const payment = String(query.get('payment') || '').trim().toLowerCase();
+      if (provider === 'moncash' && payment === 'success') {
+        setPlatformDonationFeedback('Merci. Ton don LinkEduPro a été confirmé.');
+      } else if (provider === 'moncash' && payment === 'failed') {
+        setPlatformDonationFeedback('Le paiement du don a échoué.');
+      }
+    }
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -503,6 +540,41 @@ export default function HomePage() {
       setChallengeFeedback(e.message || 'Impossible de supprimer le vote.');
     } finally {
       setChallengeDeleting(false);
+    }
+  }
+
+  async function donateToPlatform() {
+    const token = getToken();
+    if (!token) {
+      setPlatformDonationFeedback('Connecte-toi pour faire un don.');
+      return;
+    }
+    const amount = Number(platformDonationAmount || 0);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setPlatformDonationFeedback('Montant invalide.');
+      return;
+    }
+
+    try {
+      setPlatformDonationBusy(true);
+      setPlatformDonationFeedback('');
+      const data = await apiClient('/platform-donations/checkout', {
+        method: 'POST',
+        token,
+        body: JSON.stringify({
+          amount,
+          paymentMethod: 'MONCASH'
+        })
+      });
+      if (data.redirectUrl && typeof window !== 'undefined') {
+        window.location.assign(data.redirectUrl);
+      } else {
+        setPlatformDonationFeedback('Paiement non disponible.');
+      }
+    } catch (e) {
+      setPlatformDonationFeedback(e.message || 'Impossible de lancer le paiement.');
+    } finally {
+      setPlatformDonationBusy(false);
     }
   }
 
@@ -803,6 +875,33 @@ export default function HomePage() {
           <Link href={homeIntro.primaryHref} className="btn-primary cta-pulse home-gold-cta">{homeIntro.primaryLabel}</Link>
           <Link href={homeIntro.secondaryHref} className="btn-secondary">{homeIntro.secondaryLabel}</Link>
         </div>
+      </div>
+
+      <div className="card motion-enter motion-delay-1 lift-card">
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Soutenir LinkEduPro</p>
+        <h2 className="mt-2 text-xl font-bold text-brand-900">Faire un don à la plateforme</h2>
+        <p className="mt-2 text-sm text-brand-700">
+          Tes dons financent l’amélioration continue des outils éducatifs et des contenus.
+        </p>
+        <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto]">
+          <input
+            className="input"
+            type="number"
+            min="1"
+            placeholder="Montant (HTG)"
+            value={platformDonationAmount}
+            onChange={(e) => setPlatformDonationAmount(e.target.value)}
+          />
+          <button type="button" className="btn-primary" onClick={donateToPlatform} disabled={platformDonationBusy}>
+            {platformDonationBusy ? 'Redirection...' : 'Donner via MonCash'}
+          </button>
+        </div>
+        <div className="mt-3 grid gap-2 text-xs text-brand-700 sm:grid-cols-3">
+          <p>Total collecté: <strong>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'HTG', maximumFractionDigits: 0 }).format(platformDonationSummary.totalCollected)}</strong></p>
+          <p>Dons confirmés: <strong>{platformDonationSummary.totalDonations}</strong></p>
+          <p>Donateurs: <strong>{platformDonationSummary.totalDonors}</strong></p>
+        </div>
+        {platformDonationFeedback ? <p className="mt-2 text-sm text-brand-700">{platformDonationFeedback}</p> : null}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
