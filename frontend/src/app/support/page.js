@@ -5,59 +5,18 @@ import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 
-function formatHtg(value) {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'HTG',
-    maximumFractionDigits: 0
-  }).format(Number(value || 0));
-}
-
-function formatDate(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleString();
-}
+const QUICK_AMOUNTS = [10, 25, 50, 100, 250];
 
 export default function SupportPage() {
   const [student, setStudent] = useState(null);
-  const [summary, setSummary] = useState({
-    totalCollected: 0,
-    totalDonations: 0,
-    totalDonors: 0
-  });
-  const [donations, setDonations] = useState([]);
-  const [amount, setAmount] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [selectedAmount, setSelectedAmount] = useState(50);
+  const [customAmount, setCustomAmount] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
 
-  async function loadData() {
-    try {
-      setLoading(true);
-      setError('');
-      const token = getToken();
-      const [summaryData, mineData] = await Promise.all([
-        apiClient('/platform-donations/summary'),
-        token ? apiClient('/platform-donations/mine', { token }) : Promise.resolve({ donations: [] })
-      ]);
-      setSummary({
-        totalCollected: Number(summaryData?.totalCollected || 0),
-        totalDonations: Number(summaryData?.totalDonations || 0),
-        totalDonors: Number(summaryData?.totalDonors || 0)
-      });
-      setDonations(Array.isArray(mineData?.donations) ? mineData.donations : []);
-    } catch (e) {
-      setError(e.message || 'Impossible de charger la page support.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
     setStudent(getStudent());
-    loadData();
 
     if (typeof window !== 'undefined') {
       const query = new URLSearchParams(window.location.search);
@@ -77,7 +36,13 @@ export default function SupportPage() {
       setInfo('Connecte-toi pour faire un don.');
       return;
     }
-    const numericAmount = Number(amount || 0);
+
+    const hasCustom = String(customAmount || '').trim() !== '';
+    const numericAmount = hasCustom ? Number(customAmount || 0) : Number(selectedAmount || 0);
+    if (hasCustom && numericAmount <= 10) {
+      setError('Le montant personnalisé doit être supérieur à 10 HTG.');
+      return;
+    }
     if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
       setError('Montant invalide.');
       return;
@@ -115,11 +80,6 @@ export default function SupportPage() {
         <p className="mt-2 text-sm text-brand-700">
           Tes contributions financent les contenus éducatifs, l’infrastructure et les améliorations continues.
         </p>
-        <div className="mt-4 grid gap-2 text-xs text-brand-700 sm:grid-cols-3">
-          <p>Total collecté: <strong>{formatHtg(summary.totalCollected)}</strong></p>
-          <p>Dons confirmés: <strong>{summary.totalDonations}</strong></p>
-          <p>Donateurs: <strong>{summary.totalDonors}</strong></p>
-        </div>
       </section>
 
       <section className="card">
@@ -129,14 +89,34 @@ export default function SupportPage() {
             Connecte-toi pour donner. <Link className="underline" href="/login">Se connecter</Link>
           </p>
         ) : (
-          <div className="mt-3 grid gap-3 md:grid-cols-[1fr_auto]">
+          <div className="mt-3 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {QUICK_AMOUNTS.map((value) => (
+                <button
+                  key={`amt-${value}`}
+                  type="button"
+                  className={selectedAmount === value && String(customAmount || '').trim() === '' ? 'btn-primary' : 'btn-secondary'}
+                  onClick={() => {
+                    setSelectedAmount(value);
+                    setCustomAmount('');
+                    setError('');
+                  }}
+                >
+                  {value} HTG
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-brand-700">Ou entre un montant personnalisé supérieur à 10 HTG.</p>
             <input
               className="input"
               type="number"
-              min="1"
-              placeholder="Montant (HTG)"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              min="11"
+              placeholder="Montant personnalisé (HTG)"
+              value={customAmount}
+              onChange={(e) => {
+                setCustomAmount(e.target.value);
+                setError('');
+              }}
             />
             <button type="button" className="btn-primary" onClick={startDonation} disabled={busy}>
               {busy ? 'Redirection...' : 'Payer avec MonCash'}
@@ -145,25 +125,6 @@ export default function SupportPage() {
         )}
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
         {info ? <p className="mt-2 text-sm text-green-700">{info}</p> : null}
-      </section>
-
-      <section className="card">
-        <h2 className="text-lg font-semibold text-brand-900">Mes dons</h2>
-        {loading ? <p className="mt-2 text-sm text-brand-700">Chargement...</p> : null}
-        {!loading && donations.length === 0 ? (
-          <p className="mt-2 text-sm text-brand-700">Aucun don enregistré pour le moment.</p>
-        ) : null}
-        <div className="mt-3 space-y-2">
-          {donations.map((row) => (
-            <article key={row.id} className="rounded-lg border border-brand-100 px-3 py-2 text-sm">
-              <p className="font-semibold text-brand-900">{formatHtg(row.amount)} · {row.paymentMethod}</p>
-              <p className="text-brand-700">Statut: {row.status}</p>
-              <p className="text-brand-700">Référence: {row.orderRef || '-'}</p>
-              <p className="text-brand-700">Créé le: {formatDate(row.createdAt)}</p>
-              {row.paidAt ? <p className="text-brand-700">Confirmé le: {formatDate(row.paidAt)}</p> : null}
-            </article>
-          ))}
-        </div>
       </section>
     </main>
   );
