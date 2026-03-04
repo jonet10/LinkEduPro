@@ -5,6 +5,14 @@ import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 
+function formatHtg(value) {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'HTG',
+    maximumFractionDigits: 0
+  }).format(Number(value || 0));
+}
+
 export default function SuperDashboardPage() {
   const router = useRouter();
   const [dashboard, setDashboard] = useState(null);
@@ -32,6 +40,7 @@ export default function SuperDashboardPage() {
   const [challengeSubtitle, setChallengeSubtitle] = useState('Choisis la personne qui doit rester en tête cette semaine.');
   const [challengeTheme, setChallengeTheme] = useState('TIKTOKERS');
   const [savingTiktok, setSavingTiktok] = useState(false);
+  const [platformDonations, setPlatformDonations] = useState([]);
 
   useEffect(() => {
     const token = getToken();
@@ -52,13 +61,15 @@ export default function SuperDashboardPage() {
     try {
       setError('');
       setLoading(true);
-      const [d, i, c] = await Promise.all([
+      const [d, i, c, donationsPayload] = await Promise.all([
         apiClient('/community/admin/super-dashboard', { token }),
         apiClient('/community/admin/teacher-invitations', { token }),
-        apiClient('/community/admin/config', { token })
+        apiClient('/community/admin/config', { token }),
+        apiClient('/platform-donations/admin/all', { token })
       ]);
       setDashboard(d);
       setInvites(i.invitations || []);
+      setPlatformDonations(Array.isArray(donationsPayload?.donations) ? donationsPayload.donations : []);
       if (c?.config) {
         setCommunityConfig(c.config);
         setTiktokEditors(Array.isArray(c.config.tiktokCreators) ? c.config.tiktokCreators : []);
@@ -167,6 +178,9 @@ export default function SuperDashboardPage() {
     return <main className="mx-auto max-w-6xl px-4 py-8">Chargement...</main>;
   }
 
+  const successfulDonations = platformDonations.filter((row) => row.status === 'SUCCESS');
+  const totalDonationAmount = successfulDonations.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <section className="card flex items-center justify-between">
@@ -184,6 +198,59 @@ export default function SuperDashboardPage() {
           <div className="card"><p className="text-sm">Paiements mensuels</p><p className="text-2xl font-bold">{String(dashboard.analytics.monthlyInternalPayments)}</p></div>
         </section>
       ) : null}
+
+      <section className="card space-y-3">
+        <h2 className="text-xl font-semibold">Dons LinkEduPro (plateforme)</h2>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="rounded-lg border border-brand-100 p-3">
+            <p className="text-sm text-brand-700">Total confirmé</p>
+            <p className="text-2xl font-bold text-brand-900">{formatHtg(totalDonationAmount)}</p>
+          </div>
+          <div className="rounded-lg border border-brand-100 p-3">
+            <p className="text-sm text-brand-700">Dons confirmés</p>
+            <p className="text-2xl font-bold text-brand-900">{successfulDonations.length}</p>
+          </div>
+          <div className="rounded-lg border border-brand-100 p-3">
+            <p className="text-sm text-brand-700">Transactions totales</p>
+            <p className="text-2xl font-bold text-brand-900">{platformDonations.length}</p>
+          </div>
+        </div>
+
+        {platformDonations.length === 0 ? (
+          <p className="text-sm text-brand-700">Aucun don enregistré.</p>
+        ) : (
+          <div className="overflow-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left">
+                  <th>Donateur</th>
+                  <th>Email</th>
+                  <th>Montant</th>
+                  <th>Méthode</th>
+                  <th>Statut</th>
+                  <th>Référence</th>
+                  <th>Créé le</th>
+                  <th>Payé le</th>
+                </tr>
+              </thead>
+              <tbody>
+                {platformDonations.map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.donorName}</td>
+                    <td>{row.donorEmail || '-'}</td>
+                    <td>{formatHtg(row.amount)}</td>
+                    <td>{row.paymentMethod}</td>
+                    <td>{row.status}</td>
+                    <td>{row.orderRef || '-'}</td>
+                    <td>{new Date(row.createdAt).toLocaleString()}</td>
+                    <td>{row.paidAt ? new Date(row.paidAt).toLocaleString() : '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       <section className="card space-y-3">
         <h2 className="text-xl font-semibold">Liste globale des Élèves (module Élèves)</h2>

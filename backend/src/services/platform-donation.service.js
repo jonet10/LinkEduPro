@@ -106,9 +106,37 @@ async function getPlatformDonationSummary() {
   };
 }
 
+async function listAllPlatformDonations() {
+  const rows = await prisma.platformDonation.findMany({
+    include: {
+      donor: {
+        select: { id: true, firstName: true, lastName: true, email: true, role: true }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    donorId: row.donorId,
+    donorName: `${String(row.donor?.firstName || '').trim()} ${String(row.donor?.lastName || '').trim()}`.trim() || 'Utilisateur',
+    donorEmail: row.donor?.email || null,
+    donorRole: row.donor?.role || null,
+    amount: Number(row.amount || 0),
+    currency: row.currency,
+    paymentMethod: row.paymentMethod,
+    status: row.status,
+    orderRef: row.orderRef,
+    providerTxId: row.providerTxId,
+    paidAt: row.paidAt,
+    createdAt: row.createdAt
+  }));
+}
+
 module.exports = {
   createPlatformDonationCheckout,
   confirmPlatformDonationByReference,
   listMyPlatformDonations,
-  getPlatformDonationSummary
+  getPlatformDonationSummary,
+  listAllPlatformDonations
 };

@@ -1,11 +1,13 @@
 const express = require('express');
 const auth = require('../middlewares/auth');
 const validate = require('../middlewares/validate');
+const { requireRoles } = require('../middlewares/roles');
 const Joi = require('joi');
 const {
   createPlatformDonationCheckout,
   listMyPlatformDonations,
-  getPlatformDonationSummary
+  getPlatformDonationSummary,
+  listAllPlatformDonations
 } = require('../services/platform-donation.service');
 
 const router = express.Router();
@@ -27,6 +29,15 @@ router.get('/summary', async (req, res, next) => {
 router.get('/mine', auth, async (req, res, next) => {
   try {
     const donations = await listMyPlatformDonations({ userId: req.user.id });
+    return res.json({ donations });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get('/admin/all', auth, requireRoles(['ADMIN']), async (req, res, next) => {
+  try {
+    const donations = await listAllPlatformDonations();
     return res.json({ donations });
   } catch (error) {
     return next(error);
