@@ -216,11 +216,6 @@ export default function HomePage() {
   const [platformDonationAmount, setPlatformDonationAmount] = useState('');
   const [platformDonationBusy, setPlatformDonationBusy] = useState(false);
   const [platformDonationFeedback, setPlatformDonationFeedback] = useState('');
-  const [platformDonationSummary, setPlatformDonationSummary] = useState({
-    totalCollected: 0,
-    totalDonations: 0,
-    totalDonors: 0
-  });
 
   const myRanking = useMemo(() => {
     if (!student?.id) return null;
@@ -338,18 +333,6 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    apiClient('/platform-donations/summary')
-      .then((data) => {
-        if (!isMounted) return;
-        setPlatformDonationSummary({
-          totalCollected: Number(data?.totalCollected || 0),
-          totalDonations: Number(data?.totalDonations || 0),
-          totalDonors: Number(data?.totalDonors || 0)
-        });
-      })
-      .catch(() => {});
-
     if (typeof window !== 'undefined') {
       const query = new URLSearchParams(window.location.search);
       const provider = String(query.get('provider') || '').trim().toLowerCase();
@@ -361,9 +344,6 @@ export default function HomePage() {
       }
     }
 
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   useEffect(() => {
@@ -896,11 +876,6 @@ export default function HomePage() {
           <button type="button" className="btn-primary" onClick={donateToPlatform} disabled={platformDonationBusy}>
             {platformDonationBusy ? 'Redirection...' : 'Donner via MonCash'}
           </button>
-        </div>
-        <div className="mt-3 grid gap-2 text-xs text-brand-700 sm:grid-cols-3">
-          <p>Total collecté: <strong>{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'HTG', maximumFractionDigits: 0 }).format(platformDonationSummary.totalCollected)}</strong></p>
-          <p>Dons confirmés: <strong>{platformDonationSummary.totalDonations}</strong></p>
-          <p>Donateurs: <strong>{platformDonationSummary.totalDonors}</strong></p>
         </div>
         {platformDonationFeedback ? <p className="mt-2 text-sm text-brand-700">{platformDonationFeedback}</p> : null}
       </div>
