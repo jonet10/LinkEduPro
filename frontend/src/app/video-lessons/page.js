@@ -128,31 +128,6 @@ export default function VideoLessonsPage() {
     setReady(true);
   }, [router]);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const level = params.get('level');
-    const subject = params.get('subject');
-    const chapter = params.get('chapter');
-    const title = params.get('title');
-
-    if (!level && !subject && !chapter && !title) return;
-
-    const chapterLabel = chapter ? `Chapitre ${chapter}` : '';
-    const titleLabel = title || [subject, chapterLabel].filter(Boolean).join(' - ');
-    const prefillTitle = titleLabel ? `Video - ${titleLabel}` : '';
-    const prefillDescription = [subject ? `Matiere: ${subject}.` : '', chapterLabel ? `${chapterLabel}.` : '']
-      .filter(Boolean)
-      .join(' ');
-
-    setForm((prev) => ({
-      ...prev,
-      level: level ? toApiLevel(level) : prev.level,
-      title: prev.title || prefillTitle,
-      description: prev.description || prefillDescription
-    }));
-  }, []);
-
   const canManage = Boolean(student && ['ADMIN', 'TEACHER'].includes(student.role));
 
   async function loadVideos(currentToken, currentStudent) {

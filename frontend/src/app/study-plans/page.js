@@ -7,71 +7,6 @@ import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 
 const LEVELS = ['9e', 'NS1', 'NS2', 'NS3', 'Terminale', 'Universite'];
-const BOOK_TEMPLATES = [
-  {
-    id: 'jaime-haiti',
-    label: "J'aime Haiti - Instruction civique et morale",
-    defaultSubject: 'Sciences sociales',
-    chapters: [
-      {
-        chapterOrder: 1,
-        title: 'Identite nationale et citoyennete',
-        description: "Comprendre l'identite haitienne, les symboles nationaux et le role du citoyen.",
-        notes: "Origine de la nation haitienne, drapeau, hymne, armoiries. Devoirs du citoyen dans la vie quotidienne.",
-        exercises: 'Cite 3 symboles nationaux et explique leur importance. Redige un paragraphe sur la citoyennete active.'
-      },
-      {
-        chapterOrder: 2,
-        title: "Respect des personnes et des biens",
-        description: "Adopter les comportements de respect envers les personnes, les biens publics et les biens prives.",
-        notes: 'Notions de respect, responsabilite, propriete publique/privee, prevention des actes de violence.',
-        exercises: 'Donne 5 exemples de comportements responsables a l ecole et dans le quartier.'
-      },
-      {
-        chapterOrder: 3,
-        title: 'Vie en communaute et cooperation',
-        description: 'Renforcer les attitudes de cooperation, entraide et solidarite dans la communaute.',
-        notes: 'Travail collectif, resolution de conflits, ecoute active, respect des differences.',
-        exercises: "Propose un mini projet d'entraide scolaire en 4 etapes."
-      },
-      {
-        chapterOrder: 4,
-        title: 'Valeurs civiques et morales',
-        description: 'Identifier les valeurs essentielles: honnetete, discipline, justice, tolerance.',
-        notes: 'Valeurs individuelles et collectives, consequences des mauvais comportements.',
-        exercises: 'Associe chaque valeur a une situation concrete vecue dans la vie reelle.'
-      },
-      {
-        chapterOrder: 5,
-        title: 'Droits et devoirs de lenfant',
-        description: 'Connaitre les droits fondamentaux de lenfant et les devoirs correspondants.',
-        notes: 'Droit a l education, sante, protection. Responsabilites a la maison et a l ecole.',
-        exercises: 'Liste 5 droits et 5 devoirs, puis explique leur lien.'
-      },
-      {
-        chapterOrder: 6,
-        title: 'Environnement et bien commun',
-        description: 'Proteger lenvironnement comme un bien commun de la nation.',
-        notes: 'Proprete, gestion des dechets, protection des arbres, risques naturels et prevention.',
-        exercises: 'Elabore une campagne de sensibilisation environnementale pour ta classe.'
-      },
-      {
-        chapterOrder: 7,
-        title: 'Institutions de la Republique',
-        description: "Decouvrir les principales institutions et leur role dans l'organisation du pays.",
-        notes: 'Etat, collectivites territoriales, justice, role de la Constitution.',
-        exercises: 'Explique le role de 3 institutions publiques en Haiti.'
-      },
-      {
-        chapterOrder: 8,
-        title: 'Culture de paix et non-violence',
-        description: 'Promouvoir le dialogue, la mediation et la paix dans les relations sociales.',
-        notes: 'Communication non violente, gestion des tensions, respect des opinions.',
-        exercises: 'Mets en scene un conflit et propose une resolution pacifique.'
-      }
-    ]
-  }
-];
 
 function parseChapterOrder(plan) {
   if (Number.isInteger(plan?.chapterOrder)) return plan.chapterOrder;
@@ -110,11 +45,6 @@ export default function StudyPlansPage() {
     description: '',
     notes: '',
     exercises: ''
-  });
-  const [bookImport, setBookImport] = useState({
-    templateId: BOOK_TEMPLATES[0].id,
-    level: '9e',
-    subject: BOOK_TEMPLATES[0].defaultSubject
   });
 
   const [editForm, setEditForm] = useState({
@@ -363,62 +293,6 @@ export default function StudyPlansPage() {
     }
   }
 
-  async function onImportBookChapters() {
-    if (!token) return;
-    const selectedTemplate = BOOK_TEMPLATES.find((item) => item.id === bookImport.templateId);
-    if (!selectedTemplate) return;
-
-    setSaving(true);
-    setError('');
-    setInfo('');
-
-    let createdCount = 0;
-    let skippedCount = 0;
-
-    try {
-      const nextPlans = [...plans];
-      for (const chapter of selectedTemplate.chapters) {
-        const normalizedSubject = (bookImport.subject || selectedTemplate.defaultSubject).trim();
-        const exists = nextPlans.some(
-          (plan) =>
-            String(plan.level || '') === String(bookImport.level) &&
-            String(plan.subject || '').trim().toLowerCase() === normalizedSubject.toLowerCase() &&
-            String(plan.title || '').trim().toLowerCase() === String(chapter.title || '').trim().toLowerCase()
-        );
-
-        if (exists) {
-          skippedCount += 1;
-          continue;
-        }
-
-        const payload = {
-          level: bookImport.level,
-          subject: normalizedSubject,
-          chapterOrder: chapter.chapterOrder,
-          title: chapter.title,
-          description: chapter.description,
-          notes: chapter.notes,
-          exercises: chapter.exercises
-        };
-
-        const data = await apiClient('/v2/study-plans', {
-          method: 'POST',
-          token,
-          body: JSON.stringify(payload)
-        });
-        createdCount += 1;
-        nextPlans.push(data.studyPlan);
-      }
-
-      setPlans(nextPlans);
-      setInfo(`Import termine: ${createdCount} chapitre(s) crees, ${skippedCount} deja existant(s).`);
-    } catch (e) {
-      setError(e.message || 'Erreur import des chapitres.');
-    } finally {
-      setSaving(false);
-    }
-  }
-
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <section className="card space-y-2">
@@ -446,48 +320,6 @@ export default function StudyPlansPage() {
             <button className="btn-primary md:col-span-2" disabled={saving}>{saving ? 'Création...' : 'Ajouter chapitre'}</button>
           </form>
 
-          <div className="mt-4 rounded-xl border border-brand-100 p-3">
-            <h3 className="text-base font-semibold text-brand-900">Importer des chapitres depuis un livre</h3>
-            <p className="mt-1 text-sm text-brand-700">
-              Base pre-remplie modifiable ensuite dans "Detail chapitre". Tu pourras aussi ajouter des videos apres.
-            </p>
-            <div className="mt-3 grid gap-3 md:grid-cols-3">
-              <select
-                className="input"
-                value={bookImport.templateId}
-                onChange={(e) => {
-                  const selected = BOOK_TEMPLATES.find((item) => item.id === e.target.value);
-                  setBookImport((prev) => ({
-                    ...prev,
-                    templateId: e.target.value,
-                    subject: selected?.defaultSubject || prev.subject
-                  }));
-                }}
-              >
-                {BOOK_TEMPLATES.map((tpl) => (
-                  <option key={tpl.id} value={tpl.id}>{tpl.label}</option>
-                ))}
-              </select>
-              <select
-                className="input"
-                value={bookImport.level}
-                onChange={(e) => setBookImport((prev) => ({ ...prev, level: e.target.value }))}
-              >
-                {LEVELS.map((lvl) => (
-                  <option key={lvl} value={lvl}>{lvl}</option>
-                ))}
-              </select>
-              <input
-                className="input"
-                value={bookImport.subject}
-                onChange={(e) => setBookImport((prev) => ({ ...prev, subject: e.target.value }))}
-                placeholder="Matiere"
-              />
-            </div>
-            <button type="button" className="btn-secondary mt-3" onClick={onImportBookChapters} disabled={saving}>
-              {saving ? 'Import en cours...' : 'Creer les chapitres du livre'}
-            </button>
-          </div>
         </section>
       ) : null}
 
@@ -598,12 +430,6 @@ export default function StudyPlansPage() {
                 <div className="flex gap-2">
                   <button className="btn-secondary" onClick={() => openEdit(selectedPlan)}>modifier</button>
                   <button className="btn-secondary" onClick={() => onDeletePlan(selectedPlan.id)}>Supprimer</button>
-                  <Link
-                    className="btn-secondary"
-                    href={`/video-lessons?level=${encodeURIComponent(selectedPlan.level || '')}&subject=${encodeURIComponent(selectedPlan.subject || '')}&chapter=${encodeURIComponent(Number.isInteger(selectedPlan.chapterOrder) ? String(selectedPlan.chapterOrder) : '')}&title=${encodeURIComponent(selectedPlan.title || '')}`}
-                  >
-                    Ajouter video
-                  </Link>
                 </div>
               ) : null}
             </div>
