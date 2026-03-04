@@ -1,14 +1,12 @@
-const path = require('path');
-const fs = require('fs');
 const multer = require('multer');
+const { resolveStoragePath, ensureDir } = require('../config/storage');
 
 const storage = multer.diskStorage({
   destination: (_, file, cb) => {
-    const base = path.resolve(__dirname, '../../storage/library-books');
     const targetDir = file.fieldname === 'coverImage'
-      ? path.join(base, 'covers')
-      : path.join(base, 'pdfs');
-    fs.mkdirSync(targetDir, { recursive: true });
+      ? resolveStoragePath('library-books', 'covers')
+      : resolveStoragePath('library-books', 'pdfs');
+    ensureDir(targetDir);
     cb(null, targetDir);
   },
   filename: (_, file, cb) => {
