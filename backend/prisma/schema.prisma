@@ -53,6 +53,7 @@ model Student {
   homeChallengeVotes                                                  HomeChallengeVote[]
   reviewedLibraryBooks                                                LibraryBook[]                @relation("LibraryBookReviewer")
   libraryPurchases                                                    LibraryPurchase[]
+  platformDonations                                                   PlatformDonation[]
   uploadedLibraryBooks                                                LibraryBook[]                @relation("LibraryBookUploader")
   sentMessages                                                        Message[]                    @relation("MessageSender")
   nsiv_catchup_sessions_nsiv_catchup_sessions_created_byToStudent     nsiv_catchup_sessions[]      @relation("nsiv_catchup_sessions_created_byToStudent")
@@ -690,6 +691,25 @@ model LibraryPurchase {
   @@index([buyerId, createdAt], map: "LibraryPurchase_buyerId_createdAt_idx")
   @@index([bookId, status], map: "LibraryPurchase_bookId_status_idx")
   @@map("library_purchases")
+}
+
+model PlatformDonation {
+  id                   Int                    @id(map: "PlatformDonation_pkey") @default(autoincrement())
+  donorId              Int                    @map("donor_id")
+  amount               Decimal                @db.Decimal(12, 2)
+  currency             String                 @default("HTG")
+  paymentMethod        RemedialPaymentMethod  @default(MONCASH) @map("payment_method")
+  status               PlatformDonationStatus @default(PENDING)
+  orderRef             String?                @unique(map: "PlatformDonation_orderRef_key") @map("order_ref")
+  providerTxId         String?                @map("provider_tx_id")
+  paidAt               DateTime?              @map("paid_at")
+  createdAt            DateTime               @default(now()) @map("created_at")
+  updatedAt            DateTime               @updatedAt @map("updated_at")
+  donor                Student                @relation(fields: [donorId], references: [id], onDelete: Cascade, map: "PlatformDonation_donor_id_fkey")
+
+  @@index([donorId, createdAt], map: "PlatformDonation_donorId_createdAt_idx")
+  @@index([status, createdAt], map: "PlatformDonation_status_createdAt_idx")
+  @@map("platform_donations")
 }
 
 model EduCollectRuleAcceptance {
@@ -1446,6 +1466,13 @@ enum ContentStatus {
   PENDING  @map("pending")
   APPROVED @map("approved")
   REJECTED @map("rejected")
+}
+
+enum PlatformDonationStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
 }
 
 enum EduCollectProjectStatus {

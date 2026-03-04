@@ -41,6 +41,11 @@ function buildLibraryOrderReference({ bookId, buyerId }) {
   return `LIB-${Number(bookId)}-${Number(buyerId)}-${now}`;
 }
 
+function buildPlatformDonationOrderReference({ donorId }) {
+  const now = Date.now();
+  return `PDON-${Number(donorId)}-${now}`;
+}
+
 function parseOrderReference(reference) {
   const raw = String(reference || '').trim();
   const match = /^LEP-(\d+)-(\d+)-\d+$/i.exec(raw);
@@ -58,6 +63,15 @@ function parseLibraryOrderReference(reference) {
   return {
     bookId: Number(match[1]),
     buyerId: Number(match[2])
+  };
+}
+
+function parsePlatformDonationOrderReference(reference) {
+  const raw = String(reference || '').trim();
+  const match = /^PDON-(\d+)-\d+$/i.exec(raw);
+  if (!match) return null;
+  return {
+    donorId: Number(match[1])
   };
 }
 
@@ -146,8 +160,10 @@ module.exports = {
   isMoncashEnabled,
   buildOrderReference,
   buildLibraryOrderReference,
+  buildPlatformDonationOrderReference,
   parseOrderReference,
   parseLibraryOrderReference,
+  parsePlatformDonationOrderReference,
   createMoncashPayment,
   retrieveMoncashPayment
 };

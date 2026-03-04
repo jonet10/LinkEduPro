@@ -1,7 +1,15 @@
 const prisma = require('../config/prisma');
 const { payForSession } = require('../services/remedial.service');
-const { isMoncashEnabled, parseOrderReference, parseLibraryOrderReference, retrieveMoncashPayment } = require('../services/moncash.service');
+const {
+  isMoncashEnabled,
+  parseOrderReference,
+  parseLibraryOrderReference,
+  parsePlatformDonationOrderReference,
+  retrieveMoncashPayment
+} = require('../services/moncash.service');
 const { confirmLibraryPurchaseByReference } = require('../services/library-purchase.service');
+const { confirmPlatformDonationByReference } = require('../services/platform-donation.service');
+const { createNotification, notifyAdmins } = require('../services/notifications');
 
 function resolveProviderStatus(payload) {
   const raw = String(
@@ -124,9 +132,7 @@ async function paymentReturn(req, res) {
           }
         } else {
           const libraryRef = parseLibraryOrderReference(payment.reference);
-          if (!libraryRef) {
-            status = 'failed';
-          } else {
+          if (libraryRef) {
             fallbackPath = '/library';
             const confirmResult = await confirmLibraryPurchaseByReference({
               orderRef: payment.reference,
@@ -134,6 +140,39 @@ async function paymentReturn(req, res) {
               amount: payment.amount
             });
             if (!confirmResult.ok) status = 'failed';
+          } else {
+            const platformRef = parsePlatformDonationOrderReference(payment.reference);
+            if (!platformRef) {
+              status = 'failed';
+            } else {
+              fallbackPath = '/';
+              const confirmResult = await confirmPlatformDonationByReference({
+                orderRef: payment.reference,
+                providerTxId: payment.transactionId,
+                amount: payment.amount
+              });
+              if (!confirmResult.ok) {
+                status = 'failed';
+              } else if (!confirmResult.alreadyPaid) {
+                await Promise.all([
+                  createNotification({
+                    userId: confirmResult.donorId,
+                    type: 'PLATFORM_DONATION_CONFIRMED',
+                    title: 'Don LinkEduPro confirmé',
+                    message: 'Merci pour ton soutien à LinkEduPro.',
+                    entityType: 'PlatformDonation',
+                    entityId: String(confirmResult.donationId || '')
+                  }),
+                  notifyAdmins({
+                    type: 'PLATFORM_DONATION_CONFIRMED',
+                    title: 'Nouveau don plateforme',
+                    message: `Un don LinkEduPro a été confirmé (${Number(payment.amount || 0)} HTG).`,
+                    entityType: 'PlatformDonation',
+                    entityId: String(confirmResult.donationId || '')
+                  })
+                ]);
+              }
+            }
           }
         }
       }
@@ -236,6 +275,46 @@ async function paymentWebhook(req, res, next) {
 
         return res.json({
           message: 'Achat livre MonCash validé via webhook.',
+          accepted: true
+        });
+      }
+
+      const platformRef = parsePlatformDonationOrderReference(payment.reference);
+      if (platformRef) {
+        const confirmResult = await confirmPlatformDonationByReference({
+          orderRef: payment.reference,
+          providerTxId: payment.transactionId,
+          amount: payment.amount
+        });
+        if (!confirmResult.ok) {
+          return res.status(confirmResult.status || 400).json({
+            message: confirmResult.message,
+            accepted: false
+          });
+        }
+
+        if (!confirmResult.alreadyPaid) {
+          await Promise.all([
+            createNotification({
+              userId: confirmResult.donorId,
+              type: 'PLATFORM_DONATION_CONFIRMED',
+              title: 'Don LinkEduPro confirmé',
+              message: 'Merci pour ton soutien à LinkEduPro.',
+              entityType: 'PlatformDonation',
+              entityId: String(confirmResult.donationId || '')
+            }),
+            notifyAdmins({
+              type: 'PLATFORM_DONATION_CONFIRMED',
+              title: 'Nouveau don plateforme',
+              message: `Un don LinkEduPro a été confirmé (${Number(payment.amount || 0)} HTG).`,
+              entityType: 'PlatformDonation',
+              entityId: String(confirmResult.donationId || '')
+            })
+          ]);
+        }
+
+        return res.json({
+          message: 'Don LinkEduPro MonCash validé via webhook.',
           accepted: true
         });
       }
