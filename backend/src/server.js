@@ -8,7 +8,9 @@ const port = process.env.PORT || 5000;
 async function start() {
   try {
     await prisma.$connect();
-    await seedDefaultLibraryBooks();
+    if (String(process.env.LIBRARY_SEED_ENABLED || '').toLowerCase() === 'true') {
+      await seedDefaultLibraryBooks();
+    }
     app.listen(port, () => {
       console.log(`Backend running on http://localhost:${port}`);
     });
