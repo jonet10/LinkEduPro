@@ -82,6 +82,12 @@ model Student {
   teacherVerifications                                                TeacherVerification[]        @relation("TeacherVerificationTeacher")
   userBadges                                                          UserBadge[]
   notifications                                                       UserNotification[]
+  eduCollectProjectsOwned                                             EduCollectProject[]          @relation("EduCollectProjectOwner")
+  eduCollectDonations                                                 EduCollectDonation[]         @relation("EduCollectDonationDonor")
+  eduCollectRuleAcceptances                                           EduCollectRuleAcceptance[]
+  eduCollectProjectReports                                            EduCollectProjectReport[]    @relation("EduCollectProjectReportAuthor")
+  eduCollectProjectFlags                                              EduCollectProjectFlag[]      @relation("EduCollectProjectFlagReporter")
+  eduCollectPartnerProfile                                            EduCollectPartnerProfile?
 
   @@index([lastName])
   @@index([role])
@@ -684,6 +690,133 @@ model LibraryPurchase {
   @@index([buyerId, createdAt], map: "LibraryPurchase_buyerId_createdAt_idx")
   @@index([bookId, status], map: "LibraryPurchase_bookId_status_idx")
   @@map("library_purchases")
+}
+
+model EduCollectRuleAcceptance {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  acceptedAt   DateTime @default(now()) @map("accepted_at")
+  ipAddress    String?  @map("ip_address")
+  rulesVersion String   @map("rules_version")
+  user         Student  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, acceptedAt], map: "EduCollectRuleAcceptance_user_id_accepted_at_idx")
+  @@map("educollect_rule_acceptances")
+}
+
+model EduCollectPartnerProfile {
+  id         Int       @id @default(autoincrement())
+  userId     Int       @unique @map("user_id")
+  isVerified Boolean   @default(false) @map("is_verified")
+  verifiedAt DateTime? @map("verified_at")
+  verifiedBy Int?      @map("verified_by")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  user       Student   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isVerified], map: "EduCollectPartnerProfile_is_verified_idx")
+  @@map("educollect_partner_profiles")
+}
+
+model EduCollectProject {
+  id                         Int                  @id @default(autoincrement())
+  ownerId                    Int                  @map("owner_id")
+  title                      String
+  category                   String
+  description                String
+  targetAmount               Decimal              @map("target_amount") @db.Decimal(12, 2)
+  currentAmount              Decimal              @default(0) @map("current_amount") @db.Decimal(12, 2)
+  contributorCount           Int                  @default(0) @map("contributor_count")
+  budgetItems                Json                 @map("budget_items")
+  deadline                   DateTime
+  school                     String
+  proofUrl                   String               @map("proof_url")
+  teacherValidationText      String               @map("teacher_validation_text")
+  teacherValidationSignature String?              @map("teacher_validation_signature")
+  status                     EduCollectProjectStatus @default(PENDING_REVIEW)
+  reviewNote                 String?              @map("review_note")
+  reviewedBy                 Int?                 @map("reviewed_by")
+  reviewedAt                 DateTime?            @map("reviewed_at")
+  disbursedTo                String?              @map("disbursed_to")
+  disbursementNote           String?              @map("disbursement_note")
+  disbursedBy                Int?                 @map("disbursed_by")
+  disbursedAt                DateTime?            @map("disbursed_at")
+  suspendedReason            String?              @map("suspended_reason")
+  createdAt                  DateTime             @default(now()) @map("created_at")
+  updatedAt                  DateTime             @updatedAt @map("updated_at")
+  owner                      Student              @relation("EduCollectProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  donations                  EduCollectDonation[]
+  reports                    EduCollectProjectReport[]
+  flags                      EduCollectProjectFlag[]
+  logs                       EduCollectTransactionLog[]
+
+  @@index([ownerId, createdAt], map: "EduCollectProject_owner_id_created_at_idx")
+  @@index([status, createdAt], map: "EduCollectProject_status_created_at_idx")
+  @@map("educollect_projects")
+}
+
+model EduCollectDonation {
+  id                   Int                       @id @default(autoincrement())
+  projectId            Int                       @map("project_id")
+  donorId              Int                       @map("donor_id")
+  donorType            EduCollectDonorType       @map("donor_type")
+  amount               Decimal                   @db.Decimal(12, 2)
+  paymentMethod        EduCollectPaymentMethod   @map("payment_method")
+  transactionReference String?                   @map("transaction_reference")
+  visibilityType       EduCollectVisibilityType  @map("visibility_type")
+  status               EduCollectDonationStatus  @default(PENDING)
+  createdAt            DateTime                  @default(now()) @map("created_at")
+  confirmedAt          DateTime?                 @map("confirmed_at")
+  project              EduCollectProject         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  donor                Student                   @relation("EduCollectDonationDonor", fields: [donorId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt], map: "EduCollectDonation_project_id_created_at_idx")
+  @@index([donorId, createdAt], map: "EduCollectDonation_donor_id_created_at_idx")
+  @@index([status, createdAt], map: "EduCollectDonation_status_created_at_idx")
+  @@map("educollect_donations")
+}
+
+model EduCollectProjectReport {
+  id        Int               @id @default(autoincrement())
+  projectId Int               @map("project_id")
+  authorId  Int               @map("author_id")
+  content   String
+  createdAt DateTime          @default(now()) @map("created_at")
+  project   EduCollectProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author    Student           @relation("EduCollectProjectReportAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt], map: "EduCollectProjectReport_project_id_created_at_idx")
+  @@map("educollect_project_reports")
+}
+
+model EduCollectProjectFlag {
+  id         Int                 @id @default(autoincrement())
+  projectId  Int                 @map("project_id")
+  reporterId Int                 @map("reporter_id")
+  reason     String
+  details    String?
+  status     EduCollectFlagStatus @default(OPEN)
+  createdAt  DateTime            @default(now()) @map("created_at")
+  project    EduCollectProject   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reporter   Student             @relation("EduCollectProjectFlagReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt], map: "EduCollectProjectFlag_project_id_created_at_idx")
+  @@map("educollect_project_flags")
+}
+
+model EduCollectTransactionLog {
+  id         Int               @id @default(autoincrement())
+  projectId  Int?              @map("project_id")
+  donationId Int?              @map("donation_id")
+  actorId    Int?              @map("actor_id")
+  action     String
+  details    Json?
+  createdAt  DateTime          @default(now()) @map("created_at")
+  project    EduCollectProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, createdAt], map: "EduCollectTransactionLog_project_id_created_at_idx")
+  @@index([actorId, createdAt], map: "EduCollectTransactionLog_actor_id_created_at_idx")
+  @@map("educollect_transaction_logs")
 }
 
 model UserNotification {
@@ -1313,4 +1446,42 @@ enum ContentStatus {
   PENDING  @map("pending")
   APPROVED @map("approved")
   REJECTED @map("rejected")
+}
+
+enum EduCollectProjectStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  FUNDING
+  FUNDED
+  CLOSED
+  SUSPENDED
+}
+
+enum EduCollectDonorType {
+  STUDENT
+  PARTNER
+}
+
+enum EduCollectPaymentMethod {
+  MONCASH
+  NATCASH
+}
+
+enum EduCollectVisibilityType {
+  PUBLIC
+  NAME_ONLY
+  ANONYMOUS
+}
+
+enum EduCollectDonationStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+enum EduCollectFlagStatus {
+  OPEN
+  RESOLVED
 }

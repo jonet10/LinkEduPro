@@ -50,6 +50,7 @@ export default function HeaderNav() {
   const publicStudyTools = useMemo(() => ([
     { href: '/subjects', label: 'Apprendre', icon: '🧠' },
     { href: '/study-plans', label: "Programmes d'étude", icon: '🗂️' },
+    { href: '/educollect', label: 'EduCollect', icon: '💸' },
     { href: '/subjects', label: "Test d'entraînement", icon: '🧪' },
     { href: '/blog', label: 'Solutions expertes', icon: '✅' },
     { href: '/search', label: "Recherche d'étude", icon: '🔎' }
@@ -352,6 +353,7 @@ export default function HeaderNav() {
       { href: '/subjects', label: 'Rubriques', icon: '📘' },
       { href: '/progress', label: 'Progrès', icon: '📈' },
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
+      { href: '/educollect', label: 'EduCollect', icon: '💸' },
       { href: '/blog', label: 'Forum', icon: '📝' },
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : []),
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
@@ -373,6 +375,7 @@ export default function HeaderNav() {
   const mobileToolItems = useMemo(
     () => [
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
+      { href: '/educollect', label: 'EduCollect', icon: '💸' },
       { href: '/blog', label: 'Forum', icon: '📝' },
       { href: '/search', label: 'Recherche', icon: '🔎' }
     ],
