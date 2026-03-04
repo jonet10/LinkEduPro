@@ -14,53 +14,6 @@ function getStorageUrl(fileUrl) {
   return `${origin}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
 }
 
-const UPCOMING_LIBRARY_BOOKS = [
-  {
-    id: 'upcoming-j-aime-haiti-civique',
-    title: "J'AIME HAITI - INSTRUCTION CIVIQUE ET MORALE",
-    subject: 'Sciences sociales',
-    level: '1er et 2e cycle fondamental',
-    description:
-      "F.I.C. Ce matériel a pour objectif de faire acquérir aux enfants les habitudes civiques indispensables au développement de notre pays (respect des personnes et des biens, coopération, tolérance...).",
-    status: 'UPCOMING',
-    upcoming: true,
-    viewerOnly: true,
-    priceHtg: 250,
-    coverImage: '/books/j-aime-haiti.jpg',
-    fileUrl: null
-  }
-];
-
-const DEFAULT_LIBRARY_BOOKS = [
-  {
-    id: 'seed-zophysique-2021',
-    title: 'Zophysique 2021',
-    subject: 'Physique',
-    level: 'NSIV',
-    description: 'Recueil Zophysique 2021.',
-    status: 'APPROVED',
-    upcoming: false,
-    isPaid: true,
-    price: 500,
-    canAccess: false,
-    coverImageUrl: '/storage/library-books/covers/zophysique-2021-cover.jpg',
-    fileUrl: '/storage/library-books/pdfs/zophysique-2021.pdf'
-  }
-];
-
-function mergeBooks(primary = [], extras = []) {
-  const merged = [...primary];
-  const known = new Set(primary.map((item) => `${String(item.title || '').toLowerCase()}::${String(item.fileUrl || '')}`));
-  extras.forEach((item) => {
-    const key = `${String(item.title || '').toLowerCase()}::${String(item.fileUrl || '')}`;
-    if (!known.has(key)) {
-      merged.push(item);
-      known.add(key);
-    }
-  });
-  return merged;
-}
-
 function formatHTG(value) {
   const amount = Number(value || 0);
   return new Intl.NumberFormat('fr-FR', {
@@ -69,6 +22,15 @@ function formatHTG(value) {
     maximumFractionDigits: 2
   }).format(amount);
 }
+
+const LIBRARY_LEVEL_OPTIONS = [
+  '9e',
+  'NSI',
+  'NSII',
+  'NSIII',
+  'NSIV',
+  'Universitaire'
+];
 
 function BookCard({ book, preordered = false, onPreorder = null, onPurchase = null, purchasingId = null }) {
   return (
@@ -164,12 +126,12 @@ export default function LibraryPage() {
     try {
       setError('');
       const data = await apiClient('/library/books', { token });
-      setApprovedBooks(mergeBooks([...(data.approved || []), ...UPCOMING_LIBRARY_BOOKS], DEFAULT_LIBRARY_BOOKS));
+      setApprovedBooks(data.approved || []);
       setPendingBooks(data.pending || []);
       setRejectedBooks(data.rejected || []);
     } catch (e) {
       setError(e.message || 'Impossible de charger la bibliothèque');
-      setApprovedBooks([...UPCOMING_LIBRARY_BOOKS, ...DEFAULT_LIBRARY_BOOKS]);
+      setApprovedBooks([]);
       setPendingBooks([]);
       setRejectedBooks([]);
     } finally {
@@ -252,7 +214,7 @@ export default function LibraryPage() {
       form.append('description', description);
       form.append('isPaid', String(isPaid));
       form.append('price', String(isPaid ? Number(price || 0) : 0));
-      form.append('file', pdfFile);
+      if (pdfFile) form.append('file', pdfFile);
       if (coverImage) form.append('coverImage', coverImage);
 
       await apiClient(editingBookId ? `/library/books/${editingBookId}` : '/library/books', {
@@ -411,9 +373,40 @@ export default function LibraryPage() {
           <form className="grid gap-3 md:grid-cols-2" onSubmit={onSubmitBook}>
             <input className="input" placeholder="Titre" value={title} onChange={(e) => setTitle(e.target.value)} required />
             <input className="input" placeholder="Matière" value={subject} onChange={(e) => setSubject(e.target.value)} required />
-            <input className="input" placeholder="Niveau" value={level} onChange={(e) => setLevel(e.target.value)} required />
-            <input className="input" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" onChange={(e) => setCoverImage(e.target.files?.[0] || null)} />
-            <input className="input md:col-span-2" type="file" accept="application/pdf,.pdf" onChange={(e) => setPdfFile(e.target.files?.[0] || null)} required={!editingBookId} />
+            <select className="input" value={level} onChange={(e) => setLevel(e.target.value)} required>
+              <option value="" disabled>Sélectionner un niveau</option>
+              {LIBRARY_LEVEL_OPTIONS.map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+              {level && !LIBRARY_LEVEL_OPTIONS.includes(level) ? (
+                <option value={level}>{level}</option>
+              ) : null}
+            </select>
+            <label className="space-y-1 text-sm text-brand-800">
+              <span className="font-medium text-brand-900">Image de couverture (optionnel)</span>
+              <input
+                className="input w-full"
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                onChange={(e) => {
+                  setCoverImage(e.target.files?.[0] || null);
+                  setError('');
+                }}
+              />
+            </label>
+            <label className="space-y-1 text-sm text-brand-800 md:col-span-2">
+              <span className="font-medium text-brand-900">Fichier PDF du livre {editingBookId ? '(laisser vide pour garder le PDF actuel)' : ''}</span>
+              <input
+                className="input w-full"
+                type="file"
+                accept="application/pdf,.pdf"
+                onChange={(e) => {
+                  setPdfFile(e.target.files?.[0] || null);
+                  setError('');
+                }}
+                required={!editingBookId}
+              />
+            </label>
             <label className="inline-flex items-center gap-2 text-sm text-brand-800">
               <input type="checkbox" checked={isPaid} onChange={(e) => setIsPaid(e.target.checked)} />
               Livre payant
