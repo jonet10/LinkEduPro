@@ -207,8 +207,8 @@ export default function LibraryPage() {
       setError('Niveau invalide.');
       return;
     }
-    if (normalizedDescription.length > 500) {
-      setError('Description trop longue (maximum 500 caractères).');
+    if (normalizedDescription.length > 2000) {
+      setError('Description trop longue (maximum 2000 caractères).');
       return;
     }
     if (isPaid && Number(price || 0) <= 0) {
