@@ -511,8 +511,9 @@ export default function HeaderNav() {
 
   return (
     <>
-      {!isAuthed ? (
-      <div className="hidden w-full items-center gap-3 text-sm md:flex">
+      <div className="w-full">
+        {!isAuthed ? (
+          <div className="hidden w-full items-center gap-3 text-sm md:flex">
           <div
             className="relative"
             ref={publicToolsRef}
@@ -605,9 +606,9 @@ export default function HeaderNav() {
           <Link href="/register" className="rounded-lg bg-brand-700 px-4 py-2 font-semibold text-white hover:bg-brand-800">
             S&apos;inscrire
           </Link>
-        </div>
-      ) : (
-        <div className="hidden w-full items-center gap-2 text-sm md:flex">
+          </div>
+        ) : (
+          <div className="hidden w-full items-center gap-2 text-sm md:flex">
           <Link href="/subjects" className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50">
             Découvrir
           </Link>
@@ -723,56 +724,57 @@ export default function HeaderNav() {
             Déconnexion
           </button>
 
-        </div>
-      )}
+          </div>
+        )}
 
-      {isAuthed ? (
-        <div className="hidden w-full items-center gap-1 overflow-x-auto border-t border-brand-100 pt-2 md:flex">
-          {globalAuthedTabs.map((tab) => (
-            <Link
-              key={`${tab.href}-${tab.label}`}
-              href={tab.href}
-              className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm transition-colors ${
-                isActivePath(pathname, tab.href)
-                  ? 'bg-brand-50 font-semibold text-brand-900'
-                  : 'text-brand-800 hover:bg-brand-50 hover:text-brand-900'
-              }`}
-            >
-              {tab.label}
-            </Link>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="flex w-full items-center justify-end gap-2 text-sm md:hidden">
-        {!isAuthed ? (
-          <>
-            {!hidePublicMobileMenu ? (
-              <button
-                type="button"
-                className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
-                aria-label="Menu public"
-                title="Menu public"
-                onClick={() => setIsPublicMobileMenuOpen(true)}
+        {isAuthed ? (
+          <div className="hidden w-full items-center gap-1 overflow-x-auto border-t border-brand-100 pt-2 md:flex">
+            {globalAuthedTabs.map((tab) => (
+              <Link
+                key={`${tab.href}-${tab.label}`}
+                href={tab.href}
+                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm transition-colors ${
+                  isActivePath(pathname, tab.href)
+                    ? 'bg-brand-50 font-semibold text-brand-900'
+                    : 'text-brand-800 hover:bg-brand-50 hover:text-brand-900'
+                }`}
               >
-                ☰
-              </button>
-            ) : null}
-            <Link
-              href="/login"
-              className="ml-auto inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
-              aria-label="Connexion"
-              title="Connexion"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-                <path
-                  d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2-7 4.5V20h14v-1.5C19 16 16 14 12 14Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </Link>
-          </>
+                {tab.label}
+              </Link>
+            ))}
+          </div>
         ) : null}
+
+        <div className="flex w-full items-center justify-end gap-2 text-sm md:hidden">
+          {!isAuthed ? (
+            <>
+              {!hidePublicMobileMenu ? (
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+                  aria-label="Menu public"
+                  title="Menu public"
+                  onClick={() => setIsPublicMobileMenuOpen(true)}
+                >
+                  ☰
+                </button>
+              ) : null}
+              <Link
+                href="/login"
+                className="ml-auto inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+                aria-label="Connexion"
+                title="Connexion"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+                  <path
+                    d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2-7 4.5V20h14v-1.5C19 16 16 14 12 14Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </Link>
+            </>
+          ) : null}
+        </div>
       </div>
 
       {mounted && !isAuthed && isPublicMobileMenuOpen
