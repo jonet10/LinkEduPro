@@ -83,16 +83,16 @@ const LANDING_HERO_SLIDES = [
   }
 ];
 const HOME_CATEGORY_TABS = [
-  { label: 'Développement', href: '/subjects' },
-  { label: 'Business', href: '/support' },
-  { label: 'Finance', href: '/library' },
-  { label: 'Informatique', href: '/subjects' },
-  { label: 'Productivité', href: '/study-plans' },
-  { label: 'Développement personnel', href: '/blog' },
-  { label: 'Design', href: '/video-lessons' },
-  { label: 'Marketing', href: '/support' },
-  { label: 'Santé et bien-être', href: '/blog' },
-  { label: 'Musique', href: '/subjects' }
+  { label: 'Accueil', href: '/' },
+  { label: 'Classe Numerique', href: '/video-lessons' },
+  { label: 'Rattrapage', href: '/rattrapage' },
+  { label: 'Rubriques', href: '/subjects' },
+  { label: 'Progrès', href: '/progress' },
+  { label: 'Bibliothèque', href: '/library' },
+  { label: 'Support', href: '/support' },
+  { label: 'EduCollect', href: '/educollect' },
+  { label: 'Forum', href: '/blog' },
+  { label: 'Exercices probables', href: '/probable-exercises' }
 ];
 const HOME_HERO_MESSAGES = [
   {
