@@ -62,6 +62,21 @@ export default function HeaderNav() {
     { href: '/blog', label: 'Publier des ressources', icon: '📝' },
     { href: '/rattrapage', label: 'Live / rattrapage', icon: '📅' }
   ]), []);
+  const desktopCategoryTabs = useMemo(
+    () => ([
+      { href: '/subjects', label: 'Développement' },
+      { href: '/support', label: 'Business' },
+      { href: '/library', label: 'Finance' },
+      { href: '/subjects', label: 'Informatique' },
+      { href: '/study-plans', label: 'Productivité' },
+      { href: '/blog', label: 'Développement personnel' },
+      { href: '/video-lessons', label: 'Design' },
+      { href: '/support', label: 'Marketing' },
+      { href: '/focus', label: 'Santé et bien-être' },
+      { href: '/subjects', label: 'Musique' }
+    ]),
+    []
+  );
   const quickDiscoverLinks = useMemo(
     () => ([
       { href: '/library', label: 'Bibliothèque numérique', icon: '📚' },
@@ -723,9 +738,9 @@ export default function HeaderNav() {
 
       {isAuthed ? (
         <div className="hidden w-full items-center gap-1 overflow-x-auto border-t border-brand-100 pt-2 md:flex">
-          {desktopMenuItems.map((item) => (
+          {desktopCategoryTabs.map((item) => (
             <Link
-              key={item.href}
+              key={`${item.label}-${item.href}`}
               href={item.href}
               className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-brand-50 ${
                 isActivePath(pathname, item.href) ? 'bg-brand-50 text-brand-900 font-semibold' : 'text-brand-800'
