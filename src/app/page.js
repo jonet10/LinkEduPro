@@ -916,58 +916,62 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <article className="card lift-card palette-card palette-1">
-          <div className="text-brand-700" aria-label="Utilisateurs en ligne" title="Utilisateurs en ligne">
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <circle cx="9" cy="8" r="3.5" />
-              <path d="M3.5 18.5a5.5 5.5 0 0 1 11 0" />
-              <circle cx="17.5" cy="9" r="2.5" />
-              <path d="M14.5 18.5a4.5 4.5 0 0 1 7 0" />
-            </svg>
+      {isAdminRole ? (
+        <>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <article className="card lift-card palette-card palette-1">
+              <div className="text-brand-700" aria-label="Utilisateurs en ligne" title="Utilisateurs en ligne">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <circle cx="9" cy="8" r="3.5" />
+                  <path d="M3.5 18.5a5.5 5.5 0 0 1 11 0" />
+                  <circle cx="17.5" cy="9" r="2.5" />
+                  <path d="M14.5 18.5a4.5 4.5 0 0 1 7 0" />
+                </svg>
+              </div>
+              <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.total}</p>
+              <p className="mt-1 text-xs text-brand-700">Dernière activité: {formatLastSeen(onlineStats.latestSeenAt)}</p>
+            </article>
+            <article className="card lift-card palette-card palette-2">
+              <div className="text-brand-700" aria-label="Élèves" title="Élèves">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <path d="M3 9 12 4l9 5-9 5-9-5Z" />
+                  <path d="M6 11.5V15c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.5" />
+                </svg>
+              </div>
+              <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.students}</p>
+              <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.students)}</p>
+            </article>
+            <article className="card lift-card palette-card palette-3">
+              <div className="text-brand-700" aria-label="Professeurs" title="Professeurs">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <rect x="3.5" y="5.5" width="13" height="10" rx="1.5" />
+                  <path d="M16.5 8.5h4v8h-4M7 19.5h6" />
+                </svg>
+              </div>
+              <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.teachers}</p>
+              <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.teachers)}</p>
+            </article>
+            <article className="card lift-card palette-card palette-4">
+              <div className="text-brand-700" aria-label="Admins" title="Admins">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <path d="M12 3.5 5 6.5v5c0 4.2 2.7 7.4 7 9 4.3-1.6 7-4.8 7-9v-5l-7-3Z" />
+                  <path d="m9.5 12 1.7 1.7L14.8 10" />
+                </svg>
+              </div>
+              <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.admins}</p>
+              <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.admins)}</p>
+            </article>
           </div>
-          <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.total}</p>
-          <p className="mt-1 text-xs text-brand-700">Dernière activité: {formatLastSeen(onlineStats.latestSeenAt)}</p>
-        </article>
-        <article className="card lift-card palette-card palette-2">
-          <div className="text-brand-700" aria-label="Élèves" title="Élèves">
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <path d="M3 9 12 4l9 5-9 5-9-5Z" />
-              <path d="M6 11.5V15c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.5" />
-            </svg>
-          </div>
-          <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.students}</p>
-          <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.students)}</p>
-        </article>
-        <article className="card lift-card palette-card palette-3">
-          <div className="text-brand-700" aria-label="Professeurs" title="Professeurs">
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <rect x="3.5" y="5.5" width="13" height="10" rx="1.5" />
-              <path d="M16.5 8.5h4v8h-4M7 19.5h6" />
-            </svg>
-          </div>
-          <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.teachers}</p>
-          <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.teachers)}</p>
-        </article>
-        <article className="card lift-card palette-card palette-4">
-          <div className="text-brand-700" aria-label="Admins" title="Admins">
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <path d="M12 3.5 5 6.5v5c0 4.2 2.7 7.4 7 9 4.3-1.6 7-4.8 7-9v-5l-7-3Z" />
-              <path d="m9.5 12 1.7 1.7L14.8 10" />
-            </svg>
-          </div>
-          <p className="mt-2 text-3xl font-black text-brand-900">{onlineStats.counts.admins}</p>
-          <p className="mt-1 text-xs text-brand-700">{formatLastSeen(onlineStats.lastSeenByRole?.admins)}</p>
-        </article>
-      </div>
 
-      <div className="card lift-card">
-        <p className="text-xs uppercase tracking-wide text-brand-700">Ma dernière activité</p>
-        <p className="mt-2 text-sm text-brand-900">{formatLastSeen(onlineStats.mineLastSeenAt)}</p>
-        <p className="mt-1 text-xs text-brand-700">
-          Dernière connexion: {formatLastSeen(student?.lastLoginAt)}
-        </p>
-      </div>
+          <div className="card lift-card">
+            <p className="text-xs uppercase tracking-wide text-brand-700">Ma dernière activité</p>
+            <p className="mt-2 text-sm text-brand-900">{formatLastSeen(onlineStats.mineLastSeenAt)}</p>
+            <p className="mt-1 text-xs text-brand-700">
+              Dernière connexion: {formatLastSeen(student?.lastLoginAt)}
+            </p>
+          </div>
+        </>
+      ) : null}
 
       {isStudentRole ? (
         <div className="card motion-enter motion-delay-1 lift-card home-gold-soft border border-brand-200 bg-gradient-to-r from-brand-50 to-white">
