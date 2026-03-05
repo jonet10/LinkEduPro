@@ -777,6 +777,158 @@ input[type="checkbox"] {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+.home-udemy-shell {
+  border: 1px solid #d6e2f3;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
+  box-shadow: 0 14px 30px rgba(26, 77, 130, 0.12);
+  overflow: hidden;
+}
+
+.home-udemy-greet {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.2rem 1.3rem 1rem;
+  border-bottom: 1px solid #e4edf9;
+}
+
+.home-udemy-avatar {
+  width: 62px;
+  height: 62px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(145deg, #171a26, #20253a);
+}
+
+.home-udemy-categories {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #e4edf9;
+  background: #f7f9fc;
+}
+
+.home-udemy-categories::-webkit-scrollbar {
+  height: 6px;
+}
+
+.home-udemy-categories::-webkit-scrollbar-thumb {
+  background: #c8d7ec;
+  border-radius: 999px;
+}
+
+.home-udemy-cat-link {
+  white-space: nowrap;
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  color: #2b3f59;
+  font-size: 0.86rem;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.home-udemy-cat-link:hover {
+  background: #e8eef7;
+  color: #0f2f52;
+}
+
+.home-udemy-hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 1rem;
+}
+
+.home-udemy-hero-card {
+  min-height: 340px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #6645d8;
+  background:
+    radial-gradient(circle at 78% 35%, rgba(102, 66, 222, 0.62), transparent 35%),
+    linear-gradient(130deg, #4e2bc9, #6b43da 42%, #6e2de5 100%);
+  display: grid;
+  grid-template-columns: 1fr 0.85fr;
+}
+
+.home-udemy-hero-copy {
+  padding: 1.9rem 1.8rem;
+}
+
+.home-udemy-hero-media {
+  position: relative;
+  min-height: 280px;
+}
+
+.home-udemy-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: screen;
+  opacity: 0.95;
+}
+
+.home-udemy-btn-primary {
+  border-radius: 10px;
+  padding: 0.65rem 1.1rem;
+  background: #ffffff;
+  color: #32158f;
+  font-weight: 700;
+}
+
+.home-udemy-btn-secondary {
+  border-radius: 10px;
+  padding: 0.65rem 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.home-udemy-arrow {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid #d7e4f6;
+  background: #ffffff;
+  color: #2e4670;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.dark .home-udemy-shell {
+  border-color: #355172;
+  background: linear-gradient(180deg, rgba(20, 34, 52, 0.94), rgba(16, 28, 44, 0.95));
+  box-shadow: 0 16px 30px rgba(3, 10, 20, 0.45);
+}
+
+.dark .home-udemy-greet {
+  border-color: #355172;
+}
+
+.dark .home-udemy-categories {
+  border-color: #355172;
+  background: rgba(19, 34, 53, 0.72);
+}
+
+.dark .home-udemy-cat-link:hover {
+  background: rgba(60, 88, 122, 0.5);
+  color: #e6f1ff;
+}
+
+.dark .home-udemy-arrow {
+  border-color: #476488;
+  background: #1a2d44;
+  color: #d7e9ff;
+}
+
 .public-hero-media {
   width: 100%;
   max-width: 520px;
@@ -843,5 +995,30 @@ input[type="checkbox"] {
 
   .landing-device-card:nth-child(2) {
     transform: none;
+  }
+
+  .home-udemy-greet {
+    grid-template-columns: 1fr;
+  }
+
+  .home-udemy-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .home-udemy-hero-card {
+    min-height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .home-udemy-hero-copy {
+    padding: 1.2rem;
+  }
+
+  .home-udemy-hero-copy h2 {
+    font-size: 1.75rem;
+  }
+
+  .home-udemy-hero-media {
+    min-height: 210px;
   }
 }
