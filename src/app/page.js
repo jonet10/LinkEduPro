@@ -82,18 +82,6 @@ const LANDING_HERO_SLIDES = [
     caption: 'Écoles et élèves engagés dans la réussite'
   }
 ];
-const HOME_CATEGORY_TABS = [
-  { label: 'Accueil', href: '/' },
-  { label: 'Classe Numerique', href: '/video-lessons' },
-  { label: 'Rattrapage', href: '/rattrapage' },
-  { label: 'Rubriques', href: '/subjects' },
-  { label: 'Progrès', href: '/progress' },
-  { label: 'Bibliothèque', href: '/library' },
-  { label: 'Support', href: '/support' },
-  { label: 'EduCollect', href: '/educollect' },
-  { label: 'Forum', href: '/blog' },
-  { label: 'Exercices probables', href: '/probable-exercises' }
-];
 const HOME_HERO_MESSAGES = [
   {
     title: "Maîtrise les compétences utiles pour l'avenir",
@@ -861,14 +849,6 @@ export default function HomePage() {
               </Link>
             </p>
           </div>
-        </div>
-
-        <div className="home-udemy-categories">
-          {HOME_CATEGORY_TABS.map((tab) => (
-            <Link key={tab.label} href={tab.href} className="home-udemy-cat-link">
-              {tab.label}
-            </Link>
-          ))}
         </div>
 
         <div className="home-udemy-hero">
