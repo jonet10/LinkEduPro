@@ -1,5 +1,6 @@
 const express = require('express');
 const auth = require('../middlewares/auth');
+const optionalAuth = require('../middlewares/auth-optional');
 const validate = require('../middlewares/validate');
 const { requireRoles } = require('../middlewares/roles');
 const Joi = require('joi');
@@ -44,10 +45,10 @@ router.get('/admin/all', auth, requireRoles(['ADMIN']), async (req, res, next) =
   }
 });
 
-router.post('/checkout', auth, validate(createCheckoutSchema), async (req, res, next) => {
+router.post('/checkout', optionalAuth, validate(createCheckoutSchema), async (req, res, next) => {
   try {
     const result = await createPlatformDonationCheckout({
-      donor: req.user,
+      donor: req.user || null,
       amount: req.body.amount,
       paymentMethod: req.body.paymentMethod
     });

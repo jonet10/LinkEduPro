@@ -1,6 +1,26 @@
 const prisma = require('../config/prisma');
 const { createMoncashPayment, buildPlatformDonationOrderReference, parsePlatformDonationOrderReference } = require('./moncash.service');
 
+async function ensureGuestDonor() {
+  const guestEmail = 'guest-donor@linkedupro.local';
+  return prisma.student.upsert({
+    where: { email: guestEmail },
+    update: {},
+    create: {
+      firstName: 'Donateur',
+      lastName: 'Invité',
+      sex: 'OTHER',
+      dateOfBirth: new Date('2000-01-01'),
+      school: 'LinkEduPro',
+      gradeLevel: 'VISITOR',
+      email: guestEmail,
+      phone: null,
+      passwordHash: 'guest_donation_account_disabled',
+      role: 'STUDENT'
+    }
+  });
+}
+
 async function createPlatformDonationCheckout({ donor, amount, paymentMethod = 'MONCASH' }) {
   const numericAmount = Number(amount || 0);
   if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
@@ -10,12 +30,13 @@ async function createPlatformDonationCheckout({ donor, amount, paymentMethod = '
     return { ok: false, status: 400, message: 'Seul MonCash est supporte actuellement.' };
   }
 
-  const orderRef = buildPlatformDonationOrderReference({ donorId: donor.id });
+  const resolvedDonor = donor?.id ? donor : await ensureGuestDonor();
+  const orderRef = buildPlatformDonationOrderReference({ donorId: resolvedDonor.id });
   const payment = await createMoncashPayment({ amount: numericAmount, orderId: orderRef });
 
   await prisma.platformDonation.create({
     data: {
-      donorId: donor.id,
+      donorId: resolvedDonor.id,
       amount: numericAmount,
       currency: 'HTG',
       paymentMethod: 'MONCASH',
