@@ -32,6 +32,8 @@ export default function HeaderNav() {
   const [mounted, setMounted] = useState(false);
   const [isPublicToolsOpen, setIsPublicToolsOpen] = useState(false);
   const [isPublicMobileMenuOpen, setIsPublicMobileMenuOpen] = useState(false);
+  const [desktopSearch, setDesktopSearch] = useState('');
+  const [isDiscoverMegaOpen, setIsDiscoverMegaOpen] = useState(false);
 
   const quickMenuRef = useRef(null);
   const notifRef = useRef(null);
@@ -60,6 +62,15 @@ export default function HeaderNav() {
     { href: '/blog', label: 'Publier des ressources', icon: '📝' },
     { href: '/rattrapage', label: 'Live / rattrapage', icon: '📅' }
   ]), []);
+  const quickDiscoverLinks = useMemo(
+    () => ([
+      { href: '/library', label: 'Bibliothèque numérique', icon: '📚' },
+      { href: '/video-lessons', label: 'Classe numérique', icon: '🎬' },
+      { href: '/subjects', label: "Quiz d'entraînement", icon: '🧪' },
+      { href: '/support', label: 'Support LinkEduPro', icon: '🤝' }
+    ]),
+    []
+  );
 
   useEffect(() => {
     const refresh = () => {
@@ -123,6 +134,7 @@ export default function HeaderNav() {
       setIsMobileMenuOpen(false);
       setIsMobileNotifOpen(false);
       setIsPublicToolsOpen(false);
+      setIsDiscoverMegaOpen(false);
       setIsPublicMobileMenuOpen(false);
       return;
     }
@@ -399,6 +411,16 @@ export default function HeaderNav() {
     router.push('/');
   };
 
+  const onDesktopSearch = (event) => {
+    event.preventDefault();
+    const q = String(desktopSearch || '').trim();
+    if (!q) {
+      router.push('/search');
+      return;
+    }
+    router.push(`/search?prefill=${encodeURIComponent(q)}`);
+  };
+
   useEffect(() => {
     if (!isMobileNotifOpen || !mounted) return undefined;
 
@@ -474,69 +496,136 @@ export default function HeaderNav() {
 
   return (
     <>
-      <div className="flex w-full items-center justify-end gap-2 text-sm md:w-auto md:justify-start">
-        <button
-          type="button"
-          className="hidden rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:inline-flex"
-          onClick={toggleDarkMode}
-          title={darkMode ? 'Désactiver le mode sombre' : 'Activer le mode sombre'}
-          aria-label={darkMode ? 'Désactiver le mode sombre' : 'Activer le mode sombre'}
-        >
-          {darkMode ? '☀️' : '🌙'}
-        </button>
-
-        {!isAuthed ? (
-          <div className="relative hidden md:block" ref={publicToolsRef}>
+      {!isAuthed ? (
+      <div className="hidden w-full items-center gap-3 text-sm md:flex">
+          <div
+            className="relative"
+            ref={publicToolsRef}
+            onMouseEnter={() => setIsDiscoverMegaOpen(true)}
+            onMouseLeave={() => setIsDiscoverMegaOpen(false)}
+          >
             <button
               type="button"
-              className="rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50"
-              onClick={() => {
-                setIsPublicToolsOpen((v) => !v);
-              }}
-              aria-label="Outils pour étudier"
+              className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50"
+              onClick={() => setIsDiscoverMegaOpen((v) => !v)}
+              aria-label="Découvrir"
             >
-              Outils pour étudier ▾
+              Découvrir
             </button>
-            {isPublicToolsOpen ? (
-              <div className="absolute left-0 z-50 mt-2 w-[280px] rounded-xl border border-brand-100 bg-white p-3 shadow-xl">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Étudiants</p>
-                <div className="space-y-1">
-                  {publicStudyTools.map((item) => (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-brand-50"
-                      onClick={() => setIsPublicToolsOpen(false)}
-                    >
-                      <span>{item.icon}</span>
-                      <span>{item.label}</span>
-                    </Link>
-                  ))}
-                </div>
-                <hr className="my-2 border-brand-100" />
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Enseignants</p>
-                <div className="space-y-1">
-                  {publicTeacherTools.map((item) => (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-brand-50"
-                      onClick={() => setIsPublicToolsOpen(false)}
-                    >
-                      <span>{item.icon}</span>
-                      <span>{item.label}</span>
-                    </Link>
-                  ))}
+            {isDiscoverMegaOpen ? (
+              <div className="absolute left-0 z-50 mt-3 w-[760px] rounded-2xl border border-brand-100 bg-white/95 p-4 shadow-2xl backdrop-blur">
+                <div className="grid gap-4 lg:grid-cols-3">
+                  <div className="rounded-xl border border-brand-100 bg-brand-50/60 p-3">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Étudiants</p>
+                    <div className="space-y-1">
+                      {publicStudyTools.map((item) => (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-white"
+                          onClick={() => setIsDiscoverMegaOpen(false)}
+                        >
+                          <span>{item.icon}</span>
+                          <span>{item.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-brand-100 bg-brand-50/40 p-3">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Enseignants</p>
+                    <div className="space-y-1">
+                      {publicTeacherTools.map((item) => (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-white"
+                          onClick={() => setIsDiscoverMegaOpen(false)}
+                        >
+                          <span>{item.icon}</span>
+                          <span>{item.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-brand-100 bg-white p-3">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Accès rapide</p>
+                    <div className="space-y-1">
+                      {quickDiscoverLinks.map((item) => (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-brand-50"
+                          onClick={() => setIsDiscoverMegaOpen(false)}
+                        >
+                          <span>{item.icon}</span>
+                          <span>{item.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : null}
           </div>
-        ) : null}
 
-        {isAuthed ? (
+          <Link href="/support" className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50">
+            S&apos;abonner
+          </Link>
+
+          <form
+            onSubmit={onDesktopSearch}
+            className="mx-2 flex min-w-[320px] flex-1 items-center rounded-full border border-brand-300 bg-white px-4 py-2 shadow-sm transition-all duration-200 focus-within:-translate-y-[1px] focus-within:border-brand-500 focus-within:shadow-lg focus-within:ring-2 focus-within:ring-brand-200"
+          >
+            <span className="mr-2 text-brand-600">🔎</span>
+            <input
+              className="w-full bg-transparent text-sm text-brand-900 outline-none placeholder:text-brand-500"
+              placeholder="Que souhaitez-vous apprendre ?"
+              value={desktopSearch}
+              onChange={(e) => setDesktopSearch(e.target.value)}
+            />
+          </form>
+
+          <Link href="/support" className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50">
+            LinkEduPro Business
+          </Link>
+          <Link href="/rattrapage" className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50">
+            Enseigner
+          </Link>
+          <Link href="/search" className="rounded-lg border border-brand-200 p-2 hover:bg-brand-50" aria-label="Explorer">
+            🌐
+          </Link>
+          <Link href="/login" className="rounded-lg border border-brand-500 px-4 py-2 font-semibold text-brand-700 hover:bg-brand-50">
+            Se connecter
+          </Link>
+          <Link href="/register" className="rounded-lg bg-brand-700 px-4 py-2 font-semibold text-white hover:bg-brand-800">
+            S&apos;inscrire
+          </Link>
+        </div>
+      ) : (
+        <div className="hidden w-full items-center gap-2 text-sm md:flex">
+          <Link href="/subjects" className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50">
+            Découvrir
+          </Link>
+          <Link href="/video-lessons" className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50">
+            Classe Numerique
+          </Link>
+
+          <form
+            onSubmit={onDesktopSearch}
+            className="mx-2 flex min-w-[260px] flex-1 items-center rounded-full border border-brand-300 bg-white px-4 py-2 shadow-sm transition-all duration-200 focus-within:-translate-y-[1px] focus-within:border-brand-500 focus-within:shadow-lg focus-within:ring-2 focus-within:ring-brand-200"
+          >
+            <span className="mr-2 text-brand-600">🔎</span>
+            <input
+              className="w-full bg-transparent text-sm text-brand-900 outline-none placeholder:text-brand-500"
+              placeholder="Rechercher un cours, quiz, livre..."
+              value={desktopSearch}
+              onChange={(e) => setDesktopSearch(e.target.value)}
+            />
+          </form>
+
           <Link
             href="/messages"
-            className="hidden rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
+            className="hidden rounded-lg border border-brand-100 px-3 py-2 hover:bg-brand-50 lg:flex lg:items-center lg:gap-1.5"
             aria-label="Messagerie"
             title="Messagerie"
           >
@@ -548,13 +637,11 @@ export default function HeaderNav() {
               </span>
             ) : null}
           </Link>
-        ) : null}
 
-        {isAuthed ? (
           <div className="relative hidden md:block" ref={notifRef}>
             <button
               type="button"
-              className="relative rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
+              className="relative rounded-lg border border-brand-100 px-3 py-2 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
               onClick={() => {
                 setIsNotifOpen((v) => !v);
                 setIsQuickMenuOpen(false);
@@ -563,7 +650,7 @@ export default function HeaderNav() {
               title="Notifications"
             >
               <span className="text-base leading-none" aria-hidden="true">🔔</span>
-              <span>Notification</span>
+              <span className="hidden lg:inline">Notification</span>
               {unreadCount > 0 ? (
                 <span className="absolute -right-2 -top-2 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -602,63 +689,39 @@ export default function HeaderNav() {
               </div>
             ) : null}
           </div>
-        ) : null}
 
-        {isAuthed ? (
           <Link
             href="/profile"
-            className="hidden rounded-md border border-brand-100 px-3 py-1.5 hover:bg-brand-50 md:flex md:items-center md:gap-1.5"
+            className="hidden rounded-lg border border-brand-100 px-3 py-2 hover:bg-brand-50 lg:flex lg:items-center lg:gap-1.5"
             aria-label="Profil"
             title="Profil"
           >
             <span className="text-base leading-none" aria-hidden="true">👤</span>
             <span>Profil</span>
           </Link>
-        ) : (
-          <>
-            {!hidePublicMobileMenu ? (
-              <button
-                type="button"
-                className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:hidden"
-                aria-label="Menu public"
-                title="Menu public"
-                onClick={() => setIsPublicMobileMenuOpen(true)}
-              >
-                ☰
-              </button>
-            ) : null}
-            <Link href="/login" className="hidden hover:text-brand-700 md:inline">Connexion</Link>
-            <Link
-              href="/login"
-              className="ml-auto inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50 md:hidden"
-              aria-label="Connexion"
-              title="Connexion"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-                <path
-                  d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2-7 4.5V20h14v-1.5C19 16 16 14 12 14Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </Link>
-          </>
-        )}
 
-        {isAuthed ? (
           <button
             type="button"
-            className="hidden rounded-md border border-red-200 px-3 py-1.5 text-red-600 hover:bg-red-50 md:inline-flex"
+            className="rounded-lg border border-brand-100 px-2 py-2 hover:bg-brand-50"
+            onClick={toggleDarkMode}
+            title={darkMode ? 'Désactiver le mode sombre' : 'Activer le mode sombre'}
+            aria-label={darkMode ? 'Désactiver le mode sombre' : 'Activer le mode sombre'}
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
+
+          <button
+            type="button"
+            className="rounded-lg border border-red-200 px-3 py-2 text-red-600 hover:bg-red-50"
             onClick={onLogout}
           >
             Déconnexion
           </button>
-        ) : null}
 
-        {isAuthed ? (
           <div className="relative hidden md:block" ref={quickMenuRef}>
             <button
               type="button"
-              className="rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+              className="rounded-lg border border-brand-100 px-2 py-2 hover:bg-brand-50"
               onClick={() => {
                 setIsQuickMenuOpen((v) => !v);
                 setIsNotifOpen(false);
@@ -687,6 +750,37 @@ export default function HeaderNav() {
               </div>
             ) : null}
           </div>
+        </div>
+      )}
+
+      <div className="flex w-full items-center justify-end gap-2 text-sm md:hidden">
+        {!isAuthed ? (
+          <>
+            {!hidePublicMobileMenu ? (
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+                aria-label="Menu public"
+                title="Menu public"
+                onClick={() => setIsPublicMobileMenuOpen(true)}
+              >
+                ☰
+              </button>
+            ) : null}
+            <Link
+              href="/login"
+              className="ml-auto inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+              aria-label="Connexion"
+              title="Connexion"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+                <path
+                  d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2-7 4.5V20h14v-1.5C19 16 16 14 12 14Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </Link>
+          </>
         ) : null}
       </div>
 
