@@ -583,10 +583,6 @@ export default function HeaderNav() {
             ) : null}
           </div>
 
-          <Link href="/support" className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50">
-            S&apos;abonner
-          </Link>
-
           <form
             onSubmit={onDesktopSearch}
             className="mx-2 flex min-w-[320px] flex-1 items-center rounded-full border border-brand-300 bg-white px-4 py-2 shadow-sm transition-all duration-200 focus-within:-translate-y-[1px] focus-within:border-brand-500 focus-within:shadow-lg focus-within:ring-2 focus-within:ring-brand-200"
@@ -600,12 +596,6 @@ export default function HeaderNav() {
             />
           </form>
 
-          <Link href="/support" className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50">
-            LinkEduPro Business
-          </Link>
-          <Link href="/rattrapage" className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50">
-            Enseigner
-          </Link>
           <Link href="/search" className="rounded-lg border border-brand-200 p-2 hover:bg-brand-50" aria-label="Explorer">
             🌐
           </Link>
