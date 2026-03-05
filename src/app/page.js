@@ -82,6 +82,38 @@ const LANDING_HERO_SLIDES = [
     caption: 'Écoles et élèves engagés dans la réussite'
   }
 ];
+const HOME_CATEGORY_TABS = [
+  { label: 'Développement', href: '/subjects' },
+  { label: 'Business', href: '/support' },
+  { label: 'Finance', href: '/library' },
+  { label: 'Informatique', href: '/subjects' },
+  { label: 'Productivité', href: '/study-plans' },
+  { label: 'Développement personnel', href: '/blog' },
+  { label: 'Design', href: '/video-lessons' },
+  { label: 'Marketing', href: '/support' },
+  { label: 'Santé et bien-être', href: '/blog' },
+  { label: 'Musique', href: '/subjects' }
+];
+const HOME_HERO_MESSAGES = [
+  {
+    title: "Maîtrise les compétences utiles pour l'avenir",
+    text: 'Progresse avec des cours ciblés, des quiz guidés et un accompagnement adapté à ton niveau.',
+    ctaPrimary: 'Commencer',
+    ctaSecondary: 'Explorer les rubriques'
+  },
+  {
+    title: 'Passe de la révision à la performance',
+    text: 'Combine quiz, bibliothèque et classe numérique pour accélérer ta préparation aux examens.',
+    ctaPrimary: 'Voir mon plan',
+    ctaSecondary: 'Lancer un quiz'
+  },
+  {
+    title: 'Construis ta routine de réussite',
+    text: 'Organise tes séances, suis ta progression et garde une cadence constante toute la semaine.',
+    ctaPrimary: 'Mon progrès',
+    ctaSecondary: 'Voir les objectifs'
+  }
+];
 const DEFAULT_HOME_CHALLENGE = {
   title: 'Vote de la semaine',
   subtitle: 'Choisis la personne qui doit rester en tête cette semaine.',
@@ -132,6 +164,16 @@ function getParticipantInitials(title) {
   if (!words.length) return 'P';
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
   return `${words[0][0] || ''}${words[1][0] || ''}`.toUpperCase();
+}
+
+function getUserInitials(student) {
+  const first = String(student?.firstName || '').trim();
+  const last = String(student?.lastName || '').trim();
+  const combo = `${first} ${last}`.trim();
+  if (!combo) return 'LE';
+  const parts = combo.split(/\s+/).filter(Boolean);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] || ''}${parts[1][0] || ''}`.toUpperCase();
 }
 
 function getDailyObjective(student) {
@@ -806,19 +848,75 @@ export default function HomePage() {
         </div>
       ) : null}
 
-      <div className="card motion-enter lift-card home-gold-card">
-        <p className="text-sm text-brand-700">Bienvenue</p>
-        <h1 className="home-gold-title text-3xl font-black text-brand-900">
-          {homeIntro.title}
-        </h1>
-        <p className="mt-2 text-sm text-brand-700">
-          {homeIntro.subtitle}
-        </p>
-        <div className="mt-4 flex gap-3">
-          <Link href={homeIntro.primaryHref} className="btn-primary cta-pulse home-gold-cta">{homeIntro.primaryLabel}</Link>
-          <Link href={homeIntro.secondaryHref} className="btn-secondary">{homeIntro.secondaryLabel}</Link>
+      <section className="home-udemy-shell motion-enter">
+        <div className="home-udemy-greet">
+          <div className="home-udemy-avatar" aria-hidden="true">
+            {getUserInitials(student)}
+          </div>
+          <div>
+            <p className="text-sm text-brand-700">Nous sommes ravis de vous retrouver</p>
+            <h1 className="text-3xl font-black text-brand-900">{homeIntro.title}</h1>
+            <p className="mt-1 text-sm text-brand-700">
+              {homeIntro.subtitle}{' '}
+              <Link href="/profile?edit=1" className="font-semibold text-[#5e17eb] hover:underline">
+                Modifier mon profil et mes intérêts
+              </Link>
+            </p>
+          </div>
         </div>
-      </div>
+
+        <div className="home-udemy-categories">
+          {HOME_CATEGORY_TABS.map((tab) => (
+            <Link key={tab.label} href={tab.href} className="home-udemy-cat-link">
+              {tab.label}
+            </Link>
+          ))}
+        </div>
+
+        <div className="home-udemy-hero">
+          <button
+            type="button"
+            className="home-udemy-arrow hidden lg:flex"
+            onClick={() => setLandingHeroIndex((prev) => (prev === 0 ? LANDING_HERO_SLIDES.length - 1 : prev - 1))}
+            aria-label="Slide précédent"
+          >
+            ‹
+          </button>
+          <div className="home-udemy-hero-card">
+            <div className="home-udemy-hero-copy">
+              <h2 className="text-4xl font-black leading-tight text-white">
+                {HOME_HERO_MESSAGES[landingHeroIndex % HOME_HERO_MESSAGES.length].title}
+              </h2>
+              <p className="mt-3 text-base text-white/90">
+                {HOME_HERO_MESSAGES[landingHeroIndex % HOME_HERO_MESSAGES.length].text}
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link href={homeIntro.primaryHref} className="home-udemy-btn-primary">
+                  {HOME_HERO_MESSAGES[landingHeroIndex % HOME_HERO_MESSAGES.length].ctaPrimary}
+                </Link>
+                <Link href={homeIntro.secondaryHref} className="home-udemy-btn-secondary">
+                  {HOME_HERO_MESSAGES[landingHeroIndex % HOME_HERO_MESSAGES.length].ctaSecondary}
+                </Link>
+              </div>
+            </div>
+            <div className="home-udemy-hero-media">
+              <img
+                src={LANDING_HERO_SLIDES[landingHeroIndex].image}
+                alt={LANDING_HERO_SLIDES[landingHeroIndex].caption}
+                className="home-udemy-hero-image"
+              />
+            </div>
+          </div>
+          <button
+            type="button"
+            className="home-udemy-arrow hidden lg:flex"
+            onClick={() => setLandingHeroIndex((prev) => (prev + 1) % LANDING_HERO_SLIDES.length)}
+            aria-label="Slide suivant"
+          >
+            ›
+          </button>
+        </div>
+      </section>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <article className="card lift-card palette-card palette-1">
