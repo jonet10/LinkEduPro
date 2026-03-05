@@ -64,16 +64,16 @@ export default function HeaderNav() {
   ]), []);
   const desktopCategoryTabs = useMemo(
     () => ([
-      { href: '/subjects', label: 'Développement' },
-      { href: '/support', label: 'Business' },
-      { href: '/library', label: 'Finance' },
-      { href: '/subjects', label: 'Informatique' },
-      { href: '/study-plans', label: 'Productivité' },
-      { href: '/blog', label: 'Développement personnel' },
-      { href: '/video-lessons', label: 'Design' },
-      { href: '/support', label: 'Marketing' },
-      { href: '/focus', label: 'Santé et bien-être' },
-      { href: '/subjects', label: 'Musique' }
+      { href: '/', label: 'Accueil' },
+      { href: '/video-lessons', label: 'Classe Numerique' },
+      { href: '/rattrapage', label: 'Rattrapage' },
+      { href: '/subjects', label: 'Rubriques' },
+      { href: '/progress', label: 'Progrès' },
+      { href: '/library', label: 'Bibliothèque' },
+      { href: '/support', label: 'Support' },
+      { href: '/educollect', label: 'EduCollect' },
+      { href: '/blog', label: 'Forum' },
+      { href: '/probable-exercises', label: 'Exercices probables' }
     ]),
     []
   );
