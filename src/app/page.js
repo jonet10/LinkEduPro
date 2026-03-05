@@ -102,6 +102,44 @@ const HOME_HERO_MESSAGES = [
     ctaSecondary: 'Voir les objectifs'
   }
 ];
+const LEARNING_SHOWCASE_SECTIONS = [
+  {
+    id: 'quiz-pop',
+    title: 'Quiz les plus populaires',
+    subtitle: 'Entraînements recommandés cette semaine',
+    items: [
+      { title: 'Quiz Physique NSIV - Bases', author: 'LinkEduPro', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Populaire', href: '/subjects', image: '/images/tool-quiz-bac.png' },
+      { title: 'Quiz Maths - Révision rapide', author: 'LinkEduPro', rating: '4,8', price: 'Gratuit', oldPrice: '', badge: 'Top', href: '/subjects', image: '/slides/H.jpeg' },
+      { title: 'Quiz Chimie - Annales ciblées', author: 'LinkEduPro', rating: '4,6', price: 'Gratuit', oldPrice: '', badge: 'Recommandé', href: '/subjects', image: '/slides/HC.jpg' },
+      { title: 'Quiz Hist-Géo - NSIV', author: 'LinkEduPro', rating: '4,5', price: 'Gratuit', oldPrice: '', badge: 'Nouveau', href: '/subjects', image: '/slides/HTC.jpg' },
+      { title: 'Quiz Philosophie - Concepts clés', author: 'LinkEduPro', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Populaire', href: '/subjects', image: '/slides/HL.jpg' }
+    ]
+  },
+  {
+    id: 'catchup-pop',
+    title: 'Rattrapages en vedette',
+    subtitle: 'Sessions live les plus consultées',
+    items: [
+      { title: 'Rattrapage Physique (mécanique)', author: 'Professeurs vérifiés', rating: '4,8', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/images/tool-rattrapage-live.png' },
+      { title: 'Rattrapage Maths (algèbre)', author: 'Professeurs vérifiés', rating: '4,7', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/slides/H.jpeg' },
+      { title: 'Rattrapage Chimie (stoéchiométrie)', author: 'Professeurs vérifiés', rating: '4,6', price: 'À partir de 120 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/slides/HC.jpg' },
+      { title: 'Rattrapage Philosophie', author: 'Professeurs vérifiés', rating: '4,6', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/slides/HTC.jpg' },
+      { title: 'Rattrapage Histoire-Géo', author: 'Professeurs vérifiés', rating: '4,5', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/slides/HL.jpg' }
+    ]
+  },
+  {
+    id: 'video-pop',
+    title: 'Vidéos classe numérique',
+    subtitle: 'Leçons vidéo recommandées',
+    items: [
+      { title: 'Physique: mouvement rectiligne', author: 'Classe numérique', rating: '4,8', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/images/tool-rubriques-nsiv.png' },
+      { title: 'Maths: fonctions et dérivées', author: 'Classe numérique', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/images/tool-communaute-scolaire.png' },
+      { title: 'Chimie: réactions et bilans', author: 'Classe numérique', rating: '4,6', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/slides/H.jpeg' },
+      { title: 'Philo: méthode dissertation', author: 'Classe numérique', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/slides/HC.jpg' },
+      { title: 'Hist-Géo: cartes et repères', author: 'Classe numérique', rating: '4,5', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/slides/HL.jpg' }
+    ]
+  }
+];
 const DEFAULT_HOME_CHALLENGE = {
   title: 'Vote de la semaine',
   subtitle: 'Choisis la personne qui doit rester en tête cette semaine.',
@@ -217,6 +255,33 @@ function getDailyObjective(student) {
   };
 
   return byTrack[track] || byTrack.ORDINAIRE;
+}
+
+function LearningShowcaseSection({ section }) {
+  return (
+    <section className="card">
+      <h2 className="text-3xl font-black text-brand-900">{section.title}</h2>
+      <p className="mt-2 text-sm text-brand-700">{section.subtitle}</p>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        {section.items.map((item) => (
+          <article key={`${section.id}-${item.title}`} className="overflow-hidden rounded-xl border border-brand-100 bg-white shadow-sm">
+            <img src={item.image} alt={item.title} className="h-36 w-full object-cover" />
+            <div className="p-3">
+              <p className="line-clamp-2 text-base font-semibold text-brand-900">{item.title}</p>
+              <p className="mt-1 text-xs text-brand-700">{item.author}</p>
+              <p className="mt-1 text-xs font-semibold text-brand-700">{item.rating} ★</p>
+              <p className="mt-1 text-sm font-bold text-brand-900">{item.price}</p>
+              {item.oldPrice ? <p className="text-xs text-brand-700 line-through">{item.oldPrice}</p> : null}
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <span className="rounded-full bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-700">{item.badge}</span>
+                <Link href={item.href} className="text-xs font-semibold text-brand-500 hover:underline">Voir</Link>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 export default function HomePage() {
@@ -735,6 +800,10 @@ export default function HomePage() {
           </div>
         </section>
 
+        {LEARNING_SHOWCASE_SECTIONS.map((section) => (
+          <LearningShowcaseSection key={`public-${section.id}`} section={section} />
+        ))}
+
         <section className="card" aria-labelledby="tiktok-title">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -895,6 +964,10 @@ export default function HomePage() {
           </button>
         </div>
       </section>
+
+      {LEARNING_SHOWCASE_SECTIONS.map((section) => (
+        <LearningShowcaseSection key={`authed-${section.id}`} section={section} />
+      ))}
 
       {isAdminRole ? (
         <>
