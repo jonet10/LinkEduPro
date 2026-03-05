@@ -62,21 +62,6 @@ export default function HeaderNav() {
     { href: '/blog', label: 'Publier des ressources', icon: '📝' },
     { href: '/rattrapage', label: 'Live / rattrapage', icon: '📅' }
   ]), []);
-  const desktopCategoryTabs = useMemo(
-    () => ([
-      { href: '/', label: 'Accueil' },
-      { href: '/video-lessons', label: 'Classe Numerique' },
-      { href: '/rattrapage', label: 'Rattrapage' },
-      { href: '/subjects', label: 'Rubriques' },
-      { href: '/progress', label: 'Progrès' },
-      { href: '/library', label: 'Bibliothèque' },
-      { href: '/support', label: 'Support' },
-      { href: '/educollect', label: 'EduCollect' },
-      { href: '/blog', label: 'Forum' },
-      { href: '/probable-exercises', label: 'Exercices probables' }
-    ]),
-    []
-  );
   const quickDiscoverLinks = useMemo(
     () => ([
       { href: '/library', label: 'Bibliothèque numérique', icon: '📚' },
@@ -725,22 +710,6 @@ export default function HeaderNav() {
 
         </div>
       )}
-
-      {isAuthed ? (
-        <div className="hidden w-full items-center gap-1 overflow-x-auto border-t border-brand-100 pt-2 md:flex">
-          {desktopCategoryTabs.map((item) => (
-            <Link
-              key={`${item.label}-${item.href}`}
-              href={item.href}
-              className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-brand-50 ${
-                isActivePath(pathname, item.href) ? 'bg-brand-50 text-brand-900 font-semibold' : 'text-brand-800'
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      ) : null}
 
       <div className="flex w-full items-center justify-end gap-2 text-sm md:hidden">
         {!isAuthed ? (
