@@ -718,41 +718,24 @@ export default function HeaderNav() {
             Déconnexion
           </button>
 
-          <div className="relative hidden md:block" ref={quickMenuRef}>
-            <button
-              type="button"
-              className="rounded-lg border border-brand-100 px-2 py-2 hover:bg-brand-50"
-              onClick={() => {
-                setIsQuickMenuOpen((v) => !v);
-                setIsNotifOpen(false);
-              }}
-              aria-label="Menu"
-              title="Menu"
-            >
-              <span className="text-base leading-none" aria-hidden="true">☰</span>
-            </button>
-
-            {isQuickMenuOpen ? (
-              <div className="absolute right-0 z-50 mt-2 w-64 rounded-xl border border-brand-100 bg-white p-3 shadow-xl">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Navigation</p>
-                <div className="grid grid-cols-1 gap-1">
-                  {desktopMenuItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="rounded-md px-3 py-2 text-sm hover:bg-brand-50"
-                      onClick={() => setIsQuickMenuOpen(false)}
-                    >
-                      {item.icon} {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </div>
-
         </div>
       )}
+
+      {isAuthed ? (
+        <div className="hidden w-full items-center gap-1 overflow-x-auto border-t border-brand-100 pt-2 md:flex">
+          {desktopMenuItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-brand-50 ${
+                isActivePath(pathname, item.href) ? 'bg-brand-50 text-brand-900 font-semibold' : 'text-brand-800'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      ) : null}
 
       <div className="flex w-full items-center justify-end gap-2 text-sm md:hidden">
         {!isAuthed ? (
