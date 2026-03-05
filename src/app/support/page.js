@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 
@@ -9,6 +9,7 @@ const QUICK_AMOUNTS = [10, 20, 50, 100, 150, 200, 250];
 
 export default function SupportPage() {
   const [student, setStudent] = useState(null);
+  const [donorName, setDonorName] = useState('');
   const [selectedAmount, setSelectedAmount] = useState(50);
   const [customAmount, setCustomAmount] = useState('');
   const [busy, setBusy] = useState(false);
@@ -16,7 +17,11 @@ export default function SupportPage() {
   const [info, setInfo] = useState('');
 
   useEffect(() => {
-    setStudent(getStudent());
+    const me = getStudent();
+    setStudent(me);
+    if (me) {
+      setDonorName(`${String(me.firstName || '').trim()} ${String(me.lastName || '').trim()}`.trim());
+    }
 
     if (typeof window !== 'undefined') {
       const query = new URLSearchParams(window.location.search);
@@ -30,12 +35,15 @@ export default function SupportPage() {
     }
   }, []);
 
+  const resolvedDonorLabel = useMemo(() => {
+    const raw = String(donorName || '').trim();
+    if (raw) return raw;
+    if (student) return 'Donateur LinkEduPro';
+    return 'Donateur invité';
+  }, [donorName, student]);
+
   async function startDonation() {
     const token = getToken();
-    if (!token) {
-      setInfo('Connecte-toi pour faire un don.');
-      return;
-    }
 
     const hasCustom = String(customAmount || '').trim() !== '';
     const numericAmount = hasCustom ? Number(customAmount || 0) : Number(selectedAmount || 0);
@@ -54,7 +62,7 @@ export default function SupportPage() {
       setInfo('');
       const data = await apiClient('/platform-donations/checkout', {
         method: 'POST',
-        token,
+        token: token || undefined,
         body: JSON.stringify({
           amount: numericAmount,
           paymentMethod: 'MONCASH'
@@ -84,45 +92,56 @@ export default function SupportPage() {
 
       <section className="card">
         <h2 className="text-lg font-semibold text-brand-900">Faire un don (MonCash)</h2>
+        <p className="mt-2 text-sm text-brand-700">
+          Donateur: <span className="font-semibold text-brand-900">{resolvedDonorLabel}</span>
+        </p>
         {!student ? (
-          <p className="mt-2 text-sm text-brand-700">
-            Connecte-toi pour donner. <Link className="underline" href="/login">Se connecter</Link>
+          <p className="mt-1 text-xs text-brand-700">
+            Optionnel: <Link className="underline" href="/login">se connecter</Link> pour suivre l&apos;historique de tes dons.
           </p>
-        ) : (
-          <div className="mt-3 space-y-3">
-            <div className="flex flex-wrap gap-2">
-              {QUICK_AMOUNTS.map((value) => (
-                <button
-                  key={`amt-${value}`}
-                  type="button"
-                  className={selectedAmount === value && String(customAmount || '').trim() === '' ? 'btn-primary' : 'btn-secondary'}
-                  onClick={() => {
-                    setSelectedAmount(value);
-                    setCustomAmount('');
-                    setError('');
-                  }}
-                >
-                  {value} HTG
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-brand-700">Ou entre un montant personnalisé supérieur à 10 HTG.</p>
+        ) : null}
+        <div className="mt-3 space-y-3">
+          {!student ? (
             <input
               className="input"
-              type="number"
-              min="11"
-              placeholder="Montant personnalisé (HTG)"
-              value={customAmount}
-              onChange={(e) => {
-                setCustomAmount(e.target.value);
-                setError('');
-              }}
+              placeholder="Nom (optionnel)"
+              value={donorName}
+              onChange={(e) => setDonorName(e.target.value)}
+              maxLength={120}
             />
-            <button type="button" className="btn-primary" onClick={startDonation} disabled={busy}>
-              {busy ? 'Redirection...' : 'Payer avec MonCash'}
-            </button>
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            {QUICK_AMOUNTS.map((value) => (
+              <button
+                key={`amt-${value}`}
+                type="button"
+                className={selectedAmount === value && String(customAmount || '').trim() === '' ? 'btn-primary' : 'btn-secondary'}
+                onClick={() => {
+                  setSelectedAmount(value);
+                  setCustomAmount('');
+                  setError('');
+                }}
+              >
+                {value} HTG
+              </button>
+            ))}
           </div>
-        )}
+          <p className="text-xs text-brand-700">Ou entre un montant personnalisé supérieur à 10 HTG.</p>
+          <input
+            className="input"
+            type="number"
+            min="11"
+            placeholder="Montant personnalisé (HTG)"
+            value={customAmount}
+            onChange={(e) => {
+              setCustomAmount(e.target.value);
+              setError('');
+            }}
+          />
+          <button type="button" className="btn-primary" onClick={startDonation} disabled={busy}>
+            {busy ? 'Redirection...' : 'Payer avec MonCash'}
+          </button>
+        </div>
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
         {info ? <p className="mt-2 text-sm text-green-700">{info}</p> : null}
       </section>

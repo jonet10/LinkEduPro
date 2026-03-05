@@ -656,9 +656,7 @@ export default function HomePage() {
               <li>Une communauté structurée pour préparer efficacement les examens en Haïti.</li>
             </ul>
             <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/register" className="btn-primary">S’inscrire gratuitement</Link>
-              <Link href="/login" className="btn-secondary">Se connecter</Link>
-              <Link href="/support" className="btn-secondary">Soutenir LinkEduPro</Link>
+              <Link href="/support" className="btn-primary">Soutenir LinkEduPro</Link>
               <a href="/apk/linkedupro.apk" download className="btn-secondary">Télécharger l&apos;APK Android</a>
             </div>
           </div>
