@@ -10,6 +10,95 @@ function toClientQuestion(question) {
   };
 }
 
+function toManageQuestion(question) {
+  return {
+    id: question.id,
+    subjectId: question.subjectId,
+    prompt: question.prompt,
+    answerType: question.answerType || 'MCQ',
+    options: Array.isArray(question.options) ? question.options : [],
+    correctOption: question.correctOption,
+    correctText: question.correctText,
+    explanation: question.explanation || null,
+    isPremium: Boolean(question.isPremium),
+    frequencyScore: Number(question.frequencyScore || 0),
+    sourceTopic: question.sourceTopic || null,
+    createdAt: question.createdAt,
+    updatedAt: question.updatedAt
+  };
+}
+
+function normalizeQuestionData(payload, existingQuestion = null) {
+  const answerType = String(payload.answerType || existingQuestion?.answerType || 'MCQ').toUpperCase();
+  if (!['MCQ', 'TEXT'].includes(answerType)) {
+    const error = new Error('answerType doit être MCQ ou TEXT.');
+    error.status = 400;
+    throw error;
+  }
+
+  const prompt = (payload.prompt ?? existingQuestion?.prompt ?? '').trim();
+  if (!prompt) {
+    const error = new Error('La question est obligatoire.');
+    error.status = 400;
+    throw error;
+  }
+
+  const explanationRaw = payload.explanation ?? existingQuestion?.explanation;
+  const sourceTopicRaw = payload.sourceTopic ?? existingQuestion?.sourceTopic;
+  const isPremium = payload.isPremium ?? existingQuestion?.isPremium ?? false;
+  const frequencyScore = payload.frequencyScore ?? existingQuestion?.frequencyScore ?? 0;
+
+  if (answerType === 'TEXT') {
+    const correctText = String(payload.correctText ?? existingQuestion?.correctText ?? '').trim();
+    if (!correctText) {
+      const error = new Error('Pour une réponse courte, correctText est obligatoire.');
+      error.status = 400;
+      throw error;
+    }
+
+    return {
+      prompt,
+      answerType,
+      options: [],
+      correctOption: -1,
+      correctText,
+      explanation: explanationRaw ? String(explanationRaw).trim() : null,
+      isPremium: Boolean(isPremium),
+      frequencyScore: Number(frequencyScore || 0),
+      sourceTopic: sourceTopicRaw ? String(sourceTopicRaw).trim() : null
+    };
+  }
+
+  const inputOptions = payload.options ?? existingQuestion?.options ?? [];
+  const options = Array.isArray(inputOptions)
+    ? inputOptions.map((opt) => String(opt || '').trim()).filter(Boolean)
+    : [];
+  if (options.length < 2) {
+    const error = new Error('Une question à choix multiple doit avoir au moins 2 options.');
+    error.status = 400;
+    throw error;
+  }
+
+  const correctOptionRaw = payload.correctOption ?? existingQuestion?.correctOption;
+  if (!Number.isInteger(correctOptionRaw) || correctOptionRaw < 0 || correctOptionRaw >= options.length) {
+    const error = new Error('correctOption est invalide pour les options fournies.');
+    error.status = 400;
+    throw error;
+  }
+
+  return {
+    prompt,
+    answerType,
+    options,
+    correctOption: correctOptionRaw,
+    correctText: null,
+    explanation: explanationRaw ? String(explanationRaw).trim() : null,
+    isPremium: Boolean(isPremium),
+    frequencyScore: Number(frequencyScore || 0),
+    sourceTopic: sourceTopicRaw ? String(sourceTopicRaw).trim() : null
+  };
+}
+
 function isPhysicsSubjectName(name) {
   return name === 'Physique' || name.startsWith('Physique -');
 }
@@ -262,6 +351,82 @@ async function getQuizAttemptLikeState(req, res, next) {
   }
 }
 
+async function listQuizQuestionsForManage(req, res, next) {
+  try {
+    const subjectId = Number(req.params.subjectId);
+    const subject = await prisma.subject.findUnique({
+      where: { id: subjectId },
+      include: {
+        questions: {
+          orderBy: { id: 'asc' }
+        }
+      }
+    });
+
+    if (!subject) {
+      return res.status(404).json({ message: 'Matière introuvable.' });
+    }
+
+    return res.json({
+      subject: { id: subject.id, name: subject.name },
+      questions: subject.questions.map(toManageQuestion)
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function createQuizQuestion(req, res, next) {
+  try {
+    const subjectId = Number(req.params.subjectId);
+    const subject = await prisma.subject.findUnique({ where: { id: subjectId }, select: { id: true, name: true } });
+    if (!subject) {
+      return res.status(404).json({ message: 'Matière introuvable.' });
+    }
+
+    const data = normalizeQuestionData(req.body);
+    const created = await prisma.question.create({
+      data: {
+        subjectId,
+        ...data
+      }
+    });
+
+    return res.status(201).json({
+      message: 'Question créée.',
+      subject: { id: subject.id, name: subject.name },
+      question: toManageQuestion(created)
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function updateQuizQuestion(req, res, next) {
+  try {
+    const questionId = Number(req.params.questionId);
+    const existing = await prisma.question.findUnique({
+      where: { id: questionId }
+    });
+    if (!existing) {
+      return res.status(404).json({ message: 'Question introuvable.' });
+    }
+
+    const data = normalizeQuestionData(req.body, existing);
+    const updated = await prisma.question.update({
+      where: { id: questionId },
+      data
+    });
+
+    return res.json({
+      message: 'Question mise à jour.',
+      question: toManageQuestion(updated)
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function toggleQuizAttemptLike(req, res, next) {
   try {
     const attemptId = Number(req.params.attemptId);
@@ -346,5 +511,8 @@ module.exports = {
   submitQuiz,
   getPremiumInsights,
   getQuizAttemptLikeState,
-  toggleQuizAttemptLike
+  toggleQuizAttemptLike,
+  listQuizQuestionsForManage,
+  createQuizQuestion,
+  updateQuizQuestion
 };

@@ -76,6 +76,9 @@ const quizParamsSchema = Joi.object({
 const quizAttemptParamsSchema = Joi.object({
   attemptId: Joi.number().integer().positive().required()
 });
+const quizQuestionParamsSchema = Joi.object({
+  questionId: Joi.number().integer().positive().required()
+});
 
 const quizQuerySchema = Joi.object({
   limit: Joi.number().integer().min(1).max(50).default(10),
@@ -106,6 +109,30 @@ const submitQuizSchema = Joi.object({
     .min(1)
     .required()
 });
+
+const createQuizQuestionSchema = Joi.object({
+  prompt: Joi.string().trim().min(3).max(2000).required(),
+  answerType: Joi.string().valid('MCQ', 'TEXT').default('MCQ'),
+  options: Joi.array().items(Joi.string().trim().min(1).max(500)).default([]),
+  correctOption: Joi.number().integer().min(0).optional(),
+  correctText: Joi.string().trim().max(2000).allow('', null).optional(),
+  explanation: Joi.string().trim().max(5000).allow('', null).optional(),
+  isPremium: Joi.boolean().default(false),
+  frequencyScore: Joi.number().integer().min(0).max(1000).default(0),
+  sourceTopic: Joi.string().trim().max(120).allow('', null).optional()
+});
+
+const updateQuizQuestionSchema = Joi.object({
+  prompt: Joi.string().trim().min(3).max(2000).optional(),
+  answerType: Joi.string().valid('MCQ', 'TEXT').optional(),
+  options: Joi.array().items(Joi.string().trim().min(1).max(500)).optional(),
+  correctOption: Joi.number().integer().min(0).optional(),
+  correctText: Joi.string().trim().max(2000).allow('', null).optional(),
+  explanation: Joi.string().trim().max(5000).allow('', null).optional(),
+  isPremium: Joi.boolean().optional(),
+  frequencyScore: Joi.number().integer().min(0).max(1000).optional(),
+  sourceTopic: Joi.string().trim().max(120).allow('', null).optional()
+}).min(1);
 
 const createLibraryBookSchema = Joi.object({
   title: Joi.string().trim().min(3).max(180).required(),
@@ -247,8 +274,11 @@ module.exports = {
   updateUnverifiedEmailSchema,
   quizParamsSchema,
   quizAttemptParamsSchema,
+  quizQuestionParamsSchema,
   quizQuerySchema,
   submitQuizSchema,
+  createQuizQuestionSchema,
+  updateQuizQuestionSchema,
   createLibraryBookSchema,
   updateLibraryBookSchema,
   reviewLibraryBookSchema,
