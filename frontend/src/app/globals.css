@@ -1227,3 +1227,44 @@ input[type="checkbox"] {
     min-height: 210px;
   }
 }
+
+/* Modern clean pass: remove visible container borders + use Background image */
+body {
+  background:
+    linear-gradient(rgba(4, 14, 28, 0.62), rgba(4, 14, 28, 0.72)),
+    url('/images/background.png') center / cover no-repeat fixed !important;
+}
+
+.dark body {
+  background:
+    linear-gradient(rgba(1, 8, 18, 0.82), rgba(1, 8, 18, 0.9)),
+    url('/images/background.png') center / cover no-repeat fixed !important;
+}
+
+.card,
+.home-udemy-shell,
+.home-udemy-hero-card,
+.landing-shell .card,
+.landing-hero-copy,
+.landing-hero-slide-shell,
+.public-top-nav,
+.palette-card,
+.public-hero-media,
+.rattrapage-shell .card,
+.glass {
+  border: none !important;
+  border-color: transparent !important;
+}
+
+.home-udemy-greet,
+.home-udemy-categories {
+  border-bottom: none !important;
+}
+
+.home-udemy-arrow {
+  border: none !important;
+}
+
+.dark header {
+  border-color: transparent !important;
+}
