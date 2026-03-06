@@ -926,12 +926,8 @@ export default function HomePage() {
               <li>Des quiz, exercices, rattrapages, challenges et outils de suivi des performances.</li>
               <li>Une communauté structurée pour préparer efficacement les examens en Haïti.</li>
             </ul>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/support" className="btn-primary btn-glow">Soutenir LinkEduPro</Link>
-              <a href="/apk/linkedupro.apk" download className="btn-secondary">Télécharger l&apos;APK Android</a>
-            </div>
           </div>
-          <div className="landing-hero-art animate-float" aria-hidden="true">
+          <div className="landing-hero-art animate-float">
             <div className="landing-hero-slide-shell glass hologram-effect">
               <img
                 src={LANDING_HERO_SLIDES[landingHeroIndex].image}
@@ -953,17 +949,10 @@ export default function HomePage() {
                 />
               ))}
             </div>
-          </div>
-        </section>
-
-        <section className="card">
-          <div className="landing-search-box">
-            <span className="text-xl text-brand-700">⌕</span>
-            <input
-              className="landing-search-input"
-              placeholder="Rechercher un manuel, une question ou un sujet"
-              type="text"
-            />
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/support" className="btn-primary btn-glow">Soutenir LinkEduPro</Link>
+              <a href="/apk/linkedupro.apk" download className="btn-secondary">Télécharger l&apos;APK Android</a>
+            </div>
           </div>
         </section>
 
