@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from '@/lib/api';
-import { getToken, getStudent, isNsivStudent } from '@/lib/auth';
+import { getToken, getStudent, isNsivStudent, normalizeAcademicLevel } from '@/lib/auth';
 import { resolveMediaUrl } from '@/lib/media';
 import VerifiedTestimonials from '@/components/VerifiedTestimonials';
 import SectionIcon from '@/components/ui/SectionIcon';
@@ -140,6 +140,86 @@ const LEARNING_SHOWCASE_SECTIONS = [
     ]
   }
 ];
+
+function normalizeLevelValue(rawLevel) {
+  const value = String(rawLevel || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toUpperCase();
+  if (!value) return '';
+  if (value === '9E' || value === 'LEVEL_9E') return '9E';
+  if (value === 'NS1' || value === 'NSI') return 'NSI';
+  if (value === 'NS2' || value === 'NSII') return 'NSII';
+  if (value === 'NS3' || value === 'NSIII') return 'NSIII';
+  if (value === 'TERMINALE' || value === 'NSIV') return 'NSIV';
+  if (value === 'UNIVERSITAIRE' || value === 'UNIVERSITE') return 'UNIVERSITAIRE';
+  return value;
+}
+
+function detectLevelFromText(rawText) {
+  const text = String(rawText || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase();
+  if (!text) return '';
+  if (/\b(9E|9EME|9E AF|LEVEL_9E)\b/.test(text)) return '9E';
+  if (/\b(NSI|NS1)\b/.test(text)) return 'NSI';
+  if (/\b(NSII|NS2)\b/.test(text)) return 'NSII';
+  if (/\b(NSIII|NS3)\b/.test(text)) return 'NSIII';
+  if (/\b(NSIV|TERMINALE)\b/.test(text)) return 'NSIV';
+  if (/\b(UNIVERSITAIRE|UNIVERSITE)\b/.test(text)) return 'UNIVERSITAIRE';
+  return '';
+}
+
+function isShowcaseItemVisibleForLevel(itemLevel, viewerLevel, title = '') {
+  if (!viewerLevel) return true;
+  const normalizedItemLevel = normalizeLevelValue(itemLevel);
+  if (normalizedItemLevel) return normalizedItemLevel === viewerLevel;
+  const levelInTitle = detectLevelFromText(title);
+  if (levelInTitle) return levelInTitle === viewerLevel;
+  return true;
+}
+
+function toShowcaseImage(title, fallback = '/slides/H.jpeg') {
+  const normalized = String(title || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+  if (normalized.includes('physique')) return '/images/tool-rubriques-nsiv.png';
+  if (normalized.includes('math')) return '/slides/HC.jpg';
+  if (normalized.includes('chimie')) return '/slides/HTC.jpg';
+  if (normalized.includes('histoire') || normalized.includes('geo')) return '/slides/HL.jpg';
+  if (normalized.includes('rattrapage') || normalized.includes('live')) return '/images/tool-rattrapage-live.png';
+  if (normalized.includes('video')) return '/images/tool-communaute-scolaire.png';
+  return fallback;
+}
+
+function parseVideoContentBody(rawBody) {
+  if (typeof rawBody !== 'string') {
+    return { description: '', videoUrl: '', isPaid: false, price: 0 };
+  }
+  try {
+    const parsed = JSON.parse(rawBody);
+    if (parsed && typeof parsed === 'object') {
+      return {
+        description: String(parsed.description || ''),
+        videoUrl: String(parsed.videoUrl || ''),
+        isPaid: Boolean(parsed.isPaid),
+        price: Number(parsed.price || 0)
+      };
+    }
+  } catch (_) {
+    // Legacy plain text body fallback.
+  }
+  return { description: String(rawBody || ''), videoUrl: '', isPaid: false, price: 0 };
+}
+
+function formatPriceTag(amount) {
+  const numeric = Number(amount || 0);
+  if (!Number.isFinite(numeric) || numeric <= 0) return 'Gratuit';
+  return `${new Intl.NumberFormat('fr-FR').format(Math.round(numeric))} HTG`;
+}
 const DEFAULT_HOME_CHALLENGE = {
   title: 'Vote de la semaine',
   subtitle: 'Choisis la personne qui doit rester en tête cette semaine.',
@@ -262,6 +342,9 @@ function LearningShowcaseSection({ section }) {
     <section className="card">
       <h2 className="text-3xl font-black text-brand-900">{section.title}</h2>
       <p className="mt-2 text-sm text-brand-700">{section.subtitle}</p>
+      {Array.isArray(section.items) && section.items.length === 0 ? (
+        <p className="mt-4 text-sm text-brand-700">Aucun contenu disponible pour ton niveau pour le moment.</p>
+      ) : null}
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {section.items.map((item) => (
           <article key={`${section.id}-${item.title}`} className="overflow-hidden rounded-xl border border-brand-100 bg-white shadow-sm">
@@ -308,6 +391,7 @@ export default function HomePage() {
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
   const [activeLandingSubject, setActiveLandingSubject] = useState(LANDING_SUBJECTS[0].id);
   const [landingHeroIndex, setLandingHeroIndex] = useState(0);
+  const [learningShowcaseSections, setLearningShowcaseSections] = useState(LEARNING_SHOWCASE_SECTIONS);
 
   const myRanking = useMemo(() => {
     if (!student?.id) return null;
@@ -323,6 +407,10 @@ export default function HomePage() {
   const isStudentRole = student?.role === 'STUDENT';
   const isTeacherRole = student?.role === 'TEACHER';
   const isAdminRole = student?.role === 'ADMIN';
+  const normalizedViewerLevel = useMemo(
+    () => normalizeLevelValue(normalizeAcademicLevel(student) || student?.level),
+    [student]
+  );
 
   const homeIntro = useMemo(() => {
     if (isAdminRole) {
@@ -509,6 +597,136 @@ export default function HomePage() {
       isMounted = false;
     };
   }, [isAuthed]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadLearningShowcaseSections() {
+      if (!isAuthed) {
+        if (!cancelled) setLearningShowcaseSections(LEARNING_SHOWCASE_SECTIONS);
+        return;
+      }
+
+      const token = getToken();
+      if (!token) {
+        if (!cancelled) setLearningShowcaseSections(LEARNING_SHOWCASE_SECTIONS);
+        return;
+      }
+
+      try {
+        const currentRole = String(student?.role || '').toUpperCase();
+        const subjectsPromise = apiClient('/subjects', { token }).catch(() => []);
+        const catchupPromise = apiClient('/catchup?page=1&pageSize=12', { token }).catch(() => ({ sessions: [] }));
+        const videosPromise = currentRole === 'STUDENT'
+          ? apiClient('/v2/contents/my-level', { token }).catch(() => ({ contents: [] }))
+          : apiClient('/v2/contents/mine', { token }).catch(() => ({ contents: [] }));
+
+        const [subjectsData, catchupData, videosData] = await Promise.all([
+          subjectsPromise,
+          catchupPromise,
+          videosPromise
+        ]);
+
+        const quizzes = Array.isArray(subjectsData) ? subjectsData : [];
+        const sessions = Array.isArray(catchupData?.sessions) ? catchupData.sessions : [];
+        const videos = Array.isArray(videosData?.contents) ? videosData.contents : [];
+
+        const quizItems = quizzes
+          .slice()
+          .sort((a, b) => Number(b?.questionCount || 0) - Number(a?.questionCount || 0))
+          .slice(0, 8)
+          .map((item) => ({
+            title: item?.name ? `Quiz ${item.name}` : 'Quiz',
+            author: `${Number(item?.questionCount || 0)} questions`,
+            rating: `${Number(item?.questionCount || 0)} Q`,
+            price: 'Gratuit',
+            oldPrice: '',
+            badge: 'Quiz',
+            href: `/quiz/${item?.id}`,
+            image: toShowcaseImage(item?.name, '/images/tool-quiz-bac.png')
+          }))
+          .filter((item) => isShowcaseItemVisibleForLevel('', normalizedViewerLevel, item.title));
+
+        const catchupItems = sessions
+          .slice()
+          .sort((a, b) => Number(b?.enrolledCount || 0) - Number(a?.enrolledCount || 0))
+          .slice(0, 8)
+          .map((session) => ({
+            title: session?.title || 'Session de rattrapage',
+            author: session?.createdBy
+              ? `${session.createdBy.firstName || ''} ${session.createdBy.lastName || ''}`.trim()
+              : (session?.subject || 'Professeur vérifié'),
+            rating: `${Number(session?.enrolledCount || 0)} inscrits`,
+            price: session?.isFree ? 'Gratuit' : `À partir de ${formatPriceTag(session?.price)}`,
+            oldPrice: '',
+            badge: 'Live',
+            href: `/rattrapage?session=${encodeURIComponent(session?.id)}`,
+            image: toShowcaseImage(`${session?.subject || ''} ${session?.title || ''}`, '/images/tool-rattrapage-live.png'),
+            level: session?.level
+          }))
+          .filter((item) => isShowcaseItemVisibleForLevel(item.level, normalizedViewerLevel, item.title))
+          .map(({ level, ...rest }) => rest);
+
+        const videoItems = videos
+          .filter((entry) => String(entry?.type || '').toLowerCase() === 'video')
+          .filter((entry) => String(entry?.status || '').toUpperCase() === 'APPROVED')
+          .slice(0, 12)
+          .map((entry) => {
+            const body = parseVideoContentBody(entry?.body);
+            const title = String(entry?.title || 'Vidéo éducative');
+            const level = entry?.level;
+            return {
+              title,
+              author: body.description ? body.description.slice(0, 48) : 'Classe numérique',
+              rating: 'Vidéo',
+              price: body.isPaid ? formatPriceTag(body.price) : 'Gratuit',
+              oldPrice: '',
+              badge: 'Vidéo',
+              href: '/video-lessons',
+              image: toShowcaseImage(title, '/images/tool-communaute-scolaire.png'),
+              level
+            };
+          })
+          .filter((item) => isShowcaseItemVisibleForLevel(item.level, normalizedViewerLevel, item.title))
+          .map(({ level, ...rest }) => rest)
+          .slice(0, 8);
+
+        const nextSections = [
+          {
+            id: 'quiz-pop',
+            title: 'Quiz les plus populaires',
+            subtitle: 'Basés sur les rubriques déjà publiées',
+            items: quizItems
+          },
+          {
+            id: 'catchup-pop',
+            title: 'Rattrapages en vedette',
+            subtitle: 'Basés sur les sessions existantes',
+            items: catchupItems
+          },
+          {
+            id: 'video-pop',
+            title: 'Vidéos classe numérique',
+            subtitle: 'Basées sur les contenus validés',
+            items: videoItems
+          }
+        ];
+
+        if (!cancelled) {
+          setLearningShowcaseSections(nextSections);
+        }
+      } catch (_) {
+        if (!cancelled) {
+          setLearningShowcaseSections(LEARNING_SHOWCASE_SECTIONS);
+        }
+      }
+    }
+
+    loadLearningShowcaseSections();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthed, student, normalizedViewerLevel]);
 
   async function submitChallengeVote() {
     const token = getToken();
@@ -800,7 +1018,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {LEARNING_SHOWCASE_SECTIONS.map((section) => (
+        {learningShowcaseSections.map((section) => (
           <LearningShowcaseSection key={`public-${section.id}`} section={section} />
         ))}
 
@@ -965,7 +1183,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {LEARNING_SHOWCASE_SECTIONS.map((section) => (
+      {learningShowcaseSections.map((section) => (
         <LearningShowcaseSection key={`authed-${section.id}`} section={section} />
       ))}
 

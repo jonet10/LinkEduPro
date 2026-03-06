@@ -62,8 +62,8 @@ export default function HeaderNav() {
     { href: '/blog', label: 'Publier des ressources', icon: '📝' },
     { href: '/rattrapage', label: 'Live / rattrapage', icon: '📅' }
   ]), []);
-  const globalAuthedTabs = useMemo(
-    () => ([
+  const globalAuthedTabs = useMemo(() => {
+    const tabs = [
       { href: '/', label: 'Accueil' },
       { href: '/video-lessons', label: 'Classe Numerique' },
       { href: '/rattrapage', label: 'Rattrapage' },
@@ -74,9 +74,13 @@ export default function HeaderNav() {
       { href: '/educollect', label: 'EduCollect' },
       { href: '/blog', label: 'Forum' },
       { href: '/probable-exercises', label: 'Exercices probables' }
-    ]),
-    []
-  );
+    ];
+    const role = String(student?.role || '').toUpperCase();
+    if (isAuthed && (role === 'ADMIN' || role === 'SUPER_ADMIN')) {
+      tabs.push({ href: '/admin/super-dashboard', label: 'Dashboard' });
+    }
+    return tabs;
+  }, [isAuthed, student?.role]);
   const quickDiscoverLinks = useMemo(
     () => ([
       { href: '/library', label: 'Bibliothèque numérique', icon: '📚' },
@@ -336,7 +340,7 @@ export default function HeaderNav() {
     }
   }, [hidePublicMobileMenu]);
 
-  const canSeeGlobalAdminDashboard = isAuthed && student?.role === 'ADMIN';
+  const canSeeGlobalAdminDashboard = isAuthed && ['ADMIN', 'SUPER_ADMIN'].includes(String(student?.role || '').toUpperCase());
   const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeCatchup = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeStudyPlans = isAuthed && student?.role !== 'STUDENT';
