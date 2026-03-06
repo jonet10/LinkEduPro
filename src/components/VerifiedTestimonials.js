@@ -6,6 +6,24 @@ import { apiClient } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { resolveMediaUrl } from '@/lib/media';
 
+function resolveSubjectMeta(text) {
+  const normalized = String(text || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+  if (normalized.includes('physique')) return { label: 'Physique', iconImage: '/images/subject-physique.png' };
+  if (normalized.includes('math')) return { label: 'Mathématiques', iconImage: '/images/subject-mathematiques.png' };
+  if (normalized.includes('chimie')) return { label: 'Chimie', iconImage: '/images/subject-chimie.png' };
+  if (normalized.includes('histoire') || normalized.includes('geo')) return { label: 'Histoire-Géo', iconImage: '/images/subject-histoire-geo.png' };
+  if (normalized.includes('philo')) return { label: 'Philosophie', iconImage: '/images/subject-philosophie.png' };
+  if (normalized.includes('francais') || normalized.includes('français')) return { label: 'Français', iconImage: '/images/subject-francais.png' };
+  if (normalized.includes('rattrapage') || normalized.includes('session') || normalized.includes('live')) {
+    return { label: 'Rattrapage', iconImage: '/images/tool-rattrapage-live.png' };
+  }
+  return { label: 'Général', iconImage: '/images/tool-communaute-scolaire.png' };
+}
+
 export default function VerifiedTestimonials() {
   const [items, setItems] = useState([]);
   const [error, setError] = useState('');
@@ -32,6 +50,7 @@ export default function VerifiedTestimonials() {
           excerpt: item.excerpt || '',
           imageUrl: item.imageUrl || null,
           authorLabel: `${item.author?.firstName || ''} ${item.author?.lastName || ''} · ${item.author?.role || ''}`.trim(),
+          subjectMeta: resolveSubjectMeta(`${item.title || ''} ${item.excerpt || ''}`),
           sortDate: item.createdAt ? new Date(item.createdAt).getTime() : 0
         }));
 
@@ -43,6 +62,7 @@ export default function VerifiedTestimonials() {
           excerpt: session.invitationMessage || session.description || '',
           imageUrl: null,
           authorLabel: `Session ${session.subject} · ${session.createdBy?.firstName || ''} ${session.createdBy?.lastName || ''}`.trim(),
+          subjectMeta: resolveSubjectMeta(`${session.subject || ''} ${session.title || ''} ${session.description || ''}`),
           sortDate: session.createdAt ? new Date(session.createdAt).getTime() : (session.startsAt ? new Date(session.startsAt).getTime() : 0)
         }));
 
@@ -78,24 +98,39 @@ export default function VerifiedTestimonials() {
         {items.map((item) => (
           <article key={item.id} className="overflow-hidden rounded-xl border border-brand-100">
             <Link href={item.link} className="block">
-              {item.imageUrl ? (
-                <img
-                  src={resolveMediaUrl(item.imageUrl)}
-                  alt={item.title}
-                  className="h-44 w-full object-cover"
-                  loading="lazy"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = '/images/article-placeholder.svg';
-                  }}
-                />
-              ) : (
-                <div className="flex h-44 items-center justify-center bg-brand-50">
-                  <p className="text-xs font-semibold text-brand-700">
-                    {item.type === 'CATCHUP' ? 'Rattrapage' : 'Image indisponible'}
-                  </p>
+              <div className="relative h-44 w-full overflow-hidden bg-brand-50">
+                {item.imageUrl ? (
+                  <img
+                    src={resolveMediaUrl(item.imageUrl)}
+                    alt={item.title}
+                    className="h-44 w-full object-cover object-center"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = item.subjectMeta?.iconImage || '/images/article-placeholder.svg';
+                      e.currentTarget.className = 'h-44 w-full object-contain object-center p-4';
+                    }}
+                  />
+                ) : (
+                  <div className="flex h-44 items-center justify-center p-4">
+                    <img
+                      src={item.subjectMeta?.iconImage || '/images/article-placeholder.svg'}
+                      alt={item.subjectMeta?.label || 'Matière'}
+                      className="h-full w-full object-contain object-center"
+                    />
+                  </div>
+                )}
+                <div className="absolute inset-x-0 bottom-0 flex justify-center p-2">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#0b203a]/80 px-2.5 py-1 text-[11px] font-semibold text-white">
+                    <img
+                      src={item.subjectMeta?.iconImage || '/images/tool-communaute-scolaire.png'}
+                      alt={item.subjectMeta?.label || 'Matière'}
+                      className="h-4 w-4 rounded-full object-cover"
+                    />
+                    {item.subjectMeta?.label || 'Général'}
+                  </span>
                 </div>
-              )}
+              </div>
               <div className="space-y-2 p-4">
                 {item.type === 'CATCHUP' ? (
                   <p className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
