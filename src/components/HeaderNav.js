@@ -517,7 +517,7 @@ export default function HeaderNav() {
     <>
       <div className="w-full">
         {!isAuthed ? (
-          <div className="hidden w-full items-center gap-3 text-sm md:flex">
+          <div className="public-top-nav hidden w-full items-center gap-3 text-sm md:flex">
           <div
             className="relative"
             ref={publicToolsRef}
@@ -526,7 +526,7 @@ export default function HeaderNav() {
           >
             <button
               type="button"
-              className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50"
+              className="public-top-link rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50"
               onClick={() => setIsDiscoverMegaOpen((v) => !v)}
               aria-label="Découvrir"
             >
@@ -590,7 +590,7 @@ export default function HeaderNav() {
 
           <form
             onSubmit={onDesktopSearch}
-            className="mx-2 flex min-w-[320px] flex-1 items-center rounded-full border border-brand-300 bg-white px-4 py-2 shadow-sm transition-all duration-200 focus-within:-translate-y-[1px] focus-within:border-brand-500 focus-within:shadow-lg focus-within:ring-2 focus-within:ring-brand-200"
+            className="public-neon-search mx-2 flex min-w-[320px] flex-1 items-center rounded-full border border-brand-300 bg-white px-4 py-2 shadow-sm transition-all duration-200 focus-within:-translate-y-[1px] focus-within:border-brand-500 focus-within:shadow-lg focus-within:ring-2 focus-within:ring-brand-200"
           >
             <span className="mr-2 text-brand-600">🔎</span>
             <input
@@ -601,13 +601,13 @@ export default function HeaderNav() {
             />
           </form>
 
-          <Link href="/search" className="rounded-lg border border-brand-200 p-2 hover:bg-brand-50" aria-label="Explorer">
+          <Link href="/search" className="public-icon-btn rounded-lg border border-brand-200 p-2 hover:bg-brand-50" aria-label="Explorer">
             🌐
           </Link>
-          <Link href="/login" className="rounded-lg border border-brand-500 px-4 py-2 font-semibold text-brand-700 hover:bg-brand-50">
+          <Link href="/login" className="public-auth-btn rounded-lg border border-brand-500 px-4 py-2 font-semibold text-brand-700 hover:bg-brand-50">
             Se connecter
           </Link>
-          <Link href="/register" className="rounded-lg bg-brand-700 px-4 py-2 font-semibold text-white hover:bg-brand-800">
+          <Link href="/register" className="public-auth-btn primary rounded-lg bg-brand-700 px-4 py-2 font-semibold text-white hover:bg-brand-800">
             S&apos;inscrire
           </Link>
           </div>
