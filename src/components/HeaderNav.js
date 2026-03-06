@@ -613,13 +613,6 @@ export default function HeaderNav() {
           </div>
         ) : (
           <div className="hidden w-full items-center gap-2 text-sm md:flex">
-          <Link href="/subjects" className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50">
-            Découvrir
-          </Link>
-          <Link href="/video-lessons" className="rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50">
-            Classe Numerique
-          </Link>
-
           <form
             onSubmit={onDesktopSearch}
             className="mx-2 flex min-w-[260px] flex-1 items-center rounded-full border border-brand-300 bg-white px-4 py-2 shadow-sm transition-all duration-200 focus-within:-translate-y-[1px] focus-within:border-brand-500 focus-within:shadow-lg focus-within:ring-2 focus-within:ring-brand-200"
