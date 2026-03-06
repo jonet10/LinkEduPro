@@ -517,7 +517,7 @@ export default function HeaderNav() {
     <>
       <div className="w-full">
         {!isAuthed ? (
-          <div className="public-top-nav hidden w-full items-center gap-3 text-sm md:flex">
+          <div className="public-top-nav navbar glass hidden w-full items-center gap-3 text-sm md:flex">
           <div
             className="relative"
             ref={publicToolsRef}
@@ -590,7 +590,7 @@ export default function HeaderNav() {
 
           <form
             onSubmit={onDesktopSearch}
-            className="public-neon-search mx-2 flex min-w-[320px] flex-1 items-center rounded-full border border-brand-300 bg-white px-4 py-2 shadow-sm transition-all duration-200 focus-within:-translate-y-[1px] focus-within:border-brand-500 focus-within:shadow-lg focus-within:ring-2 focus-within:ring-brand-200"
+            className="public-neon-search search-container mx-2 flex min-w-[320px] flex-1 items-center rounded-full border border-brand-300 bg-white px-4 py-2 shadow-sm transition-all duration-200 focus-within:-translate-y-[1px] focus-within:border-brand-500 focus-within:shadow-lg focus-within:ring-2 focus-within:ring-brand-200"
           >
             <span className="mr-2 text-brand-600">🔎</span>
             <input

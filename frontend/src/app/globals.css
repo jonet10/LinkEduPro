@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 :root {
+  --neon-blue: #00d4ff;
+  --dark-bg: #050a10;
+  --glass-bg: rgba(255, 255, 255, 0.08);
   --bg: #eef5ff;
   --text: #062f55;
   --card-bg: rgba(255, 255, 255, 0.95);
@@ -1056,6 +1059,79 @@ input[type="checkbox"] {
 .landing-hero-dot.is-active {
   background: #9ce7ff;
   box-shadow: 0 0 14px rgba(117, 221, 255, 0.75);
+}
+
+/* User requested cyber/glass set (scoped to avoid breaking other modules) */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 24px;
+  margin: 6px 4px;
+}
+
+.search-container input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px solid var(--neon-blue);
+  border-radius: 30px;
+  padding: 10px 20px;
+  color: white;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 30px;
+  padding: 30px;
+}
+
+.landing-shell .card {
+  padding: 32px;
+  min-height: 400px;
+}
+
+.btn-glow {
+  background: linear-gradient(135deg, #00d4ff, #0055ff);
+  border: none;
+  padding: 12px 25px;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-glow:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.hologram-effect {
+  width: 100%;
+  height: 80%;
+  background: linear-gradient(to bottom, transparent, rgba(0, 212, 255, 0.1));
+  border-bottom: 2px solid var(--neon-blue);
+  position: relative;
 }
 
 .public-hero-media {

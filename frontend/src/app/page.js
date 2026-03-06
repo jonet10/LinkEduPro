@@ -917,8 +917,8 @@ export default function HomePage() {
           </div>
         ) : null}
 
-        <section className="landing-hero card">
-          <div className="landing-hero-copy">
+        <section className="landing-hero content-grid card">
+          <div className="landing-hero-copy glass">
             <p className="landing-kicker">LinkEduPro</p>
             <h1 className="landing-title">LinkEduPro, c&apos;est une plateforme éducative qui relie élèves, professeurs et écoles.</h1>
             <ul className="mt-5 space-y-2 text-base text-brand-900">
@@ -927,12 +927,12 @@ export default function HomePage() {
               <li>Une communauté structurée pour préparer efficacement les examens en Haïti.</li>
             </ul>
             <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/support" className="btn-primary">Soutenir LinkEduPro</Link>
+              <Link href="/support" className="btn-primary btn-glow">Soutenir LinkEduPro</Link>
               <a href="/apk/linkedupro.apk" download className="btn-secondary">Télécharger l&apos;APK Android</a>
             </div>
           </div>
-          <div className="landing-hero-art" aria-hidden="true">
-            <div className="landing-hero-slide-shell">
+          <div className="landing-hero-art animate-float" aria-hidden="true">
+            <div className="landing-hero-slide-shell glass hologram-effect">
               <img
                 src={LANDING_HERO_SLIDES[landingHeroIndex].image}
                 alt={LANDING_HERO_SLIDES[landingHeroIndex].caption}
