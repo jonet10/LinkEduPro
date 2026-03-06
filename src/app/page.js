@@ -888,7 +888,7 @@ export default function HomePage() {
 
   if (!isAuthed) {
     return (
-      <section className="landing-shell space-y-8">
+      <section className="landing-shell landing-glass-clean space-y-8">
         {showCalendarNotice ? (
           <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
             <div className="w-full max-w-lg rounded-2xl border border-brand-100 bg-white p-6 shadow-2xl">
