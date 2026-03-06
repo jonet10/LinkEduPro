@@ -40,8 +40,6 @@ export default function RattrapagePage() {
   const [sessions, setSessions] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [teacherStats, setTeacherStats] = useState(null);
-  const [studentStats, setStudentStats] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('MONCASH');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
@@ -85,10 +83,9 @@ export default function RattrapagePage() {
     Promise.allSettled([
       apiClient('/catchup?page=1&pageSize=100', { token }),
       canManage ? apiClient('/catchup/teachers', { token }) : Promise.resolve({ teachers: [] }),
-      canManage ? apiClient('/catchup/dashboard/teacher', { token }) : Promise.resolve(null),
-      isStudent ? apiClient('/catchup/dashboard/student?page=1&pageSize=8', { token }) : Promise.resolve(null)
+      canManage ? apiClient('/catchup/dashboard/teacher', { token }) : Promise.resolve(null)
     ])
-      .then(([sessionsRes, teachersRes, teacherDashRes, studentDashRes]) => {
+      .then(([sessionsRes, teachersRes, teacherDashRes]) => {
         if (sessionsRes.status === 'fulfilled') {
           setSessions(sessionsRes.value.sessions || []);
         } else {
@@ -106,15 +103,9 @@ export default function RattrapagePage() {
         } else {
           setTeacherStats(null);
         }
-
-        if (studentDashRes.status === 'fulfilled') {
-          setStudentStats(studentDashRes.value);
-        } else {
-          setStudentStats(null);
-        }
       })
       .finally(() => setLoading(false));
-  }, [token, canView, router, canManage, isStudent]);
+  }, [token, canView, router, canManage]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -368,23 +359,37 @@ export default function RattrapagePage() {
     setError('');
     setInfo('');
     try {
-      if (paymentMethod === 'NATCASH' && typeof window !== 'undefined') {
-        const accepted = window.confirm(
-          `Mode simulation ${paymentMethod}: aucun débit réel ne sera fait. Continuer ?`
-        );
-        if (!accepted) return;
+      let selectedMethod = 'MONCASH';
+      if (typeof window !== 'undefined') {
+        const choice = String(
+          window.prompt(
+            'Choisis la méthode de paiement:\n1 = MonCash (actif)\n2 = NatCash (bientôt disponible)',
+            '1'
+          ) || ''
+        ).trim();
+
+        if (!choice) return;
+        if (choice === '2') {
+          setInfo('NatCash sera disponible prochainement. Utilise MonCash pour le moment.');
+          return;
+        }
+        if (choice !== '1') {
+          setError('Choix invalide. Tape 1 pour MonCash ou 2 pour NatCash.');
+          return;
+        }
+        selectedMethod = 'MONCASH';
       }
 
       const data = await apiClient(`/catchup/${sessionId}/pay`, {
         method: 'POST',
         token,
         body: JSON.stringify({
-          paymentMethod,
+          paymentMethod: selectedMethod,
           amount: Number(price || 0)
         })
       });
 
-      if (paymentMethod === 'MONCASH' && data.redirectUrl && typeof window !== 'undefined') {
+      if (selectedMethod === 'MONCASH' && data.redirectUrl && typeof window !== 'undefined') {
         window.location.assign(data.redirectUrl);
         return;
       }
@@ -680,40 +685,6 @@ export default function RattrapagePage() {
       {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {info ? <p className="text-sm text-green-600">{info}</p> : null}
-      {isStudent ? (
-        <div className="card flex flex-wrap items-center gap-2">
-          <p className="text-sm text-brand-700">Méthode de paiement :</p>
-          <select className="input w-full max-w-xs" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-            <option value="MONCASH">MonCash</option>
-            <option value="NATCASH">NatCash (simulation)</option>
-          </select>
-          {paymentMethod === 'MONCASH' ? (
-            <p className="w-full rounded border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-800">
-              En cliquant sur payer, tu seras redirigé vers MonCash pour finaliser la transaction.
-            </p>
-          ) : null}
-          {paymentMethod === 'NATCASH' ? (
-            <p className="w-full rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-              Mode test actif: {paymentMethod} est simulé pour le moment (pas d’API externe, pas de débit réel).
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-      {isStudent ? (
-        <div className="card">
-          <h2 className="text-lg font-semibold text-brand-900">Historique des sessions suivies</h2>
-          <div className="mt-2 space-y-2">
-            {(studentStats?.history || []).slice(0, 5).map((item) => (
-              <div key={item.enrollmentId} className="rounded border border-brand-200 px-3 py-2 text-sm text-brand-800">
-                {item.session?.title} | {item.session?.subject} | Paiement: {item.paymentStatus}
-              </div>
-            ))}
-            {(!studentStats?.history || studentStats.history.length === 0) ? (
-              <p className="text-sm text-brand-700">Aucune session suivie pour le moment.</p>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
 
       <div className="card">
         <h2 className="text-lg font-semibold text-brand-900">Sessions actives</h2>
