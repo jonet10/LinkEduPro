@@ -949,9 +949,13 @@ export default function HomePage() {
                 />
               ))}
             </div>
-            <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
-              <Link href="/support" className="btn-primary btn-glow">Soutenir LinkEduPro</Link>
-              <a href="/apk/linkedupro.apk" download className="btn-secondary">Télécharger l&apos;APK Android</a>
+            <div className="landing-slide-cta-row mt-2">
+              <Link href="/support" className="landing-slide-cta-btn">
+                Soutenir LinkEduPro
+              </Link>
+              <a href="/apk/linkedupro.apk" download className="landing-slide-cta-btn">
+                Télécharger l&apos;APK Android
+              </a>
             </div>
           </div>
         </section>
