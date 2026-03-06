@@ -937,6 +937,14 @@ export default function HomePage() {
               <div className="landing-hero-slide-overlay">
                 <p className="text-sm font-semibold text-white">{LANDING_HERO_SLIDES[landingHeroIndex].caption}</p>
               </div>
+              <div className="landing-slide-floating-cta landing-slide-cta-row">
+                <Link href="/support" className="landing-slide-cta-btn">
+                  Soutenir LinkEduPro
+                </Link>
+                <a href="/apk/linkedupro.apk" download className="landing-slide-cta-btn">
+                  Télécharger l&apos;APK Android
+                </a>
+              </div>
             </div>
             <div className="landing-hero-dots">
               {LANDING_HERO_SLIDES.map((slide, idx) => (
@@ -948,14 +956,6 @@ export default function HomePage() {
                   className={`landing-hero-dot ${idx === landingHeroIndex ? 'is-active' : ''}`}
                 />
               ))}
-            </div>
-            <div className="landing-slide-cta-row mt-2">
-              <Link href="/support" className="landing-slide-cta-btn">
-                Soutenir LinkEduPro
-              </Link>
-              <a href="/apk/linkedupro.apk" download className="landing-slide-cta-btn">
-                Télécharger l&apos;APK Android
-              </a>
             </div>
           </div>
         </section>
