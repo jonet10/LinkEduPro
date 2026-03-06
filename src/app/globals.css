@@ -1321,3 +1321,17 @@ body {
     0 14px 28px rgba(6, 20, 45, 0.45),
     0 0 0 1px rgba(255, 255, 255, 0.05) !important;
 }
+
+/* Remove the visible global container on public home (Udemy-like) */
+.landing-glass-clean {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.landing-glass-clean::before {
+  content: none !important;
+  display: none !important;
+}
