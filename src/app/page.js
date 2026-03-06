@@ -10,11 +10,12 @@ import SectionIcon from '@/components/ui/SectionIcon';
 
 const CALENDAR_NOTICE_KEY = 'linkedupro_calendar_notice_2025_2026_seen';
 const LANDING_SUBJECTS = [
-  { id: 'chimie', label: 'Chimie' },
-  { id: 'mathematiques', label: 'Mathématiques' },
-  { id: 'physique', label: 'Physique' },
-  { id: 'histoire_geo', label: 'Histoire et géographie' },
-  { id: 'philosophie', label: 'Philosophie' }
+  { id: 'chimie', label: 'Chimie', iconImage: '/images/subject-chimie.png' },
+  { id: 'mathematiques', label: 'Mathématiques', iconImage: '/images/subject-mathematiques.png' },
+  { id: 'physique', label: 'Physique', iconImage: '/images/subject-physique.png' },
+  { id: 'histoire_geo', label: 'Histoire et géographie', iconImage: '/images/subject-histoire-geo.png' },
+  { id: 'philosophie', label: 'Philosophie', iconImage: '/images/subject-philosophie.png' },
+  { id: 'francais', label: 'Français', iconImage: '/images/subject-francais.png' }
 ];
 const LANDING_BOOKS_BY_SUBJECT = {
   chimie: [
@@ -36,6 +37,10 @@ const LANDING_BOOKS_BY_SUBJECT = {
   philosophie: [
     { title: 'Philosophie - Concepts clés', meta: '14 fiches • 59 questions' },
     { title: 'Dissertations guidées', meta: '10 fiches • 42 questions' }
+  ],
+  francais: [
+    { title: 'Français NSIV - Compréhension et analyse', meta: '18 fiches • 96 questions' },
+    { title: 'Expression écrite et grammaire', meta: '13 fiches • 70 questions' }
   ]
 };
 const LANDING_STUDY_TOOLS = [
@@ -60,48 +65,10 @@ const LANDING_STUDY_TOOLS = [
     iconImage: '/images/tool-communaute-scolaire.png'
   }
 ];
-const LANDING_HERO_SLIDES = [
-  {
-    id: 'h-1',
-    image: '/slides/H.jpeg',
-    caption: 'Apprentissage guidé et personnalisé'
-  },
-  {
-    id: 'h-2',
-    image: '/slides/HC.jpg',
-    caption: 'Communauté active entre élèves et professeurs'
-  },
-  {
-    id: 'h-3',
-    image: '/slides/HTC.jpg',
-    caption: 'Outils modernes pour réussir les examens'
-  },
-  {
-    id: 'h-4',
-    image: '/slides/HL.jpg',
-    caption: 'Écoles et élèves engagés dans la réussite'
-  }
-];
-const HOME_HERO_MESSAGES = [
-  {
-    title: "Maîtrise les compétences utiles pour l'avenir",
-    text: 'Progresse avec des cours ciblés, des quiz guidés et un accompagnement adapté à ton niveau.',
-    ctaPrimary: 'Commencer',
-    ctaSecondary: 'Explorer les rubriques'
-  },
-  {
-    title: 'Passe de la révision à la performance',
-    text: 'Combine quiz, bibliothèque et classe numérique pour accélérer ta préparation aux examens.',
-    ctaPrimary: 'Voir mon plan',
-    ctaSecondary: 'Lancer un quiz'
-  },
-  {
-    title: 'Construis ta routine de réussite',
-    text: 'Organise tes séances, suis ta progression et garde une cadence constante toute la semaine.',
-    ctaPrimary: 'Mon progrès',
-    ctaSecondary: 'Voir les objectifs'
-  }
-];
+const LANDING_HERO_VISUAL = {
+  image: '/slides/HTC.jpg',
+  caption: 'Outils modernes pour réussir les examens'
+};
 const LEARNING_SHOWCASE_SECTIONS = [
   {
     id: 'quiz-pop',
@@ -186,10 +153,12 @@ function toShowcaseImage(title, fallback = '/slides/H.jpeg') {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
-  if (normalized.includes('physique')) return '/images/tool-rubriques-nsiv.png';
-  if (normalized.includes('math')) return '/slides/HC.jpg';
-  if (normalized.includes('chimie')) return '/slides/HTC.jpg';
-  if (normalized.includes('histoire') || normalized.includes('geo')) return '/slides/HL.jpg';
+  if (normalized.includes('physique')) return '/images/subject-physique.png';
+  if (normalized.includes('math')) return '/images/subject-mathematiques.png';
+  if (normalized.includes('chimie')) return '/images/subject-chimie.png';
+  if (normalized.includes('histoire') || normalized.includes('geo')) return '/images/subject-histoire-geo.png';
+  if (normalized.includes('philo')) return '/images/subject-philosophie.png';
+  if (normalized.includes('francais') || normalized.includes('français')) return '/images/subject-francais.png';
   if (normalized.includes('rattrapage') || normalized.includes('live')) return '/images/tool-rattrapage-live.png';
   if (normalized.includes('video')) return '/images/tool-communaute-scolaire.png';
   return fallback;
@@ -390,7 +359,6 @@ export default function HomePage() {
   const [welcomePopup, setWelcomePopup] = useState(null);
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
   const [activeLandingSubject, setActiveLandingSubject] = useState(LANDING_SUBJECTS[0].id);
-  const [landingHeroIndex, setLandingHeroIndex] = useState(0);
   const [learningShowcaseSections, setLearningShowcaseSections] = useState(LEARNING_SHOWCASE_SECTIONS);
 
   const myRanking = useMemo(() => {
@@ -412,38 +380,6 @@ export default function HomePage() {
     [student]
   );
 
-  const homeIntro = useMemo(() => {
-    if (isAdminRole) {
-      return {
-        title: 'Super Admin',
-        subtitle: 'Pilote la plateforme, supervise les Écoles, les contenus et les communications.',
-        primaryHref: '/admin/super-dashboard',
-        primaryLabel: 'Ouvrir le dashboard',
-        secondaryHref: '/messages',
-        secondaryLabel: 'Gérer les annonces'
-      };
-    }
-
-    if (isTeacherRole) {
-      return {
-        title: 'Espace Professeur',
-        subtitle: 'Crée des contenus, accompagne les élèves et organise les sessions de rattrapage.',
-        primaryHref: '/blog',
-        primaryLabel: 'Créer une publication',
-        secondaryHref: '/rattrapage',
-        secondaryLabel: 'Planifier rattrapage'
-      };
-    }
-
-    return {
-      title: student ? `${student.firstName} ${student.lastName}` : 'Espace élève',
-      subtitle: 'Compare tes performances avec d\'autres élèves et découvre les écoles les plus actives.',
-      primaryHref: '/subjects',
-      primaryLabel: 'Commencer un quiz',
-      secondaryHref: '/progress',
-      secondaryLabel: 'Voir mes progrès'
-    };
-  }, [isAdminRole, isTeacherRole, student]);
   const challengeLeaderHandle = useMemo(
     () => (Array.isArray(homeChallenge.items) && homeChallenge.items.length ? homeChallenge.items[0].handle : ''),
     [homeChallenge.items]
@@ -472,6 +408,10 @@ export default function HomePage() {
   }, [isAdminRole]);
   const activeLandingBooks = useMemo(
     () => LANDING_BOOKS_BY_SUBJECT[activeLandingSubject] || [],
+    [activeLandingSubject]
+  );
+  const activeLandingSubjectMeta = useMemo(
+    () => LANDING_SUBJECTS.find((subject) => subject.id === activeLandingSubject) || LANDING_SUBJECTS[0],
     [activeLandingSubject]
   );
 
@@ -563,13 +503,6 @@ export default function HomePage() {
       setWeekCountdown(getWeekCountdownLabel());
     }, 60000);
     setWeekCountdown(getWeekCountdownLabel());
-    return () => window.clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setLandingHeroIndex((prev) => (prev + 1) % LANDING_HERO_SLIDES.length);
-    }, 4500);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -930,12 +863,12 @@ export default function HomePage() {
           <div className="landing-hero-art animate-float">
             <div className="landing-hero-slide-shell glass hologram-effect">
               <img
-                src={LANDING_HERO_SLIDES[landingHeroIndex].image}
-                alt={LANDING_HERO_SLIDES[landingHeroIndex].caption}
+                src={LANDING_HERO_VISUAL.image}
+                alt={LANDING_HERO_VISUAL.caption}
                 className="landing-hero-slide-image"
               />
               <div className="landing-hero-slide-overlay">
-                <p className="text-sm font-semibold text-white">{LANDING_HERO_SLIDES[landingHeroIndex].caption}</p>
+                <p className="text-sm font-semibold text-white">{LANDING_HERO_VISUAL.caption}</p>
               </div>
               <div className="landing-slide-floating-cta landing-slide-cta-row">
                 <Link href="/support" className="landing-slide-cta-btn">
@@ -945,17 +878,6 @@ export default function HomePage() {
                   Télécharger l&apos;APK Android
                 </a>
               </div>
-            </div>
-            <div className="landing-hero-dots">
-              {LANDING_HERO_SLIDES.map((slide, idx) => (
-                <button
-                  key={slide.id}
-                  type="button"
-                  aria-label={`Aller au visuel ${idx + 1}`}
-                  onClick={() => setLandingHeroIndex(idx)}
-                  className={`landing-hero-dot ${idx === landingHeroIndex ? 'is-active' : ''}`}
-                />
-              ))}
             </div>
           </div>
         </section>
@@ -986,12 +908,13 @@ export default function HomePage() {
                 key={subject.id}
                 type="button"
                 onClick={() => setActiveLandingSubject(subject.id)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
                   activeLandingSubject === subject.id
                     ? 'bg-brand-500 text-white'
                     : 'border border-brand-100 bg-white text-brand-700'
                 }`}
               >
+                <img src={subject.iconImage} alt={subject.label} className="h-5 w-5 rounded-full object-cover" />
                 {subject.label}
               </button>
             ))}
@@ -999,6 +922,14 @@ export default function HomePage() {
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {activeLandingBooks.map((book) => (
               <article key={book.title} className="palette-card rounded-xl border border-brand-100 p-4">
+                <div className="mb-2 flex items-center gap-2">
+                  <img
+                    src={activeLandingSubjectMeta.iconImage}
+                    alt={activeLandingSubjectMeta.label}
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">{activeLandingSubjectMeta.label}</p>
+                </div>
                 <p className="text-lg font-bold text-brand-900">{book.title}</p>
                 <p className="mt-2 text-sm text-brand-700">{book.meta}</p>
                 <div className="mt-3">
@@ -1068,7 +999,7 @@ export default function HomePage() {
   }
 
   return (
-    <section className="home-gold-shell space-y-6">
+    <section className="home-gold-shell authed-transparent-scope space-y-6">
       {showCalendarNotice ? (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
           <div className="w-full max-w-lg rounded-2xl border border-brand-100 bg-white p-6 shadow-2xl">
@@ -1113,68 +1044,6 @@ export default function HomePage() {
           </div>
         </div>
       ) : null}
-
-      <section className="home-udemy-shell motion-enter">
-        <div className="home-udemy-greet">
-          <div className="home-udemy-avatar" aria-hidden="true">
-            {getUserInitials(student)}
-          </div>
-          <div>
-            <p className="text-sm text-brand-700">Nous sommes ravis de vous retrouver</p>
-            <h1 className="text-3xl font-black text-brand-900">{homeIntro.title}</h1>
-            <p className="mt-1 text-sm text-brand-700">
-              {homeIntro.subtitle}{' '}
-              <Link href="/profile?edit=1" className="font-semibold text-[#5e17eb] hover:underline">
-                Modifier mon profil et mes intérêts
-              </Link>
-            </p>
-          </div>
-        </div>
-
-        <div className="home-udemy-hero">
-          <button
-            type="button"
-            className="home-udemy-arrow hidden lg:flex"
-            onClick={() => setLandingHeroIndex((prev) => (prev === 0 ? LANDING_HERO_SLIDES.length - 1 : prev - 1))}
-            aria-label="Slide précédent"
-          >
-            ‹
-          </button>
-          <div className="home-udemy-hero-card">
-            <div className="home-udemy-hero-copy">
-              <h2 className="text-4xl font-black leading-tight text-white">
-                {HOME_HERO_MESSAGES[landingHeroIndex % HOME_HERO_MESSAGES.length].title}
-              </h2>
-              <p className="mt-3 text-base text-white/90">
-                {HOME_HERO_MESSAGES[landingHeroIndex % HOME_HERO_MESSAGES.length].text}
-              </p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Link href={homeIntro.primaryHref} className="home-udemy-btn-primary">
-                  {HOME_HERO_MESSAGES[landingHeroIndex % HOME_HERO_MESSAGES.length].ctaPrimary}
-                </Link>
-                <Link href={homeIntro.secondaryHref} className="home-udemy-btn-secondary">
-                  {HOME_HERO_MESSAGES[landingHeroIndex % HOME_HERO_MESSAGES.length].ctaSecondary}
-                </Link>
-              </div>
-            </div>
-            <div className="home-udemy-hero-media">
-              <img
-                src={LANDING_HERO_SLIDES[landingHeroIndex].image}
-                alt={LANDING_HERO_SLIDES[landingHeroIndex].caption}
-                className="home-udemy-hero-image"
-              />
-            </div>
-          </div>
-          <button
-            type="button"
-            className="home-udemy-arrow hidden lg:flex"
-            onClick={() => setLandingHeroIndex((prev) => (prev + 1) % LANDING_HERO_SLIDES.length)}
-            aria-label="Slide suivant"
-          >
-            ›
-          </button>
-        </div>
-      </section>
 
       {learningShowcaseSections.map((section) => (
         <LearningShowcaseSection key={`authed-${section.id}`} section={section} />
