@@ -15,6 +15,10 @@ export default function SupportPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
+  const isAdminViewer = useMemo(
+    () => ['ADMIN', 'SUPER_ADMIN'].includes(String(student?.role || '').toUpperCase()),
+    [student?.role]
+  );
 
   useEffect(() => {
     const me = getStudent();
@@ -90,61 +94,74 @@ export default function SupportPage() {
         </p>
       </section>
 
-      <section className="card">
-        <h2 className="text-lg font-semibold text-brand-900">Faire un don (MonCash)</h2>
-        <p className="mt-2 text-sm text-brand-700">
-          Donateur: <span className="font-semibold text-brand-900">{resolvedDonorLabel}</span>
-        </p>
-        {!student ? (
-          <p className="mt-1 text-xs text-brand-700">
-            Optionnel: <Link className="underline" href="/login">se connecter</Link> pour suivre l&apos;historique de tes dons.
+      {isAdminViewer ? (
+        <section className="card">
+          <h2 className="text-lg font-semibold text-brand-900">Espace administration des dons</h2>
+          <p className="mt-2 text-sm text-brand-700">
+            Pour les comptes admin/super admin, le don direct n&apos;est pas affiché ici.
+            Le suivi complet des dons est disponible dans le dashboard.
           </p>
-        ) : null}
-        <div className="mt-3 space-y-3">
+          <div className="mt-4">
+            <Link href="/admin/super-dashboard" className="btn-primary">Ouvrir le dashboard des dons</Link>
+          </div>
+        </section>
+      ) : (
+        <section className="card">
+          <h2 className="text-lg font-semibold text-brand-900">Faire un don (MonCash)</h2>
+          <p className="mt-2 text-sm text-brand-700">
+            Donateur: <span className="font-semibold text-brand-900">{resolvedDonorLabel}</span>
+          </p>
           {!student ? (
+            <p className="mt-1 text-xs text-brand-700">
+              Optionnel: <Link className="underline" href="/login">se connecter</Link> pour suivre l&apos;historique de tes dons.
+            </p>
+          ) : null}
+          <div className="mt-3 space-y-3">
+            {!student ? (
+              <input
+                className="input"
+                placeholder="Nom (optionnel)"
+                value={donorName}
+                onChange={(e) => setDonorName(e.target.value)}
+                maxLength={120}
+              />
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              {QUICK_AMOUNTS.map((value) => (
+                <button
+                  key={`amt-${value}`}
+                  type="button"
+                  className={selectedAmount === value && String(customAmount || '').trim() === '' ? 'btn-primary' : 'btn-secondary'}
+                  onClick={() => {
+                    setSelectedAmount(value);
+                    setCustomAmount('');
+                    setError('');
+                  }}
+                >
+                  {value} HTG
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-brand-700">Ou entre un montant personnalisé supérieur à 10 HTG.</p>
             <input
               className="input"
-              placeholder="Nom (optionnel)"
-              value={donorName}
-              onChange={(e) => setDonorName(e.target.value)}
-              maxLength={120}
+              type="number"
+              min="11"
+              placeholder="Montant personnalisé (HTG)"
+              value={customAmount}
+              onChange={(e) => {
+                setCustomAmount(e.target.value);
+                setError('');
+              }}
             />
-          ) : null}
-          <div className="flex flex-wrap gap-2">
-            {QUICK_AMOUNTS.map((value) => (
-              <button
-                key={`amt-${value}`}
-                type="button"
-                className={selectedAmount === value && String(customAmount || '').trim() === '' ? 'btn-primary' : 'btn-secondary'}
-                onClick={() => {
-                  setSelectedAmount(value);
-                  setCustomAmount('');
-                  setError('');
-                }}
-              >
-                {value} HTG
-              </button>
-            ))}
+            <button type="button" className="btn-primary" onClick={startDonation} disabled={busy}>
+              {busy ? 'Redirection...' : 'Payer avec MonCash'}
+            </button>
           </div>
-          <p className="text-xs text-brand-700">Ou entre un montant personnalisé supérieur à 10 HTG.</p>
-          <input
-            className="input"
-            type="number"
-            min="11"
-            placeholder="Montant personnalisé (HTG)"
-            value={customAmount}
-            onChange={(e) => {
-              setCustomAmount(e.target.value);
-              setError('');
-            }}
-          />
-          <button type="button" className="btn-primary" onClick={startDonation} disabled={busy}>
-            {busy ? 'Redirection...' : 'Payer avec MonCash'}
-          </button>
-        </div>
-        {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
-        {info ? <p className="mt-2 text-sm text-green-700">{info}</p> : null}
-      </section>
+          {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+          {info ? <p className="mt-2 text-sm text-green-700">{info}</p> : null}
+        </section>
+      )}
     </main>
   );
 }
