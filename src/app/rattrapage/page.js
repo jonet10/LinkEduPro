@@ -46,6 +46,7 @@ export default function RattrapagePage() {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [highlightedSessionId, setHighlightedSessionId] = useState(null);
+  const [paymentChoice, setPaymentChoice] = useState(null);
   const [form, setForm] = useState({
     title: '',
     level: 'NSIV',
@@ -355,41 +356,30 @@ export default function RattrapagePage() {
     }
   }
 
-  async function onPay(sessionId, price) {
+  function openPaymentChoice(sessionId, price) {
+    setPaymentChoice({ sessionId, price: Number(price || 0) });
+  }
+
+  async function onPayWithMethod(method, sessionId, price) {
     setError('');
     setInfo('');
     try {
-      let selectedMethod = 'MONCASH';
-      if (typeof window !== 'undefined') {
-        const choice = String(
-          window.prompt(
-            'Choisis la méthode de paiement:\n1 = MonCash (actif)\n2 = NatCash (bientôt disponible)',
-            '1'
-          ) || ''
-        ).trim();
-
-        if (!choice) return;
-        if (choice === '2') {
-          setInfo('NatCash sera disponible prochainement. Utilise MonCash pour le moment.');
-          return;
-        }
-        if (choice !== '1') {
-          setError('Choix invalide. Tape 1 pour MonCash ou 2 pour NatCash.');
-          return;
-        }
-        selectedMethod = 'MONCASH';
+      if (method === 'NATCASH') {
+        setInfo('NatCash sera disponible prochainement. Utilise MonCash pour le moment.');
+        setPaymentChoice(null);
+        return;
       }
 
       const data = await apiClient(`/catchup/${sessionId}/pay`, {
         method: 'POST',
         token,
         body: JSON.stringify({
-          paymentMethod: selectedMethod,
+          paymentMethod: method,
           amount: Number(price || 0)
         })
       });
 
-      if (selectedMethod === 'MONCASH' && data.redirectUrl && typeof window !== 'undefined') {
+      if (method === 'MONCASH' && data.redirectUrl && typeof window !== 'undefined') {
         window.location.assign(data.redirectUrl);
         return;
       }
@@ -398,6 +388,8 @@ export default function RattrapagePage() {
       await refreshSessions();
     } catch (e) {
       setError(e.message || 'Impossible de valider le paiement.');
+    } finally {
+      setPaymentChoice(null);
     }
   }
 
@@ -490,7 +482,7 @@ export default function RattrapagePage() {
               <button className="btn-secondary" onClick={() => onEnroll(session.id)}>Réserver ma place</button>
             ) : null}
             {session.enrollment && session.enrollment.paymentStatus !== 'PAID' && !session.isFree ? (
-              <button className="btn-primary" onClick={() => onPay(session.id, session.price)}>Payer ({formatHTG(session.price)})</button>
+              <button className="btn-primary" onClick={() => openPaymentChoice(session.id, session.price)}>Payer ({formatHTG(session.price)})</button>
             ) : null}
             {session.enrollment && session.isFree && !session.enrollment.accessGranted ? (
               <button className="btn-primary" onClick={() => onConfirmPresence(session.id)}>Confirmer ma présence</button>
@@ -701,6 +693,49 @@ export default function RattrapagePage() {
           <div className="mt-3 grid gap-4 md:grid-cols-2">
             {archivedSessions.map((session) => renderSessionCard(session))}
             {!loading && archivedSessions.length === 0 ? <p className="text-sm text-brand-700">Aucune session archivée.</p> : null}
+          </div>
+        </div>
+      ) : null}
+
+      {paymentChoice ? (
+        <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/45 p-4">
+          <div className="w-full max-w-xl rounded-2xl border border-brand-100 bg-white p-5 shadow-2xl">
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Paiement rattrapage</p>
+                <h3 className="mt-1 text-xl font-black text-brand-900">Choisis ta méthode de paiement</h3>
+                <p className="mt-1 text-sm text-brand-700">Montant: {formatHTG(paymentChoice.price)}</p>
+              </div>
+              <button
+                type="button"
+                className="rounded-md border border-brand-100 px-2 py-1 text-sm"
+                onClick={() => setPaymentChoice(null)}
+              >
+                Fermer
+              </button>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                className="rounded-xl border border-brand-200 p-3 text-left transition hover:border-brand-400 hover:bg-brand-50"
+                onClick={() => onPayWithMethod('MONCASH', paymentChoice.sessionId, paymentChoice.price)}
+              >
+                <img src="/images/moncash.jpg" alt="MonCash" className="h-16 w-full rounded-md object-contain bg-white" />
+                <p className="mt-2 text-sm font-semibold text-brand-900">Payer avec MonCash</p>
+                <p className="text-xs text-brand-700">Actif maintenant</p>
+              </button>
+
+              <button
+                type="button"
+                className="rounded-xl border border-brand-200 p-3 text-left transition hover:border-amber-400 hover:bg-amber-50"
+                onClick={() => onPayWithMethod('NATCASH', paymentChoice.sessionId, paymentChoice.price)}
+              >
+                <img src="/images/natcash.png" alt="NatCash" className="h-16 w-full rounded-md object-contain bg-white" />
+                <p className="mt-2 text-sm font-semibold text-brand-900">Payer avec NatCash</p>
+                <p className="text-xs text-amber-700">Option future (bientôt disponible)</p>
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
