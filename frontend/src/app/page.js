@@ -307,6 +307,8 @@ function getDailyObjective(student) {
 }
 
 function LearningShowcaseSection({ section }) {
+  const isSubjectIconImage = (src) => /^\/images\/subject-/.test(String(src || ''));
+
   return (
     <section className="card">
       <h2 className="text-3xl font-black text-brand-900">{section.title}</h2>
@@ -317,7 +319,13 @@ function LearningShowcaseSection({ section }) {
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {section.items.map((item) => (
           <article key={`${section.id}-${item.title}`} className="overflow-hidden rounded-xl border border-brand-100 bg-white shadow-sm">
-            <img src={item.image} alt={item.title} className="h-36 w-full object-cover" />
+            <div className={`h-36 w-full ${isSubjectIconImage(item.image) ? 'flex items-center justify-center bg-brand-50 p-3' : 'overflow-hidden'}`}>
+              <img
+                src={item.image}
+                alt={item.title}
+                className={isSubjectIconImage(item.image) ? 'h-full w-full object-contain object-center' : 'h-36 w-full object-cover object-center'}
+              />
+            </div>
             <div className="p-3">
               <p className="line-clamp-2 text-base font-semibold text-brand-900">{item.title}</p>
               <p className="mt-1 text-xs text-brand-700">{item.author}</p>
