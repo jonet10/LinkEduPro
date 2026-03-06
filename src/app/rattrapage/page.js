@@ -502,7 +502,7 @@ export default function RattrapagePage() {
 
   if (isPublicView) {
     return (
-      <section className="space-y-5 rattrapage-shell">
+      <section className="public-transparent-scope space-y-5 rattrapage-shell">
         <div className="card public-card grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-center">
           <div>
             <h1 className="text-3xl font-bold text-brand-900">Live / rattrapage</h1>

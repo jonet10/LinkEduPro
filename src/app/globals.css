@@ -1335,3 +1335,34 @@ body {
   content: none !important;
   display: none !important;
 }
+
+/* Transparent style for all public-content containers */
+.public-transparent-scope .card,
+.public-transparent-scope .public-card,
+.public-transparent-scope article,
+.public-transparent-scope section {
+  border: none !important;
+  outline: none !important;
+  box-shadow:
+    inset 0 1px 0 rgba(232, 246, 255, 0.12),
+    0 12px 28px rgba(2, 13, 30, 0.42) !important;
+  background:
+    linear-gradient(165deg, rgba(20, 47, 79, 0.46), rgba(11, 28, 52, 0.5)) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.public-transparent-scope [class*="border-"],
+.public-transparent-scope .border,
+.public-transparent-scope .border-brand-100,
+.public-transparent-scope .border-brand-200 {
+  border-color: transparent !important;
+}
+
+.public-transparent-scope .public-hero-media {
+  border: none !important;
+  box-shadow:
+    inset 0 1px 0 rgba(239, 250, 255, 0.14),
+    0 16px 30px rgba(2, 12, 26, 0.5) !important;
+  background: rgba(8, 24, 45, 0.35) !important;
+}
