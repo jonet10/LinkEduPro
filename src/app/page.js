@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getToken, getStudent, isNsivStudent, normalizeAcademicLevel } from '@/lib/auth';
 import { resolveMediaUrl } from '@/lib/media';
@@ -312,6 +312,37 @@ function getDailyObjective(student) {
 
 function LearningShowcaseSection({ section }) {
   const isSubjectIconImage = (src) => /^\/images\/subject-/.test(String(src || ''));
+  const trackRef = useRef(null);
+  const [canSlide, setCanSlide] = useState(false);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+
+  useEffect(() => {
+    const node = trackRef.current;
+    if (!node) return undefined;
+
+    function updateSlideState() {
+      const maxLeft = Math.max(0, node.scrollWidth - node.clientWidth);
+      setCanSlide(maxLeft > 4);
+      setAtStart(node.scrollLeft <= 4);
+      setAtEnd(node.scrollLeft >= maxLeft - 4);
+    }
+
+    updateSlideState();
+    node.addEventListener('scroll', updateSlideState, { passive: true });
+    window.addEventListener('resize', updateSlideState);
+    return () => {
+      node.removeEventListener('scroll', updateSlideState);
+      window.removeEventListener('resize', updateSlideState);
+    };
+  }, [section.items.length]);
+
+  function slide(direction = 1) {
+    const node = trackRef.current;
+    if (!node) return;
+    const amount = Math.max(260, Math.floor(node.clientWidth * 0.85));
+    node.scrollBy({ left: direction * amount, behavior: 'smooth' });
+  }
 
   return (
     <section className="card">
@@ -320,9 +351,22 @@ function LearningShowcaseSection({ section }) {
       {Array.isArray(section.items) && section.items.length === 0 ? (
         <p className="mt-4 text-sm text-brand-700">Aucun contenu disponible pour ton niveau pour le moment.</p>
       ) : null}
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="mt-4 flex items-center gap-2">
+        <button
+          type="button"
+          aria-label={`Précédent ${section.title}`}
+          className="btn-secondary !h-10 !w-10 !rounded-full !px-0 !py-0 disabled:opacity-40"
+          onClick={() => slide(-1)}
+          disabled={!canSlide || atStart}
+        >
+          ‹
+        </button>
+        <div
+          ref={trackRef}
+          className="showcase-track flex flex-1 snap-x snap-mandatory gap-4 overflow-x-auto pb-1"
+        >
         {section.items.map((item) => (
-          <article key={`${section.id}-${item.title}`} className="overflow-hidden rounded-xl border border-brand-100 bg-white shadow-sm">
+          <article key={`${section.id}-${item.title}`} className="w-[260px] shrink-0 snap-start overflow-hidden rounded-xl border border-brand-100 bg-white shadow-sm">
             <div className={`h-36 w-full ${isSubjectIconImage(item.image) ? 'flex items-center justify-center bg-brand-50 p-3' : 'overflow-hidden'}`}>
               <img
                 src={item.image}
@@ -343,6 +387,16 @@ function LearningShowcaseSection({ section }) {
             </div>
           </article>
         ))}
+        </div>
+        <button
+          type="button"
+          aria-label={`Suivant ${section.title}`}
+          className="btn-secondary !h-10 !w-10 !rounded-full !px-0 !py-0 disabled:opacity-40"
+          onClick={() => slide(1)}
+          disabled={!canSlide || atEnd}
+        >
+          ›
+        </button>
       </div>
     </section>
   );
