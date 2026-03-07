@@ -7,11 +7,11 @@ import { apiClient } from '@/lib/api';
 
 const CLASS_OPTIONS = [
   { value: '9e', label: '9e AF' },
-  { value: 'NS1', label: 'NS I' },
-  { value: 'NS2', label: 'NS II' },
-  { value: 'NS3', label: 'NS III' },
-  { value: 'Terminale', label: 'Terminale (NS IV)' },
-  { value: 'Universite', label: 'Universite' }
+  { value: 'NS1', label: 'NSI' },
+  { value: 'NS2', label: 'NSII' },
+  { value: 'NS3', label: 'NSIII' },
+  { value: 'Terminale', label: 'NSIV' },
+  { value: 'Universite', label: 'Universitaire' }
 ];
 
 const CONTENT_KIND_OPTIONS = [
@@ -364,7 +364,7 @@ export default function VideoLessonsPage() {
             </label>
 
             <label className="space-y-1">
-              <span className="text-sm font-medium text-brand-900">Classe concernée</span>
+              <span className="text-sm font-medium text-brand-900">Niveau académique concerné</span>
               <select className="input w-full" value={form.level} onChange={(e) => onChangeField('level', e.target.value)}>
                 {CLASS_OPTIONS.map((level) => (
                   <option key={level.value} value={level.value}>{level.label}</option>
