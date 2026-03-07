@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
@@ -98,6 +98,7 @@ export default function LibraryPage() {
   const [preorderedBooks, setPreorderedBooks] = useState([]);
   const [pdfViewer, setPdfViewer] = useState(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const pdfViewerRef = useRef(null);
 
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -413,10 +414,33 @@ export default function LibraryPage() {
 
   function openPdfViewer(book) {
     if (!book?.fileUrl) return;
+    const url = getStorageUrl(book.fileUrl);
+    const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
+
+    if (isMobileViewport && typeof window !== 'undefined') {
+      window.location.assign(url);
+      return;
+    }
+
     setPdfViewer({
       title: book.title || 'Lecture PDF',
-      url: getStorageUrl(book.fileUrl)
+      url
     });
+  }
+
+  async function togglePdfFullscreen() {
+    const container = pdfViewerRef.current;
+    if (!container || typeof document === 'undefined') return;
+
+    try {
+      if (!document.fullscreenElement) {
+        await container.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (_) {
+      // Ignore fullscreen API errors on unsupported browsers.
+    }
   }
 
   return (
@@ -623,15 +647,19 @@ export default function LibraryPage() {
 
       {pdfViewer ? (
         <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/70 p-3">
-          <div className="flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-brand-100 bg-white">
+          <div ref={pdfViewerRef} className="flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-brand-100 bg-white">
             <div className="flex items-center justify-between gap-3 border-b border-brand-100 px-4 py-3">
               <h3 className="line-clamp-1 text-base font-semibold text-brand-900">{pdfViewer.title}</h3>
-              <button type="button" className="btn-secondary" onClick={() => setPdfViewer(null)}>Fermer</button>
+              <div className="flex items-center gap-2">
+                <button type="button" className="btn-secondary" onClick={togglePdfFullscreen}>Plein écran</button>
+                <button type="button" className="btn-secondary" onClick={() => setPdfViewer(null)}>Fermer</button>
+              </div>
             </div>
             <iframe
               src={pdfViewer.url}
               title={pdfViewer.title}
               className="h-full w-full"
+              allowFullScreen
             />
           </div>
         </div>
