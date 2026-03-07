@@ -133,7 +133,7 @@ export default function HeaderNav() {
       { href: '/', label: 'Accueil' },
       { href: '/video-lessons', label: 'Classe Numerique' },
       { href: '/rattrapage', label: 'Rattrapage' },
-      { href: '/subjects', label: 'Rubriques' },
+      { href: '/subjects', label: 'Quiz' },
       { href: '/probable-exercises', label: 'Examens passés' },
       { href: '/library', label: 'Bibliothèque' },
       { href: '/educollect', label: 'EduCollect' },
@@ -452,7 +452,7 @@ export default function HeaderNav() {
       { href: '/', label: 'Accueil', icon: '🏠' },
       { href: '/video-lessons', label: 'Classe Numerique', icon: '🎬' },
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
-      { href: '/subjects', label: 'Rubriques', icon: '📘' },
+      { href: '/subjects', label: 'Quiz', icon: '📘' },
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : []),
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
@@ -467,7 +467,7 @@ export default function HeaderNav() {
     () => [
       { href: '/video-lessons', label: 'Classe Numerique', icon: '🎬' },
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
-      { href: '/subjects', label: 'Rubriques', icon: '📘' },
+      { href: '/subjects', label: 'Quiz', icon: '📘' },
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : []),
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : [])
     ],
