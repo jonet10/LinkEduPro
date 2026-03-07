@@ -364,6 +364,12 @@ export default function HomePage() {
     () => (homeChallenge.items || []).find((item) => item.handle === selectedChallengeHandle) || null,
     [homeChallenge.items, selectedChallengeHandle]
   );
+  const quizProgressPercent = useMemo(() => {
+    const value = Number(myRanking?.average || 0);
+    if (!Number.isFinite(value) || value <= 0) return 20;
+    return Math.max(5, Math.min(95, Math.round(value)));
+  }, [myRanking?.average]);
+  const courseProgressPercent = 100 - quizProgressPercent;
 
   const managerQuickActions = useMemo(() => {
     if (isAdminRole) {
@@ -956,11 +962,35 @@ export default function HomePage() {
 
       {isStudentRole ? (
         <div className="card motion-enter motion-delay-1 lift-card home-gold-soft border border-brand-200 bg-gradient-to-r from-brand-50 to-white">
-          <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Coaching intelligent</p>
-          <h2 className="home-gold-title mt-1 text-xl font-bold text-brand-900">{dailyObjective.title}</h2>
-          <p className="mt-2 text-sm text-brand-700">{dailyObjective.description}</p>
-          <div className="mt-4">
-            <Link href={dailyObjective.ctaHref} className="btn-primary cta-pulse home-gold-cta">{dailyObjective.ctaLabel}</Link>
+          <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Coaching intelligent</p>
+              <h2 className="home-gold-title mt-1 text-xl font-bold text-brand-900">{dailyObjective.title}</h2>
+              <p className="mt-2 text-sm text-brand-700">{dailyObjective.description}</p>
+              <div className="mt-4">
+                <Link href={dailyObjective.ctaHref} className="btn-primary cta-pulse home-gold-cta">{dailyObjective.ctaLabel}</Link>
+              </div>
+            </div>
+            <div className="rounded-xl border border-brand-100 bg-white/65 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-700">Progression du jour</p>
+              <div className="mt-2 flex items-center gap-3">
+                <div
+                  className="h-20 w-20 rounded-full"
+                  style={{
+                    background: `conic-gradient(#5f6cff 0 ${quizProgressPercent}%, rgba(95,108,255,0.18) ${quizProgressPercent}% 100%)`
+                  }}
+                  aria-label={`Quiz ${quizProgressPercent}% et cours ${courseProgressPercent}%`}
+                >
+                  <div className="m-[7px] flex h-[66px] w-[66px] items-center justify-center rounded-full bg-white/90 text-[11px] font-bold text-brand-900">
+                    {quizProgressPercent}%
+                  </div>
+                </div>
+                <div className="text-xs">
+                  <p className="font-semibold text-brand-900">Quiz: {quizProgressPercent}%</p>
+                  <p className="mt-1 text-brand-700">Cours: {courseProgressPercent}%</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       ) : null}
@@ -1007,8 +1037,8 @@ export default function HomePage() {
       {error ? <p className="text-red-600">{error}</p> : null}
 
       {isStudentRole ? (
-        <div className="grid gap-4 lg:grid-cols-3 motion-enter motion-delay-3">
-          <article className="card lg:col-span-2 lift-card">
+        <div className="motion-enter motion-delay-3">
+          <article className="card lift-card">
             <h2 className="mb-3 text-xl font-semibold text-brand-900">Plan rapide du jour</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-1">
@@ -1047,22 +1077,6 @@ export default function HomePage() {
                 </p>
                 <p className="mt-1 text-sm text-brand-700">PDF, ressources et fiches utiles.</p>
               </Link>
-            </div>
-          </article>
-
-          <article className="card lift-card">
-            <h2 className="mb-3 text-xl font-semibold text-brand-900">Mon niveau actuel</h2>
-            {myRanking ? (
-              <div className="space-y-2 text-sm text-brand-800">
-                <p>Classement: <strong>#{myRanking.position}</strong></p>
-                <p>Moyenne: <strong>{myRanking.average}%</strong></p>
-                <p>Meilleur score: <strong>{myRanking.best}%</strong></p>
-              </div>
-            ) : (
-              <p className="text-sm text-brand-700">Fais un quiz pour débloquer tes stats.</p>
-            )}
-            <div className="mt-4">
-              <Link href="/subjects" className="btn-primary">Lancer un entraînement</Link>
             </div>
           </article>
         </div>

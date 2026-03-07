@@ -77,10 +77,6 @@ export default function NsivPage() {
           <h2 className="text-xl font-semibold text-brand-900">Connaissance générale</h2>
           <p className="mt-2 text-sm text-brand-700">Culture générale utile pour la filière ordinaire et toutes les séries.</p>
         </Link>
-        <Link href="/progress" className="card hover:bg-brand-50">
-          <h2 className="text-xl font-semibold text-brand-900">Mon progrès</h2>
-          <p className="mt-2 text-sm text-brand-700">Suivi des performances et points à renforcer.</p>
-        </Link>
       </section>
 
       <section className="card">
