@@ -514,7 +514,7 @@ export default function HeaderNav() {
     <>
       <div className="w-full">
         {!isAuthed ? (
-          <div className="public-top-nav navbar glass hidden w-full items-center gap-3 text-sm md:flex">
+          <div className="public-top-nav glass hidden w-full items-center gap-3 text-sm md:flex">
           <div
             className="relative"
             ref={publicToolsRef}
