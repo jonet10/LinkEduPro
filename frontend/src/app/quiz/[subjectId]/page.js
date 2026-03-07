@@ -440,7 +440,7 @@ export default function QuizPage() {
   return (
     <section>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-brand-900">
+        <h1 className="text-2xl font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
           Quiz {subject ? `- ${subject.name}` : ''} {selectedSet ? `(${selectedSet.name})` : ''}
         </h1>
 
@@ -462,7 +462,7 @@ export default function QuizPage() {
         </div>
 
         {questions.length > 0 ? (
-          <p className="rounded-lg bg-accent/20 px-3 py-2 text-sm font-semibold text-brand-900">Temps restant : {timeLeft}s</p>
+          <p className="rounded-lg bg-white/15 px-3 py-2 text-sm font-semibold text-white">Temps restant : {timeLeft}s</p>
         ) : null}
       </div>
 
