@@ -89,11 +89,11 @@ const LEARNING_SHOWCASE_SECTIONS = [
     title: 'Rattrapages en vedette',
     subtitle: 'Sessions live les plus consultées',
     items: [
-      { title: 'Rattrapage Physique (mécanique)', author: 'Professeurs vérifiés', rating: '4,8', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/images/tool-rattrapage-live.png' },
-      { title: 'Rattrapage Maths (algèbre)', author: 'Professeurs vérifiés', rating: '4,7', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/slides/H.jpeg' },
-      { title: 'Rattrapage Chimie (stoéchiométrie)', author: 'Professeurs vérifiés', rating: '4,6', price: 'À partir de 120 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/slides/HC.jpg' },
-      { title: 'Rattrapage Philosophie', author: 'Professeurs vérifiés', rating: '4,6', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/slides/HTC.jpg' },
-      { title: 'Rattrapage Histoire-Géo', author: 'Professeurs vérifiés', rating: '4,5', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/slides/HL.jpg' }
+      { title: 'Rattrapage Physique (mécanique)', author: 'Professeurs vérifiés', rating: '4,8', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/images/subject-physique.png' },
+      { title: 'Rattrapage Maths (algèbre)', author: 'Professeurs vérifiés', rating: '4,7', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/images/subject-mathematiques.png' },
+      { title: 'Rattrapage Chimie (stoéchiométrie)', author: 'Professeurs vérifiés', rating: '4,6', price: 'À partir de 120 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/images/subject-chimie.png' },
+      { title: 'Rattrapage Philosophie', author: 'Professeurs vérifiés', rating: '4,6', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/images/subject-philosophie.png' },
+      { title: 'Rattrapage Histoire-Géo', author: 'Professeurs vérifiés', rating: '4,5', price: 'À partir de 100 HTG', oldPrice: '', badge: 'Live', href: '/rattrapage', image: '/images/subject-histoire-geo.png' }
     ]
   },
   {
@@ -101,11 +101,11 @@ const LEARNING_SHOWCASE_SECTIONS = [
     title: 'Vidéos classe numérique',
     subtitle: 'Leçons vidéo recommandées',
     items: [
-      { title: 'Physique: mouvement rectiligne', author: 'Classe numérique', rating: '4,8', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/images/tool-rubriques-nsiv.png' },
-      { title: 'Maths: fonctions et dérivées', author: 'Classe numérique', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/images/tool-communaute-scolaire.png' },
-      { title: 'Chimie: réactions et bilans', author: 'Classe numérique', rating: '4,6', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/slides/H.jpeg' },
-      { title: 'Philo: méthode dissertation', author: 'Classe numérique', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/slides/HC.jpg' },
-      { title: 'Hist-Géo: cartes et repères', author: 'Classe numérique', rating: '4,5', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/slides/HL.jpg' }
+      { title: 'Physique: mouvement rectiligne', author: 'Classe numérique', rating: '4,8', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/images/subject-physique.png' },
+      { title: 'Maths: fonctions et dérivées', author: 'Classe numérique', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/images/subject-mathematiques.png' },
+      { title: 'Chimie: réactions et bilans', author: 'Classe numérique', rating: '4,6', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/images/subject-chimie.png' },
+      { title: 'Philo: méthode dissertation', author: 'Classe numérique', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/images/subject-philosophie.png' },
+      { title: 'Hist-Géo: cartes et repères', author: 'Classe numérique', rating: '4,5', price: 'Gratuit', oldPrice: '', badge: 'Vidéo', href: '/video-lessons', image: '/images/subject-histoire-geo.png' }
     ]
   }
 ];
