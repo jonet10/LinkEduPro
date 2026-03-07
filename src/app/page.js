@@ -65,10 +65,12 @@ const LANDING_STUDY_TOOLS = [
     iconImage: '/images/tool-communaute-scolaire.png'
   }
 ];
-const LANDING_HERO_VISUAL = {
-  image: '/slides/HTC.jpg',
-  caption: 'Outils modernes pour réussir les examens'
-};
+const LANDING_HERO_SLIDES = [
+  { image: '/slides/HTC.jpg', caption: 'Outils modernes pour réussir les examens' },
+  { image: '/slides/H.jpeg', caption: 'Révisions guidées avec des ressources ciblées' },
+  { image: '/slides/HC.jpg', caption: 'Exercices et accompagnement pour chaque matière' },
+  { image: '/slides/HL.jpg', caption: 'Progression continue vers les examens officiels' }
+];
 const LEARNING_SHOWCASE_SECTIONS = [
   {
     id: 'quiz-pop',
@@ -340,6 +342,7 @@ export default function HomePage() {
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
   const [activeLandingSubject, setActiveLandingSubject] = useState(LANDING_SUBJECTS[0].id);
   const [learningShowcaseSections, setLearningShowcaseSections] = useState(LEARNING_SHOWCASE_SECTIONS);
+  const [activeHeroSlide, setActiveHeroSlide] = useState(0);
 
   const myRanking = useMemo(() => {
     if (!student?.id) return null;
@@ -395,6 +398,15 @@ export default function HomePage() {
     () => LANDING_SUBJECTS.find((subject) => subject.id === activeLandingSubject) || LANDING_SUBJECTS[0],
     [activeLandingSubject]
   );
+  const currentHeroSlide = LANDING_HERO_SLIDES[activeHeroSlide] || LANDING_HERO_SLIDES[0];
+
+  useEffect(() => {
+    if (isAuthed || LANDING_HERO_SLIDES.length <= 1) return undefined;
+    const timer = window.setInterval(() => {
+      setActiveHeroSlide((prev) => (prev + 1) % LANDING_HERO_SLIDES.length);
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, [isAuthed]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -701,13 +713,26 @@ export default function HomePage() {
           <div className="landing-hero-art animate-float">
             <div className="landing-hero-slide-shell glass hologram-effect">
               <img
-                src={LANDING_HERO_VISUAL.image}
-                alt={LANDING_HERO_VISUAL.caption}
+                src={currentHeroSlide.image}
+                alt={currentHeroSlide.caption}
                 className="landing-hero-slide-image"
               />
               <div className="landing-hero-slide-overlay">
-                <p className="text-sm font-semibold text-white">{LANDING_HERO_VISUAL.caption}</p>
+                <p className="text-sm font-semibold text-white">{currentHeroSlide.caption}</p>
               </div>
+            </div>
+            <div className="landing-hero-dots" role="tablist" aria-label="Slides de présentation">
+              {LANDING_HERO_SLIDES.map((slide, idx) => (
+                <button
+                  key={slide.image}
+                  type="button"
+                  className={`landing-hero-dot ${idx === activeHeroSlide ? 'is-active' : ''}`}
+                  onClick={() => setActiveHeroSlide(idx)}
+                  aria-label={`Aller au slide ${idx + 1}`}
+                  aria-selected={idx === activeHeroSlide}
+                  role="tab"
+                />
+              ))}
             </div>
             <div className="landing-hero-actions">
               <Link href="/support" className="landing-hero-action-btn">
