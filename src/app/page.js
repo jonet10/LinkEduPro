@@ -1098,7 +1098,6 @@ export default function HomePage() {
               className={`block rounded border px-3 py-2 lift-card ${n.isRead ? 'border-brand-100' : 'border-brand-500 bg-brand-50'}`}
             >
               <p className="font-semibold text-brand-900">{n.title}</p>
-              <p className="text-brand-700">{n.message}</p>
               <p className="text-xs text-brand-700">{new Date(n.createdAt).toLocaleString()}</p>
             </Link>
           ))}
