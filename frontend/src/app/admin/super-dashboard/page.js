@@ -40,6 +40,13 @@ export default function SuperDashboardPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [userActionLoadingId, setUserActionLoadingId] = useState(null);
+  const [userFilters, setUserFilters] = useState({
+    q: '',
+    role: ''
+  });
   const [studentFilters, setStudentFilters] = useState({
     school: '',
     department: '',
@@ -101,6 +108,7 @@ export default function SuperDashboardPage() {
         setChallengeTheme(c.config.homeChallengeTheme || 'TIKTOKERS');
       }
       await loadStudents(token, studentFilters);
+      await loadUsers(token, userFilters);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -176,6 +184,56 @@ export default function SuperDashboardPage() {
       departments: data.filters?.departments || [],
       communes: data.filters?.communes || []
     });
+  }
+
+  async function loadUsers(token, filters) {
+    const params = new URLSearchParams();
+    if (filters.q) params.set('q', filters.q);
+    if (filters.role) params.set('role', filters.role);
+    const query = params.toString();
+    setUsersLoading(true);
+    try {
+      const data = await apiClient(`/community/admin/users-registry${query ? `?${query}` : ''}`, { token });
+      setUsers(Array.isArray(data.users) ? data.users : []);
+    } finally {
+      setUsersLoading(false);
+    }
+  }
+
+  async function moderateUser(userId, action) {
+    const token = getToken();
+    if (!token) return;
+    setUserActionLoadingId(userId);
+    try {
+      await apiClient(`/community/admin/users-registry/${userId}/moderate`, {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify({ action })
+      });
+      await loadUsers(token, userFilters);
+    } catch (e) {
+      setError(e.message || 'Erreur action utilisateur.');
+    } finally {
+      setUserActionLoadingId(null);
+    }
+  }
+
+  async function deleteUser(userId) {
+    const token = getToken();
+    if (!token) return;
+    if (typeof window !== 'undefined' && !window.confirm('Supprimer cet utilisateur définitivement ?')) return;
+    setUserActionLoadingId(userId);
+    try {
+      await apiClient(`/community/admin/users-registry/${userId}`, {
+        method: 'DELETE',
+        token
+      });
+      await loadUsers(token, userFilters);
+    } catch (e) {
+      setError(e.message || 'Erreur suppression utilisateur.');
+    } finally {
+      setUserActionLoadingId(null);
+    }
   }
 
   async function createInvite() {
@@ -527,6 +585,127 @@ export default function SuperDashboardPage() {
             </table>
           </div>
         )}
+      </section>
+
+      <section className="card space-y-3">
+        <h2 className="text-xl font-semibold">Gestion utilisateurs (toutes catégories)</h2>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+          <input
+            className="input"
+            placeholder="Recherche nom/email/École"
+            value={userFilters.q}
+            onChange={(e) => setUserFilters((prev) => ({ ...prev, q: e.target.value }))}
+          />
+          <select
+            className="input"
+            value={userFilters.role}
+            onChange={(e) => setUserFilters((prev) => ({ ...prev, role: e.target.value }))}
+          >
+            <option value="">Tous rôles</option>
+            <option value="STUDENT">Élève</option>
+            <option value="TEACHER">Professeur</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={async () => {
+                try {
+                  const token = getToken();
+                  if (!token) return;
+                  setError('');
+                  await loadUsers(token, userFilters);
+                } catch (e) {
+                  setError(e.message || 'Erreur chargement utilisateurs.');
+                }
+              }}
+            >
+              Filtrer
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={async () => {
+                const reset = { q: '', role: '' };
+                setUserFilters(reset);
+                try {
+                  const token = getToken();
+                  if (!token) return;
+                  setError('');
+                  await loadUsers(token, reset);
+                } catch (e) {
+                  setError(e.message || 'Erreur chargement utilisateurs.');
+                }
+              }}
+            >
+              Réinitialiser
+            </button>
+          </div>
+        </div>
+
+        {usersLoading ? <p className="text-sm text-brand-700">Chargement utilisateurs...</p> : null}
+        {!usersLoading && users.length === 0 ? <p className="text-sm text-brand-700">Aucun utilisateur trouvé.</p> : null}
+        {!usersLoading && users.length > 0 ? (
+          <div className="overflow-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left">
+                  <th>Nom</th>
+                  <th>Email</th>
+                  <th>Rôle</th>
+                  <th>École</th>
+                  <th>Niveau</th>
+                  <th>État</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.id}>
+                    <td>{user.lastName} {user.firstName}</td>
+                    <td>{user.email || '-'}</td>
+                    <td>{user.role}</td>
+                    <td>{user.school || '-'}</td>
+                    <td>{user.gradeLevel || '-'}</td>
+                    <td>{user.isSuspended ? 'Suspendu' : 'Actif'}</td>
+                    <td>
+                      <div className="flex flex-wrap gap-2">
+                        {user.isSuspended ? (
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            disabled={userActionLoadingId === user.id}
+                            onClick={() => moderateUser(user.id, 'REACTIVATE')}
+                          >
+                            Réactiver
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            disabled={userActionLoadingId === user.id}
+                            onClick={() => moderateUser(user.id, 'SUSPEND')}
+                          >
+                            Suspendre
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                          disabled={userActionLoadingId === user.id}
+                          onClick={() => deleteUser(user.id)}
+                        >
+                          Supprimer
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
       </section>
 
       <section className="card space-y-3">

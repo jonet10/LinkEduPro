@@ -400,4 +400,134 @@ async function listPlatformStudents(req, res, next) {
   }
 }
 
-module.exports = { getConfig, updateConfig, getSuperDashboard, listPlatformStudents };
+async function listPlatformUsers(req, res, next) {
+  try {
+    const q = String(req.query.q || '').trim();
+    const roleFilter = String(req.query.role || '').trim().toUpperCase();
+    const limitRaw = Number(req.query.limit);
+    const limit = Number.isFinite(limitRaw) ? Math.max(20, Math.min(500, Math.trunc(limitRaw))) : 200;
+
+    const users = await prisma.student.findMany({
+      where: {
+        ...(roleFilter ? { role: roleFilter } : {}),
+        ...(q
+          ? {
+              OR: [
+                { firstName: { contains: q, mode: 'insensitive' } },
+                { lastName: { contains: q, mode: 'insensitive' } },
+                { email: { contains: q, mode: 'insensitive' } },
+                { school: { contains: q, mode: 'insensitive' } }
+              ]
+            }
+          : {})
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        emailVerified: true,
+        school: true,
+        gradeLevel: true,
+        createdAt: true
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit
+    });
+
+    return res.json({
+      users: users.map((user) => ({
+        ...user,
+        isSuspended: !Boolean(user.emailVerified)
+      }))
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function moderatePlatformUser(req, res, next) {
+  try {
+    const targetId = Number(req.params.userId);
+    const action = String(req.body.action || '').trim().toUpperCase();
+    if (!Number.isInteger(targetId) || targetId <= 0) {
+      return res.status(400).json({ message: 'Utilisateur invalide.' });
+    }
+    if (!['SUSPEND', 'REACTIVATE'].includes(action)) {
+      return res.status(400).json({ message: 'Action invalide.' });
+    }
+    if (targetId === req.user.id) {
+      return res.status(400).json({ message: 'Action impossible sur ton propre compte.' });
+    }
+
+    const target = await prisma.student.findUnique({
+      where: { id: targetId },
+      select: { id: true, email: true, role: true, emailVerified: true }
+    });
+    if (!target) {
+      return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    }
+
+    const superAdminEmail = String(process.env.SUPER_ADMIN_EMAIL || '').trim().toLowerCase();
+    if (superAdminEmail && String(target.email || '').toLowerCase() === superAdminEmail) {
+      return res.status(403).json({ message: 'Action interdite sur le compte super admin principal.' });
+    }
+
+    const updated = await prisma.student.update({
+      where: { id: targetId },
+      data: { emailVerified: action === 'REACTIVATE' },
+      select: { id: true, emailVerified: true }
+    });
+
+    return res.json({
+      message: action === 'SUSPEND' ? 'Utilisateur suspendu.' : 'Utilisateur réactivé.',
+      user: {
+        id: updated.id,
+        isSuspended: !Boolean(updated.emailVerified)
+      }
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deletePlatformUser(req, res, next) {
+  try {
+    const targetId = Number(req.params.userId);
+    if (!Number.isInteger(targetId) || targetId <= 0) {
+      return res.status(400).json({ message: 'Utilisateur invalide.' });
+    }
+    if (targetId === req.user.id) {
+      return res.status(400).json({ message: 'Suppression impossible sur ton propre compte.' });
+    }
+
+    const target = await prisma.student.findUnique({
+      where: { id: targetId },
+      select: { id: true, email: true }
+    });
+    if (!target) {
+      return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    }
+
+    const superAdminEmail = String(process.env.SUPER_ADMIN_EMAIL || '').trim().toLowerCase();
+    if (superAdminEmail && String(target.email || '').toLowerCase() === superAdminEmail) {
+      return res.status(403).json({ message: 'Suppression interdite sur le compte super admin principal.' });
+    }
+
+    await prisma.student.delete({ where: { id: targetId } });
+    return res.json({ message: 'Utilisateur supprimé.' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = {
+  getConfig,
+  updateConfig,
+  getSuperDashboard,
+  listPlatformStudents,
+  listPlatformUsers,
+  moderatePlatformUser,
+  deletePlatformUser
+};
