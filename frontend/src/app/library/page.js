@@ -606,7 +606,7 @@ export default function LibraryPage() {
         </section>
       ) : null}
 
-      <section>
+      <section className="card">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-2xl font-bold text-brand-900">Livres approuvés</h2>
           <input
