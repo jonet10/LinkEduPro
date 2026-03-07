@@ -69,7 +69,6 @@ export default function HeaderNav() {
       { href: '/video-lessons', label: 'Classe Numerique' },
       { href: '/rattrapage', label: 'Rattrapage' },
       { href: '/subjects', label: 'Rubriques' },
-      ...(roleUpper === 'SUPER_ADMIN' ? [] : [{ href: '/progress', label: 'Progrès' }]),
       { href: '/library', label: 'Bibliothèque' },
       { href: '/support', label: 'Support' },
       { href: '/educollect', label: 'EduCollect' },
@@ -341,7 +340,6 @@ export default function HeaderNav() {
   }, [hidePublicMobileMenu]);
 
   const canSeeGlobalAdminDashboard = isAuthed && ['ADMIN', 'SUPER_ADMIN'].includes(roleUpper);
-  const canSeeProgress = isAuthed && roleUpper !== 'SUPER_ADMIN';
   const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeCatchup = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeStudyPlans = isAuthed && student?.role !== 'STUDENT';
@@ -383,7 +381,6 @@ export default function HeaderNav() {
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
       { href: '/subjects', label: 'Rubriques', icon: '📘' },
-      ...(canSeeProgress ? [{ href: '/progress', label: 'Progrès', icon: '📈' }] : []),
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
       { href: '/support', label: 'Support', icon: '🤝' },
       { href: '/educollect', label: 'EduCollect', icon: '💸' },
@@ -391,7 +388,7 @@ export default function HeaderNav() {
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : []),
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
     ];
-  }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard, canSeeProgress, canSeeStudyPlans]);
+  }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard, canSeeStudyPlans]);
 
   const mobileStudyItems = useMemo(
     () => [
@@ -399,10 +396,9 @@ export default function HeaderNav() {
       { href: '/video-lessons', label: 'Classe Numerique', icon: '🎬' },
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
-      ...(canSeeProgress ? [{ href: '/progress', label: 'Progrès', icon: '📈' }] : []),
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : [])
     ],
-    [canSeeCatchup, canSeeProbableExercises, canSeeProgress, canSeeStudyPlans]
+    [canSeeCatchup, canSeeProbableExercises, canSeeStudyPlans]
   );
 
   const mobileToolItems = useMemo(
