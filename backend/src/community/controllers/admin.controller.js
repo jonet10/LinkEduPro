@@ -137,6 +137,108 @@ async function getSuperDashboard(req, res, next) {
       })
     ]);
 
+    let paidLibraryPurchases = [];
+    try {
+      paidLibraryPurchases = await prisma.libraryPurchase.findMany({
+        where: { status: 'PAID' },
+        include: {
+          book: {
+            select: {
+              uploadedBy: true,
+              uploader: {
+                select: { role: true }
+              }
+            }
+          }
+        }
+      });
+    } catch (error) {
+      const knownSchemaIssue = error?.code === 'P2021' || error?.code === 'P2022';
+      if (!knownSchemaIssue) throw error;
+    }
+
+    let successfulRemedialTransactions = [];
+    try {
+      successfulRemedialTransactions = await prisma.remedialTransaction.findMany({
+        where: { status: 'SUCCESS' },
+        include: {
+          session: {
+            select: {
+              teacherId: true,
+              teacher: {
+                select: { role: true }
+              }
+            }
+          }
+        }
+      });
+    } catch (error) {
+      const knownSchemaIssue = error?.code === 'P2021' || error?.code === 'P2022';
+      if (!knownSchemaIssue) throw error;
+    }
+
+    const librarySummary = paidLibraryPurchases.reduce((acc, row) => {
+      const uploaderRole = String(row.book?.uploader?.role || '').toUpperCase();
+      const sellerAmount = Number(row.sellerAmount || 0);
+      const platformCommission = Number(row.platformCommission || 0);
+      const grossAmount = Number(row.amount || 0);
+
+      acc.gross += grossAmount;
+      acc.platformCommissionTotal += platformCommission;
+
+      if (uploaderRole === 'ADMIN') {
+        acc.adminBookRevenue += sellerAmount;
+        acc.adminBooksSales += 1;
+        return acc;
+      }
+
+      if (uploaderRole === 'TEACHER') {
+        acc.teacherBookSellerRevenue += sellerAmount;
+        acc.teacherBookSales += 1;
+      } else if (uploaderRole === 'STUDENT') {
+        acc.studentBookSellerRevenue += sellerAmount;
+        acc.studentBookSales += 1;
+      }
+      acc.commissionFromTeacherStudentBooks += platformCommission;
+      return acc;
+    }, {
+      gross: 0,
+      platformCommissionTotal: 0,
+      adminBookRevenue: 0,
+      adminBooksSales: 0,
+      teacherBookSellerRevenue: 0,
+      teacherBookSales: 0,
+      studentBookSellerRevenue: 0,
+      studentBookSales: 0,
+      commissionFromTeacherStudentBooks: 0
+    });
+
+    const remedialSummary = successfulRemedialTransactions.reduce((acc, row) => {
+      const teacherRole = String(row.session?.teacher?.role || '').toUpperCase();
+      const teacherAmount = Number(row.teacherAmount || 0);
+      const platformCommission = Number(row.platformCommission || 0);
+
+      acc.platformCommissionTotal += platformCommission;
+      if (teacherRole === 'ADMIN') {
+        acc.adminRemedialRevenue += teacherAmount;
+      } else if (teacherRole === 'TEACHER') {
+        acc.commissionFromTeacherRemedials += platformCommission;
+      }
+      return acc;
+    }, {
+      adminRemedialRevenue: 0,
+      platformCommissionTotal: 0,
+      commissionFromTeacherRemedials: 0
+    });
+
+    const premiumRevenue = 0;
+    const adminPaidVideoRevenue = 0;
+    const adminPaidQuizRevenue = 0;
+
+    const totalPlatformCommissions = librarySummary.platformCommissionTotal + remedialSummary.platformCommissionTotal;
+    const totalDirectAdminSales = librarySummary.adminBookRevenue + remedialSummary.adminRemedialRevenue + adminPaidVideoRevenue + adminPaidQuizRevenue;
+    const totalPlatformRevenue = totalDirectAdminSales + totalPlatformCommissions + premiumRevenue;
+
     return res.json({
       analytics: {
         schools: totalSchools,
@@ -149,6 +251,36 @@ async function getSuperDashboard(req, res, next) {
         teacherInvitations: totalTeacherInvitations,
         activeTeacherInvitations: teacherInvitationsPending,
         monthlyInternalPayments: monthlyPaymentVolume._sum.amountPaid || 0
+      },
+      revenues: {
+        totals: {
+          totalPlatformRevenue,
+          totalDirectAdminSales,
+          totalPlatformCommissions,
+          premiumRevenue
+        },
+        directSales: {
+          books: librarySummary.adminBookRevenue,
+          remedials: remedialSummary.adminRemedialRevenue,
+          videos: adminPaidVideoRevenue,
+          quizzes: adminPaidQuizRevenue
+        },
+        commissions: {
+          fromTeacherAndStudentBooks: librarySummary.commissionFromTeacherStudentBooks,
+          fromTeacherRemedials: remedialSummary.commissionFromTeacherRemedials,
+          booksTotal: librarySummary.platformCommissionTotal,
+          remedialsTotal: remedialSummary.platformCommissionTotal
+        },
+        publications: {
+          studentBookSales: librarySummary.studentBookSales,
+          teacherBookSales: librarySummary.teacherBookSales,
+          adminBookSales: librarySummary.adminBooksSales
+        },
+        roadmap: {
+          premiumEnabled: false,
+          paidVideosEnabled: false,
+          paidQuizzesEnabled: false
+        }
       },
       recentActivity
     });

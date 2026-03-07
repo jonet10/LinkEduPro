@@ -54,7 +54,7 @@ async function listBooks(req, res, next) {
       where = whereBase;
     }
 
-    if (req.user.role === 'TEACHER') {
+    if (req.user.role === 'TEACHER' || req.user.role === 'STUDENT') {
       where = {
         ...whereBase,
         OR: [{ status: 'APPROVED' }, { uploadedBy: req.user.id }]

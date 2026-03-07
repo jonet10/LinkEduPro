@@ -9,10 +9,10 @@ const { createLibraryBookSchema, updateLibraryBookSchema, reviewLibraryBookSchem
 const router = express.Router();
 
 router.get('/books', auth, listBooks);
-router.post('/books', auth, requireRoles(['ADMIN', 'TEACHER']), uploadLibraryBook, validate(createLibraryBookSchema), submitBook);
-router.patch('/books/:id', auth, requireRoles(['ADMIN', 'TEACHER']), uploadLibraryBook, validate(updateLibraryBookSchema), updateBook);
+router.post('/books', auth, requireRoles(['ADMIN', 'TEACHER', 'STUDENT']), uploadLibraryBook, validate(createLibraryBookSchema), submitBook);
+router.patch('/books/:id', auth, requireRoles(['ADMIN', 'TEACHER', 'STUDENT']), uploadLibraryBook, validate(updateLibraryBookSchema), updateBook);
 router.post('/books/:id/purchase', auth, validate(createLibraryPurchaseSchema), purchaseBook);
 router.patch('/books/:id/review', auth, requireRoles(['ADMIN']), validate(reviewLibraryBookSchema), reviewBook);
-router.delete('/books/:id', auth, requireRoles(['ADMIN', 'TEACHER']), softDeleteBook);
+router.delete('/books/:id', auth, requireRoles(['ADMIN', 'TEACHER', 'STUDENT']), softDeleteBook);
 
 module.exports = router;
