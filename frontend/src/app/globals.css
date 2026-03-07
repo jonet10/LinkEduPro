@@ -1480,6 +1480,14 @@ body {
     0 14px 24px rgba(3, 11, 24, 0.42);
 }
 
+.showcase-track {
+  scrollbar-width: none;
+}
+
+.showcase-track::-webkit-scrollbar {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .landing-slide-cta-row {
     max-width: 100%;
