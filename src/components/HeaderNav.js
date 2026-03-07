@@ -74,7 +74,7 @@ export default function HeaderNav() {
       { href: '/support', label: 'Support' },
       { href: '/educollect', label: 'EduCollect' },
       { href: '/blog', label: 'Forum' },
-      { href: '/probable-exercises', label: 'Exercices probables' }
+      { href: '/probable-exercises', label: 'Examens passés' }
     ];
     if (isAuthed && (roleUpper === 'ADMIN' || roleUpper === 'SUPER_ADMIN')) {
       tabs.push({ href: '/admin/super-dashboard', label: 'Dashboard' });
@@ -388,7 +388,7 @@ export default function HeaderNav() {
       { href: '/support', label: 'Support', icon: '🤝' },
       { href: '/educollect', label: 'EduCollect', icon: '💸' },
       { href: '/blog', label: 'Forum', icon: '📝' },
-      ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : []),
+      ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : []),
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
     ];
   }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard, canSeeProgress, canSeeStudyPlans]);
@@ -400,7 +400,7 @@ export default function HeaderNav() {
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
       ...(canSeeProgress ? [{ href: '/progress', label: 'Progrès', icon: '📈' }] : []),
-      ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : [])
+      ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : [])
     ],
     [canSeeCatchup, canSeeProbableExercises, canSeeProgress, canSeeStudyPlans]
   );
