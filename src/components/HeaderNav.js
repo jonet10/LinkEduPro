@@ -48,6 +48,7 @@ export default function HeaderNav() {
   const router = useRouter();
   const pathname = usePathname();
   const hidePublicMobileMenu = ['/login', '/register', '/forgot-password', '/verify-email'].includes(pathname || '');
+  const roleUpper = String(student?.role || '').toUpperCase();
 
   const publicStudyTools = useMemo(() => ([
     { href: '/subjects', label: 'Apprendre', icon: '🧠' },
@@ -68,19 +69,18 @@ export default function HeaderNav() {
       { href: '/video-lessons', label: 'Classe Numerique' },
       { href: '/rattrapage', label: 'Rattrapage' },
       { href: '/subjects', label: 'Rubriques' },
-      { href: '/progress', label: 'Progrès' },
+      ...(roleUpper === 'SUPER_ADMIN' ? [] : [{ href: '/progress', label: 'Progrès' }]),
       { href: '/library', label: 'Bibliothèque' },
       { href: '/support', label: 'Support' },
       { href: '/educollect', label: 'EduCollect' },
       { href: '/blog', label: 'Forum' },
       { href: '/probable-exercises', label: 'Exercices probables' }
     ];
-    const role = String(student?.role || '').toUpperCase();
-    if (isAuthed && (role === 'ADMIN' || role === 'SUPER_ADMIN')) {
+    if (isAuthed && (roleUpper === 'ADMIN' || roleUpper === 'SUPER_ADMIN')) {
       tabs.push({ href: '/admin/super-dashboard', label: 'Dashboard' });
     }
     return tabs;
-  }, [isAuthed, student?.role]);
+  }, [isAuthed, roleUpper]);
   const quickDiscoverLinks = useMemo(
     () => ([
       { href: '/library', label: 'Bibliothèque numérique', icon: '📚' },
@@ -340,7 +340,8 @@ export default function HeaderNav() {
     }
   }, [hidePublicMobileMenu]);
 
-  const canSeeGlobalAdminDashboard = isAuthed && ['ADMIN', 'SUPER_ADMIN'].includes(String(student?.role || '').toUpperCase());
+  const canSeeGlobalAdminDashboard = isAuthed && ['ADMIN', 'SUPER_ADMIN'].includes(roleUpper);
+  const canSeeProgress = isAuthed && roleUpper !== 'SUPER_ADMIN';
   const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeCatchup = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeStudyPlans = isAuthed && student?.role !== 'STUDENT';
@@ -382,7 +383,7 @@ export default function HeaderNav() {
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
       { href: '/subjects', label: 'Rubriques', icon: '📘' },
-      { href: '/progress', label: 'Progrès', icon: '📈' },
+      ...(canSeeProgress ? [{ href: '/progress', label: 'Progrès', icon: '📈' }] : []),
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
       { href: '/support', label: 'Support', icon: '🤝' },
       { href: '/educollect', label: 'EduCollect', icon: '💸' },
@@ -390,7 +391,7 @@ export default function HeaderNav() {
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : []),
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
     ];
-  }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard, canSeeStudyPlans]);
+  }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard, canSeeProgress, canSeeStudyPlans]);
 
   const mobileStudyItems = useMemo(
     () => [
@@ -398,10 +399,10 @@ export default function HeaderNav() {
       { href: '/video-lessons', label: 'Classe Numerique', icon: '🎬' },
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
-      { href: '/progress', label: 'Progrès', icon: '📈' },
+      ...(canSeeProgress ? [{ href: '/progress', label: 'Progrès', icon: '📈' }] : []),
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Exercices probables', icon: '🎯' }] : [])
     ],
-    [canSeeCatchup, canSeeProbableExercises, canSeeStudyPlans]
+    [canSeeCatchup, canSeeProbableExercises, canSeeProgress, canSeeStudyPlans]
   );
 
   const mobileToolItems = useMemo(
