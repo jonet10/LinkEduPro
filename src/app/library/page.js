@@ -129,7 +129,7 @@ export default function LibraryPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const canUpload = useMemo(() => {
-    return student && ['ADMIN', 'TEACHER'].includes(student.role);
+    return student && ['ADMIN', 'TEACHER', 'STUDENT'].includes(student.role);
   }, [student]);
 
   const filteredApprovedBooks = useMemo(() => {
@@ -465,7 +465,7 @@ export default function LibraryPage() {
       <div className="card">
         <h1 className="text-3xl font-black text-brand-900">Bibliothèque numérique</h1>
         <p className="mt-2 text-sm text-brand-700">
-          Ressources PDF validées pour les élèves. Les professeurs peuvent proposer des livres, le super admin valide.
+          Ressources PDF validées pour les élèves. Professeurs et élèves peuvent proposer des livres/recueils, le super admin valide.
         </p>
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
         {success ? <p className="mt-2 text-sm text-green-700">{success}</p> : null}

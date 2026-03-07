@@ -287,6 +287,53 @@ export default function SuperDashboardPage() {
         </section>
       ) : null}
 
+      {dashboard?.revenues ? (
+        <section className="card space-y-3">
+          <h2 className="text-xl font-semibold">Revenus plateforme (Super Admin)</h2>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-lg border border-brand-100 p-3">
+              <p className="text-sm text-brand-700">Revenu total plateforme</p>
+              <p className="text-2xl font-bold text-brand-900">{formatHtg(dashboard.revenues.totals?.totalPlatformRevenue)}</p>
+            </div>
+            <div className="rounded-lg border border-brand-100 p-3">
+              <p className="text-sm text-brand-700">Ventes directes (admin)</p>
+              <p className="text-2xl font-bold text-brand-900">{formatHtg(dashboard.revenues.totals?.totalDirectAdminSales)}</p>
+            </div>
+            <div className="rounded-lg border border-brand-100 p-3">
+              <p className="text-sm text-brand-700">Commissions plateforme</p>
+              <p className="text-2xl font-bold text-brand-900">{formatHtg(dashboard.revenues.totals?.totalPlatformCommissions)}</p>
+            </div>
+            <div className="rounded-lg border border-brand-100 p-3">
+              <p className="text-sm text-brand-700">Premium utilisateurs</p>
+              <p className="text-2xl font-bold text-brand-900">{formatHtg(dashboard.revenues.totals?.premiumRevenue)}</p>
+              <p className="text-xs text-brand-700">Bientôt activé</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div className="rounded-lg border border-brand-100 p-3">
+              <p className="text-sm font-semibold text-brand-900">Ventes payantes publiées par Super Admin</p>
+              <ul className="mt-2 space-y-1 text-sm text-brand-700">
+                <li>Livres: {formatHtg(dashboard.revenues.directSales?.books)} ({dashboard.revenues.publications?.adminBookSales || 0} vente(s))</li>
+                <li>Rattrapages: {formatHtg(dashboard.revenues.directSales?.remedials)}</li>
+                <li>Vidéos: {formatHtg(dashboard.revenues.directSales?.videos)} (bientôt)</li>
+                <li>Quiz payants: {formatHtg(dashboard.revenues.directSales?.quizzes)} (bientôt)</li>
+              </ul>
+            </div>
+
+            <div className="rounded-lg border border-brand-100 p-3">
+              <p className="text-sm font-semibold text-brand-900">Commissions publications professeurs / élèves</p>
+              <ul className="mt-2 space-y-1 text-sm text-brand-700">
+                <li>Commissions livres (prof + élèves): {formatHtg(dashboard.revenues.commissions?.fromTeacherAndStudentBooks)}</li>
+                <li>Commissions rattrapages professeurs: {formatHtg(dashboard.revenues.commissions?.fromTeacherRemedials)}</li>
+                <li>Ventes livres professeurs: {dashboard.revenues.publications?.teacherBookSales || 0}</li>
+                <li>Ventes livres élèves (petits recueils): {dashboard.revenues.publications?.studentBookSales || 0}</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section className="card space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xl font-semibold">Dons LinkEduPro (plateforme)</h2>

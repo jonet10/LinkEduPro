@@ -133,7 +133,7 @@ export default function HeaderNav() {
       { href: '/', label: 'Accueil' },
       { href: '/video-lessons', label: 'Classe Numerique' },
       { href: '/rattrapage', label: 'Rattrapage' },
-      ...(isAuthed && (roleUpper === 'TEACHER' || roleUpper === 'ADMIN') ? [{ href: '/teacher/dashboard', label: 'Dashboard prof' }] : []),
+      ...(isAuthed && roleUpper === 'TEACHER' ? [{ href: '/teacher/dashboard', label: 'Dashboard prof' }] : []),
       { href: '/subjects', label: 'Quiz' },
       { href: '/probable-exercises', label: 'Examens passés' },
       { href: '/library', label: 'Bibliothèque' },
@@ -414,7 +414,7 @@ export default function HeaderNav() {
   }, [hidePublicMobileMenu]);
 
   const canSeeGlobalAdminDashboard = isAuthed && ['ADMIN', 'SUPER_ADMIN'].includes(roleUpper);
-  const canSeeTeacherDashboard = isAuthed && ['TEACHER', 'ADMIN'].includes(roleUpper);
+  const canSeeTeacherDashboard = isAuthed && roleUpper === 'TEACHER';
   const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeCatchup = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeStudyPlans = isAuthed && student?.role !== 'STUDENT';

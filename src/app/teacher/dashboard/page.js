@@ -23,14 +23,23 @@ export default function TeacherDashboardPage() {
   const router = useRouter();
   const token = useMemo(() => getToken(), []);
   const student = useMemo(() => getStudent(), []);
-  const isTeacher = student?.role === 'TEACHER' || student?.role === 'ADMIN';
+  const isTeacher = student?.role === 'TEACHER';
+  const isAdmin = student?.role === 'ADMIN';
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [dashboard, setDashboard] = useState(null);
 
   useEffect(() => {
-    if (!token || !isTeacher) {
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    if (isAdmin) {
+      router.push('/admin/super-dashboard');
+      return;
+    }
+    if (!isTeacher) {
       router.push('/rattrapage');
       return;
     }
@@ -50,7 +59,7 @@ export default function TeacherDashboardPage() {
     return () => {
       mounted = false;
     };
-  }, [token, isTeacher, router]);
+  }, [token, isTeacher, isAdmin, router]);
 
   const summary = dashboard?.summary || {};
   const sessionRevenues = dashboard?.revenuesBySession || [];
