@@ -1611,10 +1611,15 @@ body {
 
 .showcase-track {
   scrollbar-width: none;
+  overscroll-behavior-x: contain;
 }
 
 .showcase-track::-webkit-scrollbar {
   display: none;
+}
+
+.showcase-card {
+  width: min(260px, calc(100vw - 5.5rem));
 }
 
 @media (max-width: 900px) {
@@ -1633,5 +1638,20 @@ body {
     min-height: 40px;
     font-size: 0.84rem;
     padding: 0.52rem 0.55rem;
+  }
+
+  .showcase-track {
+    gap: 0.75rem;
+    padding-inline: 0.2rem;
+  }
+
+  .showcase-card {
+    width: min(260px, calc(100vw - 4.8rem));
+  }
+}
+
+@media (max-width: 480px) {
+  .showcase-card {
+    width: calc(100vw - 4.2rem);
   }
 }
