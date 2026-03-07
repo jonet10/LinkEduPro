@@ -863,7 +863,6 @@ export default function HomePage() {
         ) : null}
 
         <section className="landing-hero content-grid card">
-          <div className="landing-hero-topline" aria-hidden="true" />
           <div className="landing-hero-copy glass">
             <p className="landing-kicker">LinkEduPro</p>
             <h1 className="landing-title">LinkEduPro, c&apos;est une plateforme éducative qui relie élèves, professeurs et écoles.</h1>
