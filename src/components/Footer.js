@@ -80,9 +80,6 @@ const socialLinks = [
 ];
 
 export default function Footer() {
-  const [email, setEmail] = useState('');
-  const [newsletterMessage, setNewsletterMessage] = useState('');
-  const [newsletterError, setNewsletterError] = useState('');
   const [shareFeedback, setShareFeedback] = useState('');
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [contactName, setContactName] = useState('');
@@ -110,23 +107,6 @@ export default function Footer() {
     observer.observe(target);
     return () => observer.disconnect();
   }, []);
-
-  function onSubmitNewsletter(event) {
-    event.preventDefault();
-    setNewsletterError('');
-    setNewsletterMessage('');
-
-    const normalized = email.trim();
-    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
-
-    if (!validEmail) {
-      setNewsletterError('Veuillez saisir une adresse email valide.');
-      return;
-    }
-
-    setNewsletterMessage('Merci. Vous serez informé des nouveautés LinkEduPro.');
-    setEmail('');
-  }
 
   async function onSharePlatform() {
     const text = 'Découvre LinkEduPro, la plateforme éducative pour réviser efficacement.';
@@ -241,31 +221,6 @@ export default function Footer() {
               {shareFeedback ? <p className={styles.shareFeedback}>{shareFeedback}</p> : null}
             </div>
 
-            <form className={styles.newsletter} onSubmit={onSubmitNewsletter} noValidate>
-              <label htmlFor="newsletter-email" className={styles.smallTitle}>Newsletter</label>
-              <div className={styles.newsletterRow}>
-                <input
-                  id="newsletter-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Votre email"
-                  className={styles.input}
-                  aria-label="Email newsletter"
-                />
-                <button type="submit" className={styles.button}>S’abonner</button>
-              </div>
-              {newsletterError ? <p className={styles.error}>{newsletterError}</p> : null}
-              {newsletterMessage ? <p className={styles.success}>{newsletterMessage}</p> : null}
-            </form>
-
-            <div className={styles.langPlaceholder}>
-              <label htmlFor="lang-select" className={styles.smallTitle}>Langue</label>
-              <select id="lang-select" className={styles.select} aria-label="Sélecteur de langue">
-                <option>Français (placeholder)</option>
-                <option>English (placeholder)</option>
-              </select>
-            </div>
           </section>
         </div>
       </div>

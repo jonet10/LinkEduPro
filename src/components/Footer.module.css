@@ -32,13 +32,6 @@
   color: #08355f;
 }
 
-.smallTitle {
-  margin: 0 0 0.4rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #165487;
-}
-
 .list {
   margin: 0;
   padding: 0;
@@ -112,10 +105,6 @@
   height: 1rem;
 }
 
-.newsletter {
-  margin-top: 1rem;
-}
-
 .shareBox {
   margin-top: 1rem;
 }
@@ -139,11 +128,6 @@
   margin: 0.45rem 0 0;
   font-size: 0.78rem;
   color: #165487;
-}
-
-.newsletterRow {
-  display: flex;
-  gap: 0.5rem;
 }
 
 .input,
@@ -173,20 +157,10 @@
   background: #095996;
 }
 
-.error {
-  margin: 0.5rem 0 0;
-  font-size: 0.78rem;
-  color: #c02626;
-}
-
 .success {
   margin: 0.5rem 0 0;
   font-size: 0.78rem;
   color: #1f7a1f;
-}
-
-.langPlaceholder {
-  margin-top: 0.8rem;
 }
 
 .contactOverlay {
@@ -284,8 +258,7 @@
   background: linear-gradient(135deg, rgba(13, 26, 42, 0.96), rgba(19, 38, 60, 0.96));
 }
 
-:global(.dark) .title,
-:global(.dark) .smallTitle {
+:global(.dark) .title {
   color: #d9ecff;
 }
 
