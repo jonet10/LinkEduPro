@@ -261,8 +261,8 @@ function LearningShowcaseSection({ section }) {
 
   return (
     <section className="card">
-      <h2 className="text-3xl font-black text-brand-900">{section.title}</h2>
-      <p className="mt-2 text-sm text-brand-700">{section.subtitle}</p>
+      <h2 className="public-landing-section-title text-3xl font-black text-brand-900">{section.title}</h2>
+      <p className="public-landing-section-subtitle mt-2 text-sm text-brand-700">{section.subtitle}</p>
       {Array.isArray(section.items) && section.items.length === 0 ? (
         <p className="mt-4 text-sm text-brand-700">Aucun contenu disponible pour ton niveau pour le moment.</p>
       ) : null}
@@ -721,8 +721,8 @@ export default function HomePage() {
         </section>
 
         <section className="card" aria-labelledby="how-title">
-          <h2 id="how-title" className="text-4xl font-black text-brand-900">Ce que propose LinkEduPro</h2>
-          <p className="mt-3 max-w-3xl text-lg text-brand-700">
+          <h2 id="how-title" className="public-landing-section-title text-4xl font-black text-brand-900">Ce que propose LinkEduPro</h2>
+          <p className="public-landing-section-subtitle mt-3 max-w-3xl text-lg text-brand-700">
             Une plateforme éducative pour s&apos;entraîner, réviser avec méthode et collaborer avec les professeurs.
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -739,7 +739,7 @@ export default function HomePage() {
         </section>
 
         <section className="card" aria-labelledby="subjects-title">
-          <h2 id="subjects-title" className="text-4xl font-black text-brand-900">Parcourir par sujet</h2>
+          <h2 id="subjects-title" className="public-landing-section-title text-4xl font-black text-brand-900">Parcourir par sujet</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {LANDING_SUBJECTS.map((subject) => (
               <button
@@ -787,14 +787,14 @@ export default function HomePage() {
         <section className="card" aria-labelledby="tiktok-title">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 id="tiktok-title" className="text-2xl font-black text-brand-900">{homeChallenge.title}</h2>
-              <p className="mt-1 text-sm text-brand-700">{homeChallenge.subtitle}</p>
+              <h2 id="tiktok-title" className="public-landing-section-title text-2xl font-black text-brand-900">{homeChallenge.title}</h2>
+              <p className="public-landing-section-subtitle mt-1 text-sm text-brand-700">{homeChallenge.subtitle}</p>
             </div>
-            <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+            <span className="public-landing-pill rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
               {homeChallenge.totalVotes} vote(s)
             </span>
           </div>
-          <p className="mt-2 text-xs text-brand-700">
+          <p className="public-landing-meta mt-2 text-xs text-brand-700">
             Semaine: {homeChallenge.weekKey || '-'}
           </p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">

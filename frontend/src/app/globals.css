@@ -1377,6 +1377,22 @@ body {
   color: #cfe8ff !important;
 }
 
+/* Public home section typography contrast (titles/subtitles/meta only) */
+.landing-glass-clean .public-landing-section-title {
+  color: #edf7ff !important;
+  text-shadow: 0 1px 10px rgba(4, 17, 34, 0.35);
+}
+
+.landing-glass-clean .public-landing-section-subtitle,
+.landing-glass-clean .public-landing-meta {
+  color: #cfe8ff !important;
+}
+
+.landing-glass-clean .public-landing-pill {
+  color: #5d89b3 !important;
+  background-color: rgba(236, 245, 255, 0.94) !important;
+}
+
 /* Remove the visible global container on public home (Udemy-like) */
 .landing-glass-clean {
   background: transparent !important;

@@ -88,8 +88,8 @@ export default function VerifiedTestimonials() {
   return (
     <section className="card" aria-labelledby="recent-publications-title">
       <div className="mb-4 flex items-center justify-between gap-2">
-        <h2 id="recent-publications-title" className="text-2xl font-bold text-brand-900">Publications récentes</h2>
-        <p className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">Contenus de la communauté et rattrapages</p>
+        <h2 id="recent-publications-title" className="public-landing-section-title text-2xl font-bold text-brand-900">Publications récentes</h2>
+        <p className="public-landing-pill rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">Contenus de la communauté et rattrapages</p>
       </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
