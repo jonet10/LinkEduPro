@@ -34,6 +34,7 @@ export default function HeaderNav() {
   const [isPublicMobileMenuOpen, setIsPublicMobileMenuOpen] = useState(false);
   const [desktopSearch, setDesktopSearch] = useState('');
   const [isDiscoverMegaOpen, setIsDiscoverMegaOpen] = useState(false);
+  const [locale, setLocale] = useState('fr');
 
   const quickMenuRef = useRef(null);
   const notifRef = useRef(null);
@@ -49,20 +50,84 @@ export default function HeaderNav() {
   const pathname = usePathname();
   const hidePublicMobileMenu = ['/login', '/register', '/forgot-password', '/verify-email'].includes(pathname || '');
   const roleUpper = String(student?.role || '').toUpperCase();
+  const t = useMemo(
+    () => (
+      locale === 'ht'
+        ? {
+            discover: 'Dekouvri',
+            students: 'Elèv',
+            teachers: 'Pwofesè',
+            quickAccess: 'Aksè rapid',
+            learn: 'Aprann',
+            studyPlans: 'Pwogram etid',
+            trainingTest: 'Tès fòmasyon',
+            expertSolutions: 'Solisyon ekspè',
+            studySearch: 'Rechèch etid',
+            publishResources: 'Pibliye resous',
+            liveCatchup: 'Live / ratrapaj',
+            digitalLibrary: 'Bibliyotèk dijital',
+            digitalClass: 'Klas dijital',
+            practiceQuiz: 'Quiz fòmasyon',
+            supportLinkedu: 'Sipò LinkEduPro',
+            publicSearchPlaceholder: 'Kisa ou vle aprann?',
+            login: 'Konekte',
+            register: 'Enskri',
+            langLabel: 'Lang',
+            menuTitle: 'Meni LinkEduPro',
+            close: 'Fèmen',
+            studyToolsTitle: 'Zouti pou etidye',
+            display: 'Afiche',
+            language: 'Lang',
+            french: 'Franse',
+            creole: 'Kreyòl'
+          }
+        : {
+            discover: 'Découvrir',
+            students: 'Étudiants',
+            teachers: 'Enseignants',
+            quickAccess: 'Accès rapide',
+            learn: 'Apprendre',
+            studyPlans: "Programmes d'étude",
+            trainingTest: "Test d'entraînement",
+            expertSolutions: 'Solutions expertes',
+            studySearch: "Recherche d'étude",
+            publishResources: 'Publier des ressources',
+            liveCatchup: 'Live / rattrapage',
+            digitalLibrary: 'Bibliothèque numérique',
+            digitalClass: 'Classe numérique',
+            practiceQuiz: "Quiz d'entraînement",
+            supportLinkedu: 'Support LinkEduPro',
+            publicSearchPlaceholder: 'Que souhaitez-vous apprendre ?',
+            login: 'Se connecter',
+            register: "S'inscrire",
+            langLabel: 'Langue',
+            menuTitle: 'Menu LinkEduPro',
+            close: 'Fermer',
+            studyToolsTitle: 'Outils pour étudier',
+            display: 'Affichage',
+            language: 'Langue',
+            french: 'Français',
+            creole: 'Kreyòl'
+          }
+    ),
+    [locale]
+  );
+
+  const languageBadge = locale === 'ht' ? 'KR' : 'FR';
 
   const publicStudyTools = useMemo(() => ([
-    { href: '/subjects', label: 'Apprendre', icon: '🧠' },
-    { href: '/study-plans', label: "Programmes d'étude", icon: '🗂️' },
+    { href: '/subjects', label: t.learn, icon: '🧠' },
+    { href: '/study-plans', label: t.studyPlans, icon: '🗂️' },
     { href: '/educollect', label: 'EduCollect', icon: '💸' },
-    { href: '/subjects', label: "Test d'entraînement", icon: '🧪' },
-    { href: '/blog', label: 'Solutions expertes', icon: '✅' },
-    { href: '/search', label: "Recherche d'étude", icon: '🔎' }
-  ]), []);
+    { href: '/subjects', label: t.trainingTest, icon: '🧪' },
+    { href: '/blog', label: t.expertSolutions, icon: '✅' },
+    { href: '/search', label: t.studySearch, icon: '🔎' }
+  ]), [t]);
 
   const publicTeacherTools = useMemo(() => ([
-    { href: '/blog', label: 'Publier des ressources', icon: '📝' },
-    { href: '/rattrapage', label: 'Live / rattrapage', icon: '📅' }
-  ]), []);
+    { href: '/blog', label: t.publishResources, icon: '📝' },
+    { href: '/rattrapage', label: t.liveCatchup, icon: '📅' }
+  ]), [t]);
   const globalAuthedTabs = useMemo(() => {
     const tabs = [
       { href: '/', label: 'Accueil' },
@@ -82,12 +147,12 @@ export default function HeaderNav() {
   }, [isAuthed, roleUpper]);
   const quickDiscoverLinks = useMemo(
     () => ([
-      { href: '/library', label: 'Bibliothèque numérique', icon: '📚' },
-      { href: '/video-lessons', label: 'Classe numérique', icon: '🎬' },
-      { href: '/subjects', label: "Quiz d'entraînement", icon: '🧪' },
-      { href: '/support', label: 'Support LinkEduPro', icon: '🤝' }
+      { href: '/library', label: t.digitalLibrary, icon: '📚' },
+      { href: '/video-lessons', label: t.digitalClass, icon: '🎬' },
+      { href: '/subjects', label: t.practiceQuiz, icon: '🧪' },
+      { href: '/support', label: t.supportLinkedu, icon: '🤝' }
     ]),
-    []
+    [t]
   );
 
   useEffect(() => {
@@ -110,6 +175,14 @@ export default function HeaderNav() {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const savedLocale = localStorage.getItem('linkedupro_locale');
+    if (savedLocale === 'fr' || savedLocale === 'ht') {
+      setLocale(savedLocale);
+    }
   }, []);
 
   useEffect(() => {
@@ -475,6 +548,14 @@ export default function HeaderNav() {
     }
   }
 
+  function toggleLocale() {
+    const next = locale === 'fr' ? 'ht' : 'fr';
+    setLocale(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('linkedupro_locale', next);
+    }
+  }
+
   async function markAllRead() {
     const token = getToken();
     if (!token) return;
@@ -525,15 +606,15 @@ export default function HeaderNav() {
               type="button"
               className="public-top-link rounded-lg px-3 py-2 font-medium text-brand-900 hover:bg-brand-50"
               onClick={() => setIsDiscoverMegaOpen((v) => !v)}
-              aria-label="Découvrir"
+              aria-label={t.discover}
             >
-              Découvrir
+              {t.discover}
             </button>
             {isDiscoverMegaOpen ? (
               <div className="absolute left-0 z-50 mt-3 w-[760px] rounded-2xl border border-brand-100 bg-white/95 p-4 shadow-2xl backdrop-blur">
                 <div className="grid gap-4 lg:grid-cols-3">
                   <div className="rounded-xl border border-brand-100 bg-brand-50/60 p-3">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Étudiants</p>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">{t.students}</p>
                     <div className="space-y-1">
                       {publicStudyTools.map((item) => (
                         <Link
@@ -549,7 +630,7 @@ export default function HeaderNav() {
                     </div>
                   </div>
                   <div className="rounded-xl border border-brand-100 bg-brand-50/40 p-3">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Enseignants</p>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">{t.teachers}</p>
                     <div className="space-y-1">
                       {publicTeacherTools.map((item) => (
                         <Link
@@ -565,7 +646,7 @@ export default function HeaderNav() {
                     </div>
                   </div>
                   <div className="rounded-xl border border-brand-100 bg-white p-3">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Accès rapide</p>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">{t.quickAccess}</p>
                     <div className="space-y-1">
                       {quickDiscoverLinks.map((item) => (
                         <Link
@@ -592,15 +673,22 @@ export default function HeaderNav() {
             <span className="mr-2 text-brand-600">🔎</span>
             <input
               className="w-full bg-transparent text-sm text-brand-900 outline-none placeholder:text-brand-500"
-              placeholder="Que souhaitez-vous apprendre ?"
+              placeholder={t.publicSearchPlaceholder}
               value={desktopSearch}
               onChange={(e) => setDesktopSearch(e.target.value)}
             />
           </form>
 
-          <Link href="/search" className="public-icon-btn rounded-lg border border-brand-200 p-2 hover:bg-brand-50" aria-label="Explorer">
-            🌐
-          </Link>
+          <button
+            type="button"
+            className="public-icon-btn inline-flex items-center gap-1 rounded-lg border border-brand-200 px-2 py-2 hover:bg-brand-50"
+            onClick={toggleLocale}
+            aria-label={`${t.langLabel}: ${locale === 'fr' ? t.french : t.creole}`}
+            title={`${t.language}: ${locale === 'fr' ? t.french : t.creole}`}
+          >
+            <span>🌐</span>
+            <span className="text-[11px] font-semibold">{languageBadge}</span>
+          </button>
           <button
             type="button"
             className="public-icon-btn rounded-lg border border-brand-200 p-2 hover:bg-brand-50"
@@ -611,10 +699,10 @@ export default function HeaderNav() {
             {darkMode ? '☀️' : '🌙'}
           </button>
           <Link href="/login" className="public-auth-btn rounded-lg border border-brand-500 px-4 py-2 font-semibold text-brand-700 hover:bg-brand-50">
-            Se connecter
+            {t.login}
           </Link>
           <Link href="/register" className="public-auth-btn primary rounded-lg bg-brand-700 px-4 py-2 font-semibold text-white hover:bg-brand-800">
-            S&apos;inscrire
+            {t.register}
           </Link>
           </div>
         ) : (
@@ -771,11 +859,21 @@ export default function HeaderNav() {
               >
                 {darkMode ? '☀️' : '🌙'}
               </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+                aria-label={`${t.langLabel}: ${locale === 'fr' ? t.french : t.creole}`}
+                title={`${t.language}: ${locale === 'fr' ? t.french : t.creole}`}
+                onClick={toggleLocale}
+              >
+                <span>🌐</span>
+                <span className="text-[11px] font-semibold">{languageBadge}</span>
+              </button>
               <Link
                 href="/login"
                 className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
-                aria-label="Connexion"
-                title="Connexion"
+                aria-label={t.login}
+                title={t.login}
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
                   <path
@@ -798,18 +896,18 @@ export default function HeaderNav() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-base font-semibold text-brand-900">Menu LinkEduPro</p>
+                  <p className="text-base font-semibold text-brand-900">{t.menuTitle}</p>
                   <button
                     type="button"
                     className="rounded-md border border-brand-100 px-2 py-1 text-xs"
                     onClick={() => setIsPublicMobileMenuOpen(false)}
                   >
-                    Fermer
+                    {t.close}
                   </button>
                 </div>
 
                 <section className="rounded-xl border border-brand-100 p-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Outils pour étudier</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">{t.studyToolsTitle}</p>
                   <div className="space-y-1">
                     {publicStudyTools.map((item) => (
                       <Link
@@ -826,7 +924,7 @@ export default function HeaderNav() {
                 </section>
 
                 <section className="mt-3 rounded-xl border border-brand-100 p-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Affichage</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">{t.display}</p>
                   <button
                     type="button"
                     className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm hover:bg-brand-50"
@@ -835,11 +933,19 @@ export default function HeaderNav() {
                     <span>{darkMode ? '☀️ Mode clair' : '🌙 Mode sombre'}</span>
                     <span className="text-brand-500">›</span>
                   </button>
+                  <button
+                    type="button"
+                    className="mt-1 flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm hover:bg-brand-50"
+                    onClick={toggleLocale}
+                  >
+                    <span>{t.language}: {locale === 'fr' ? t.french : t.creole}</span>
+                    <span className="text-brand-500">›</span>
+                  </button>
                 </section>
 
                 <div className="mt-4 flex gap-2">
-                  <Link href="/register" className="btn-primary" onClick={() => setIsPublicMobileMenuOpen(false)}>Créer un compte</Link>
-                  <Link href="/login" className="btn-secondary" onClick={() => setIsPublicMobileMenuOpen(false)}>Se connecter</Link>
+                  <Link href="/register" className="btn-primary" onClick={() => setIsPublicMobileMenuOpen(false)}>{t.register}</Link>
+                  <Link href="/login" className="btn-secondary" onClick={() => setIsPublicMobileMenuOpen(false)}>{t.login}</Link>
                 </div>
               </div>
             </div>,

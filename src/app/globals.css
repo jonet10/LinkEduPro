@@ -980,10 +980,19 @@ input[type="checkbox"] {
 }
 
 .public-top-link {
-  color: #d9efff !important;
+  color: #456f99 !important;
+  font-weight: 600;
 }
 
 .public-top-link:hover {
+  background: rgba(98, 169, 226, 0.2) !important;
+}
+
+.dark .public-top-link {
+  color: #d9efff !important;
+}
+
+.dark .public-top-link:hover {
   background: rgba(116, 195, 255, 0.16) !important;
 }
 
