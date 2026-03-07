@@ -105,6 +105,31 @@
   margin-top: 1rem;
 }
 
+.shareBox {
+  margin-top: 1rem;
+}
+
+.shareButton {
+  border: 0;
+  border-radius: 0.7rem;
+  background: linear-gradient(160deg, #2f7ecc, #246db5);
+  color: #fff;
+  padding: 0.55rem 0.95rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.shareButton:hover {
+  background: linear-gradient(160deg, #2a73bb, #215f9f);
+}
+
+.shareFeedback {
+  margin: 0.45rem 0 0;
+  font-size: 0.78rem;
+  color: #165487;
+}
+
 .newsletterRow {
   display: flex;
   gap: 0.5rem;
@@ -232,6 +257,18 @@
   border-color: #43658c;
   background: rgba(20, 34, 52, 0.92);
   color: #e8f2ff;
+}
+
+:global(.dark) .shareButton {
+  background: linear-gradient(160deg, #2b6dac, #245b8f);
+}
+
+:global(.dark) .shareButton:hover {
+  background: linear-gradient(160deg, #2f77ba, #28659d);
+}
+
+:global(.dark) .shareFeedback {
+  color: #bfdcff;
 }
 
 :global(.dark) .bottomBar {

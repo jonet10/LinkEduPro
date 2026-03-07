@@ -292,7 +292,6 @@ export default function HomePage() {
     lastSeenByRole: { students: null, teachers: null, admins: null, others: null },
     mineLastSeenAt: null
   });
-  const [shareFeedback, setShareFeedback] = useState('');
   const [platformDonationFeedback, setPlatformDonationFeedback] = useState('');
   const [error, setError] = useState('');
   const [welcomePopup, setWelcomePopup] = useState(null);
@@ -443,24 +442,6 @@ export default function HomePage() {
       setLearningShowcaseSections(LEARNING_SHOWCASE_SECTIONS);
     }
   }, [isAuthed]);
-  async function sharePlatform() {
-    const text = 'Découvre LinkEduPro, la plateforme éducative pour réviser efficacement.';
-    const url = typeof window !== 'undefined' ? `${window.location.origin}/` : '';
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: 'LinkEduPro',
-          text,
-          url
-        });
-      } else if (navigator.clipboard && url) {
-        await navigator.clipboard.writeText(url);
-      }
-      setShareFeedback('Lien prêt à être partagé.');
-    } catch (_) {
-      setShareFeedback('Impossible de partager pour le moment.');
-    }
-  }
 
   function closeCalendarNotice() {
     if (typeof window !== 'undefined') {
@@ -611,17 +592,6 @@ export default function HomePage() {
         {learningShowcaseSections.map((section) => (
           <LearningShowcaseSection key={`public-${section.id}`} section={section} />
         ))}
-
-        <section className="card" aria-labelledby="share-title-public">
-          <h2 id="share-title-public" className="public-landing-section-title text-2xl font-black text-brand-900">Partager LinkEduPro</h2>
-          <p className="public-landing-section-subtitle mt-1 text-sm text-brand-700">
-            Aide d&apos;autres élèves à découvrir la plateforme.
-          </p>
-          <div className="mt-4">
-            <button type="button" className="btn-primary" onClick={sharePlatform}>📢 Partager la plateforme</button>
-          </div>
-          {shareFeedback ? <p className="mt-2 text-xs text-brand-700">{shareFeedback}</p> : null}
-        </section>
 
         <VerifiedTestimonials />
       </section>
@@ -871,17 +841,6 @@ export default function HomePage() {
           </div>
         </article>
       )}
-
-      <article className="card motion-enter motion-delay-4 lift-card home-gold-soft">
-        <h2 className="home-gold-title text-xl font-semibold text-brand-900">Partager LinkEduPro</h2>
-        <p className="mt-1 text-sm text-brand-700">
-          Invite tes amis à rejoindre la plateforme et à apprendre avec toi.
-        </p>
-        <div className="mt-4">
-          <button type="button" className="btn-primary" onClick={sharePlatform}>📢 Partager la plateforme</button>
-        </div>
-        {shareFeedback ? <p className="mt-2 text-xs text-brand-700">{shareFeedback}</p> : null}
-      </article>
 
       <VerifiedTestimonials />
     </section>

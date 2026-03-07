@@ -83,6 +83,7 @@ export default function Footer() {
   const [email, setEmail] = useState('');
   const [newsletterMessage, setNewsletterMessage] = useState('');
   const [newsletterError, setNewsletterError] = useState('');
+  const [shareFeedback, setShareFeedback] = useState('');
   const [visible, setVisible] = useState(false);
   const year = useMemo(() => new Date().getFullYear(), []);
 
@@ -119,6 +120,26 @@ export default function Footer() {
 
     setNewsletterMessage('Merci. Vous serez informé des nouveautés LinkEduPro.');
     setEmail('');
+  }
+
+  async function onSharePlatform() {
+    const text = 'Découvre LinkEduPro, la plateforme éducative pour réviser efficacement.';
+    const url = typeof window !== 'undefined' ? `${window.location.origin}/` : '';
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'LinkEduPro',
+          text,
+          url
+        });
+      } else if (navigator.clipboard && url) {
+        await navigator.clipboard.writeText(url);
+      }
+      setShareFeedback('Lien prêt à être partagé.');
+    } catch (_) {
+      setShareFeedback('Impossible de partager pour le moment.');
+    }
   }
 
   return (
@@ -166,6 +187,13 @@ export default function Footer() {
                   {social.icon}
                 </a>
               ))}
+            </div>
+
+            <div className={styles.shareBox}>
+              <button type="button" className={styles.shareButton} onClick={onSharePlatform}>
+                📢 Partager la plateforme
+              </button>
+              {shareFeedback ? <p className={styles.shareFeedback}>{shareFeedback}</p> : null}
             </div>
 
             <form className={styles.newsletter} onSubmit={onSubmitNewsletter} noValidate>
