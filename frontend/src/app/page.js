@@ -859,6 +859,7 @@ export default function HomePage() {
         ) : null}
 
         <section className="landing-hero content-grid card">
+          <div className="landing-hero-topline" aria-hidden="true" />
           <div className="landing-hero-copy glass">
             <p className="landing-kicker">LinkEduPro</p>
             <h1 className="landing-title">LinkEduPro, c&apos;est une plateforme éducative qui relie élèves, professeurs et écoles.</h1>
@@ -878,14 +879,14 @@ export default function HomePage() {
               <div className="landing-hero-slide-overlay">
                 <p className="text-sm font-semibold text-white">{LANDING_HERO_VISUAL.caption}</p>
               </div>
-              <div className="landing-slide-floating-cta landing-slide-cta-row">
-                <Link href="/support" className="landing-slide-cta-btn">
-                  Soutenir LinkEduPro
-                </Link>
-                <a href="/apk/linkedupro.apk" download className="landing-slide-cta-btn">
-                  Télécharger l&apos;APK Android
-                </a>
-              </div>
+            </div>
+            <div className="landing-hero-actions">
+              <Link href="/support" className="landing-hero-action-btn">
+                Soutenir LinkEduPro
+              </Link>
+              <a href="/apk/linkedupro.apk" download className="landing-hero-action-btn">
+                Télécharger l&apos;APK Android
+              </a>
             </div>
           </div>
         </section>
