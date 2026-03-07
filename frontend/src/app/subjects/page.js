@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken, isNsivStudent } from '@/lib/auth';
-import SectionIcon from '@/components/ui/SectionIcon';
 
 function normalizeSubjectName(name) {
   return String(name || '')
@@ -160,71 +159,6 @@ export default function SubjectsPage() {
           <h2 className="text-xl font-semibold text-brand-900">Exercices les plus probables</h2>
           <p className="mt-2 text-sm text-brand-700">Analyse NSIV des sujets les plus fréquents par matière.</p>
           <Link href="/probable-exercises" className="btn-primary mt-4 inline-block">Voir la rubrique</Link>
-        </article>
-      ) : null}
-      {isNsivSectionVisible ? (
-        <article className="card mb-4">
-          <h2 className="text-xl font-semibold text-brand-900">Rubriques NSIV</h2>
-          <p className="mt-2 text-sm text-brand-700">
-            Accès rapide aux contenus structurés pour la classe NSIV.
-          </p>
-          <p className="mt-1 text-sm font-semibold text-brand-800">Filière active : {nsivTrack}</p>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <Link href="/nsiv" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
-              <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                  <SectionIcon name="nsiv" />
-                </span>
-                Espace NSIV
-              </p>
-              <p className="mt-1 text-sm text-brand-700">Vue complète des rubriques NSIV.</p>
-            </Link>
-            <Link href="/probable-exercises" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
-              <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                  <SectionIcon name="target" />
-                </span>
-                Exercices les plus probables
-              </p>
-              <p className="mt-1 text-sm text-brand-700">Analyse des sujets récurrents du Bac NSIV.</p>
-            </Link>
-            <Link href="/video-lessons" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
-              <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                  <SectionIcon name="video" />
-                </span>
-                Classe Numerique
-              </p>
-              <p className="mt-1 text-sm text-brand-700">Leçons et exercices vidéo, gratuits ou payants.</p>
-            </Link>
-            <Link href="/rattrapage" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
-              <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                  <SectionIcon name="video" />
-                </span>
-                Rattrapage Google Meet
-              </p>
-              <p className="mt-1 text-sm text-brand-700">Cours de rattrapage planifiés pour NSIV.</p>
-            </Link>
-            <Link href="/subjects" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
-              <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                  <SectionIcon name="globe" />
-                </span>
-                Histoire-Géographie NSIV
-              </p>
-              <p className="mt-1 text-sm text-brand-700">Nouveaux quiz basés sur vos documents Hist-Géo.</p>
-            </Link>
-            <Link href="/subjects" className="rounded-lg border border-brand-100 p-3 hover:bg-brand-50">
-              <p className="flex items-center gap-2 font-semibold text-brand-900">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                  <SectionIcon name="brain" />
-                </span>
-                Connaissance générale NSIV
-              </p>
-              <p className="mt-1 text-sm text-brand-700">Rubrique culture générale pour toutes les filières.</p>
-            </Link>
-          </div>
         </article>
       ) : null}
       <section className="card">
