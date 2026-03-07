@@ -97,6 +97,7 @@ export default function LibraryPage() {
   const [purchasingId, setPurchasingId] = useState(null);
   const [preorderedBooks, setPreorderedBooks] = useState([]);
   const [pdfViewer, setPdfViewer] = useState(null);
+  const [showUploadForm, setShowUploadForm] = useState(false);
 
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -275,6 +276,7 @@ export default function LibraryPage() {
       setCoverImage(null);
       setPdfFile(null);
       setEditingBookId(null);
+      setShowUploadForm(false);
       setSuccess(editingBookId ? 'Livre modifié avec succès.' : 'Livre soumis avec succès.');
       await loadBooks();
     } catch (e) {
@@ -293,6 +295,7 @@ export default function LibraryPage() {
 
   function startEditBook(book) {
     setEditingBookId(book.id);
+    setShowUploadForm(true);
     setTitle(book.title || '');
     setAuthor(book.author || '');
     setSubject(book.subject || '');
@@ -327,6 +330,7 @@ export default function LibraryPage() {
     setPdfFile(null);
     setError('');
     setSuccess('');
+    setShowUploadForm(false);
   }
 
   async function reviewBook(id, status) {
@@ -428,8 +432,24 @@ export default function LibraryPage() {
 
       {canUpload ? (
         <section className="card">
-          <h2 className="mb-3 text-xl font-bold text-brand-900">{editingBookId ? 'Modifier un livre PDF' : 'Ajouter un livre PDF'}</h2>
-          <form className="grid gap-3 md:grid-cols-2" onSubmit={onSubmitBook}>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-bold text-brand-900">{editingBookId ? 'Modifier un livre PDF' : 'Ajouter un livre PDF'}</h2>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => {
+                if (editingBookId) {
+                  cancelEditBook();
+                  return;
+                }
+                setShowUploadForm((v) => !v);
+              }}
+            >
+              {editingBookId ? 'Fermer le formulaire' : (showUploadForm ? 'Masquer le formulaire' : 'Ajouter un livre PDF')}
+            </button>
+          </div>
+          {showUploadForm ? (
+            <form className="grid gap-3 md:grid-cols-2" onSubmit={onSubmitBook}>
             <input className="input" placeholder="Titre" value={title} onChange={(e) => setTitle(e.target.value)} required />
             <input className="input" placeholder="Auteur" value={author} onChange={(e) => setAuthor(e.target.value)} required />
             <input className="input" placeholder="Matière" value={subject} onChange={(e) => setSubject(e.target.value)} required />
@@ -502,7 +522,10 @@ export default function LibraryPage() {
                 Annuler la modification
               </button>
             ) : null}
-          </form>
+            </form>
+          ) : (
+            <p className="text-sm text-brand-700">Clique sur « Ajouter un livre PDF » pour afficher le formulaire.</p>
+          )}
         </section>
       ) : null}
 
