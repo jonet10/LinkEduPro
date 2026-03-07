@@ -959,7 +959,10 @@ export default function HeaderNav() {
               <div
                 ref={mobilePanelRef}
                 className="absolute inset-0 overflow-y-auto bg-[#081223] text-white"
-                style={{ animation: 'mobilePlusFade 200ms ease' }}
+                style={{
+                  animation: 'mobilePlusFade 200ms ease',
+                  paddingTop: 'max(0.75rem, env(safe-area-inset-top))'
+                }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="mx-auto flex w-full max-w-md items-center justify-between px-5 pb-3 pt-6">
