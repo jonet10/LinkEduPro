@@ -612,24 +612,13 @@ input[type="checkbox"] {
   grid-template-columns: 1.1fr 0.9fr;
   gap: 1.3rem;
   align-items: center;
-  position: relative;
-}
-
-.landing-hero-topline {
-  position: absolute;
-  left: 28px;
-  right: 28px;
-  top: 12px;
-  height: 4px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(214, 62, 131, 0.95), rgba(255, 132, 66, 0.9));
-  box-shadow: 0 0 10px rgba(214, 62, 131, 0.35);
 }
 
 .landing-hero-art {
   display: grid;
   gap: 0.9rem;
   justify-items: end;
+  margin-top: 22px;
 }
 
 .landing-hero-slide-shell {
@@ -1231,6 +1220,7 @@ input[type="checkbox"] {
 
   .landing-hero-art {
     justify-items: start;
+    margin-top: 12px;
   }
 
   .landing-hero-slide-shell {
