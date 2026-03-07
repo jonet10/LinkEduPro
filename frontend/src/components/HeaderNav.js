@@ -133,6 +133,7 @@ export default function HeaderNav() {
       { href: '/', label: 'Accueil' },
       { href: '/video-lessons', label: 'Classe Numerique' },
       { href: '/rattrapage', label: 'Rattrapage' },
+      ...(isAuthed && (roleUpper === 'TEACHER' || roleUpper === 'ADMIN') ? [{ href: '/teacher/dashboard', label: 'Dashboard prof' }] : []),
       { href: '/subjects', label: 'Quiz' },
       { href: '/probable-exercises', label: 'Examens passés' },
       { href: '/library', label: 'Bibliothèque' },
@@ -413,6 +414,7 @@ export default function HeaderNav() {
   }, [hidePublicMobileMenu]);
 
   const canSeeGlobalAdminDashboard = isAuthed && ['ADMIN', 'SUPER_ADMIN'].includes(roleUpper);
+  const canSeeTeacherDashboard = isAuthed && ['TEACHER', 'ADMIN'].includes(roleUpper);
   const canSeeProbableExercises = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeCatchup = isAuthed && (student?.role !== 'STUDENT' || isNsivStudent(student));
   const canSeeStudyPlans = isAuthed && student?.role !== 'STUDENT';
@@ -452,6 +454,7 @@ export default function HeaderNav() {
       { href: '/', label: 'Accueil', icon: '🏠' },
       { href: '/video-lessons', label: 'Classe Numerique', icon: '🎬' },
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
+      ...(canSeeTeacherDashboard ? [{ href: '/teacher/dashboard', label: 'Dashboard prof', icon: '💼' }] : []),
       { href: '/subjects', label: 'Quiz', icon: '📘' },
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : []),
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
@@ -461,7 +464,7 @@ export default function HeaderNav() {
       { href: '/support', label: 'Support', icon: '🤝' },
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
     ];
-  }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard, canSeeStudyPlans]);
+  }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard, canSeeStudyPlans, canSeeTeacherDashboard]);
 
   const mobileStudyItems = useMemo(
     () => [
@@ -480,9 +483,10 @@ export default function HeaderNav() {
       { href: '/educollect', label: 'EduCollect', icon: '💸' },
       { href: '/blog', label: 'Forum', icon: '📝' },
       { href: '/support', label: 'Support', icon: '🤝' },
+      ...(canSeeTeacherDashboard ? [{ href: '/teacher/dashboard', label: 'Dashboard prof', icon: '💼' }] : []),
       { href: '/search', label: 'Recherche', icon: '🔎' }
     ],
-    []
+    [canSeeTeacherDashboard]
   );
 
   const onLogout = () => {
