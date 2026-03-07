@@ -1,306 +1,195 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { apiClient } from '@/lib/api';
-import { getStudent, getToken } from '@/lib/auth';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { apiClient } from '@/lib/api';
+import { getToken } from '@/lib/auth';
+
+function normalizeText(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .trim();
+}
+
+function toSubjectKey(subject) {
+  const normalized = normalizeText(subject);
+  if (normalized.includes('PHYSIQUE')) return 'PHYSIQUE';
+  if (normalized.includes('MATHEMAT')) return 'MATHEMATIQUE';
+  if (normalized.includes('CHIM')) return 'CHIMIE';
+  return normalized || 'AUTRE';
+}
+
+function toSubjectLabel(key) {
+  if (key === 'PHYSIQUE') return 'Physique';
+  if (key === 'MATHEMATIQUE') return 'Mathématique';
+  if (key === 'CHIMIE') return 'Chimie';
+  return key;
+}
+
+function extractYear(fileName) {
+  const match = String(fileName || '').match(/(19\d{2}|20\d{2})/);
+  return match ? match[1] : 'Sans année';
+}
+
+function cleanFileLabel(fileName) {
+  return String(fileName || '')
+    .replace(/\.pdf$/i, '')
+    .replace(/[_-]+/g, ' ')
+    .trim();
+}
+
+function groupExamsByYear(subjectRows) {
+  const byFile = new Map();
+
+  for (const row of subjectRows || []) {
+    const topic = String(row?.topic || '').trim();
+    for (const source of row?.sources || []) {
+      const fileName = String(source?.fileName || '').trim();
+      if (!fileName) continue;
+
+      if (!byFile.has(fileName)) {
+        byFile.set(fileName, {
+          fileName,
+          year: extractYear(fileName),
+          topics: new Set()
+        });
+      }
+      if (topic) byFile.get(fileName).topics.add(topic);
+    }
+  }
+
+  const byYear = new Map();
+  for (const exam of byFile.values()) {
+    if (!byYear.has(exam.year)) byYear.set(exam.year, []);
+    byYear.get(exam.year).push({
+      fileName: exam.fileName,
+      label: cleanFileLabel(exam.fileName),
+      topics: Array.from(exam.topics).sort((a, b) => a.localeCompare(b)),
+      href: `/exam-viewer?file=${encodeURIComponent(exam.fileName)}`
+    });
+  }
+
+  const years = Array.from(byYear.keys()).sort((a, b) => {
+    if (a === 'Sans année') return 1;
+    if (b === 'Sans année') return -1;
+    return Number(b) - Number(a);
+  });
+
+  return years.map((year) => ({
+    year,
+    exams: (byYear.get(year) || []).sort((a, b) => a.label.localeCompare(b.label))
+  }));
+}
 
 export default function ProbableExercisesPage() {
   const [items, setItems] = useState([]);
-  const [selectedSubject, setSelectedSubject] = useState('PHYSIQUE');
+  const [selectedSubject, setSelectedSubject] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [commentDrafts, setCommentDrafts] = useState({});
-  const [feedback, setFeedback] = useState('');
-  const [submittingKey, setSubmittingKey] = useState('');
-  const [expandedSubjects, setExpandedSubjects] = useState({});
-  const [student, setStudent] = useState(null);
-  const [token, setToken] = useState(null);
-
-  function getKey(subject, topic) {
-    return `${subject}__${topic}`;
-  }
-
-  function normalizeSubjectName(value) {
-    return String(value || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toUpperCase();
-  }
-
-  function subjectMatches(subject, key) {
-    const normalized = normalizeSubjectName(subject);
-    if (key === 'PHYSIQUE') return normalized.includes('PHYSIQUE');
-    if (key === 'MATHEMATIQUE') return normalized.includes('MATHEMAT');
-    if (key === 'CHIMIE') return normalized.includes('CHIM');
-    return false;
-  }
-
-  function isExpandedSubject(subject) {
-    return Boolean(expandedSubjects[subject]);
-  }
-
-  function getVisibleTopics(subject, topics) {
-    if (!Array.isArray(topics)) return [];
-    return isExpandedSubject(subject) ? topics : topics.slice(0, 6);
-  }
 
   useEffect(() => {
     const authToken = getToken();
-    setToken(authToken);
-    setStudent(getStudent());
-
     apiClient('/public/probable-exercises', { token: authToken })
-      .then((data) => setItems(data.items || []))
-      .catch((e) => setError(e.message || 'Impossible de charger les exercices probables.'))
+      .then((data) => {
+        const nextItems = Array.isArray(data?.items) ? data.items : [];
+        setItems(nextItems);
+        const firstKey = nextItems.length ? toSubjectKey(nextItems[0].subject) : '';
+        setSelectedSubject(firstKey);
+      })
+      .catch((e) => setError(e.message || 'Impossible de charger les examens passés.'))
       .finally(() => setLoading(false));
   }, []);
 
-  async function onToggleLike(subject, topic) {
-    if (!token) {
-      setFeedback('Connecte-toi pour aimer un exercice.');
-      return;
+  const availableSubjects = useMemo(() => {
+    const subjectMap = new Map();
+    for (const row of items) {
+      const key = toSubjectKey(row?.subject);
+      if (!key) continue;
+      if (!subjectMap.has(key)) subjectMap.set(key, toSubjectLabel(key));
     }
+    return Array.from(subjectMap.entries()).map(([key, label]) => ({ key, label }));
+  }, [items]);
 
-    const key = getKey(subject, topic);
-    setSubmittingKey(`like:${key}`);
-    setFeedback('');
-    try {
-      const data = await apiClient('/public/probable-exercises/like', {
-        method: 'POST',
-        token,
-        body: JSON.stringify({ subject, topic })
-      });
+  const selectedRows = useMemo(
+    () => items.filter((row) => toSubjectKey(row?.subject) === selectedSubject),
+    [items, selectedSubject]
+  );
 
-      setItems((prev) =>
-        prev.map((subjectItem) => {
-          if (subjectItem.subject !== subject) return subjectItem;
-          return {
-            ...subjectItem,
-            topics: (subjectItem.topics || []).map((topicItem) =>
-              topicItem.topic === topic
-                ? {
-                    ...topicItem,
-                    likes: data.likes,
-                    likedByMe: Boolean(data.liked)
-                  }
-                : topicItem
-            )
-          };
-        })
-      );
-    } catch (e) {
-      setFeedback(e.message || 'Erreur lors du like.');
-    } finally {
-      setSubmittingKey('');
-    }
-  }
-
-  async function onComment(subject, topic) {
-    if (!token) {
-      setFeedback('Connecte-toi pour commenter.');
-      return;
-    }
-
-    const key = getKey(subject, topic);
-    const content = String(commentDrafts[key] || '').trim();
-    if (!content) return;
-
-    setSubmittingKey(`comment:${key}`);
-    setFeedback('');
-    try {
-      const data = await apiClient('/public/probable-exercises/comment', {
-        method: 'POST',
-        token,
-        body: JSON.stringify({ subject, topic, content })
-      });
-
-      setItems((prev) =>
-        prev.map((subjectItem) => {
-          if (subjectItem.subject !== subject) return subjectItem;
-          return {
-            ...subjectItem,
-            topics: (subjectItem.topics || []).map((topicItem) => {
-              if (topicItem.topic !== topic) return topicItem;
-              const currentComments = Array.isArray(topicItem.comments) ? topicItem.comments : [];
-              return {
-                ...topicItem,
-                commentsCount: Number(topicItem.commentsCount || 0) + 1,
-                comments: [
-                  {
-                    id: data.comment?.id || `${Date.now()}`,
-                    content,
-                    createdAt: data.comment?.createdAt || new Date().toISOString(),
-                    author: {
-                      id: student?.id || null,
-                      firstName: student?.firstName || 'Moi',
-                      lastName: student?.lastName || ''
-                    }
-                  },
-                  ...currentComments
-                ].slice(0, 3)
-              };
-            })
-          };
-        })
-      );
-      setCommentDrafts((prev) => ({ ...prev, [key]: '' }));
-    } catch (e) {
-      setFeedback(e.message || 'Erreur lors du commentaire.');
-    } finally {
-      setSubmittingKey('');
-    }
-  }
+  const yearGroups = useMemo(() => {
+    const topicRows = selectedRows.flatMap((row) => row?.topics || []);
+    return groupExamsByYear(topicRows);
+  }, [selectedRows]);
 
   return (
     <section className="space-y-5">
       <div className="card">
-        <h1 className="text-3xl font-bold text-brand-900">Exercices les plus probables</h1>
+        <h1 className="text-3xl font-bold text-brand-900">Examens passés</h1>
         <p className="mt-2 text-sm text-brand-700">
-          Analyse globale des examens passés pour le niveau NSIV (toutes écoles confondues).
+          Sélectionne une matière puis une année pour ouvrir les PDF des examens précédents.
         </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <button
-          type="button"
-          className={`card text-left ${selectedSubject === 'PHYSIQUE' ? 'ring-2 ring-brand-400' : ''}`}
-          onClick={() => setSelectedSubject('PHYSIQUE')}
-        >
-          <p className="text-lg font-semibold text-brand-900">Physique</p>
-          <p className="mt-1 text-sm text-brand-700">Voir tous les exercices probables de Physique.</p>
-        </button>
-        <button
-          type="button"
-          className={`card text-left ${selectedSubject === 'MATHEMATIQUE' ? 'ring-2 ring-brand-400' : ''}`}
-          onClick={() => setSelectedSubject('MATHEMATIQUE')}
-        >
-          <p className="text-lg font-semibold text-brand-900">Mathématique</p>
-          <p className="mt-1 text-sm text-brand-700">Voir les exercices probables de Mathématique.</p>
-        </button>
-        <button
-          type="button"
-          className={`card text-left ${selectedSubject === 'CHIMIE' ? 'ring-2 ring-brand-400' : ''}`}
-          onClick={() => setSelectedSubject('CHIMIE')}
-        >
-          <p className="text-lg font-semibold text-brand-900">Chimie</p>
-          <p className="mt-1 text-sm text-brand-700">Voir les exercices probables de Chimie.</p>
-        </button>
+        {availableSubjects.map((subject) => (
+          <button
+            key={subject.key}
+            type="button"
+            className={`card text-left ${selectedSubject === subject.key ? 'ring-2 ring-brand-400' : ''}`}
+            onClick={() => setSelectedSubject(subject.key)}
+          >
+            <p className="text-lg font-semibold text-brand-900">{subject.label}</p>
+            <p className="mt-1 text-sm text-brand-700">Voir les examens passés de {subject.label} par année.</p>
+          </button>
+        ))}
       </div>
 
       {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      {feedback ? <p className="text-sm text-red-600">{feedback}</p> : null}
 
-      {!loading && !error ? (() => {
-        const selectedItems = items.filter((subjectItem) => subjectMatches(subjectItem.subject, selectedSubject));
-        return selectedItems.length === 0 ? (
+      {!loading && !error ? (
+        yearGroups.length === 0 ? (
           <div className="card">
-            <p className="text-lg font-semibold text-brand-900">
-              {selectedSubject === 'PHYSIQUE' ? 'Physique' : selectedSubject === 'MATHEMATIQUE' ? 'Mathématique' : 'Chimie'}
-            </p>
-            <p className="mt-2 text-sm text-brand-700">Ce contenu sera disponible bientôt.</p>
+            <p className="text-lg font-semibold text-brand-900">{toSubjectLabel(selectedSubject || 'Matière')}</p>
+            <p className="mt-2 text-sm text-brand-700">Aucun PDF d’examen disponible pour le moment.</p>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {selectedItems.map((subjectItem) => (
-                <article key={subjectItem.subject} className="card space-y-3">
-                  <h2 className="text-xl font-semibold text-brand-900">{subjectItem.subject}</h2>
-                  <div className="space-y-2">
-                    {getVisibleTopics(subjectItem.subject, subjectItem.topics).map((topicItem) => (
-                      <div key={`${subjectItem.subject}_${topicItem.topic}`} className="rounded-lg border border-brand-100 px-3 py-2">
-                        <p className="font-semibold text-brand-900">{topicItem.topic}</p>
-                        <p className="text-xs text-brand-700">Apparitions: {topicItem.frequency}</p>
-                        <p className="text-xs text-brand-700">Classification: {topicItem.classification}</p>
-                        {topicItem.sampleQuestion ? (
-                          <div className="mt-2 rounded border border-brand-100 bg-brand-50 px-2 py-2">
-                            <p className="text-[11px] font-semibold text-brand-900">Exercice réel (extrait)</p>
-                            <p className="text-xs text-brand-700">{topicItem.sampleQuestion}</p>
-                          </div>
-                        ) : null}
-                        {(topicItem.sources || []).length > 0 ? (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {topicItem.sources.map((source) => (
-                              <Link
-                                key={`${subjectItem.subject}_${topicItem.topic}_${source.fileName}`}
-                                href={`/exam-viewer?file=${encodeURIComponent(source.fileName)}`}
-                                className="btn-secondary !px-3 !py-1 text-xs"
-                              >
-                                Ouvrir PDF
-                              </Link>
-                            ))}
-                          </div>
-                        ) : null}
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <button
-                            type="button"
-                            className="btn-secondary !px-3 !py-1 text-xs"
-                            onClick={() => onToggleLike(subjectItem.subject, topicItem.topic)}
-                            disabled={submittingKey === `like:${getKey(subjectItem.subject, topicItem.topic)}`}
-                          >
-                            {topicItem.likedByMe ? '💙 J’aime' : '🤍 J’aime'} ({topicItem.likes || 0})
-                          </button>
-                          <span className="text-xs text-brand-700">Commentaires: {topicItem.commentsCount || 0}</span>
-                        </div>
+          <div className="space-y-4">
+            {yearGroups.map((group) => (
+              <article key={`${selectedSubject}-${group.year}`} className="card">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <h2 className="text-xl font-semibold text-brand-900">
+                    {group.year === 'Sans année' ? 'Année non précisée' : `Année ${group.year}`}
+                  </h2>
+                  <span className="rounded-full bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700">
+                    {group.exams.length} PDF
+                  </span>
+                </div>
 
-                        <div className="mt-2 space-y-2">
-                          {(topicItem.comments || []).map((comment) => (
-                            <div key={comment.id} className="rounded border border-brand-100 bg-brand-50 px-2 py-1">
-                              <p className="text-xs text-brand-900">{comment.content}</p>
-                              <p className="text-[11px] text-brand-700">
-                                {comment.author?.firstName || 'Utilisateur'} {comment.author?.lastName || ''} • {new Date(comment.createdAt).toLocaleString()}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="mt-2 flex gap-2">
-                          <input
-                            className="input !py-1 text-xs"
-                            placeholder={token ? 'Ajouter un commentaire...' : 'Connecte-toi pour commenter'}
-                            value={commentDrafts[getKey(subjectItem.subject, topicItem.topic)] || ''}
-                            onChange={(e) =>
-                              setCommentDrafts((prev) => ({
-                                ...prev,
-                                [getKey(subjectItem.subject, topicItem.topic)]: e.target.value
-                              }))
-                            }
-                            disabled={!token || submittingKey === `comment:${getKey(subjectItem.subject, topicItem.topic)}`}
-                          />
-                          <button
-                            type="button"
-                            className="btn-primary !px-3 !py-1 text-xs"
-                            onClick={() => onComment(subjectItem.subject, topicItem.topic)}
-                            disabled={!token || submittingKey === `comment:${getKey(subjectItem.subject, topicItem.topic)}`}
-                          >
-                            Commenter
-                          </button>
-                        </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {group.exams.map((exam) => (
+                    <div key={`${group.year}-${exam.fileName}`} className="rounded-lg border border-brand-100 p-3">
+                      <p className="font-semibold text-brand-900">{exam.label}</p>
+                      {exam.topics.length > 0 ? (
+                        <p className="mt-1 text-xs text-brand-700">
+                          Thèmes: {exam.topics.slice(0, 3).join(' • ')}
+                          {exam.topics.length > 3 ? ' • ...' : ''}
+                        </p>
+                      ) : null}
+                      <div className="mt-3">
+                        <Link href={exam.href} className="btn-primary !px-3 !py-1.5 text-xs">
+                          Ouvrir PDF
+                        </Link>
                       </div>
-                    ))}
-                    {(subjectItem.topics || []).length > 6 ? (
-                      <button
-                        type="button"
-                        className="btn-secondary !px-3 !py-1 text-xs"
-                        onClick={() =>
-                          setExpandedSubjects((prev) => ({
-                            ...prev,
-                            [subjectItem.subject]: !prev[subjectItem.subject]
-                          }))
-                        }
-                      >
-                        {isExpandedSubject(subjectItem.subject) ? 'Voir moins' : `Voir plus (${(subjectItem.topics || []).length - 6})`}
-                      </button>
-                    ) : null}
-                    {(subjectItem.topics || []).length === 0 ? (
-                      <p className="text-sm text-brand-700">Aucune donnée disponible.</p>
-                    ) : null}
-                  </div>
-                </article>
-              ))}
+                    </div>
+                  ))}
+                </div>
+              </article>
+            ))}
           </div>
-        );
-      })() : null}
+        )
+      ) : null}
     </section>
   );
 }
