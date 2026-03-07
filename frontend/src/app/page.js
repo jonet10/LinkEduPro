@@ -217,28 +217,33 @@ function LearningShowcaseSection({ section }) {
     const node = trackRef.current;
     if (!node || !canSlide || section.items.length < 2) return undefined;
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
-
-    let rafId = null;
-    let lastTs = 0;
     const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
-    const speed = isMobileViewport ? 0.03 : 0.06;
+    const stepDelay = isMobileViewport ? 2600 : 3000;
 
-    const tick = (ts) => {
-      if (!lastTs) lastTs = ts;
-      const dt = ts - lastTs;
-      lastTs = ts;
-
+    const timer = window.setInterval(() => {
+      const firstCard = node.querySelector('.showcase-card');
+      if (!firstCard) return;
+      const gap = Number.parseFloat(window.getComputedStyle(node).columnGap || window.getComputedStyle(node).gap || '16') || 16;
+      const step = firstCard.getBoundingClientRect().width + gap;
       const maxLeft = Math.max(0, node.scrollWidth - node.clientWidth);
-      if (node.scrollLeft <= 1) autoDirectionRef.current = 1;
-      if (node.scrollLeft >= maxLeft - 1) autoDirectionRef.current = -1;
+      const next = node.scrollLeft + (autoDirectionRef.current * step);
 
-      node.scrollLeft += autoDirectionRef.current * speed * dt;
-      rafId = window.requestAnimationFrame(tick);
-    };
+      if (next <= 0) {
+        autoDirectionRef.current = 1;
+        node.scrollTo({ left: 0, behavior: 'auto' });
+        return;
+      }
+      if (next >= maxLeft) {
+        autoDirectionRef.current = -1;
+        node.scrollTo({ left: maxLeft, behavior: 'auto' });
+        return;
+      }
 
-    rafId = window.requestAnimationFrame(tick);
+      node.scrollTo({ left: next, behavior: 'auto' });
+    }, stepDelay);
+
     return () => {
-      if (rafId) window.cancelAnimationFrame(rafId);
+      window.clearInterval(timer);
     };
   }, [canSlide, section.items.length]);
 
