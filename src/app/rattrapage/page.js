@@ -443,7 +443,7 @@ export default function RattrapagePage() {
   function renderSessionCard(session) {
     const endDate = getSessionEndDate(session);
     return (
-      <article key={session.id} className={`card ${highlightedSessionId === session.id ? 'ring-2 ring-brand-400' : ''}`}>
+      <article key={session.id} className={`card rattrapage-session-card ${highlightedSessionId === session.id ? 'ring-2 ring-brand-400' : ''} ${openActionsId === session.id ? 'z-30' : ''}`}>
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">{session.subject}</p>
         <h3 className="text-lg font-semibold text-brand-900">{session.title}</h3>
         {session.description ? <p className="mt-1 text-sm text-brand-700">{session.description}</p> : null}
@@ -567,7 +567,7 @@ export default function RattrapagePage() {
         </p>
         {student?.role === 'TEACHER' ? (
           <div className="mt-4">
-            <Link href="/teacher/dashboard" className="btn-secondary">Ouvrir mon dashboard professeur</Link>
+            <Link href="/teacher/dashboard" className="btn-secondary">Ouvrir mes revenus</Link>
           </div>
         ) : null}
       </div>

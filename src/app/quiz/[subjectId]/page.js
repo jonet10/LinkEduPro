@@ -52,8 +52,26 @@ export default function QuizPage() {
   const [reviewItems, setReviewItems] = useState([]);
   const [showReview, setShowReview] = useState(false);
   const [reviewMode, setReviewMode] = useState('failed');
+  const [showQuizCreator, setShowQuizCreator] = useState(false);
+  const [creatingQuizQuestion, setCreatingQuizQuestion] = useState(false);
+  const [manageInfo, setManageInfo] = useState('');
+  const [quizCreatorForm, setQuizCreatorForm] = useState({
+    prompt: '',
+    answerType: 'MCQ',
+    optionsRaw: '',
+    correctOption: '0',
+    correctText: '',
+    explanation: '',
+    sourceTopic: '',
+    frequencyScore: '10',
+    isPremium: false
+  });
   const lastOptionOrderRef = useRef({});
   const currentStudent = useMemo(() => getStudent(), []);
+  const canManageQuiz = useMemo(() => {
+    const role = String(currentStudent?.role || '').toUpperCase();
+    return role === 'ADMIN' || role === 'TEACHER' || role === 'SUPER_ADMIN';
+  }, [currentStudent?.role]);
 
   const selectedSet = quizSets.find((s) => s.key === selectedSetKey) || null;
   const shouldShowExamHeader = Boolean(subject?.name) && (
@@ -279,6 +297,87 @@ export default function QuizPage() {
     }
   };
 
+  const createQuizQuestion = async (event) => {
+    event.preventDefault();
+    if (!canManageQuiz || creatingQuizQuestion) return;
+    const token = getToken();
+    if (!token) return;
+
+    const prompt = String(quizCreatorForm.prompt || '').trim();
+    const answerType = String(quizCreatorForm.answerType || 'MCQ').toUpperCase();
+    const explanation = String(quizCreatorForm.explanation || '').trim();
+    const sourceTopic = String(quizCreatorForm.sourceTopic || '').trim();
+    const frequencyScore = Number(quizCreatorForm.frequencyScore || 0);
+    const isPremium = Boolean(quizCreatorForm.isPremium);
+
+    if (prompt.length < 3) {
+      setError('Le prompt doit contenir au moins 3 caractères.');
+      return;
+    }
+
+    const payload = {
+      prompt,
+      answerType,
+      explanation: explanation || null,
+      sourceTopic: sourceTopic || null,
+      frequencyScore: Number.isFinite(frequencyScore) ? Math.max(0, Math.min(1000, Math.trunc(frequencyScore))) : 0,
+      isPremium
+    };
+
+    if (answerType === 'MCQ') {
+      const options = String(quizCreatorForm.optionsRaw || '')
+        .split('\n')
+        .map((item) => item.trim())
+        .filter(Boolean);
+      if (options.length < 2) {
+        setError('Pour un quiz QCM, ajoute au moins 2 options.');
+        return;
+      }
+      const correctOption = Number(quizCreatorForm.correctOption || 0);
+      if (!Number.isInteger(correctOption) || correctOption < 0 || correctOption >= options.length) {
+        setError('Index de bonne réponse invalide.');
+        return;
+      }
+      payload.options = options;
+      payload.correctOption = correctOption;
+    } else {
+      const correctText = String(quizCreatorForm.correctText || '').trim();
+      if (!correctText) {
+        setError('Pour un quiz texte, la réponse attendue est obligatoire.');
+        return;
+      }
+      payload.options = [];
+      payload.correctText = correctText;
+    }
+
+    try {
+      setCreatingQuizQuestion(true);
+      setError('');
+      setManageInfo('');
+      await apiClient(`/quiz/subject/${subjectId}/questions`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify(payload)
+      });
+      setManageInfo('Question de quiz créée avec succès.');
+      setQuizCreatorForm({
+        prompt: '',
+        answerType: 'MCQ',
+        optionsRaw: '',
+        correctOption: '0',
+        correctText: '',
+        explanation: '',
+        sourceTopic: '',
+        frequencyScore: '10',
+        isPremium: false
+      });
+    } catch (e) {
+      setError(e.message || 'Impossible de créer la question de quiz.');
+    } finally {
+      setCreatingQuizQuestion(false);
+    }
+  };
+
   const shareQuizResult = async () => {
     if (!quizResult) return;
 
@@ -388,6 +487,77 @@ export default function QuizPage() {
       ) : null}
 
       {error ? <p className="mb-4 text-red-600">{error}</p> : null}
+      {manageInfo ? <p className="mb-4 text-sm text-emerald-700">{manageInfo}</p> : null}
+
+      {canManageQuiz ? (
+        <article className="card mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold text-brand-900">Créer un quiz (question)</h2>
+            <button type="button" className="btn-secondary" onClick={() => setShowQuizCreator((prev) => !prev)}>
+              {showQuizCreator ? 'Masquer' : 'Créer un quiz'}
+            </button>
+          </div>
+          {showQuizCreator ? (
+            <form className="mt-3 grid gap-3 md:grid-cols-2" onSubmit={createQuizQuestion}>
+              <label className="space-y-1 md:col-span-2">
+                <span className="text-sm font-medium text-brand-900">Question</span>
+                <input className="input w-full" value={quizCreatorForm.prompt} onChange={(e) => setQuizCreatorForm((p) => ({ ...p, prompt: e.target.value }))} required />
+              </label>
+
+              <label className="space-y-1">
+                <span className="text-sm font-medium text-brand-900">Type de réponse</span>
+                <select className="input w-full" value={quizCreatorForm.answerType} onChange={(e) => setQuizCreatorForm((p) => ({ ...p, answerType: e.target.value }))}>
+                  <option value="MCQ">QCM</option>
+                  <option value="TEXT">Texte libre</option>
+                </select>
+              </label>
+
+              <label className="space-y-1">
+                <span className="text-sm font-medium text-brand-900">Indice bonne réponse (QCM)</span>
+                <input className="input w-full" type="number" min="0" value={quizCreatorForm.correctOption} onChange={(e) => setQuizCreatorForm((p) => ({ ...p, correctOption: e.target.value }))} />
+              </label>
+
+              {quizCreatorForm.answerType === 'MCQ' ? (
+                <label className="space-y-1 md:col-span-2">
+                  <span className="text-sm font-medium text-brand-900">Options (une ligne par option)</span>
+                  <textarea className="input min-h-[100px] w-full" value={quizCreatorForm.optionsRaw} onChange={(e) => setQuizCreatorForm((p) => ({ ...p, optionsRaw: e.target.value }))} />
+                </label>
+              ) : (
+                <label className="space-y-1 md:col-span-2">
+                  <span className="text-sm font-medium text-brand-900">Réponse attendue (texte)</span>
+                  <textarea className="input min-h-[90px] w-full" value={quizCreatorForm.correctText} onChange={(e) => setQuizCreatorForm((p) => ({ ...p, correctText: e.target.value }))} />
+                </label>
+              )}
+
+              <label className="space-y-1">
+                <span className="text-sm font-medium text-brand-900">Thème source</span>
+                <input className="input w-full" value={quizCreatorForm.sourceTopic} onChange={(e) => setQuizCreatorForm((p) => ({ ...p, sourceTopic: e.target.value }))} placeholder="Ex: Cinématique" />
+              </label>
+
+              <label className="space-y-1">
+                <span className="text-sm font-medium text-brand-900">Score fréquence</span>
+                <input className="input w-full" type="number" min="0" max="1000" value={quizCreatorForm.frequencyScore} onChange={(e) => setQuizCreatorForm((p) => ({ ...p, frequencyScore: e.target.value }))} />
+              </label>
+
+              <label className="space-y-1 md:col-span-2">
+                <span className="text-sm font-medium text-brand-900">Explication (optionnel)</span>
+                <textarea className="input min-h-[90px] w-full" value={quizCreatorForm.explanation} onChange={(e) => setQuizCreatorForm((p) => ({ ...p, explanation: e.target.value }))} />
+              </label>
+
+              <label className="inline-flex items-center gap-2 md:col-span-2">
+                <input type="checkbox" checked={quizCreatorForm.isPremium} onChange={(e) => setQuizCreatorForm((p) => ({ ...p, isPremium: e.target.checked }))} />
+                <span className="text-sm text-brand-900">Question premium</span>
+              </label>
+
+              <div className="md:col-span-2">
+                <button type="submit" className="btn-primary" disabled={creatingQuizQuestion}>
+                  {creatingQuizQuestion ? 'Création...' : 'Enregistrer la question'}
+                </button>
+              </div>
+            </form>
+          ) : null}
+        </article>
+      ) : null}
 
       {questions.length === 0 && quizSets.length > 1 ? (
         <div className="grid gap-4 md:grid-cols-2">

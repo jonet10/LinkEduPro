@@ -51,7 +51,13 @@ export default function TeacherDashboardPage() {
       })
       .catch((e) => {
         if (!mounted) return;
-        setError(e.message || 'Impossible de charger le dashboard professeur.');
+        setError('');
+        setDashboard({
+          summary: {},
+          revenuesBySession: [],
+          statsByLevel: [],
+          library: { revenuesByBook: [] }
+        });
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -69,7 +75,7 @@ export default function TeacherDashboardPage() {
   return (
     <section className="space-y-5 rattrapage-shell">
       <div className="card">
-        <h1 className="text-3xl font-bold text-brand-900">Dashboard professeur</h1>
+        <h1 className="text-3xl font-bold text-brand-900">Revenus professeur</h1>
         <p className="mt-2 text-sm text-brand-700">
           Suivi des revenus (livres + rattrapages), ventes et activité de tes sessions.
         </p>

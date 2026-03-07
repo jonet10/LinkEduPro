@@ -59,7 +59,7 @@ export default function SuperDashboardPage() {
   const [savingTiktok, setSavingTiktok] = useState(false);
   const [platformDonations, setPlatformDonations] = useState([]);
   const [donationFilters, setDonationFilters] = useState({
-    status: '',
+    status: 'SUCCESS',
     dateFrom: '',
     dateTo: '',
     q: ''
@@ -281,7 +281,7 @@ export default function SuperDashboardPage() {
       {dashboard?.analytics ? (
         <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <div className="card"><p className="text-sm">Écoles</p><p className="text-2xl font-bold">{dashboard.analytics.schools}</p></div>
-          <div className="card"><p className="text-sm">Élèves NS4</p><p className="text-2xl font-bold">{dashboard.analytics.publicStudents}</p></div>
+          <div className="card"><p className="text-sm">Élèves (tous niveaux)</p><p className="text-2xl font-bold">{dashboard.analytics.publicStudents}</p></div>
           <div className="card"><p className="text-sm">Professeurs</p><p className="text-2xl font-bold">{dashboard.analytics.teachers}</p></div>
           <div className="card"><p className="text-sm">Paiements mensuels</p><p className="text-2xl font-bold">{String(dashboard.analytics.monthlyInternalPayments)}</p></div>
         </section>
@@ -349,9 +349,6 @@ export default function SuperDashboardPage() {
           >
             <option value="">Tous statuts</option>
             <option value="SUCCESS">SUCCESS</option>
-            <option value="PENDING">PENDING</option>
-            <option value="FAILED">FAILED</option>
-            <option value="REFUNDED">REFUNDED</option>
           </select>
           <input
             className="input"
