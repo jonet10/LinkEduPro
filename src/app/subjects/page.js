@@ -108,7 +108,7 @@ export default function SubjectsPage() {
 
   if (isPublicView) {
     return (
-      <section className="public-transparent-scope space-y-5">
+      <section className="public-transparent-scope subjects-public-scope space-y-5">
         <article className="card public-card grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-center">
           <div>
             <h1 className="text-3xl font-bold text-brand-900">Apprendre par matière</h1>

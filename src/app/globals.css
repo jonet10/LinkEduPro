@@ -1457,6 +1457,26 @@ body {
   color: #cfe8ff !important;
 }
 
+/* Subjects public page: stronger contrast in light mode */
+.subjects-public-scope .text-brand-900 {
+  color: #eaf6ff !important;
+  text-shadow: 0 1px 10px rgba(4, 16, 33, 0.34);
+}
+
+.subjects-public-scope .text-brand-700 {
+  color: #cfe8ff !important;
+}
+
+.subjects-public-scope .text-brand-500 {
+  color: #abd4fb !important;
+}
+
+.subjects-public-scope .btn-secondary {
+  background: rgba(240, 248, 255, 0.94) !important;
+  border-color: rgba(179, 212, 244, 0.8) !important;
+  color: #2f6292 !important;
+}
+
 /* Transparent treatment for home after login */
 .authed-transparent-scope .card,
 .authed-transparent-scope .palette-card,
@@ -1521,6 +1541,18 @@ body {
 }
 
 .dark .authed-transparent-scope .text-brand-500 {
+  color: #96c2ef !important;
+}
+
+.dark .subjects-public-scope .text-brand-900 {
+  color: #e8f2ff !important;
+}
+
+.dark .subjects-public-scope .text-brand-700 {
+  color: #bfdcff !important;
+}
+
+.dark .subjects-public-scope .text-brand-500 {
   color: #96c2ef !important;
 }
 
