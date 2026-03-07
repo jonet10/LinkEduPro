@@ -322,7 +322,6 @@ export default function HomePage() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [student, setStudent] = useState(null);
   const [community, setCommunity] = useState({ leaderboard: [], recent: [], schools: [] });
-  const [notifications, setNotifications] = useState([]);
   const [onlineStats, setOnlineStats] = useState({
     counts: { total: 0, students: 0, teachers: 0, admins: 0, others: 0 },
     latestSeenAt: null,
@@ -417,12 +416,10 @@ export default function HomePage() {
 
     Promise.all([
       apiClient('/results/community', { token }),
-      apiClient('/v2/profile/daily-welcome-popup', { token }),
-      apiClient('/notifications', { token })
+      apiClient('/v2/profile/daily-welcome-popup', { token })
     ])
-      .then(([communityData, popupData, notifData]) => {
+      .then(([communityData, popupData]) => {
         setCommunity(communityData);
-        setNotifications((notifData?.notifications || []).slice(0, 6));
         if (popupData?.shouldShow) {
           setWelcomePopup(popupData);
         }
@@ -656,23 +653,6 @@ export default function HomePage() {
       localStorage.setItem(CALENDAR_NOTICE_KEY, '1');
     }
     setShowCalendarNotice(false);
-  }
-
-  function resolveNotificationHref(notification) {
-    const entityId = notification?.entityId ? String(notification.entityId) : '';
-    if (notification?.entityType === 'CATCHUP_SESSION' && entityId) {
-      return `/rattrapage?session=${encodeURIComponent(entityId)}`;
-    }
-    if (notification?.entityType === 'Conversation' && entityId) {
-      return `/messages?conversation=${encodeURIComponent(entityId)}`;
-    }
-    if (notification?.entityType === 'Post' && entityId) {
-      return `/blog?post=${encodeURIComponent(entityId)}`;
-    }
-    if (notification?.entityType === 'LibraryBook') {
-      return '/library';
-    }
-    return '/messages';
   }
 
   if (!ready) return <p>Chargement...</p>;
@@ -1098,26 +1078,6 @@ export default function HomePage() {
           </div>
         </article>
       )}
-
-      <article className="card motion-enter motion-delay-4 lift-card home-gold-soft">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="home-gold-title text-xl font-semibold text-brand-900">Annonces et alertes</h2>
-          <Link href="/messages" className="text-sm text-brand-700 hover:underline">Voir tout</Link>
-        </div>
-        <div className="space-y-2 text-sm">
-          {notifications.map((n) => (
-            <Link
-              key={n.id}
-              href={resolveNotificationHref(n)}
-              className={`block rounded border px-3 py-2 lift-card ${n.isRead ? 'border-brand-100' : 'border-brand-500 bg-brand-50'}`}
-            >
-              <p className="font-semibold text-brand-900">{n.title}</p>
-              <p className="text-xs text-brand-700">{new Date(n.createdAt).toLocaleString()}</p>
-            </Link>
-          ))}
-          {notifications.length === 0 ? <p className="text-brand-700">Aucune alerte pour le moment.</p> : null}
-        </div>
-      </article>
 
       <article className="card motion-enter motion-delay-4 lift-card home-gold-soft">
         <div className="mb-3 flex items-start justify-between gap-3">
