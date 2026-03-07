@@ -1367,18 +1367,14 @@ body {
     0 0 0 1px rgba(255, 255, 255, 0.05) !important;
 }
 
-/* Improve readability on transparent public landing cards */
-.landing-glass-clean .card .text-brand-900 {
+/* Improve readability on transparent public landing section headers only */
+.landing-glass-clean > .card > .text-brand-900 {
   color: #edf7ff !important;
   text-shadow: 0 1px 10px rgba(4, 17, 34, 0.35);
 }
 
-.landing-glass-clean .card .text-brand-700 {
+.landing-glass-clean > .card > .text-brand-700 {
   color: #cfe8ff !important;
-}
-
-.landing-glass-clean .card .text-brand-500 {
-  color: #a7d2fb !important;
 }
 
 /* Remove the visible global container on public home (Udemy-like) */
@@ -1426,26 +1422,14 @@ body {
   background: rgba(8, 24, 45, 0.35) !important;
 }
 
-/* Public pages: enforce stronger text contrast on transparent blocks */
-.public-transparent-scope .text-brand-900 {
+/* Keep text contrast on transparent section headers without affecting nested white cards */
+.public-transparent-scope > .card > .text-brand-900 {
   color: #edf7ff !important;
   text-shadow: 0 1px 10px rgba(3, 16, 32, 0.34);
 }
 
-.public-transparent-scope .text-brand-800 {
-  color: #deefff !important;
-}
-
-.public-transparent-scope .text-brand-700 {
+.public-transparent-scope > .card > .text-brand-700 {
   color: #cfe8ff !important;
-}
-
-.public-transparent-scope .text-brand-500 {
-  color: #acd4fb !important;
-}
-
-.public-transparent-scope .bg-brand-50 {
-  background-color: rgba(139, 200, 247, 0.2) !important;
 }
 
 /* Transparent treatment for home after login */
