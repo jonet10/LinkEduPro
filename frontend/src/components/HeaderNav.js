@@ -601,6 +601,15 @@ export default function HeaderNav() {
           <Link href="/search" className="public-icon-btn rounded-lg border border-brand-200 p-2 hover:bg-brand-50" aria-label="Explorer">
             🌐
           </Link>
+          <button
+            type="button"
+            className="public-icon-btn rounded-lg border border-brand-200 p-2 hover:bg-brand-50"
+            onClick={toggleDarkMode}
+            title={darkMode ? 'Désactiver le mode sombre' : 'Activer le mode sombre'}
+            aria-label={darkMode ? 'Désactiver le mode sombre' : 'Activer le mode sombre'}
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
           <Link href="/login" className="public-auth-btn rounded-lg border border-brand-500 px-4 py-2 font-semibold text-brand-700 hover:bg-brand-50">
             Se connecter
           </Link>
@@ -753,9 +762,18 @@ export default function HeaderNav() {
                   ☰
                 </button>
               ) : null}
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+                aria-label={darkMode ? 'Désactiver le mode sombre' : 'Activer le mode sombre'}
+                title={darkMode ? 'Désactiver le mode sombre' : 'Activer le mode sombre'}
+                onClick={toggleDarkMode}
+              >
+                {darkMode ? '☀️' : '🌙'}
+              </button>
               <Link
                 href="/login"
-                className="ml-auto inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
+                className="inline-flex items-center justify-center rounded-md border border-brand-100 px-2 py-1.5 hover:bg-brand-50"
                 aria-label="Connexion"
                 title="Connexion"
               >
@@ -805,6 +823,18 @@ export default function HeaderNav() {
                       </Link>
                     ))}
                   </div>
+                </section>
+
+                <section className="mt-3 rounded-xl border border-brand-100 p-3">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-700">Affichage</p>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm hover:bg-brand-50"
+                    onClick={toggleDarkMode}
+                  >
+                    <span>{darkMode ? '☀️ Mode clair' : '🌙 Mode sombre'}</span>
+                    <span className="text-brand-500">›</span>
+                  </button>
                 </section>
 
                 <div className="mt-4 flex gap-2">
