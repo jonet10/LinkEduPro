@@ -65,6 +65,8 @@ export default function BlogPage() {
   const [publicItems, setPublicItems] = useState([]);
   const [publicLoading, setPublicLoading] = useState(false);
   const [publicError, setPublicError] = useState('');
+  const [publicVisibleCount, setPublicVisibleCount] = useState(5);
+  const [visibleCount, setVisibleCount] = useState(5);
   const [openComments, setOpenComments] = useState({});
   const [commentsByPost, setCommentsByPost] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
@@ -445,7 +447,7 @@ export default function BlogPage() {
     if (token) return;
     setPublicLoading(true);
     setPublicError('');
-    apiClient('/public/blog/recent?limit=6')
+    apiClient('/public/blog/recent?limit=20')
       .then((data) => {
         setPublicItems(data.items || []);
       })
@@ -467,6 +469,14 @@ export default function BlogPage() {
     if (!expandedPostId) return;
     scrollToPostTop(expandedPostId, false);
   }, [expandedPostId, items.length]);
+
+  useEffect(() => {
+    setVisibleCount(5);
+  }, [page, search, postTypeFilter]);
+
+  useEffect(() => {
+    setPublicVisibleCount(5);
+  }, [token]);
 
   useEffect(() => {
     if (!viewerImageUrl) return undefined;
@@ -760,7 +770,7 @@ export default function BlogPage() {
           {publicLoading ? <p className="mt-2 text-sm text-brand-700">Chargement...</p> : null}
           {publicError ? <p className="mt-2 text-sm text-red-600">{publicError}</p> : null}
           <div className="mt-4 grid gap-4">
-            {publicItems.map((post) => (
+            {publicItems.slice(0, publicVisibleCount).map((post) => (
               <article key={post.id} className="rounded-xl border border-brand-100 bg-white p-4 public-card public-card-delay-2">
                 <div className="flex items-start gap-3">
                   {post.imageUrl ? (
@@ -793,6 +803,13 @@ export default function BlogPage() {
             ))}
             {!publicLoading && publicItems.length === 0 ? (
               <p className="text-sm text-brand-700">Aucune publication publique pour le moment.</p>
+            ) : null}
+            {!publicLoading && publicItems.length > publicVisibleCount ? (
+              <div>
+                <button type="button" className="btn-secondary" onClick={() => setPublicVisibleCount((prev) => prev + 5)}>
+                  Voir plus
+                </button>
+              </div>
             ) : null}
           </div>
         </section>
@@ -932,7 +949,16 @@ export default function BlogPage() {
 
       {items
         .filter((post) => !expandedPostId || post.id !== expandedPostId)
+        .slice(0, visibleCount)
         .map((post) => renderPostCard(post))}
+
+      {items.filter((post) => !expandedPostId || post.id !== expandedPostId).length > visibleCount ? (
+        <section className="flex justify-center">
+          <button type="button" className="btn-secondary" onClick={() => setVisibleCount((prev) => prev + 5)}>
+            Voir plus
+          </button>
+        </section>
+      ) : null}
 
       <section className="flex items-center justify-between">
         <button className="btn-secondary" disabled={pagination.page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Precedent</button>
