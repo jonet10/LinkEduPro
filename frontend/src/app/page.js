@@ -759,7 +759,7 @@ export default function HomePage() {
           </div>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {activeLandingBooks.map((book) => (
-              <article key={book.title} className="palette-card rounded-xl border border-brand-100 p-4">
+              <article key={book.title} className="palette-card rounded-xl border border-brand-100 bg-white/90 p-4 backdrop-blur-sm dark:bg-slate-900/70">
                 <div className="mb-2 flex items-center gap-2">
                   <img
                     src={activeLandingSubjectMeta.iconImage}
