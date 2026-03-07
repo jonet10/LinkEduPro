@@ -594,6 +594,14 @@ export default function HeaderNav() {
   const mobileFourthTabHref = canSeeGlobalAdminDashboard ? dashboardHref : '/search';
   const mobileFourthTabLabel = canSeeGlobalAdminDashboard ? 'Dashboard' : 'Recherche';
   const mobileFourthTabIcon = canSeeGlobalAdminDashboard ? '📊' : '🔎';
+  const onMobileBack = () => {
+    if (typeof window === 'undefined') return;
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    router.push('/');
+  };
 
   return (
     <>
@@ -1126,7 +1134,16 @@ export default function HeaderNav() {
                 paddingBottom: 'env(safe-area-inset-bottom)'
               }}
             >
-              <nav className="grid grid-cols-5 gap-1 px-2 py-2">
+              <nav className="grid grid-cols-6 gap-1 px-2 py-2">
+                <button
+                  type="button"
+                  className="rounded-lg px-1 py-1 text-center text-[11px] text-slate-300"
+                  onClick={onMobileBack}
+                  aria-label="Retour"
+                >
+                  <div className="text-lg">←</div>
+                  <div>Retour</div>
+                </button>
                 <Link href="/" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
                   <div className="text-lg">🏠</div>
                   <div>Accueil</div>
