@@ -75,11 +75,11 @@ const LEARNING_SHOWCASE_SECTIONS = [
     title: 'Quiz les plus populaires',
     subtitle: 'Entraînements recommandés cette semaine',
     items: [
-      { title: 'Quiz Physique NSIV - Bases', author: 'LinkEduPro', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Populaire', href: '/subjects', image: '/images/tool-quiz-bac.png' },
-      { title: 'Quiz Maths - Révision rapide', author: 'LinkEduPro', rating: '4,8', price: 'Gratuit', oldPrice: '', badge: 'Top', href: '/subjects', image: '/slides/H.jpeg' },
-      { title: 'Quiz Chimie - Annales ciblées', author: 'LinkEduPro', rating: '4,6', price: 'Gratuit', oldPrice: '', badge: 'Recommandé', href: '/subjects', image: '/slides/HC.jpg' },
-      { title: 'Quiz Hist-Géo - NSIV', author: 'LinkEduPro', rating: '4,5', price: 'Gratuit', oldPrice: '', badge: 'Nouveau', href: '/subjects', image: '/slides/HTC.jpg' },
-      { title: 'Quiz Philosophie - Concepts clés', author: 'LinkEduPro', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Populaire', href: '/subjects', image: '/slides/HL.jpg' }
+      { title: 'Quiz Physique NSIV - Bases', author: 'LinkEduPro', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Populaire', href: '/subjects', image: '/images/subject-physique.png' },
+      { title: 'Quiz Maths - Révision rapide', author: 'LinkEduPro', rating: '4,8', price: 'Gratuit', oldPrice: '', badge: 'Top', href: '/subjects', image: '/images/subject-mathematiques.png' },
+      { title: 'Quiz Chimie - Annales ciblées', author: 'LinkEduPro', rating: '4,6', price: 'Gratuit', oldPrice: '', badge: 'Recommandé', href: '/subjects', image: '/images/subject-chimie.png' },
+      { title: 'Quiz Hist-Géo - NSIV', author: 'LinkEduPro', rating: '4,5', price: 'Gratuit', oldPrice: '', badge: 'Nouveau', href: '/subjects', image: '/images/subject-histoire-geo.png' },
+      { title: 'Quiz Philosophie - Concepts clés', author: 'LinkEduPro', rating: '4,7', price: 'Gratuit', oldPrice: '', badge: 'Populaire', href: '/subjects', image: '/images/subject-philosophie.png' }
     ]
   },
   {
@@ -153,11 +153,15 @@ function toShowcaseImage(title, fallback = '/slides/H.jpeg') {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
+  if (normalized.includes('svt') || normalized.includes('biologie') || normalized.includes('geologie')) return '/images/subject-physique.png';
   if (normalized.includes('physique')) return '/images/subject-physique.png';
   if (normalized.includes('math')) return '/images/subject-mathematiques.png';
+  if (normalized.includes('informatique')) return '/images/subject-mathematiques.png';
   if (normalized.includes('chimie')) return '/images/subject-chimie.png';
   if (normalized.includes('histoire') || normalized.includes('geo')) return '/images/subject-histoire-geo.png';
+  if (normalized.includes('econom') || normalized.includes('civique') || normalized.includes('citoyennete')) return '/images/subject-histoire-geo.png';
   if (normalized.includes('philo')) return '/images/subject-philosophie.png';
+  if (normalized.includes('anglais') || normalized.includes('espagnol') || normalized.includes('creole') || normalized.includes('grammaire')) return '/images/subject-francais.png';
   if (normalized.includes('francais') || normalized.includes('français')) return '/images/subject-francais.png';
   if (normalized.includes('rattrapage') || normalized.includes('live')) return '/images/tool-rattrapage-live.png';
   if (normalized.includes('video')) return '/images/tool-communaute-scolaire.png';
