@@ -39,12 +39,13 @@ export default function RattrapagePage() {
 
   const [sessions, setSessions] = useState([]);
   const [teachers, setTeachers] = useState([]);
-  const [teacherStats, setTeacherStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [showPlanner, setShowPlanner] = useState(false);
+  const [openActionsId, setOpenActionsId] = useState(null);
   const [highlightedSessionId, setHighlightedSessionId] = useState(null);
   const [paymentChoice, setPaymentChoice] = useState(null);
   const [form, setForm] = useState({
@@ -83,10 +84,9 @@ export default function RattrapagePage() {
 
     Promise.allSettled([
       apiClient('/catchup?page=1&pageSize=100', { token }),
-      canManage ? apiClient('/catchup/teachers', { token }) : Promise.resolve({ teachers: [] }),
-      canManage ? apiClient('/catchup/dashboard/teacher', { token }) : Promise.resolve(null)
+      canManage ? apiClient('/catchup/teachers', { token }) : Promise.resolve({ teachers: [] })
     ])
-      .then(([sessionsRes, teachersRes, teacherDashRes]) => {
+      .then(([sessionsRes, teachersRes]) => {
         if (sessionsRes.status === 'fulfilled') {
           setSessions(sessionsRes.value.sessions || []);
         } else {
@@ -99,11 +99,6 @@ export default function RattrapagePage() {
           setTeachers([]);
         }
 
-        if (teacherDashRes.status === 'fulfilled') {
-          setTeacherStats(teacherDashRes.value);
-        } else {
-          setTeacherStats(null);
-        }
       })
       .finally(() => setLoading(false));
   }, [token, canView, router, canManage]);
@@ -185,6 +180,8 @@ export default function RattrapagePage() {
 
   function startEdit(session) {
     setEditingId(session.id);
+    setShowPlanner(true);
+    setOpenActionsId(null);
     setForm({
       title: session.title || '',
       level: session.level || 'NSIV',
@@ -313,6 +310,8 @@ export default function RattrapagePage() {
 
   function onRepublish(session) {
     setEditingId(null);
+    setShowPlanner(true);
+    setOpenActionsId(null);
     const sourceStart = session.startTime || session.startsAt;
     const sourceEnd = session.endsAt || (sourceStart ? new Date(new Date(sourceStart).getTime() + Number(session.duration || 0) * 60000) : null);
     setForm({
@@ -490,10 +489,30 @@ export default function RattrapagePage() {
           </div>
         ) : null}
         {canManage ? (
-          <div className="mt-3 flex gap-2">
-            <button className="btn-secondary" onClick={() => startEdit(session)}>Modifier</button>
-            <button className="btn-secondary" onClick={() => onDelete(session.id)}>Supprimer</button>
-            <button className="btn-secondary" onClick={() => onRepublish(session)}>Reprogrammer</button>
+          <div className="mt-3 flex justify-end">
+            <div className="relative">
+              <button
+                type="button"
+                className="btn-secondary px-3"
+                aria-label="Actions session"
+                onClick={() => setOpenActionsId((prev) => (prev === session.id ? null : session.id))}
+              >
+                ⋮
+              </button>
+              {openActionsId === session.id ? (
+                <div className="absolute right-0 z-20 mt-2 min-w-[180px] rounded-lg border border-brand-100 bg-white p-1 shadow-lg">
+                  <button type="button" className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-brand-50" onClick={() => { startEdit(session); setOpenActionsId(null); }}>
+                    Modifier
+                  </button>
+                  <button type="button" className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-brand-50" onClick={() => { onRepublish(session); setOpenActionsId(null); }}>
+                    Reprogrammer
+                  </button>
+                  <button type="button" className="w-full rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50" onClick={() => { onDelete(session.id); setOpenActionsId(null); }}>
+                    Supprimer
+                  </button>
+                </div>
+              ) : null}
+            </div>
           </div>
         ) : null}
       </article>
@@ -546,47 +565,34 @@ export default function RattrapagePage() {
         <p className="mt-2 text-sm text-brand-700">
           Sessions gratuites ou payantes. Les élèves réservent leur place et accèdent au lien après validation.
         </p>
+        {student?.role === 'TEACHER' ? (
+          <div className="mt-4">
+            <Link href="/teacher/dashboard" className="btn-secondary">Ouvrir mon dashboard professeur</Link>
+          </div>
+        ) : null}
       </div>
 
       {canManage ? (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          <article className="card">
-            <p className="text-xs text-brand-700">Revenus total (livres + rattrapage)</p>
-            <p className="text-2xl font-bold text-brand-900">{formatHTG(teacherStats?.summary?.totalRevenue ?? 0)}</p>
-          </article>
-          <article className="card">
-            <p className="text-xs text-brand-700">Commission plateforme totale</p>
-            <p className="text-2xl font-bold text-brand-900">{formatHTG(teacherStats?.summary?.totalCommission ?? 0)}</p>
-          </article>
-          <article className="card">
-            <p className="text-xs text-brand-700">Revenus rattrapage (85%)</p>
-            <p className="text-2xl font-bold text-brand-900">{formatHTG(teacherStats?.summary?.totalRemedialRevenue ?? 0)}</p>
-          </article>
-          <article className="card">
-            <p className="text-xs text-brand-700">Revenus livres (90%)</p>
-            <p className="text-2xl font-bold text-brand-900">{formatHTG(teacherStats?.summary?.totalLibraryRevenue ?? 0)}</p>
-          </article>
-          <article className="card">
-            <p className="text-xs text-brand-700">Ventes de livres</p>
-            <p className="text-2xl font-bold text-brand-900">{teacherStats?.summary?.totalLibrarySales ?? 0}</p>
-          </article>
-          <article className="card">
-            <p className="text-xs text-brand-700">Élèves inscrits rattrapage</p>
-            <p className="text-2xl font-bold text-brand-900">{teacherStats?.summary?.totalStudents ?? 0}</p>
-          </article>
-          <article className="card">
-            <p className="text-xs text-brand-700">Sessions</p>
-            <p className="text-2xl font-bold text-brand-900">{teacherStats?.summary?.totalSessions ?? 0}</p>
-          </article>
-        </div>
-      ) : null}
-
-      {canManage ? (
         <div className="card">
-          <h2 className="text-xl font-semibold text-brand-900">
-            {editingId ? 'Modifier une session' : 'Planifier une session'}
-          </h2>
-          <form className="mt-3 grid gap-3 md:grid-cols-2" onSubmit={onSubmitForm}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold text-brand-900">{editingId ? 'Modifier une session' : 'Planifier une session'}</h2>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => {
+                if (editingId) {
+                  setEditingId(null);
+                  setShowPlanner(false);
+                  return;
+                }
+                setShowPlanner((prev) => !prev);
+              }}
+            >
+              {editingId ? 'Fermer' : (showPlanner ? 'Masquer le planificateur' : 'Planifier un rattrapage')}
+            </button>
+          </div>
+          {showPlanner || editingId ? (
+            <form className="mt-3 grid gap-3 md:grid-cols-2" onSubmit={onSubmitForm}>
             <input className="input" placeholder="Titre" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} required />
             <select className="input" value={form.level} onChange={(e) => setForm((p) => ({ ...p, level: e.target.value }))} required>
               <option value="LEVEL_9E">9e</option>
@@ -667,10 +673,13 @@ export default function RattrapagePage() {
             ) : (
               <div className="md:col-span-2 flex gap-2">
                 <button type="button" className="btn-primary" disabled={saving} onClick={onSaveEdit}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
-                <button type="button" className="btn-secondary" onClick={() => setEditingId(null)}>Annuler</button>
+                <button type="button" className="btn-secondary" onClick={() => { setEditingId(null); setShowPlanner(false); }}>Annuler</button>
               </div>
             )}
-          </form>
+            </form>
+          ) : (
+            <p className="mt-3 text-sm text-brand-700">Clique sur « Planifier un rattrapage » pour afficher le formulaire.</p>
+          )}
         </div>
       ) : null}
 
