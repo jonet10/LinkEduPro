@@ -781,6 +781,10 @@ input[type="checkbox"] {
   border-color: #b9d3ef;
 }
 
+.rattrapage-shell .rattrapage-session-card {
+  overflow: visible;
+}
+
 .dark .rattrapage-shell .card {
   background:
     linear-gradient(180deg, rgba(20, 34, 52, 0.92), rgba(17, 30, 46, 0.94)),

@@ -638,17 +638,23 @@ async function teacherDashboard(teacherId) {
     return { ok: false, status: 403, message: 'Accès refusé.' };
   }
 
-  const sessions = await prisma.remedialSession.findMany({
-    where: teacher.role === 'TEACHER' ? { teacherId } : {},
-    orderBy: { createdAt: 'desc' },
-    include: {
-      _count: { select: { enrollments: true } },
-      transactions: {
-        where: { status: 'success' },
-        select: { amount: true, teacherAmount: true, platformCommission: true, createdAt: true }
+  let sessions = [];
+  try {
+    sessions = await prisma.remedialSession.findMany({
+      where: teacher.role === 'TEACHER' ? { teacherId } : {},
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: { select: { enrollments: true } },
+        transactions: {
+          where: { status: 'success' },
+          select: { amount: true, teacherAmount: true, platformCommission: true, createdAt: true }
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    const knownSchemaIssue = error?.code === 'P2021' || error?.code === 'P2022';
+    if (!knownSchemaIssue) throw error;
+  }
 
   const totalRevenue = sessions.reduce((sum, s) => {
     const value = s.transactions.reduce((acc, t) => acc + Number(t.teacherAmount || 0), 0);

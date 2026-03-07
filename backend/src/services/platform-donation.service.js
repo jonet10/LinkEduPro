@@ -1,6 +1,8 @@
 const prisma = require('../config/prisma');
 const { createMoncashPayment, buildPlatformDonationOrderReference, parsePlatformDonationOrderReference } = require('./moncash.service');
 
+const STALE_NON_SUCCESSFUL_DONATION_HOURS = Math.max(1, Number(process.env.PLATFORM_DONATION_STALE_HOURS || 24));
+
 async function ensureGuestDonor() {
   const guestEmail = 'guest-donor@linkedupro.local';
   return prisma.student.upsert({
@@ -127,8 +129,20 @@ async function getPlatformDonationSummary() {
   };
 }
 
+async function cleanupStaleNonSuccessfulDonations() {
+  const cutoff = new Date(Date.now() - STALE_NON_SUCCESSFUL_DONATION_HOURS * 60 * 60 * 1000);
+  await prisma.platformDonation.deleteMany({
+    where: {
+      status: { in: ['PENDING', 'FAILED', 'REFUNDED'] },
+      createdAt: { lt: cutoff }
+    }
+  });
+}
+
 async function listAllPlatformDonations() {
+  await cleanupStaleNonSuccessfulDonations();
   const rows = await prisma.platformDonation.findMany({
+    where: { status: 'SUCCESS' },
     include: {
       donor: {
         select: { id: true, firstName: true, lastName: true, email: true, role: true }

@@ -14,6 +14,27 @@ const CLASS_OPTIONS = [
   { value: 'Universite', label: 'Universite' }
 ];
 
+const CONTENT_KIND_OPTIONS = [
+  { value: 'LESSON', label: 'Leçon' },
+  { value: 'EXERCISE', label: 'Exercice' },
+  { value: 'COURSE', label: 'Cours complet' },
+  { value: 'TUTORIAL', label: 'Tutoriel pratique' },
+  { value: 'MASTERCLASS', label: 'Masterclass' },
+  { value: 'REVISION', label: 'Révision guidée' },
+  { value: 'WEBINAR', label: 'Webinaire' },
+  { value: 'INTERVIEW', label: 'Interview pédagogique' },
+  { value: 'OTHER', label: 'Autre' }
+];
+
+function normalizeVideoKind(value) {
+  const upper = String(value || '').trim().toUpperCase();
+  return CONTENT_KIND_OPTIONS.some((item) => item.value === upper) ? upper : 'LESSON';
+}
+
+function getVideoKindLabel(kind) {
+  return CONTENT_KIND_OPTIONS.find((item) => item.value === kind)?.label || 'Leçon';
+}
+
 function toApiLevel(value) {
   const raw = String(value || '').trim();
   if (!raw) return 'Terminale';
@@ -46,7 +67,7 @@ function parseVideoBody(rawBody) {
       return {
         description: String(parsed.description || ''),
         videoUrl: String(parsed.videoUrl || ''),
-        kind: String(parsed.kind || 'LESSON').toUpperCase() === 'EXERCISE' ? 'EXERCISE' : 'LESSON',
+        kind: normalizeVideoKind(parsed.kind),
         isPaid: Boolean(parsed.isPaid),
         price: Number(parsed.price || 0)
       };
@@ -71,7 +92,7 @@ function mapContentToVideo(item) {
     title: item?.title || 'Sans titre',
     description: body.description || 'Aucune description.',
     videoUrl: body.videoUrl || '',
-    kind: body.kind,
+    kind: normalizeVideoKind(body.kind),
     isPaid: body.isPaid,
     price: Math.max(0, Number(body.price || 0)),
     level: toApiLevel(item?.level),
@@ -140,6 +161,7 @@ export default function VideoLessonsPage() {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [classFilter, setClassFilter] = useState('ALL');
   const [submitting, setSubmitting] = useState(false);
+  const [showComposer, setShowComposer] = useState(false);
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -165,7 +187,7 @@ export default function VideoLessonsPage() {
     setReady(true);
   }, [router]);
 
-  const canManage = Boolean(student && ['ADMIN', 'TEACHER'].includes(student.role));
+  const canManage = Boolean(student && ['ADMIN', 'TEACHER', 'SUPER_ADMIN'].includes(student.role));
 
   async function loadVideos(currentToken, currentStudent) {
     try {
@@ -173,7 +195,7 @@ export default function VideoLessonsPage() {
       setError('');
       if (!currentToken) return;
 
-      if (currentStudent && ['ADMIN', 'TEACHER'].includes(currentStudent.role)) {
+      if (currentStudent && ['ADMIN', 'TEACHER', 'SUPER_ADMIN'].includes(currentStudent.role)) {
         const data = await apiClient('/v2/contents/mine', { token: currentToken });
         const mapped = (data.contents || [])
           .filter((item) => String(item.type || '').toLowerCase() === 'video')
@@ -275,8 +297,10 @@ export default function VideoLessonsPage() {
         kind: 'LESSON',
         isPaid: false,
         price: '',
-        videoUrl: ''
+        videoUrl: '',
+        publishNow: false
       }));
+      setShowComposer(false);
       setSuccess(student?.role === 'ADMIN' && form.publishNow
         ? 'Vidéo publiée avec succès.'
         : 'Vidéo enregistrée avec succès (en attente de validation admin).');
@@ -297,7 +321,7 @@ export default function VideoLessonsPage() {
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Nouveau module</p>
         <h1 className="mt-2 text-3xl font-black text-brand-900">Classe Numerique</h1>
         <p className="mt-2 text-sm text-brand-700">
-          Espace de leçons et exercices en vidéo. Les contenus peuvent être gratuits ou payants.
+          Espace de vidéos pédagogiques: leçons, exercices, cours complets, tutoriels et plus.
         </p>
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
         {success ? <p className="mt-2 text-sm text-emerald-700">{success}</p> : null}
@@ -305,11 +329,19 @@ export default function VideoLessonsPage() {
 
       {canManage ? (
         <section className="card">
-          <h2 className="text-xl font-semibold text-brand-900">Publier un contenu vidéo</h2>
-          <p className="mt-1 text-sm text-brand-700">
-            Visible pour: ADMIN et TEACHER. Les enseignants créent des contenus en attente de validation.
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-semibold text-brand-900">Publier un contenu vidéo</h2>
+              <p className="mt-1 text-sm text-brand-700">
+                Visible pour: ADMIN et TEACHER. Les enseignants créent des contenus en attente de validation.
+              </p>
+            </div>
+            <button type="button" className="btn-primary" onClick={() => setShowComposer((prev) => !prev)}>
+              {showComposer ? 'Masquer le formulaire' : 'Ajouter une vidéo'}
+            </button>
+          </div>
 
+          {showComposer ? (
           <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={onSubmit}>
             <label className="space-y-1">
               <span className="text-sm font-medium text-brand-900">Titre</span>
@@ -325,8 +357,9 @@ export default function VideoLessonsPage() {
             <label className="space-y-1">
               <span className="text-sm font-medium text-brand-900">Type</span>
               <select className="input w-full" value={form.kind} onChange={(e) => onChangeField('kind', e.target.value)}>
-                <option value="LESSON">Leçon</option>
-                <option value="EXERCISE">Exercice</option>
+                {CONTENT_KIND_OPTIONS.map((kindOption) => (
+                  <option key={kindOption.value} value={kindOption.value}>{kindOption.label}</option>
+                ))}
               </select>
             </label>
 
@@ -398,10 +431,13 @@ export default function VideoLessonsPage() {
 
             <div className="md:col-span-2">
               <button type="submit" className="btn-primary" disabled={submitting}>
-                {submitting ? 'Publication...' : 'Ajouter la vidéo'}
+                {submitting ? 'Publication...' : 'Publier la vidéo'}
               </button>
             </div>
           </form>
+          ) : (
+            <p className="mt-4 text-sm text-brand-700">Clique sur « Ajouter une vidéo » pour afficher le formulaire.</p>
+          )}
         </section>
       ) : null}
 
@@ -409,9 +445,12 @@ export default function VideoLessonsPage() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xl font-semibold text-brand-900">{canManage ? 'Mes contenus vidéo' : 'Catalogue vidéo'}</h2>
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <button type="button" className={filter === 'ALL' ? 'btn-primary' : 'btn-secondary'} onClick={() => setFilter('ALL')}>Tout</button>
-            <button type="button" className={filter === 'LESSON' ? 'btn-primary' : 'btn-secondary'} onClick={() => setFilter('LESSON')}>Leçons</button>
-            <button type="button" className={filter === 'EXERCISE' ? 'btn-primary' : 'btn-secondary'} onClick={() => setFilter('EXERCISE')}>Exercices</button>
+            <select className="input h-9 text-xs" value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filtrer par catégorie vidéo">
+              <option value="ALL">Toutes catégories</option>
+              {CONTENT_KIND_OPTIONS.map((kindOption) => (
+                <option key={kindOption.value} value={kindOption.value}>{kindOption.label}</option>
+              ))}
+            </select>
             <select className="input h-9 text-xs" value={classFilter} onChange={(e) => setClassFilter(e.target.value)} aria-label="Filtrer par classe">
               <option value="ALL">Toutes les classes</option>
               {CLASS_OPTIONS.map((entry) => (
@@ -434,8 +473,8 @@ export default function VideoLessonsPage() {
           {filteredVideos.map((item) => (
             <article key={item.id} className="rounded-xl border border-brand-100 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`rounded-full px-2 py-1 text-xs font-semibold ${item.kind === 'LESSON' ? 'bg-brand-50 text-brand-700' : 'bg-amber-50 text-amber-700'}`}>
-                  {item.kind === 'LESSON' ? 'Leçon' : 'Exercice'}
+                <span className={`rounded-full px-2 py-1 text-xs font-semibold ${item.kind === 'EXERCISE' ? 'bg-amber-50 text-amber-700' : 'bg-brand-50 text-brand-700'}`}>
+                  {getVideoKindLabel(item.kind)}
                 </span>
                 <span className={`rounded-full px-2 py-1 text-xs font-semibold ${item.isPaid ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>
                   {item.isPaid ? `Payant (${formatHtg(item.price)})` : 'Gratuit'}
