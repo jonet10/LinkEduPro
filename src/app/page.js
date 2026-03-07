@@ -192,9 +192,8 @@ function getDailyObjective(student) {
 function LearningShowcaseSection({ section }) {
   const isSubjectIconImage = (src) => /^\/images\/subject-/.test(String(src || ''));
   const trackRef = useRef(null);
+  const autoDirectionRef = useRef(1);
   const [canSlide, setCanSlide] = useState(false);
-  const [atStart, setAtStart] = useState(true);
-  const [atEnd, setAtEnd] = useState(false);
 
   useEffect(() => {
     const node = trackRef.current;
@@ -203,8 +202,6 @@ function LearningShowcaseSection({ section }) {
     function updateSlideState() {
       const maxLeft = Math.max(0, node.scrollWidth - node.clientWidth);
       setCanSlide(maxLeft > 4);
-      setAtStart(node.scrollLeft <= 4);
-      setAtEnd(node.scrollLeft >= maxLeft - 4);
     }
 
     updateSlideState();
@@ -216,12 +213,33 @@ function LearningShowcaseSection({ section }) {
     };
   }, [section.items.length]);
 
-  function slide(direction = 1) {
+  useEffect(() => {
     const node = trackRef.current;
-    if (!node) return;
-    const amount = Math.max(260, Math.floor(node.clientWidth * 0.85));
-    node.scrollBy({ left: direction * amount, behavior: 'smooth' });
-  }
+    if (!node || !canSlide || section.items.length < 2) return undefined;
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+
+    let rafId = null;
+    let lastTs = 0;
+    const speed = 0.45;
+
+    const tick = (ts) => {
+      if (!lastTs) lastTs = ts;
+      const dt = ts - lastTs;
+      lastTs = ts;
+
+      const maxLeft = Math.max(0, node.scrollWidth - node.clientWidth);
+      if (node.scrollLeft <= 1) autoDirectionRef.current = 1;
+      if (node.scrollLeft >= maxLeft - 1) autoDirectionRef.current = -1;
+
+      node.scrollLeft += autoDirectionRef.current * speed * dt;
+      rafId = window.requestAnimationFrame(tick);
+    };
+
+    rafId = window.requestAnimationFrame(tick);
+    return () => {
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, [canSlide, section.items.length]);
 
   return (
     <section className="card">
@@ -230,16 +248,7 @@ function LearningShowcaseSection({ section }) {
       {Array.isArray(section.items) && section.items.length === 0 ? (
         <p className="mt-4 text-sm text-brand-700">Aucun contenu disponible pour ton niveau pour le moment.</p>
       ) : null}
-      <div className="mt-4 flex items-center gap-2">
-        <button
-          type="button"
-          aria-label={`Précédent ${section.title}`}
-          className="btn-secondary !h-10 !w-10 !rounded-full !px-0 !py-0 disabled:opacity-40"
-          onClick={() => slide(-1)}
-          disabled={!canSlide || atStart}
-        >
-          ‹
-        </button>
+      <div className="mt-4">
         <div
           ref={trackRef}
           className="showcase-track flex flex-1 snap-x snap-mandatory gap-4 overflow-x-auto pb-1"
@@ -267,15 +276,6 @@ function LearningShowcaseSection({ section }) {
           </article>
         ))}
         </div>
-        <button
-          type="button"
-          aria-label={`Suivant ${section.title}`}
-          className="btn-secondary !h-10 !w-10 !rounded-full !px-0 !py-0 disabled:opacity-40"
-          onClick={() => slide(1)}
-          disabled={!canSlide || atEnd}
-        >
-          ›
-        </button>
       </div>
     </section>
   );
