@@ -220,7 +220,7 @@ function LearningShowcaseSection({ section }) {
 
     let rafId = null;
     let lastTs = 0;
-    const speed = 0.45;
+    const speed = 0.08;
 
     const tick = (ts) => {
       if (!lastTs) lastTs = ts;
