@@ -484,9 +484,10 @@ export default function HeaderNav() {
       { href: '/blog', label: 'Forum', icon: '📝' },
       { href: '/support', label: 'Support', icon: '🤝' },
       ...(canSeeTeacherDashboard ? [{ href: '/teacher/dashboard', label: 'Dashboard prof', icon: '💼' }] : []),
+      ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : []),
       { href: '/search', label: 'Recherche', icon: '🔎' }
     ],
-    [canSeeTeacherDashboard]
+    [canSeeTeacherDashboard, canSeeGlobalAdminDashboard]
   );
 
   const onLogout = () => {
@@ -589,19 +590,6 @@ export default function HeaderNav() {
       setNotifError(e.message || 'Erreur notifications');
     }
   }
-
-  const dashboardHref = '/admin/super-dashboard';
-  const mobileFourthTabHref = canSeeGlobalAdminDashboard ? dashboardHref : '/search';
-  const mobileFourthTabLabel = canSeeGlobalAdminDashboard ? 'Dashboard' : 'Recherche';
-  const mobileFourthTabIcon = canSeeGlobalAdminDashboard ? '📊' : '🔎';
-  const onMobileBack = () => {
-    if (typeof window === 'undefined') return;
-    if (window.history.length > 1) {
-      window.history.back();
-      return;
-    }
-    router.push('/');
-  };
 
   return (
     <>
@@ -1134,16 +1122,7 @@ export default function HeaderNav() {
                 paddingBottom: 'env(safe-area-inset-bottom)'
               }}
             >
-              <nav className="grid grid-cols-6 gap-1 px-2 py-2">
-                <button
-                  type="button"
-                  className="rounded-lg px-1 py-1 text-center text-[11px] text-slate-300"
-                  onClick={onMobileBack}
-                  aria-label="Retour"
-                >
-                  <div className="text-lg">←</div>
-                  <div>Retour</div>
-                </button>
+              <nav className="grid grid-cols-4 gap-1 px-2 py-2">
                 <Link href="/" className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, '/') ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
                   <div className="text-lg">🏠</div>
                   <div>Accueil</div>
@@ -1180,10 +1159,6 @@ export default function HeaderNav() {
                   </div>
                   <div>Activité</div>
                 </button>
-                <Link href={mobileFourthTabHref} className={`rounded-lg px-1 py-1 text-center text-[11px] ${isActivePath(pathname, mobileFourthTabHref) ? 'bg-white/15 text-white' : 'text-slate-300'}`}>
-                  <div className="text-lg">{mobileFourthTabIcon}</div>
-                  <div>{mobileFourthTabLabel}</div>
-                </Link>
                 <button
                   type="button"
                   className={`rounded-lg px-1 py-1 text-center text-[11px] ${isMobileMenuOpen ? 'bg-white/15 text-white' : 'text-slate-300'}`}

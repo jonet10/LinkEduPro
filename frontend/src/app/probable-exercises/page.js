@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 function normalizeText(value) {
   return String(value || '')
@@ -84,6 +86,7 @@ function groupExamsByYear(subjectRows) {
 }
 
 export default function ProbableExercisesPage() {
+  const router = useRouter();
   const [items, setItems] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [loading, setLoading] = useState(true);
@@ -121,6 +124,17 @@ export default function ProbableExercisesPage() {
     const topicRows = selectedRows.flatMap((row) => row?.topics || []);
     return groupExamsByYear(topicRows);
   }, [selectedRows]);
+
+  function openExamPdf(fileName) {
+    if (typeof window === 'undefined') return;
+    const pdfUrl = `${API_URL}/public/exam-pdfs/${encodeURIComponent(fileName)}`;
+    const isMobileViewport = window.matchMedia('(max-width: 900px)').matches;
+    if (isMobileViewport) {
+      window.location.assign(pdfUrl);
+      return;
+    }
+    router.push(`/exam-viewer?file=${encodeURIComponent(fileName)}`);
+  }
 
   return (
     <section className="space-y-5">
@@ -178,9 +192,9 @@ export default function ProbableExercisesPage() {
                         </p>
                       ) : null}
                       <div className="mt-3">
-                        <Link href={exam.href} className="btn-primary !px-3 !py-1.5 text-xs">
+                        <button type="button" onClick={() => openExamPdf(exam.fileName)} className="btn-primary !px-3 !py-1.5 text-xs">
                           Ouvrir PDF
-                        </Link>
+                        </button>
                       </div>
                     </div>
                   ))}
