@@ -220,7 +220,8 @@ function LearningShowcaseSection({ section }) {
 
     let rafId = null;
     let lastTs = 0;
-    const speed = 0.08;
+    const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
+    const speed = isMobileViewport ? 0.03 : 0.06;
 
     const tick = (ts) => {
       if (!lastTs) lastTs = ts;
@@ -254,7 +255,7 @@ function LearningShowcaseSection({ section }) {
           className="showcase-track flex flex-1 snap-x snap-mandatory gap-4 overflow-x-auto pb-1"
         >
         {section.items.map((item) => (
-          <article key={`${section.id}-${item.title}`} className="w-[260px] shrink-0 snap-start overflow-hidden rounded-xl border border-brand-100 bg-white shadow-sm">
+          <article key={`${section.id}-${item.title}`} className="showcase-card w-[260px] shrink-0 snap-start overflow-hidden rounded-xl border border-brand-100 bg-white shadow-sm">
             <div className={`h-36 w-full ${isSubjectIconImage(item.image) ? 'flex items-center justify-center bg-brand-50 p-3' : 'overflow-hidden'}`}>
               <img
                 src={item.image}
