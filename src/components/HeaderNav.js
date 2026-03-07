@@ -134,11 +134,11 @@ export default function HeaderNav() {
       { href: '/video-lessons', label: 'Classe Numerique' },
       { href: '/rattrapage', label: 'Rattrapage' },
       { href: '/subjects', label: 'Rubriques' },
+      { href: '/probable-exercises', label: 'Examens passés' },
       { href: '/library', label: 'Bibliothèque' },
-      { href: '/support', label: 'Support' },
       { href: '/educollect', label: 'EduCollect' },
       { href: '/blog', label: 'Forum' },
-      { href: '/probable-exercises', label: 'Examens passés' }
+      { href: '/support', label: 'Support' }
     ];
     if (isAuthed && (roleUpper === 'ADMIN' || roleUpper === 'SUPER_ADMIN')) {
       tabs.push({ href: '/admin/super-dashboard', label: 'Dashboard' });
@@ -451,25 +451,25 @@ export default function HeaderNav() {
     return [
       { href: '/', label: 'Accueil', icon: '🏠' },
       { href: '/video-lessons', label: 'Classe Numerique', icon: '🎬' },
-      ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
       { href: '/subjects', label: 'Rubriques', icon: '📘' },
+      ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : []),
+      ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
-      { href: '/support', label: 'Support', icon: '🤝' },
       { href: '/educollect', label: 'EduCollect', icon: '💸' },
       { href: '/blog', label: 'Forum', icon: '📝' },
-      ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : []),
+      { href: '/support', label: 'Support', icon: '🤝' },
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
     ];
   }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard, canSeeStudyPlans]);
 
   const mobileStudyItems = useMemo(
     () => [
-      { href: '/subjects', label: 'Rubriques', icon: '📘' },
       { href: '/video-lessons', label: 'Classe Numerique', icon: '🎬' },
-      ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       ...(canSeeCatchup ? [{ href: '/rattrapage', label: 'Rattrapage', icon: '📅' }] : []),
-      ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : [])
+      { href: '/subjects', label: 'Rubriques', icon: '📘' },
+      ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : []),
+      ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : [])
     ],
     [canSeeCatchup, canSeeProbableExercises, canSeeStudyPlans]
   );
@@ -477,9 +477,9 @@ export default function HeaderNav() {
   const mobileToolItems = useMemo(
     () => [
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
-      { href: '/support', label: 'Support', icon: '🤝' },
       { href: '/educollect', label: 'EduCollect', icon: '💸' },
       { href: '/blog', label: 'Forum', icon: '📝' },
+      { href: '/support', label: 'Support', icon: '🤝' },
       { href: '/search', label: 'Recherche', icon: '🔎' }
     ],
     []
