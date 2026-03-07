@@ -32,7 +32,7 @@ const LIBRARY_LEVEL_OPTIONS = [
   'Universitaire'
 ];
 
-function BookCard({ book, preordered = false, onPreorder = null, onPurchase = null, purchasingId = null }) {
+function BookCard({ book, preordered = false, onPreorder = null, onPurchase = null, purchasingId = null, onOpenPdf = null }) {
   return (
     <article className="card">
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -75,7 +75,9 @@ function BookCard({ book, preordered = false, onPreorder = null, onPurchase = nu
           {purchasingId === book.id ? 'Redirection...' : `Acheter (${formatHTG(book.price)})`}
         </button>
       ) : (
-        <a className="btn-primary mt-4 inline-block" href={getStorageUrl(book.fileUrl)} target="_blank" rel="noreferrer">Ouvrir le PDF</a>
+        <button type="button" className="btn-primary mt-4" onClick={() => onOpenPdf?.(book)}>
+          Lire le PDF
+        </button>
       )}
     </article>
   );
@@ -94,6 +96,7 @@ export default function LibraryPage() {
   const [editingBookId, setEditingBookId] = useState(null);
   const [purchasingId, setPurchasingId] = useState(null);
   const [preorderedBooks, setPreorderedBooks] = useState([]);
+  const [pdfViewer, setPdfViewer] = useState(null);
 
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -404,6 +407,14 @@ export default function LibraryPage() {
     }
   }
 
+  function openPdfViewer(book) {
+    if (!book?.fileUrl) return;
+    setPdfViewer({
+      title: book.title || 'Lecture PDF',
+      url: getStorageUrl(book.fileUrl)
+    });
+  }
+
   return (
     <section className="space-y-6">
       <div className="card">
@@ -514,7 +525,7 @@ export default function LibraryPage() {
                 {book.isPaid ? <p className="mt-2 text-sm font-semibold text-brand-900">Prix: {formatHTG(book.price)}</p> : null}
                 <p className="mt-1 text-xs text-brand-500">Ajouté par: {book.uploadedBy?.firstName} {book.uploadedBy?.lastName}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <a className="btn-secondary" href={getStorageUrl(book.fileUrl)} target="_blank" rel="noreferrer">Voir PDF</a>
+                  <button className="btn-secondary" type="button" onClick={() => openPdfViewer(book)}>Voir PDF</button>
                   {canEditBook(book) ? (
                     <button className="btn-secondary" onClick={() => startEditBook(book)} type="button">Modifier</button>
                   ) : null}
@@ -551,6 +562,7 @@ export default function LibraryPage() {
                 onPreorder={savePreorder}
                 onPurchase={purchaseBook}
                 purchasingId={purchasingId}
+                onOpenPdf={openPdfViewer}
               />
               {canEditBook(book) ? (
                 <button type="button" className="btn-secondary w-full" onClick={() => startEditBook(book)}>
@@ -584,6 +596,22 @@ export default function LibraryPage() {
             ))}
           </div>
         </section>
+      ) : null}
+
+      {pdfViewer ? (
+        <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/70 p-3">
+          <div className="flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-brand-100 bg-white">
+            <div className="flex items-center justify-between gap-3 border-b border-brand-100 px-4 py-3">
+              <h3 className="line-clamp-1 text-base font-semibold text-brand-900">{pdfViewer.title}</h3>
+              <button type="button" className="btn-secondary" onClick={() => setPdfViewer(null)}>Fermer</button>
+            </div>
+            <iframe
+              src={pdfViewer.url}
+              title={pdfViewer.title}
+              className="h-full w-full"
+            />
+          </div>
+        </div>
       ) : null}
     </section>
   );

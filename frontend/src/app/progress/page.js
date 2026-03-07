@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { getStudent, getToken } from '@/lib/auth';
 
 export default function ProgressPage() {
   const router = useRouter();
@@ -14,6 +14,11 @@ export default function ProgressPage() {
     const token = getToken();
     if (!token) {
       router.push('/login');
+      return;
+    }
+    const me = getStudent();
+    if (String(me?.role || '').toUpperCase() === 'SUPER_ADMIN') {
+      router.push('/admin/super-dashboard');
       return;
     }
 

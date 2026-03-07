@@ -90,6 +90,43 @@ function formatHtg(value) {
   }).format(amount);
 }
 
+function getVideoPlayerConfig(rawUrl) {
+  const url = String(rawUrl || '').trim();
+  if (!url) return { type: 'none', src: '' };
+  const directVideoPattern = /\.(mp4|webm|ogg)(\?.*)?$/i;
+  if (directVideoPattern.test(url)) return { type: 'file', src: url };
+
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+
+    if (host.includes('youtube.com')) {
+      const id = parsed.searchParams.get('v');
+      if (id) return { type: 'iframe', src: `https://www.youtube.com/embed/${id}` };
+      const shortPath = parsed.pathname.split('/').filter(Boolean);
+      if (shortPath[0] === 'shorts' && shortPath[1]) {
+        return { type: 'iframe', src: `https://www.youtube.com/embed/${shortPath[1]}` };
+      }
+    }
+
+    if (host.includes('youtu.be')) {
+      const id = parsed.pathname.split('/').filter(Boolean)[0];
+      if (id) return { type: 'iframe', src: `https://www.youtube.com/embed/${id}` };
+    }
+
+    if (host.includes('vimeo.com')) {
+      const id = parsed.pathname.split('/').filter(Boolean)[0];
+      if (id && /^\d+$/.test(id)) {
+        return { type: 'iframe', src: `https://player.vimeo.com/video/${id}` };
+      }
+    }
+  } catch (_) {
+    return { type: 'link', src: url };
+  }
+
+  return { type: 'link', src: url };
+}
+
 export default function VideoLessonsPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
@@ -418,11 +455,34 @@ export default function VideoLessonsPage() {
               </div>
               <h3 className="mt-3 text-lg font-semibold text-brand-900">{item.title}</h3>
               <p className="mt-1 text-sm text-brand-700">{item.description || 'Aucune description.'}</p>
-              {item.videoUrl ? (
-                <a className="btn-secondary mt-4 inline-block" href={item.videoUrl} target="_blank" rel="noreferrer">
-                  Ouvrir la vidéo
-                </a>
-              ) : (
+              {item.videoUrl ? (() => {
+                const player = getVideoPlayerConfig(item.videoUrl);
+                if (player.type === 'file') {
+                  return (
+                    <div className="mt-4 overflow-hidden rounded-lg border border-brand-100 bg-black">
+                      <video className="aspect-video w-full" controls preload="metadata" src={player.src} />
+                    </div>
+                  );
+                }
+                if (player.type === 'iframe') {
+                  return (
+                    <div className="mt-4 overflow-hidden rounded-lg border border-brand-100 bg-black">
+                      <iframe
+                        src={player.src}
+                        title={item.title}
+                        className="aspect-video w-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    </div>
+                  );
+                }
+                return (
+                  <a className="btn-secondary mt-4 inline-block" href={item.videoUrl} target="_blank" rel="noreferrer">
+                    Ouvrir la vidéo
+                  </a>
+                );
+              })() : (
                 <p className="mt-4 text-xs text-brand-700">Aucun lien vidéo fourni.</p>
               )}
             </article>
