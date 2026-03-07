@@ -33,8 +33,10 @@ const LIBRARY_LEVEL_OPTIONS = [
 ];
 
 function BookCard({ book, preordered = false, onPreorder = null, onPurchase = null, purchasingId = null, onOpenPdf = null }) {
+  const [showDescription, setShowDescription] = useState(false);
+  const hasDescription = Boolean(String(book.description || '').trim());
   return (
-    <article className="card">
+    <article className="card flex h-full flex-col">
       <div className="mb-2 flex items-center justify-between gap-2">
         <h3 className="text-lg font-semibold text-brand-900">{book.title}</h3>
         <span className={`rounded-full px-2 py-1 text-xs font-semibold ${book.upcoming ? 'bg-amber-50 text-amber-700' : 'bg-brand-50 text-brand-700'}`}>
@@ -48,9 +50,23 @@ function BookCard({ book, preordered = false, onPreorder = null, onPurchase = nu
           className="mb-3 h-52 w-full rounded-lg border border-brand-100 object-cover"
         />
       ) : null}
-      <p className="text-sm text-brand-700">{book.description || 'Aucune description'}</p>
+      {hasDescription ? (
+        <button
+          type="button"
+          className="w-fit text-sm font-semibold text-brand-700 underline-offset-2 hover:underline"
+          onClick={() => setShowDescription((prev) => !prev)}
+        >
+          {showDescription ? 'Masquer la description' : 'Voir la description'}
+        </button>
+      ) : (
+        <p className="text-sm text-brand-500">Aucune description</p>
+      )}
+      {showDescription && hasDescription ? (
+        <p className="mt-2 text-sm text-brand-700">{book.description}</p>
+      ) : null}
       {book.author ? <p className="mt-2 text-sm text-brand-800">Auteur: {book.author}</p> : null}
       <p className="mt-2 text-xs text-brand-500">{book.subject} | {book.level}</p>
+      <div className="mt-auto">
       {book.isPaid && !book.upcoming ? <p className="mt-2 text-sm font-semibold text-brand-900">Prix: {formatHTG(book.price)}</p> : null}
       {book.upcoming ? (
         <div className="mt-4 space-y-2">
@@ -79,6 +95,7 @@ function BookCard({ book, preordered = false, onPreorder = null, onPurchase = nu
           Lire le PDF
         </button>
       )}
+      </div>
     </article>
   );
 }
