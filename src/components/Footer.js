@@ -84,6 +84,12 @@ export default function Footer() {
   const [newsletterMessage, setNewsletterMessage] = useState('');
   const [newsletterError, setNewsletterError] = useState('');
   const [shareFeedback, setShareFeedback] = useState('');
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactSubject, setContactSubject] = useState('');
+  const [contactBody, setContactBody] = useState('');
+  const [contactFeedback, setContactFeedback] = useState('');
   const [visible, setVisible] = useState(false);
   const year = useMemo(() => new Date().getFullYear(), []);
 
@@ -142,6 +148,39 @@ export default function Footer() {
     }
   }
 
+  function openContactModal() {
+    setContactModalOpen(true);
+    setContactFeedback('');
+  }
+
+  function closeContactModal() {
+    setContactModalOpen(false);
+  }
+
+  function onSubmitContact(event) {
+    event.preventDefault();
+    setContactFeedback('');
+
+    const normalizedName = String(contactName || '').trim();
+    const normalizedEmail = String(contactEmail || '').trim();
+    const normalizedSubject = String(contactSubject || '').trim();
+    const normalizedBody = String(contactBody || '').trim();
+    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+
+    if (!normalizedName || !validEmail || !normalizedSubject || !normalizedBody) {
+      setContactFeedback('Merci de remplir tous les champs avec des informations valides.');
+      return;
+    }
+
+    const mailto = `mailto:infolinkedupro@gmail.com?subject=${encodeURIComponent(normalizedSubject)}&body=${encodeURIComponent(
+      `Nom: ${normalizedName}\nEmail: ${normalizedEmail}\n\n${normalizedBody}`
+    )}`;
+    if (typeof window !== 'undefined') {
+      window.location.href = mailto;
+    }
+    setContactFeedback('Votre application email va s’ouvrir pour envoyer le message.');
+  }
+
   return (
     <footer id="site-footer" className={`${styles.footer} ${visible ? styles.visible : ''}`} aria-label="Pied de page LinkEduPro">
       <div className={styles.inner}>
@@ -152,7 +191,13 @@ export default function Footer() {
               <ul className={styles.list}>
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className={styles.link}>{link.label}</Link>
+                    {link.href === '/contact' ? (
+                      <button type="button" className={styles.linkButton} onClick={openContactModal}>
+                        {link.label}
+                      </button>
+                    ) : (
+                      <Link href={link.href} className={styles.link}>{link.label}</Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -224,6 +269,51 @@ export default function Footer() {
           </section>
         </div>
       </div>
+
+      {contactModalOpen ? (
+        <div className={styles.contactOverlay} onClick={closeContactModal}>
+          <div className={styles.contactModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.contactHeader}>
+              <h3 className={styles.title}>Contacter LinkEduPro</h3>
+              <button type="button" className={styles.closeButton} onClick={closeContactModal}>Fermer</button>
+            </div>
+            <form className={styles.contactForm} onSubmit={onSubmitContact}>
+              <input
+                className={styles.input}
+                placeholder="Nom complet"
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
+                required
+              />
+              <input
+                className={styles.input}
+                type="email"
+                placeholder="Email"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+                required
+              />
+              <input
+                className={styles.input}
+                placeholder="Sujet"
+                value={contactSubject}
+                onChange={(e) => setContactSubject(e.target.value)}
+                required
+              />
+              <textarea
+                className={styles.input}
+                placeholder="Votre message"
+                value={contactBody}
+                onChange={(e) => setContactBody(e.target.value)}
+                rows={4}
+                required
+              />
+              <button type="submit" className={styles.button}>Envoyer</button>
+              {contactFeedback ? <p className={styles.success}>{contactFeedback}</p> : null}
+            </form>
+          </div>
+        </div>
+      ) : null}
 
       <div className={styles.bottomBar}>
         <div className={styles.bottomInner}>
