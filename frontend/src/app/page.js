@@ -110,21 +110,6 @@ const LEARNING_SHOWCASE_SECTIONS = [
   }
 ];
 
-const DEFAULT_HOME_CHALLENGE = {
-  title: 'Vote de la semaine',
-  subtitle: 'Choisis la personne qui doit rester en tête cette semaine.',
-  theme: 'TIKTOKERS',
-  weekKey: '',
-  totalVotes: 0,
-  myVote: null,
-  recentComments: [],
-  items: [
-    { title: 'Maths en 60 secondes', handle: '@mathsfacile.ht', category: 'Mathématiques', search: 'maths bac haiti', votes: 0 },
-    { title: 'Chimie visuelle', handle: '@chimie.simple', category: 'Chimie', search: 'chimie exercices', votes: 0 },
-    { title: 'Histoire-Géo active', handle: '@histgeo.smart', category: 'Histoire-Géo', search: 'histoire geographie revision', votes: 0 },
-    { title: 'Philo en pratique', handle: '@philo.express', category: 'Philosophie', search: 'philosophie terminale', votes: 0 }
-  ]
-};
 
 function hasDepartmentAndCommune(schoolLabel) {
   if (!schoolLabel || typeof schoolLabel !== 'string') return false;
@@ -137,29 +122,6 @@ function formatLastSeen(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'Aucune activité récente';
   return date.toLocaleString();
-}
-
-function getWeekCountdownLabel(now = new Date()) {
-  const current = new Date(now);
-  const day = current.getDay(); // 0 Sunday ... 6 Saturday
-  const diffToSunday = day === 0 ? 0 : (7 - day);
-  const end = new Date(current);
-  end.setDate(current.getDate() + diffToSunday);
-  end.setHours(23, 59, 59, 999);
-
-  const ms = Math.max(0, end.getTime() - current.getTime());
-  const totalMinutes = Math.floor(ms / 60000);
-  const days = Math.floor(totalMinutes / (60 * 24));
-  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-  const minutes = totalMinutes % 60;
-  return `${days}j ${hours}h ${minutes}m`;
-}
-
-function getParticipantInitials(title) {
-  const words = String(title || '').trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return 'P';
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return `${words[0][0] || ''}${words[1][0] || ''}`.toUpperCase();
 }
 
 function getUserInitials(student) {
@@ -330,13 +292,8 @@ export default function HomePage() {
     lastSeenByRole: { students: null, teachers: null, admins: null, others: null },
     mineLastSeenAt: null
   });
-  const [homeChallenge, setHomeChallenge] = useState(DEFAULT_HOME_CHALLENGE);
-  const [selectedChallengeHandle, setSelectedChallengeHandle] = useState('');
-  const [challengeComment, setChallengeComment] = useState('');
-  const [challengeSubmitting, setChallengeSubmitting] = useState(false);
-  const [challengeDeleting, setChallengeDeleting] = useState(false);
-  const [challengeFeedback, setChallengeFeedback] = useState('');
-  const [weekCountdown, setWeekCountdown] = useState(getWeekCountdownLabel());
+  const [shareFeedback, setShareFeedback] = useState('');
+  const [platformDonationFeedback, setPlatformDonationFeedback] = useState('');
   const [error, setError] = useState('');
   const [welcomePopup, setWelcomePopup] = useState(null);
   const [showCalendarNotice, setShowCalendarNotice] = useState(false);
@@ -358,14 +315,6 @@ export default function HomePage() {
   const isStudentRole = student?.role === 'STUDENT';
   const isAdminRole = student?.role === 'ADMIN';
 
-  const challengeLeaderHandle = useMemo(
-    () => (Array.isArray(homeChallenge.items) && homeChallenge.items.length ? homeChallenge.items[0].handle : ''),
-    [homeChallenge.items]
-  );
-  const selectedChallengeItem = useMemo(
-    () => (homeChallenge.items || []).find((item) => item.handle === selectedChallengeHandle) || null,
-    [homeChallenge.items, selectedChallengeHandle]
-  );
   const quizProgressPercent = useMemo(() => {
     const value = Number(myRanking?.average || 0);
     if (!Number.isFinite(value) || value <= 0) return 20;
@@ -490,173 +439,26 @@ export default function HomePage() {
   }, [isAuthed]);
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setWeekCountdown(getWeekCountdownLabel());
-    }, 60000);
-    setWeekCountdown(getWeekCountdownLabel());
-    return () => window.clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    apiClient('/public/home/challenge', { token: getToken() || undefined })
-      .then((data) => {
-        if (isMounted && Array.isArray(data?.items) && data.items.length > 0) {
-          const merged = {
-            ...DEFAULT_HOME_CHALLENGE,
-            ...data,
-            items: data.items
-          };
-          setHomeChallenge(merged);
-          if (data?.myVote?.candidateHandle) {
-            setSelectedChallengeHandle(data.myVote.candidateHandle);
-            setChallengeComment(data?.myVote?.comment || '');
-          }
-        }
-      })
-      .catch(() => {});
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isAuthed]);
-
-  useEffect(() => {
     if (!isAuthed) {
       setLearningShowcaseSections(LEARNING_SHOWCASE_SECTIONS);
     }
   }, [isAuthed]);
-
-  async function submitChallengeVote() {
-    const token = getToken();
-    if (!token) {
-      setChallengeFeedback('Connecte-toi pour participer au challenge.');
-      return;
-    }
-    if (!selectedChallengeHandle) {
-      setChallengeFeedback('Choisis une personne avant de voter.');
-      return;
-    }
-
-    try {
-      setChallengeSubmitting(true);
-      setChallengeFeedback('');
-      await apiClient('/public/home/challenge/vote', {
-        method: 'POST',
-        token,
-        body: JSON.stringify({
-          handle: selectedChallengeHandle,
-          comment: challengeComment
-        })
-      });
-
-      const refreshed = await apiClient('/public/home/challenge', { token });
-      setHomeChallenge({
-        ...DEFAULT_HOME_CHALLENGE,
-        ...refreshed,
-        items: Array.isArray(refreshed?.items) ? refreshed.items : DEFAULT_HOME_CHALLENGE.items
-      });
-      setChallengeFeedback('Vote enregistré avec succès.');
-    } catch (e) {
-      setChallengeFeedback(e.message || 'Impossible d’enregistrer le vote.');
-    } finally {
-      setChallengeSubmitting(false);
-    }
-  }
-
-  async function updateChallengeVote() {
-    const token = getToken();
-    if (!token) {
-      setChallengeFeedback('Connecte-toi pour modifier ton vote.');
-      return;
-    }
-    if (!selectedChallengeHandle) {
-      setChallengeFeedback('Choisis une personne avant de modifier.');
-      return;
-    }
-
-    try {
-      setChallengeSubmitting(true);
-      setChallengeFeedback('');
-      await apiClient('/public/home/challenge/vote', {
-        method: 'PATCH',
-        token,
-        body: JSON.stringify({
-          handle: selectedChallengeHandle,
-          comment: challengeComment
-        })
-      });
-
-      const refreshed = await apiClient('/public/home/challenge', { token });
-      setHomeChallenge({
-        ...DEFAULT_HOME_CHALLENGE,
-        ...refreshed,
-        items: Array.isArray(refreshed?.items) ? refreshed.items : DEFAULT_HOME_CHALLENGE.items
-      });
-      setChallengeFeedback('Vote modifié avec succès.');
-    } catch (e) {
-      setChallengeFeedback(e.message || 'Impossible de modifier le vote.');
-    } finally {
-      setChallengeSubmitting(false);
-    }
-  }
-
-  async function deleteChallengeVote() {
-    const token = getToken();
-    if (!token) {
-      setChallengeFeedback('Connecte-toi pour supprimer ton vote.');
-      return;
-    }
-
-    try {
-      setChallengeDeleting(true);
-      setChallengeFeedback('');
-      await apiClient('/public/home/challenge/vote', {
-        method: 'DELETE',
-        token
-      });
-
-      const refreshed = await apiClient('/public/home/challenge', { token });
-      setHomeChallenge({
-        ...DEFAULT_HOME_CHALLENGE,
-        ...refreshed,
-        items: Array.isArray(refreshed?.items) ? refreshed.items : DEFAULT_HOME_CHALLENGE.items
-      });
-      setSelectedChallengeHandle('');
-      setChallengeComment('');
-      setChallengeFeedback('Vote supprimé. Tu peux voter à nouveau.');
-    } catch (e) {
-      setChallengeFeedback(e.message || 'Impossible de supprimer le vote.');
-    } finally {
-      setChallengeDeleting(false);
-    }
-  }
-
-  async function shareChallengeChoice() {
-    if (!selectedChallengeHandle) {
-      setChallengeFeedback('Choisis d’abord une personne à partager.');
-      return;
-    }
-
-    const candidate = selectedChallengeItem;
-    const candidateLabel = candidate?.title || selectedChallengeHandle;
-    const text = `Je soutiens ${candidateLabel} (${selectedChallengeHandle}) sur LinkEduPro !`;
+  async function sharePlatform() {
+    const text = 'Découvre LinkEduPro, la plateforme éducative pour réviser efficacement.';
     const url = typeof window !== 'undefined' ? `${window.location.origin}/` : '';
-
     try {
       if (navigator.share) {
         await navigator.share({
-          title: 'Mon choix de la semaine - LinkEduPro',
+          title: 'LinkEduPro',
           text,
           url
         });
-      } else {
-        await navigator.clipboard.writeText(`${text} ${url}`.trim());
+      } else if (navigator.clipboard && url) {
+        await navigator.clipboard.writeText(url);
       }
-      setChallengeFeedback('Ton choix est prêt à être partagé.');
+      setShareFeedback('Lien prêt à être partagé.');
     } catch (_) {
-      setChallengeFeedback('Impossible de partager pour le moment.');
+      setShareFeedback('Impossible de partager pour le moment.');
     }
   }
 
@@ -672,6 +474,7 @@ export default function HomePage() {
   if (!isAuthed) {
     return (
       <section className="landing-shell landing-glass-clean space-y-8">
+        {platformDonationFeedback ? <p className="text-sm text-brand-700">{platformDonationFeedback}</p> : null}
         {showCalendarNotice ? (
           <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
             <div className="w-full max-w-lg rounded-2xl border border-brand-100 bg-white p-6 shadow-2xl">
@@ -809,51 +612,15 @@ export default function HomePage() {
           <LearningShowcaseSection key={`public-${section.id}`} section={section} />
         ))}
 
-        <section className="card" aria-labelledby="tiktok-title">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 id="tiktok-title" className="public-landing-section-title text-2xl font-black text-brand-900">{homeChallenge.title}</h2>
-              <p className="public-landing-section-subtitle mt-1 text-sm text-brand-700">{homeChallenge.subtitle}</p>
-            </div>
-            <span className="public-landing-pill rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-              {homeChallenge.totalVotes} vote(s)
-            </span>
-          </div>
-          <p className="public-landing-meta mt-2 text-xs text-brand-700">
-            Semaine: {homeChallenge.weekKey || '-'}
+        <section className="card" aria-labelledby="share-title-public">
+          <h2 id="share-title-public" className="public-landing-section-title text-2xl font-black text-brand-900">Partager LinkEduPro</h2>
+          <p className="public-landing-section-subtitle mt-1 text-sm text-brand-700">
+            Aide d&apos;autres élèves à découvrir la plateforme.
           </p>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {homeChallenge.items.map((item, idx) => (
-              <a
-                key={item.handle}
-                href={`https://www.tiktok.com/search?q=${encodeURIComponent(item.search)}`}
-                target="_blank"
-                rel="noreferrer"
-                className={`palette-card palette-${(idx % 4) + 1} rounded-xl border border-brand-100 p-4`}
-              >
-                <div className="mb-2 flex items-center gap-2">
-                  {resolveMediaUrl(item.photoUrl) ? (
-                    <img
-                      src={resolveMediaUrl(item.photoUrl)}
-                      alt={item.title}
-                      className="h-10 w-10 rounded-full border border-brand-100 object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-100 bg-white/80 text-xs font-bold text-brand-900">
-                      {getParticipantInitials(item.title)}
-                    </div>
-                  )}
-                  {item.handle === challengeLeaderHandle ? (
-                    <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">⭐ En tête</span>
-                  ) : null}
-                </div>
-                <p className="text-base font-semibold text-brand-900">{item.title}</p>
-                <p className="mt-1 text-sm text-brand-700">{item.handle} · {item.category}</p>
-                <p className="mt-2 text-xs font-semibold text-brand-500">Votes: {item.votes || 0}</p>
-              </a>
-            ))}
+          <div className="mt-4">
+            <button type="button" className="btn-primary" onClick={sharePlatform}>📢 Partager la plateforme</button>
           </div>
-          <p className="mt-3 text-xs text-brand-700">Connecte-toi pour voter et laisser ton commentaire.</p>
+          {shareFeedback ? <p className="mt-2 text-xs text-brand-700">{shareFeedback}</p> : null}
         </section>
 
         <VerifiedTestimonials />
@@ -863,6 +630,7 @@ export default function HomePage() {
 
   return (
     <section className="home-gold-shell authed-transparent-scope space-y-6">
+      {platformDonationFeedback ? <p className="text-sm text-brand-700">{platformDonationFeedback}</p> : null}
       {showCalendarNotice ? (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
           <div className="w-full max-w-lg rounded-2xl border border-brand-100 bg-white p-6 shadow-2xl">
@@ -1105,128 +873,14 @@ export default function HomePage() {
       )}
 
       <article className="card motion-enter motion-delay-4 lift-card home-gold-soft">
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <div>
-            <h2 className="home-gold-title text-xl font-semibold text-brand-900">{homeChallenge.title}</h2>
-            <p className="mt-1 text-sm text-brand-700">{homeChallenge.subtitle}</p>
-          </div>
-          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-            {homeChallenge.totalVotes} vote(s)
-          </span>
+        <h2 className="home-gold-title text-xl font-semibold text-brand-900">Partager LinkEduPro</h2>
+        <p className="mt-1 text-sm text-brand-700">
+          Invite tes amis à rejoindre la plateforme et à apprendre avec toi.
+        </p>
+        <div className="mt-4">
+          <button type="button" className="btn-primary" onClick={sharePlatform}>📢 Partager la plateforme</button>
         </div>
-        <div className="mb-3 rounded-lg border border-brand-100 bg-brand-50/60 px-3 py-2 text-xs text-brand-800">
-          <p className="font-semibold">Challenge de la semaine {homeChallenge.weekKey || '-'}</p>
-          <p className="mt-1">Fin de ce cycle dans: {weekCountdown}. Un nouveau vote est disponible chaque semaine.</p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {homeChallenge.items.map((item, idx) => (
-            <button
-              key={item.handle}
-              type="button"
-              onClick={() => setSelectedChallengeHandle(item.handle)}
-              className={`rounded-xl border border-brand-100 p-4 palette-card palette-${(idx % 4) + 1}`}
-            >
-              <div className="mb-2 flex items-center gap-2">
-                {resolveMediaUrl(item.photoUrl) ? (
-                  <img
-                    src={resolveMediaUrl(item.photoUrl)}
-                    alt={item.title}
-                    className="h-10 w-10 rounded-full border border-brand-100 object-cover"
-                  />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-100 bg-white/80 text-xs font-bold text-brand-900">
-                    {getParticipantInitials(item.title)}
-                  </div>
-                )}
-                {item.handle === challengeLeaderHandle ? (
-                  <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">⭐ En tête</span>
-                ) : null}
-              </div>
-              <p className="text-sm font-semibold text-brand-900">{item.title}</p>
-              <p className="mt-1 text-xs text-brand-700">{item.handle}</p>
-              <p className="mt-2 text-xs font-semibold text-brand-500">{item.category}</p>
-              <p className="mt-1 text-xs text-brand-700">Votes: {item.votes || 0}</p>
-              {selectedChallengeHandle === item.handle ? (
-                <p className="mt-1 text-xs font-semibold text-emerald-700">🏅 Je me reconnais ici</p>
-              ) : null}
-            </button>
-          ))}
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
-          <textarea
-            className="input min-h-[92px]"
-            placeholder="Laisse un commentaire (optionnel)"
-            value={challengeComment}
-            onChange={(e) => setChallengeComment(e.target.value)}
-            maxLength={500}
-          />
-          {homeChallenge.myVote ? (
-            <div className="flex flex-col gap-2">
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={shareChallengeChoice}
-                disabled={challengeSubmitting || challengeDeleting || !selectedChallengeHandle}
-              >
-                📢 Partager mon choix
-              </button>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={updateChallengeVote}
-                disabled={challengeSubmitting || challengeDeleting}
-              >
-                {challengeSubmitting ? 'Modification...' : 'Modifier mon vote'}
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={deleteChallengeVote}
-                disabled={challengeSubmitting || challengeDeleting}
-              >
-                {challengeDeleting ? 'Suppression...' : 'Supprimer mon vote'}
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={shareChallengeChoice}
-                disabled={challengeSubmitting || challengeDeleting || !selectedChallengeHandle}
-              >
-                📢 Partager mon choix
-              </button>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={submitChallengeVote}
-                disabled={challengeSubmitting || challengeDeleting}
-              >
-                {challengeSubmitting ? 'Envoi...' : 'Voter maintenant'}
-              </button>
-            </div>
-          )}
-        </div>
-        {homeChallenge.myVote ? (
-          <p className="mt-2 text-xs text-brand-700">
-            Tu as voté pour {homeChallenge.myVote.candidateHandle} le {formatLastSeen(homeChallenge.myVote.createdAt)}.
-          </p>
-        ) : null}
-        {challengeFeedback ? <p className="mt-2 text-xs text-brand-700">{challengeFeedback}</p> : null}
-        {Array.isArray(homeChallenge.recentComments) && homeChallenge.recentComments.length > 0 ? (
-          <div className="mt-4 rounded-lg border border-brand-100 p-3">
-            <p className="text-sm font-semibold text-brand-900">Commentaires récents</p>
-            <div className="mt-2 space-y-2">
-              {homeChallenge.recentComments.map((row) => (
-                <div key={row.id} className="rounded-md border border-brand-100 px-3 py-2 text-xs">
-                  <p className="font-semibold text-brand-900">{row.author} • {row.candidateHandle}</p>
-                  <p className="mt-1 text-brand-700">{row.comment}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
+        {shareFeedback ? <p className="mt-2 text-xs text-brand-700">{shareFeedback}</p> : null}
       </article>
 
       <VerifiedTestimonials />
