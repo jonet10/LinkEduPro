@@ -285,6 +285,8 @@ async function streamExamPdf(req, res, next) {
       .filter(Boolean);
 
     const candidateDirs = [
+      // Exam PDFs packaged inside backend repository (works for monorepo and backend-only repo)
+      path.resolve(__dirname, '../../exam-pdfs'),
       // Existing local folders (development repository)
       path.resolve(__dirname, '../../../Examen Physiques'),
       path.resolve(__dirname, '../../../Documents/Chimie'),
