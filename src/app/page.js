@@ -189,6 +189,17 @@ function getDailyObjective(student) {
   return byTrack[track] || byTrack.ORDINAIRE;
 }
 
+function resolveSubjectSlot(subjectName) {
+  const value = String(subjectName || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  if (!value) return null;
+  if (value.includes('math')) return 'Mathematiques';
+  if (value.includes('physique') || value.includes('chimie')) return 'Physique-Chimie';
+  if (value.includes('franc')) return 'Francais';
+  if (value.includes('histoire') || value.includes('geo')) return 'Histoire-Geo';
+  if (value.includes('philo')) return 'Philosophie';
+  return null;
+}
+
 function LearningShowcaseSection({ section }) {
   const isSubjectIconImage = (src) => /^\/images\/subject-/.test(String(src || ''));
   const trackRef = useRef(null);
@@ -298,6 +309,11 @@ export default function HomePage() {
     lastSeenByRole: { students: null, teachers: null, admins: null, others: null },
     mineLastSeenAt: null
   });
+  const [progress, setProgress] = useState({
+    overview: { totalAttempts: 0, averageScore: 0 },
+    subjectStats: [],
+    recentAttempts: []
+  });
   const [platformDonationFeedback, setPlatformDonationFeedback] = useState('');
   const [error, setError] = useState('');
   const [welcomePopup, setWelcomePopup] = useState(null);
@@ -321,11 +337,76 @@ export default function HomePage() {
   const isAdminRole = student?.role === 'ADMIN';
 
   const quizProgressPercent = useMemo(() => {
-    const value = Number(myRanking?.average || 0);
+    const preferred = Number(progress?.overview?.averageScore || 0);
+    const fallback = Number(myRanking?.average || 0);
+    const value = Number.isFinite(preferred) && preferred > 0 ? preferred : fallback;
     if (!Number.isFinite(value) || value <= 0) return 20;
     return Math.max(5, Math.min(95, Math.round(value)));
-  }, [myRanking?.average]);
+  }, [myRanking?.average, progress?.overview?.averageScore]);
   const courseProgressPercent = 100 - quizProgressPercent;
+  const studentTrackLabel = useMemo(() => {
+    const track = String(student?.nsivTrack || '').trim().toUpperCase();
+    if (!track) return 'General';
+    return track;
+  }, [student?.nsivTrack]);
+  const topSubject = useMemo(() => {
+    const rows = Array.isArray(progress?.subjectStats) ? progress.subjectStats : [];
+    if (!rows.length) return null;
+    const sorted = [...rows].sort((a, b) => Number(b?.average || 0) - Number(a?.average || 0));
+    const best = sorted[0];
+    return {
+      name: best?.subject || 'Quiz',
+      average: Math.max(0, Math.min(100, Number(best?.average || 0)))
+    };
+  }, [progress?.subjectStats]);
+
+  const predictiveNodes = useMemo(() => {
+    const slotTemplate = [
+      { slot: 'Mathematiques', label: 'Mathematiques', tone: 'cyan', offset: 'left-5 top-10' },
+      { slot: 'Physique-Chimie', label: 'Physique-Chimie', tone: 'mint', offset: 'left-4 bottom-14' },
+      { slot: 'Francais', label: 'Francais', tone: 'violet', offset: 'left-28 top-3' },
+      { slot: 'Histoire-Geo', label: 'Histoire-Geo', tone: 'blue', offset: 'right-5 bottom-16' },
+      { slot: 'Philosophie', label: 'Philosophie', tone: 'blue', offset: 'right-16 top-28' }
+    ];
+
+    const slotValues = new Map();
+    for (const row of progress.subjectStats || []) {
+      const slot = resolveSubjectSlot(row?.subject);
+      if (!slot) continue;
+      const avg = Math.max(0, Math.min(100, Number(row?.average || 0)));
+      const attempts = Number(row?.attempts || 0);
+      const current = slotValues.get(slot);
+      if (!current || avg > current.value) {
+        slotValues.set(slot, { value: avg, attempts });
+      }
+    }
+
+    const filled = slotTemplate.map((item) => {
+      const data = slotValues.get(item.slot) || null;
+      return {
+        ...item,
+        value: data ? data.value : 0,
+        attempts: data ? data.attempts : 0
+      };
+    });
+
+    filled.push({
+      label: studentTrackLabel,
+      tone: 'gold',
+      offset: 'right-8 top-10',
+      highlight: true,
+      value: quizProgressPercent
+    });
+    filled.push({
+      label: 'Knowledge-cible',
+      tone: 'blue',
+      offset: 'left-[36%] top-[43%]',
+      core: true,
+      value: quizProgressPercent
+    });
+    return filled;
+  }, [progress.subjectStats, quizProgressPercent, studentTrackLabel]);
+
 
   const managerQuickActions = useMemo(() => {
     if (isAdminRole) {
@@ -382,17 +463,21 @@ export default function HomePage() {
 
     Promise.all([
       apiClient('/results/community', { token }),
+      apiClient('/results/progress', { token }),
       apiClient('/v2/profile/daily-welcome-popup', { token })
     ])
-      .then(([communityData, popupData]) => {
+      .then(([communityData, progressData, popupData]) => {
         setCommunity(communityData);
+        if (progressData?.overview) {
+          setProgress(progressData);
+        }
         if (popupData?.shouldShow) {
           setWelcomePopup(popupData);
         }
         setReady(true);
       })
       .catch((e) => {
-        setError(e.message || 'Erreur de chargement des données communautaires');
+        setError(e.message || 'Erreur de chargement des données de progression');
         setReady(true);
       });
   }, []);
@@ -710,38 +795,68 @@ export default function HomePage() {
       ) : null}
 
       {isStudentRole ? (
-        <div className="card motion-enter motion-delay-1 lift-card home-gold-soft border border-brand-200 bg-gradient-to-r from-brand-50 to-white">
-          <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Coaching intelligent</p>
-              <h2 className="home-gold-title mt-1 text-xl font-bold text-brand-900">{dailyObjective.title}</h2>
-              <p className="mt-2 text-sm text-brand-700">{dailyObjective.description}</p>
-              <div className="mt-4">
-                <Link href={dailyObjective.ctaHref} className="btn-primary cta-pulse home-gold-cta">{dailyObjective.ctaLabel}</Link>
-              </div>
-            </div>
-            <div className="rounded-xl border border-brand-100 bg-white/65 p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-700">Progression du jour</p>
-              <div className="mt-2 flex items-center gap-3">
-                <div
-                  className="h-20 w-20 rounded-full"
-                  style={{
-                    background: `conic-gradient(#5f6cff 0 ${quizProgressPercent}%, rgba(95,108,255,0.18) ${quizProgressPercent}% 100%)`
-                  }}
-                  aria-label={`Quiz ${quizProgressPercent}% et cours ${courseProgressPercent}%`}
-                >
-                  <div className="m-[7px] flex h-[66px] w-[66px] items-center justify-center rounded-full bg-white/90 text-[11px] font-bold text-brand-900">
-                    {quizProgressPercent}%
-                  </div>
-                </div>
-                <div className="text-xs">
-                  <p className="font-semibold text-brand-900">Quiz: {quizProgressPercent}%</p>
-                  <p className="mt-1 text-brand-700">Cours: {courseProgressPercent}%</p>
+        <section className="student-neo-hud motion-enter motion-delay-1" aria-label="Parcours prédictif élève">
+          <div className="student-neo-grid">
+            <div className="student-neo-orbit">
+              <p className="student-neo-kicker">Ton parcours predictif</p>
+              <div className="student-neo-sphere-wrap">
+                <div className="student-neo-sphere">
+                  {predictiveNodes.map((node) => (
+                    <div
+                      key={`${node.label}-${node.offset}`}
+                      className={`student-neo-node ${node.tone || 'blue'} ${node.offset} ${node.highlight ? 'is-highlight' : ''} ${node.core ? 'is-core' : ''}`}
+                    >
+                      <span className="student-neo-node-title">{node.label}</span>
+                      {typeof node.value === 'number' ? (
+                        <span className="student-neo-node-score">{Math.round(node.value)}%</span>
+                      ) : null}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
+
+            <aside className="student-neo-objective">
+              <div className="student-neo-user">
+                <span className="student-neo-avatar">{getUserInitials(student)}</span>
+                <div>
+                  <p className="student-neo-user-name">{student?.firstName || 'Eleve'}</p>
+                  <p className="student-neo-user-meta">Track: {studentTrackLabel}</p>
+                </div>
+              </div>
+
+              <h2 className="student-neo-title">Objectif du moment (IA-assiste)</h2>
+              <p className="student-neo-desc">{dailyObjective.description}</p>
+
+              <div className="student-neo-progress-row">
+                <span>{studentTrackLabel}: {quizProgressPercent}% complete</span>
+                <span>Cours: {courseProgressPercent}%</span>
+              </div>
+              <div className="student-neo-progress-track" aria-label={`Progression globale ${quizProgressPercent}%`}>
+                <div className="student-neo-progress-fill" style={{ width: `${quizProgressPercent}%` }} />
+              </div>
+              {topSubject ? (
+                <p className="student-neo-best-subject">
+                  Meilleure matiere: {topSubject.name} ({topSubject.average}%)
+                </p>
+              ) : null}
+
+              <div className="student-neo-cta-grid">
+                <Link href="/video-lessons" className="student-neo-cta">Classe Numerique</Link>
+                <Link href="/probable-exercises" className="student-neo-cta">Exercices probables</Link>
+                <Link href={dailyObjective.ctaHref} className="student-neo-cta student-neo-cta-primary">{dailyObjective.ctaLabel}</Link>
+                <Link href="/subjects" className="student-neo-cta">Quiz valides</Link>
+              </div>
+            </aside>
           </div>
-        </div>
+
+          <nav className="student-neo-bottom-nav" aria-label="Raccourcis eleve">
+            <Link href="/library" className="student-neo-pill">Ressources</Link>
+            <Link href="/subjects" className="student-neo-pill">Exercices</Link>
+            <Link href="/support" className="student-neo-pill">Support IA</Link>
+            <Link href="/blog" className="student-neo-pill">Forum</Link>
+          </nav>
+        </section>
       ) : null}
 
       {isStudentRole && !hasDepartmentAndCommune(student?.school) ? (
