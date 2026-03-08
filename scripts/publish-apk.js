@@ -10,6 +10,20 @@ function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+function resolveApkSource(root, variant) {
+  const outDir = path.join(root, 'android', 'app', 'build', 'outputs', 'apk', variant);
+  const preferred = path.join(outDir, `app-${variant}.apk`);
+  if (fs.existsSync(preferred)) return preferred;
+
+  const files = fs.readdirSync(outDir).filter((name) => name.endsWith('.apk'));
+  if (!files.length) {
+    throw new Error(`Aucun APK trouve dans: ${outDir}`);
+  }
+
+  const unsigned = files.find((name) => name.includes('unsigned'));
+  return path.join(outDir, unsigned || files[0]);
+}
+
 function copyFileOrThrow(source, target) {
   if (!fs.existsSync(source)) {
     throw new Error(`APK source introuvable: ${source}`);
@@ -24,16 +38,7 @@ function writeJson(file, payload) {
 function main() {
   const variant = resolveVariant(process.argv[2]);
   const root = process.cwd();
-  const source = path.join(
-    root,
-    'android',
-    'app',
-    'build',
-    'outputs',
-    'apk',
-    variant,
-    `app-${variant}.apk`
-  );
+  const source = resolveApkSource(root, variant);
   const targetDir = path.join(root, 'public', 'apk');
   const targetStable = path.join(targetDir, 'linkedupro.apk');
   const targetVersioned = path.join(targetDir, `linkedupro-${variant}.apk`);
