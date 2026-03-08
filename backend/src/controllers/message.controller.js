@@ -220,7 +220,7 @@ async function getUnreadMessageSummary(req, res, next) {
         FROM conversation_participants cp
         INNER JOIN conversations c
           ON c.id = cp.conversation_id
-         AND c.type = 'PRIVATE'
+         AND c.type = 'private'
         INNER JOIN messages m
           ON m.conversation_id = cp.conversation_id
          AND m.sender_id <> cp.user_id
@@ -234,7 +234,7 @@ async function getUnreadMessageSummary(req, res, next) {
           FROM conversation_participants cp
           INNER JOIN conversations c
             ON c.id = cp.conversation_id
-           AND c.type = 'PRIVATE'
+           AND c.type = 'private'
           INNER JOIN messages m
             ON m.conversation_id = cp.conversation_id
            AND m.sender_id <> cp.user_id
