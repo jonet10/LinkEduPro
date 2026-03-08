@@ -11,7 +11,9 @@
     "mobile:open": "npx cap open android",
     "apk:debug": "cd android && gradlew.bat assembleDebug",
     "apk:release": "cd android && gradlew.bat assembleRelease",
-    "aab:release": "cd android && gradlew.bat bundleRelease"
+    "aab:release": "cd android && gradlew.bat bundleRelease",
+    "apk:publish": "npm run mobile:sync && npm run apk:debug && node scripts/publish-apk.js debug",
+    "apk:publish:release": "npm run mobile:sync && npm run apk:release && node scripts/publish-apk.js release"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",
