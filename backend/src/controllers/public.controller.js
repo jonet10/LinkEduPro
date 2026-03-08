@@ -297,9 +297,31 @@ async function streamExamPdf(req, res, next) {
       ...extraExamDirs.map((dir) => path.resolve(dir))
     ].filter(Boolean);
 
-    const filePath = candidateDirs
+    const normalizeLookupName = (value) => String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[\s_-]+/g, '');
+
+    const exactMatch = candidateDirs
       .map((dir) => path.join(dir, safeName))
       .find((candidate) => fs.existsSync(candidate));
+
+    let filePath = exactMatch;
+    if (!filePath) {
+      const targetName = normalizeLookupName(safeName);
+      for (const dir of candidateDirs) {
+        if (!fs.existsSync(dir)) continue;
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        const matched = entries.find((entry) => (
+          entry.isFile() && normalizeLookupName(entry.name) === targetName
+        ));
+        if (matched) {
+          filePath = path.join(dir, matched.name);
+          break;
+        }
+      }
+    }
 
     if (!filePath) {
       return res.status(404).json({ message: 'PDF introuvable.' });
