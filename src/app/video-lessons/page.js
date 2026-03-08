@@ -26,6 +26,20 @@ const CONTENT_KIND_OPTIONS = [
   { value: 'OTHER', label: 'Autre' }
 ];
 
+const PUBLICATION_TYPE_OPTIONS = [
+  { value: 'SINGLE', label: 'Vidéo unique' },
+  { value: 'SERIES', label: 'Série / Cours complet' }
+];
+
+const MAX_SERIES_LESSONS = 10;
+
+function createEmptyLesson(index) {
+  return {
+    title: `Leçon ${index + 1}`,
+    videoUrl: ''
+  };
+}
+
 function normalizeVideoKind(value) {
   const upper = String(value || '').trim().toUpperCase();
   return CONTENT_KIND_OPTIONS.some((item) => item.value === upper) ? upper : 'LESSON';
@@ -162,6 +176,8 @@ export default function VideoLessonsPage() {
   const [classFilter, setClassFilter] = useState('ALL');
   const [submitting, setSubmitting] = useState(false);
   const [showComposer, setShowComposer] = useState(false);
+  const [publicationType, setPublicationType] = useState('SINGLE');
+  const [seriesLessons, setSeriesLessons] = useState([createEmptyLesson(0)]);
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -246,6 +262,31 @@ export default function VideoLessonsPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
+  function addSeriesLesson() {
+    setSeriesLessons((prev) => {
+      if (prev.length >= MAX_SERIES_LESSONS) return prev;
+      return [...prev, createEmptyLesson(prev.length)];
+    });
+  }
+
+  function removeSeriesLesson(index) {
+    setSeriesLessons((prev) => {
+      if (prev.length <= 1) return prev;
+      return prev
+        .filter((_, currentIndex) => currentIndex !== index)
+        .map((lesson, lessonIndex) => ({
+          ...lesson,
+          title: lesson.title || `Leçon ${lessonIndex + 1}`
+        }));
+    });
+  }
+
+  function updateSeriesLesson(index, patch) {
+    setSeriesLessons((prev) => prev.map((lesson, currentIndex) => (
+      currentIndex === index ? { ...lesson, ...patch } : lesson
+    )));
+  }
+
   async function onSubmit(event) {
     event.preventDefault();
     if (!canManage || !token) return;
@@ -258,38 +299,80 @@ export default function VideoLessonsPage() {
     const videoUrl = form.videoUrl.trim();
     const price = Number(form.price || 0);
 
-    if (!title || !videoUrl || !description) {
+    if (!title || !description) {
       setSubmitting(false);
-      setError('Merci de remplir le titre, la description et le lien vidéo.');
+      setError('Merci de remplir le titre et la description.');
       return;
     }
 
-    const payload = {
-      title,
-      level: toApiLevel(form.level),
-      type: 'video',
-      body: JSON.stringify({
-        description,
-        videoUrl,
-        kind: form.kind,
-        isPaid: Boolean(form.isPaid),
-        price: form.isPaid ? Math.max(0, price) : 0
-      })
-    };
-
-    if (student?.role === 'ADMIN' && form.publishNow) {
-      payload.status = 'approved';
+    if (publicationType === 'SINGLE' && !videoUrl) {
+      setSubmitting(false);
+      setError('Merci de renseigner le lien vidéo.');
+      return;
     }
 
     try {
-      const data = await apiClient('/v2/contents', {
-        method: 'POST',
-        token,
-        body: JSON.stringify(payload)
-      });
+      const basePayload = {
+        level: toApiLevel(form.level),
+        type: 'video'
+      };
+      const shouldPublishNow = student?.role === 'ADMIN' && form.publishNow;
 
-      const created = mapContentToVideo(data.content);
-      setVideos((prev) => [created, ...prev]);
+      const buildPayload = (contentTitle, contentDescription, contentVideoUrl) => {
+        const payload = {
+          ...basePayload,
+          title: contentTitle,
+          body: JSON.stringify({
+            description: contentDescription,
+            videoUrl: contentVideoUrl,
+            kind: form.kind,
+            isPaid: Boolean(form.isPaid),
+            price: form.isPaid ? Math.max(0, price) : 0
+          })
+        };
+        if (shouldPublishNow) {
+          payload.status = 'approved';
+        }
+        return payload;
+      };
+
+      const payloads = publicationType === 'SERIES'
+        ? seriesLessons
+          .map((lesson, index) => ({
+            title: String(lesson.title || `Leçon ${index + 1}`).trim(),
+            videoUrl: String(lesson.videoUrl || '').trim(),
+            index
+          }))
+          .filter((lesson) => lesson.videoUrl)
+          .map((lesson) => (
+            buildPayload(
+              `${title} - ${lesson.title || `Leçon ${lesson.index + 1}`}`,
+              `${description}\n\nParcours: ${title} | ${lesson.title || `Leçon ${lesson.index + 1}`}`,
+              lesson.videoUrl
+            )
+          ))
+        : [buildPayload(title, description, videoUrl)];
+
+      if (!payloads.length) {
+        setSubmitting(false);
+        setError('Ajoute au moins une leçon avec un lien vidéo valide.');
+        return;
+      }
+
+      const createdResponses = [];
+      for (const payload of payloads) {
+        const data = await apiClient('/v2/contents', {
+          method: 'POST',
+          token,
+          body: JSON.stringify(payload)
+        });
+        createdResponses.push(data);
+      }
+
+      const createdVideos = createdResponses
+        .map((response) => mapContentToVideo(response.content))
+        .filter((item) => item?.id);
+      setVideos((prev) => [...createdVideos, ...prev]);
       setForm((prev) => ({
         ...prev,
         title: '',
@@ -300,10 +383,20 @@ export default function VideoLessonsPage() {
         videoUrl: '',
         publishNow: false
       }));
+      setPublicationType('SINGLE');
+      setSeriesLessons([createEmptyLesson(0)]);
       setShowComposer(false);
-      setSuccess(student?.role === 'ADMIN' && form.publishNow
-        ? 'Vidéo publiée avec succès.'
-        : 'Vidéo enregistrée avec succès (en attente de validation admin).');
+      if (publicationType === 'SERIES') {
+        setSuccess(
+          shouldPublishNow
+            ? `Série publiée avec succès (${createdVideos.length} leçon(s)).`
+            : `Série enregistrée avec succès (${createdVideos.length} leçon(s), en attente de validation admin).`
+        );
+      } else {
+        setSuccess(shouldPublishNow
+          ? 'Vidéo publiée avec succès.'
+          : 'Vidéo enregistrée avec succès (en attente de validation admin).');
+      }
     } catch (e) {
       setError(e.message || 'Erreur lors de la création du contenu vidéo.');
     } finally {
@@ -343,13 +436,26 @@ export default function VideoLessonsPage() {
 
           {showComposer ? (
           <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={onSubmit}>
+            <label className="space-y-1 md:col-span-2">
+              <span className="text-sm font-medium text-brand-900">Type de publication</span>
+              <select
+                className="input w-full"
+                value={publicationType}
+                onChange={(e) => setPublicationType(e.target.value)}
+              >
+                {PUBLICATION_TYPE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+
             <label className="space-y-1">
               <span className="text-sm font-medium text-brand-900">Titre</span>
               <input
                 className="input w-full"
                 value={form.title}
                 onChange={(e) => onChangeField('title', e.target.value)}
-                placeholder="Ex: Leçon de chimie organique"
+                placeholder={publicationType === 'SERIES' ? 'Ex: Chimie organique - Cours complet' : 'Ex: Leçon de chimie organique'}
                 required
               />
             </label>
@@ -382,17 +488,61 @@ export default function VideoLessonsPage() {
               />
             </label>
 
-            <label className="space-y-1 md:col-span-2">
-              <span className="text-sm font-medium text-brand-900">Lien vidéo (YouTube, Vimeo, etc.)</span>
-              <input
-                className="input w-full"
-                type="url"
-                value={form.videoUrl}
-                onChange={(e) => onChangeField('videoUrl', e.target.value)}
-                placeholder="https://..."
-                required
-              />
-            </label>
+            {publicationType === 'SINGLE' ? (
+              <label className="space-y-1 md:col-span-2">
+                <span className="text-sm font-medium text-brand-900">Lien vidéo (YouTube, Vimeo, etc.)</span>
+                <input
+                  className="input w-full"
+                  type="url"
+                  value={form.videoUrl}
+                  onChange={(e) => onChangeField('videoUrl', e.target.value)}
+                  placeholder="https://..."
+                  required
+                />
+              </label>
+            ) : (
+              <div className="space-y-2 md:col-span-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm font-medium text-brand-900">Leçons du parcours ({seriesLessons.length}/{MAX_SERIES_LESSONS})</span>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={addSeriesLesson}
+                    disabled={seriesLessons.length >= MAX_SERIES_LESSONS}
+                  >
+                    + Ajouter une leçon
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {seriesLessons.map((lesson, index) => (
+                    <div key={`lesson-${index}`} className="grid gap-2 rounded-lg border border-brand-100 p-3 md:grid-cols-[1fr_2fr_auto]">
+                      <input
+                        className="input w-full"
+                        value={lesson.title}
+                        onChange={(e) => updateSeriesLesson(index, { title: e.target.value })}
+                        placeholder={`Leçon ${index + 1}`}
+                      />
+                      <input
+                        className="input w-full"
+                        type="url"
+                        value={lesson.videoUrl}
+                        onChange={(e) => updateSeriesLesson(index, { videoUrl: e.target.value })}
+                        placeholder="https://..."
+                        required={index === 0}
+                      />
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => removeSeriesLesson(index)}
+                        disabled={seriesLessons.length <= 1}
+                      >
+                        Retirer
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <label className="inline-flex items-center gap-2 pt-2">
               <input
@@ -431,7 +581,7 @@ export default function VideoLessonsPage() {
 
             <div className="md:col-span-2">
               <button type="submit" className="btn-primary" disabled={submitting}>
-                {submitting ? 'Publication...' : 'Publier la vidéo'}
+                {submitting ? 'Publication...' : (publicationType === 'SERIES' ? 'Publier la série' : 'Publier la vidéo')}
               </button>
             </div>
           </form>
