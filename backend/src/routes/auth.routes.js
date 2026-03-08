@@ -13,7 +13,7 @@ const {
   resetPasswordWithCode
 } = require('../controllers/auth.controller');
 const validate = require('../middlewares/validate');
-const loginRateLimit = require('../middlewares/login-rate-limit');
+const { loginRateLimit } = require('../middlewares/login-rate-limit');
 const {
   registerSchema,
   loginSchema,

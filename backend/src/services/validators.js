@@ -1,5 +1,17 @@
 const Joi = require('joi');
 
+const STRONG_PASSWORD_SCHEMA = Joi.string()
+  .min(10)
+  .max(128)
+  .pattern(/[a-z]/)
+  .pattern(/[A-Z]/)
+  .pattern(/[0-9]/)
+  .pattern(/[^a-zA-Z0-9]/)
+  .required()
+  .messages({
+    'string.pattern.base': 'Le mot de passe doit contenir majuscule, minuscule, chiffre et caractère spécial.'
+  });
+
 const registerSchema = Joi.object({
   firstName: Joi.string().trim().min(2).max(80).required(),
   lastName: Joi.string().trim().min(2).max(80).required(),
@@ -22,7 +34,7 @@ const registerSchema = Joi.object({
   gradeLevel: Joi.string().trim().min(1).max(50).optional().allow('', null),
   email: Joi.string().email({ tlds: { allow: false } }).required(),
   phone: Joi.string().trim().max(30).allow(null, ''),
-  password: Joi.string().min(6).max(128).required()
+  password: STRONG_PASSWORD_SCHEMA
 });
 
 const loginSchema = Joi.object({
@@ -35,7 +47,7 @@ const acceptTeacherInviteSchema = Joi.object({
   token: Joi.string().trim().length(48).required(),
   firstName: Joi.string().trim().min(2).max(80).required(),
   lastName: Joi.string().trim().min(2).max(80).required(),
-  password: Joi.string().min(8).max(128).required(),
+  password: STRONG_PASSWORD_SCHEMA,
   sex: Joi.string().valid('MALE', 'FEMALE', 'OTHER').default('OTHER'),
   dateOfBirth: Joi.date().iso().optional(),
   phone: Joi.string().trim().max(30).allow(null, '')
@@ -53,7 +65,7 @@ const forgotPasswordVerifySchema = Joi.object({
 const forgotPasswordResetSchema = Joi.object({
   email: Joi.string().email({ tlds: { allow: false } }).required(),
   code: Joi.string().trim().pattern(/^\d{6}$/).required(),
-  newPassword: Joi.string().min(8).max(128).required()
+  newPassword: STRONG_PASSWORD_SCHEMA
 });
 
 const verifyEmailSchema = Joi.object({
@@ -67,7 +79,7 @@ const resendVerificationEmailSchema = Joi.object({
 const updateUnverifiedEmailSchema = Joi.object({
   email: Joi.string().email({ tlds: { allow: false } }).required(),
   newEmail: Joi.string().email({ tlds: { allow: false } }).required(),
-  password: Joi.string().min(6).max(128).required()
+  password: Joi.string().min(8).max(128).required()
 });
 
 const quizParamsSchema = Joi.object({

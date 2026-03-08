@@ -4,6 +4,7 @@ const prisma = require('../config/prisma');
 const { generateToken } = require('../utils/token');
 const { toApiLevel } = require('../v2/utils/level');
 const { sendEmail } = require('../services/email');
+const { clearLoginRateLimit } = require('../middlewares/login-rate-limit');
 
 const OTP_EXPIRES_MINUTES = Number(process.env.PASSWORD_RESET_OTP_EXPIRES_MINUTES || 10);
 const OTP_COOLDOWN_SECONDS = Number(process.env.PASSWORD_RESET_OTP_COOLDOWN_SECONDS || 60);
@@ -83,7 +84,7 @@ function mapAcademicLevelToEducationLevel(academicLevel) {
 }
 
 function hashEmailVerificationToken(token) {
-  const secret = process.env.JWT_SECRET || 'linkedupro_email_verification_secret';
+  const secret = process.env.EMAIL_TOKEN_SECRET || process.env.JWT_SECRET || 'dev-only-email-token-secret';
   return crypto.createHash('sha256').update(`${token}:${secret}`).digest('hex');
 }
 
@@ -157,7 +158,7 @@ async function verifyAndConsumeEmailToken(rawToken) {
 }
 
 function hashResetCode(email, code) {
-  const secret = process.env.JWT_SECRET || 'linkedupro_reset_secret';
+  const secret = process.env.PASSWORD_RESET_SECRET || process.env.JWT_SECRET || 'dev-only-reset-secret';
   return crypto.createHash('sha256').update(`${email}:${code}:${secret}`).digest('hex');
 }
 
@@ -311,6 +312,7 @@ async function login(req, res, next) {
     if (!valid) {
       return res.status(401).json({ message: 'Identifiants invalides.' });
     }
+    clearLoginRateLimit(normalizedIdentifier, req);
 
     if (!student.emailVerified) {
       return res.status(403).json({

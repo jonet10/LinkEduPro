@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
 const prisma = require('../../config/prisma');
+const { verifyJwt } = require('../../utils/jwt');
 
 async function schoolAuthMiddleware(req, res, next) {
   try {
@@ -9,7 +9,7 @@ async function schoolAuthMiddleware(req, res, next) {
     }
 
     const token = header.split(' ')[1];
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = verifyJwt(token);
 
     if (payload.scope !== 'school-management') {
       return res.status(401).json({ message: 'Token invalide pour ce module.' });

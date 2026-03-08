@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
+const { verifyJwt } = require('../utils/jwt');
 
 async function authMiddleware(req, res, next) {
   try {
@@ -9,7 +9,7 @@ async function authMiddleware(req, res, next) {
     }
 
     const token = header.split(' ')[1];
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = verifyJwt(token);
     const student = await prisma.student.findUnique({ where: { id: payload.sub } });
 
     if (!student) {

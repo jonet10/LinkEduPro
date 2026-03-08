@@ -20,6 +20,8 @@ describe('school create validation integration', () => {
       phone: '50911111111',
       email: 'contact@school.test',
       address: 'Rue A #12',
+      department: 'Ouest',
+      commune: 'Delmas',
       city: 'Port-au-Prince',
       country: 'Haiti',
       logo: '',

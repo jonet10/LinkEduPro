@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
 const { sendSseEvent, subscribeUser } = require('../services/realtime');
+const { verifyJwt } = require('../utils/jwt');
 
 function resolveToken(req) {
   const queryToken = String(req.query.token || '').trim();
@@ -21,7 +21,7 @@ async function streamRealtime(req, res) {
       return res.status(401).json({ message: 'Token manquant.' });
     }
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = verifyJwt(token);
     const userId = Number(payload?.sub);
     if (!Number.isInteger(userId) || userId <= 0) {
       return res.status(401).json({ message: 'Token invalide ou expiré.' });
@@ -62,4 +62,3 @@ async function streamRealtime(req, res) {
 module.exports = {
   streamRealtime
 };
-

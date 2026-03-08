@@ -6,9 +6,10 @@
     });
 
     if (error) {
+      const isProd = String(process.env.NODE_ENV || '').toLowerCase() === 'production';
       return res.status(400).json({
         message: 'Validation error',
-        details: error.details.map((d) => d.message)
+        ...(isProd ? {} : { details: error.details.map((d) => d.message) })
       });
     }
 

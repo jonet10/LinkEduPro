@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const securityHeaders = require('./middlewares/security-headers');
 const authRoutes = require('./routes/auth.routes');
 const subjectRoutes = require('./routes/subject.routes');
 const quizRoutes = require('./routes/quiz.routes');
@@ -25,10 +26,38 @@ const { API_BASE_URL } = require('./config/api-base-url');
 
 const app = express();
 
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
-app.use(express.json());
+const allowedOrigins = new Set(
+  [
+    process.env.FRONTEND_URL,
+    ...(String(process.env.FRONTEND_URLS || '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean))
+  ].filter(Boolean)
+);
+
+const corsOptions = {
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Authorization', 'Content-Type', 'Accept', 'X-Requested-With'],
+  maxAge: 86400,
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.has(origin)) return callback(null, true);
+    return callback(new Error('Origin non autorisee par CORS.'));
+  }
+};
+
+if (String(process.env.TRUST_PROXY || '').toLowerCase() === 'true') {
+  app.set('trust proxy', 1);
+}
+
+app.use(securityHeaders);
+app.use(cors(corsOptions));
+app.use(express.json({ limit: process.env.JSON_BODY_LIMIT || '100kb' }));
+app.use(express.urlencoded({ extended: false, limit: process.env.FORM_BODY_LIMIT || '50kb' }));
 app.use(morgan('dev'));
-app.use('/storage', express.static(getStorageRoot()));
+app.use('/storage', express.static(getStorageRoot(), { index: false, maxAge: '7d' }));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', apiBaseUrl: API_BASE_URL });
@@ -61,6 +90,9 @@ app.use((req, res) => {
 
 app.use((error, req, res, next) => {
   console.error(error);
+  if (error && error.message === 'Origin non autorisee par CORS.') {
+    return res.status(403).json({ message: 'Origine non autorisee.' });
+  }
   const status = Number(error?.status) || 500;
   const isProd = process.env.NODE_ENV === 'production';
   const message = isProd
