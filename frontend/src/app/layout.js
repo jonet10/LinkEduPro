@@ -6,8 +6,10 @@ import ThemeInit from '@/components/ThemeInit';
 import Footer from '@/components/Footer';
 import SplashScreenGate from '@/components/SplashScreenGate';
 
+const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://linkedupro.com';
+
 export const metadata = {
-  metadataBase: new URL('https://linkedupro-2.onrender.com'),
+  metadataBase: new URL(PUBLIC_SITE_URL),
   title: 'LinkEduPro - Éducation connectée',
   description: 'LinkEduPro est une plateforme éducative qui aide les élèves et les enseignants à apprendre, réviser et progresser ensemble.',
   icons: {
@@ -18,7 +20,7 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    url: 'https://linkedupro-2.onrender.com/',
+    url: `${PUBLIC_SITE_URL.replace(/\/+$/, '')}/`,
     siteName: 'LinkEduPro',
     title: 'LinkEduPro - Éducation connectée',
     description: 'LinkEduPro est une plateforme éducative qui aide les élèves et les enseignants à apprendre, réviser et progresser ensemble.',

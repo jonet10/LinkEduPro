@@ -4,7 +4,18 @@ function normalizeApiBaseUrl(value) {
   const raw = String(value || '').trim();
   if (!raw) return '';
   if (!/^https?:\/\//i.test(raw)) return '';
-  return raw.replace(/\/+$/, '');
+
+  try {
+    const url = new URL(raw);
+    const pathname = (url.pathname || '/').replace(/\/+$/, '');
+    if (!pathname || pathname === '/') {
+      url.pathname = '/api';
+      return url.toString().replace(/\/+$/, '');
+    }
+    return url.toString().replace(/\/+$/, '');
+  } catch (_) {
+    return raw.replace(/\/+$/, '');
+  }
 }
 
 function resolveBackendOrigin(apiBaseUrl) {
@@ -17,6 +28,7 @@ function resolveBackendOrigin(apiBaseUrl) {
 
 const configuredApiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
   process.env.API_BASE_URL ||
   '';
 

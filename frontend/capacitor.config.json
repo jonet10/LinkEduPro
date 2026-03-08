@@ -3,7 +3,7 @@
   "appName": "LinkEduPro",
   "webDir": "web-mobile",
   "server": {
-    "url": "https://linkedupro-2.onrender.com",
+    "url": "https://linkedupro.com",
     "cleartext": false
   }
 }
