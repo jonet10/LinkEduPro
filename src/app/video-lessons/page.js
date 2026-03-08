@@ -162,6 +162,14 @@ function getVideoPlayerConfig(rawUrl) {
   return { type: 'link', src: url };
 }
 
+function normalizeErrorText(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
 export default function VideoLessonsPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
@@ -227,7 +235,8 @@ export default function VideoLessonsPage() {
       }
     } catch (e) {
       const message = String(e?.message || '');
-      if (message.toLowerCase().includes('niveau utilisateur non défini')) {
+      const normalizedMessage = normalizeErrorText(message);
+      if (normalizedMessage.includes('niveau utilisateur non defini')) {
         // For users without an academic level yet, keep the catalog empty without surfacing a blocking red error.
         setError('');
       } else {
