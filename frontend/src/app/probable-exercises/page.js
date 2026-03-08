@@ -90,6 +90,7 @@ export default function ProbableExercisesPage() {
   const router = useRouter();
   const [items, setItems] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState('');
+  const [expandedYear, setExpandedYear] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -101,6 +102,7 @@ export default function ProbableExercisesPage() {
         setItems(nextItems);
         const firstKey = nextItems.length ? toSubjectKey(nextItems[0].subject) : '';
         setSelectedSubject(firstKey);
+        setExpandedYear('');
       })
       .catch((e) => setError(e.message || 'Impossible de charger les examens passés.'))
       .finally(() => setLoading(false));
@@ -126,6 +128,14 @@ export default function ProbableExercisesPage() {
     return groupExamsByYear(topicRows);
   }, [selectedRows]);
 
+  useEffect(() => {
+    if (!yearGroups.length) {
+      setExpandedYear('');
+      return;
+    }
+    setExpandedYear((prev) => (prev && yearGroups.some((group) => group.year === prev) ? prev : yearGroups[0].year));
+  }, [yearGroups]);
+
   function openExamPdf(fileName) {
     if (typeof window === 'undefined') return;
     const pdfUrl = `${API_URL}/public/exam-pdfs/${encodeURIComponent(fileName)}`;
@@ -146,18 +156,21 @@ export default function ProbableExercisesPage() {
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="overflow-x-auto rounded-2xl border border-brand-100 bg-white/70">
+        <div className="flex min-w-max">
         {availableSubjects.map((subject) => (
           <button
             key={subject.key}
             type="button"
-            className={`card text-left ${selectedSubject === subject.key ? 'ring-2 ring-brand-400' : ''}`}
+            className={`min-w-[220px] border-r border-brand-100 px-6 py-4 text-left text-2xl font-semibold text-brand-900 transition ${
+              selectedSubject === subject.key ? 'bg-brand-50' : 'bg-transparent'
+            }`}
             onClick={() => setSelectedSubject(subject.key)}
           >
-            <p className="text-lg font-semibold text-brand-900">{subject.label}</p>
-            <p className="mt-1 text-sm text-brand-700">Voir les examens passés de {subject.label} par année.</p>
+            {subject.label}
           </button>
         ))}
+        </div>
       </div>
 
       {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
@@ -177,29 +190,46 @@ export default function ProbableExercisesPage() {
                   <h2 className="text-xl font-semibold text-brand-900">
                     {group.year === 'Sans année' ? 'Année non précisée' : `Année ${group.year}`}
                   </h2>
-                  <span className="rounded-full bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700">
-                    {group.exams.length} PDF
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700">
+                      {group.exams.length} PDF
+                    </span>
+                    <button
+                      type="button"
+                      className="btn-secondary !px-3 !py-1.5 text-xs"
+                      onClick={() => setExpandedYear((prev) => (prev === group.year ? '' : group.year))}
+                    >
+                      {expandedYear === group.year ? 'Masquer' : 'Voir les PDF'}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-2">
-                  {group.exams.map((exam) => (
-                    <div key={`${group.year}-${exam.fileName}`} className="rounded-lg border border-brand-100 p-3">
-                      <p className="font-semibold text-brand-900">{exam.label}</p>
-                      {exam.topics.length > 0 ? (
-                        <p className="mt-1 text-xs text-brand-700">
-                          Thèmes: {exam.topics.slice(0, 3).join(' • ')}
-                          {exam.topics.length > 3 ? ' • ...' : ''}
-                        </p>
-                      ) : null}
-                      <div className="mt-3">
-                        <button type="button" onClick={() => openExamPdf(exam.fileName)} className="btn-primary !px-3 !py-1.5 text-xs">
-                          Ouvrir PDF
-                        </button>
+                {expandedYear === group.year ? (
+                  <div className="space-y-3">
+                    {group.exams.map((exam) => (
+                      <div key={`${group.year}-${exam.fileName}`} className="rounded-xl border border-brand-100 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-lg font-semibold text-brand-900">{exam.label}</p>
+                            {exam.topics.length > 0 ? (
+                              <p className="mt-1 text-sm text-brand-700">
+                                Thèmes: {exam.topics.slice(0, 3).join(', ')}
+                                {exam.topics.length > 3 ? ', ...' : ''}
+                              </p>
+                            ) : null}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => openExamPdf(exam.fileName)}
+                            className="btn-primary !px-3 !py-1.5 text-xs whitespace-nowrap"
+                          >
+                            Ouvrir PDF
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : null}
               </article>
             ))}
           </div>
