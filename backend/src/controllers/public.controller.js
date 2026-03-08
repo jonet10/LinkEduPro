@@ -277,12 +277,25 @@ async function streamExamPdf(req, res, next) {
       return res.status(400).json({ message: 'Nom de fichier invalide.' });
     }
 
+    const storageRoot = String(process.env.STORAGE_ROOT || '').trim();
+    const examPdfRoot = String(process.env.EXAM_PDF_ROOT || '').trim();
+    const extraExamDirs = String(process.env.EXAM_PDF_DIRS || '')
+      .split(';')
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+
     const candidateDirs = [
+      // Existing local folders (development repository)
       path.resolve(__dirname, '../../../Examen Physiques'),
       path.resolve(__dirname, '../../../Documents/Chimie'),
       path.resolve(__dirname, '../../../Documents/Math'),
-      path.resolve(__dirname, '../../../Documents/Mathematiques')
-    ];
+      path.resolve(__dirname, '../../../Documents/Mathematiques'),
+      // Backend-only repository / persistent disk locations (production)
+      examPdfRoot ? path.resolve(examPdfRoot) : null,
+      storageRoot ? path.resolve(storageRoot, 'exam-pdfs') : null,
+      storageRoot ? path.resolve(storageRoot, 'exams') : null,
+      ...extraExamDirs.map((dir) => path.resolve(dir))
+    ].filter(Boolean);
 
     const filePath = candidateDirs
       .map((dir) => path.join(dir, safeName))
