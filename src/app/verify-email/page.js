@@ -1,14 +1,8 @@
 import { redirect } from 'next/navigation';
+import { API_BASE_URL } from '@/lib/runtime-config';
 
 function getApiBaseUrl() {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-
-  if (/^https?:\/\//i.test(apiUrl)) {
-    return apiUrl.replace(/\/+$/, '');
-  }
-
-  return `${backendUrl.replace(/\/+$/, '')}${apiUrl.startsWith('/') ? apiUrl : `/${apiUrl}`}`;
+  return API_BASE_URL.replace(/\/+$/, '');
 }
 
 async function verifyToken(token) {

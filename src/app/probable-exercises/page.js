@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { API_BASE_URL } from '@/lib/runtime-config';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = API_BASE_URL;
 
 function normalizeText(value) {
   return String(value || '')
