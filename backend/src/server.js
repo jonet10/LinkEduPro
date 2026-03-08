@@ -2,6 +2,7 @@ require('dotenv').config();
 const app = require('./app');
 const prisma = require('./config/prisma');
 const { seedDefaultLibraryBooks } = require('./services/library-seed.service');
+const { API_BASE_URL } = require('./config/api-base-url');
 
 const port = process.env.PORT || 5000;
 
@@ -12,7 +13,7 @@ async function start() {
       await seedDefaultLibraryBooks();
     }
     app.listen(port, () => {
-      console.log(`Backend running on http://localhost:${port}`);
+      console.log(`Backend running on ${API_BASE_URL}`);
     });
   } catch (error) {
     console.error('Failed to start server', error);

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { clearSchoolAuth, getSchoolAdmin, getSchoolToken } from '@/lib/schoolAuth';
+import { API_BASE_URL } from '@/lib/runtime-config';
 
 export default function SchoolPaymentsPage() {
   const router = useRouter();
@@ -174,8 +175,7 @@ export default function SchoolPaymentsPage() {
   const downloadReceipt = async (paymentId) => {
     const token = getSchoolToken();
     const schoolId = admin.schoolId;
-    const base = process.env.NEXT_PUBLIC_API_URL || '';
-    const url = `${base}/school-management/payments/schools/${schoolId}/${paymentId}/receipt`;
+    const url = `${API_BASE_URL}/school-management/payments/schools/${schoolId}/${paymentId}/receipt`;
 
     try {
       const res = await fetch(url, {

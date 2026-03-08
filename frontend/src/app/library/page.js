@@ -4,14 +4,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
+import { BACKEND_ORIGIN } from '@/lib/runtime-config';
 
 function getStorageUrl(fileUrl) {
   if (!fileUrl) return '#';
   if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
 
-  const api = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-  const origin = api.replace(/\/api\/?$/, '');
-  return `${origin}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+  return `${BACKEND_ORIGIN}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
 }
 
 function formatHTG(value) {

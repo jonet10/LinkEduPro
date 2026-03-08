@@ -1,4 +1,5 @@
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { API_BASE_URL, BACKEND_ORIGIN } from '@/lib/runtime-config';
+
 const mediaBaseEnv = process.env.NEXT_PUBLIC_MEDIA_BASE_URL || '';
 
 function normalizeBase(baseUrl) {
@@ -10,11 +11,7 @@ function getBackendBaseUrl() {
     return normalizeBase(mediaBaseEnv);
   }
 
-  if (/^https?:\/\//i.test(apiUrl)) {
-    return normalizeBase(apiUrl).replace(/\/api\/?$/, '');
-  }
-
-  return '';
+  return normalizeBase(BACKEND_ORIGIN || API_BASE_URL.replace(/\/api\/?$/, ''));
 }
 
 export function resolveMediaUrl(url) {
@@ -38,4 +35,3 @@ export function resolveMediaUrl(url) {
 
   return `${backendBaseUrl}/${raw}`;
 }
-

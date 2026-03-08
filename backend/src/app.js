@@ -21,6 +21,7 @@ const searchRoutes = require('./search/routes/search.routes');
 const realtimeRoutes = require('./routes/realtime.routes');
 const { focusRouter, pomodoroRouter } = require('./focus/routes/focus.routes');
 const { getStorageRoot } = require('./config/storage');
+const { API_BASE_URL } = require('./config/api-base-url');
 
 const app = express();
 
@@ -30,7 +31,7 @@ app.use(morgan('dev'));
 app.use('/storage', express.static(getStorageRoot()));
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: 'ok', apiBaseUrl: API_BASE_URL });
 });
 
 app.use('/api/auth', authRoutes);
