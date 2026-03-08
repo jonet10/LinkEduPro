@@ -616,29 +616,31 @@ export default function LibraryPage() {
           />
         </div>
         {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredApprovedBooks.map((book) => (
-            <div key={book.id} className="space-y-2">
-              <BookCard
-                book={book}
-                preordered={preorderedBooks.includes(book.id)}
-                onPreorder={savePreorder}
-                onPurchase={purchaseBook}
-                purchasingId={purchasingId}
-                onOpenPdf={openPdfViewer}
-              />
-              {canEditBook(book) ? (
-                <button type="button" className="btn-secondary w-full" onClick={() => startEditBook(book)}>
-                  Modifier ce livre
-                </button>
-              ) : null}
-              {canDeleteBook(book) ? (
-                <button type="button" className="btn-secondary w-full" onClick={() => deleteBook(book.id)}>
-                  Supprimer ce livre
-                </button>
-              ) : null}
-            </div>
-          ))}
+        <div className="max-h-[70vh] overflow-y-auto pr-1">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredApprovedBooks.map((book) => (
+              <div key={book.id} className="space-y-2">
+                <BookCard
+                  book={book}
+                  preordered={preorderedBooks.includes(book.id)}
+                  onPreorder={savePreorder}
+                  onPurchase={purchaseBook}
+                  purchasingId={purchasingId}
+                  onOpenPdf={openPdfViewer}
+                />
+                {canEditBook(book) ? (
+                  <button type="button" className="btn-secondary w-full" onClick={() => startEditBook(book)}>
+                    Modifier ce livre
+                  </button>
+                ) : null}
+                {canDeleteBook(book) ? (
+                  <button type="button" className="btn-secondary w-full" onClick={() => deleteBook(book.id)}>
+                    Supprimer ce livre
+                  </button>
+                ) : null}
+              </div>
+            ))}
+          </div>
         </div>
         {!loading && filteredApprovedBooks.length === 0 ? <p className="text-sm text-brand-700">Aucun livre trouvé pour cette recherche.</p> : null}
       </section>

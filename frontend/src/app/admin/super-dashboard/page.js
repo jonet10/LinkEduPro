@@ -647,10 +647,10 @@ export default function SuperDashboardPage() {
         {usersLoading ? <p className="text-sm text-brand-700">Chargement utilisateurs...</p> : null}
         {!usersLoading && users.length === 0 ? <p className="text-sm text-brand-700">Aucun utilisateur trouvé.</p> : null}
         {!usersLoading && users.length > 0 ? (
-          <div className="overflow-auto">
+          <div className="max-h-[62vh] overflow-auto rounded-lg border border-brand-100">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="text-left">
+                <tr className="sticky top-0 z-[1] bg-white text-left">
                   <th>Nom</th>
                   <th>Email</th>
                   <th>Rôle</th>
