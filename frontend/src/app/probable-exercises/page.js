@@ -4,9 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import { API_BASE_URL } from '@/lib/runtime-config';
-
-const API_URL = API_BASE_URL;
+import { getApiBaseUrl } from '@/lib/runtime-config';
 
 function normalizeText(value) {
   return String(value || '')
@@ -138,7 +136,7 @@ export default function ProbableExercisesPage() {
 
   function openExamPdf(fileName) {
     if (typeof window === 'undefined') return;
-    const pdfUrl = `${API_URL}/public/exam-pdfs/${encodeURIComponent(fileName)}`;
+    const pdfUrl = `${getApiBaseUrl()}/public/exam-pdfs/${encodeURIComponent(fileName)}`;
     const isMobileViewport = window.matchMedia('(max-width: 900px)').matches;
     if (isMobileViewport) {
       window.location.assign(pdfUrl);

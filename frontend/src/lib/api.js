@@ -1,6 +1,6 @@
 import { clearAuth } from '@/lib/auth';
 import { clearSchoolAuth } from '@/lib/schoolAuth';
-import { API_BASE_URL } from '@/lib/runtime-config';
+import { API_BASE_URL, getApiBaseUrl } from '@/lib/runtime-config';
 
 export const API_URL = API_BASE_URL;
 
@@ -12,7 +12,7 @@ export async function apiClient(path, options = {}) {
     ...(options.headers || {})
   };
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`${getApiBaseUrl()}${path}`, {
     method: options.method || 'GET',
     headers,
     body: options.body

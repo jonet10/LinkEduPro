@@ -1,4 +1,5 @@
 const DEFAULT_LOCAL_API_BASE_URL = 'http://localhost:5000/api';
+const LEGACY_BACKEND_HOSTS = new Set(['linkedupro-2.onrender.com']);
 
 function normalizeApiBaseUrl(value) {
   const raw = String(value || '').trim();
@@ -26,6 +27,28 @@ function resolveBackendOrigin(apiBaseUrl) {
   }
 }
 
+function getHostname(value) {
+  try {
+    return new URL(String(value || '')).hostname.toLowerCase();
+  } catch (_) {
+    return '';
+  }
+}
+
+function resolveBrowserApiBaseUrl(configuredApiBaseUrl) {
+  if (typeof window === 'undefined') return '';
+
+  const origin = String(window.location?.origin || '').replace(/\/+$/, '');
+  if (!origin) return '';
+
+  const configuredHost = getHostname(configuredApiBaseUrl);
+  if (LEGACY_BACKEND_HOSTS.has(configuredHost)) {
+    return `${origin}/api`;
+  }
+
+  return '';
+}
+
 const configuredApiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
@@ -39,3 +62,11 @@ export const BACKEND_ORIGIN =
   normalizeApiBaseUrl(process.env.NEXT_PUBLIC_BACKEND_ORIGIN) ||
   resolveBackendOrigin(API_BASE_URL) ||
   'http://localhost:5000';
+
+export function getApiBaseUrl() {
+  return resolveBrowserApiBaseUrl(API_BASE_URL) || API_BASE_URL;
+}
+
+export function getBackendOrigin() {
+  return resolveBackendOrigin(getApiBaseUrl()) || BACKEND_ORIGIN;
+}

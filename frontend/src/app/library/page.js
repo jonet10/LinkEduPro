@@ -4,13 +4,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
-import { BACKEND_ORIGIN } from '@/lib/runtime-config';
+import { resolveMediaUrl } from '@/lib/media';
 
 function getStorageUrl(fileUrl) {
   if (!fileUrl) return '#';
-  if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
-
-  return `${BACKEND_ORIGIN}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+  return resolveMediaUrl(fileUrl) || '#';
 }
 
 function formatHTG(value) {

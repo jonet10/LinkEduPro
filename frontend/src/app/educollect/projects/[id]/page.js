@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
-import { BACKEND_ORIGIN } from '@/lib/runtime-config';
+import { resolveMediaUrl } from '@/lib/media';
 
 function formatHtg(value) {
   return new Intl.NumberFormat('fr-FR', {
@@ -17,8 +17,7 @@ function formatHtg(value) {
 
 function getStorageUrl(fileUrl) {
   if (!fileUrl) return '#';
-  if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
-  return `${BACKEND_ORIGIN}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+  return resolveMediaUrl(fileUrl) || '#';
 }
 
 export default function EduCollectProjectDetailPage() {
