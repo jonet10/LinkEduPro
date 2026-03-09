@@ -5,6 +5,7 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 const INPUT_FILE = path.resolve(__dirname, '../data/generated-nsiv-topic-quizzes.json');
+const LEGACY_PROMPT_PREFIX = 'Dans les annales NSIV, le theme "';
 
 function normalizeQuestionData(question) {
   const options = Array.isArray(question.options)
@@ -35,7 +36,9 @@ async function main() {
   const packs = Array.isArray(raw) ? raw : [];
   let createdSubjects = 0;
   let createdQuestions = 0;
+  let updatedQuestions = 0;
   let skippedQuestions = 0;
+  let deletedLegacyQuestions = 0;
 
   for (const pack of packs) {
     const name = String(pack?.name || '').trim();
@@ -55,6 +58,17 @@ async function main() {
 
     if (!existingSubject) createdSubjects += 1;
 
+    const deleted = await prisma.question.deleteMany({
+      where: {
+        subjectId: subject.id,
+        isPremium: true,
+        prompt: {
+          startsWith: LEGACY_PROMPT_PREFIX
+        }
+      }
+    });
+    deletedLegacyQuestions += deleted.count;
+
     for (const question of questions) {
       const data = normalizeQuestionData(question);
       if (!data || !data.prompt) {
@@ -67,7 +81,11 @@ async function main() {
         select: { id: true }
       });
       if (exists) {
-        skippedQuestions += 1;
+        await prisma.question.update({
+          where: { id: exists.id },
+          data
+        });
+        updatedQuestions += 1;
         continue;
       }
 
@@ -82,7 +100,9 @@ async function main() {
   }
 
   console.log(`Sujets crees: ${createdSubjects}`);
+  console.log(`Anciennes questions NSIV supprimees: ${deletedLegacyQuestions}`);
   console.log(`Questions ajoutees: ${createdQuestions}`);
+  console.log(`Questions mises a jour: ${updatedQuestions}`);
   console.log(`Questions ignorees (doublons/invalides): ${skippedQuestions}`);
 }
 
