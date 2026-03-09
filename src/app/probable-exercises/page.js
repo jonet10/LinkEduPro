@@ -6,32 +6,9 @@ import { apiClient } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { getApiBaseUrl } from '@/lib/runtime-config';
 
-function normalizeText(value) {
-  return String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toUpperCase()
-    .trim();
-}
-
-function toSubjectKey(subject) {
-  const normalized = normalizeText(subject);
-  if (normalized.includes('PHYSIQUE')) return 'PHYSIQUE';
-  if (normalized.includes('MATHEMAT')) return 'MATHEMATIQUE';
-  if (normalized.includes('CHIM')) return 'CHIMIE';
-  return normalized || 'AUTRE';
-}
-
-function toSubjectLabel(key) {
-  if (key === 'PHYSIQUE') return 'Physique';
-  if (key === 'MATHEMATIQUE') return 'Mathématique';
-  if (key === 'CHIMIE') return 'Chimie';
-  return key;
-}
-
 function extractYear(fileName) {
   const match = String(fileName || '').match(/(19\d{2}|20\d{2})/);
-  return match ? match[1] : 'Sans année';
+  return match ? match[1] : 'Sans annee';
 }
 
 function cleanFileLabel(fileName) {
@@ -41,55 +18,80 @@ function cleanFileLabel(fileName) {
     .trim();
 }
 
-function groupExamsByYear(subjectRows) {
-  const byFile = new Map();
+function normalizeSubjectLabel(value) {
+  return String(value || 'Autre')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
-  for (const row of subjectRows || []) {
-    const topic = String(row?.topic || '').trim();
-    for (const source of row?.sources || []) {
-      const fileName = String(source?.fileName || '').trim();
-      if (!fileName) continue;
+function buildYearBuckets(items) {
+  const yearMap = new Map();
 
-      if (!byFile.has(fileName)) {
-        byFile.set(fileName, {
-          fileName,
-          year: extractYear(fileName),
-          topics: new Set()
-        });
+  for (const subjectRow of items || []) {
+    const subject = normalizeSubjectLabel(subjectRow?.subject);
+    const topicRows = Array.isArray(subjectRow?.topics) ? subjectRow.topics : [];
+
+    for (const topicRow of topicRows) {
+      const topic = String(topicRow?.topic || '').trim();
+      const sources = Array.isArray(topicRow?.sources) ? topicRow.sources : [];
+
+      for (const source of sources) {
+        const fileName = String(source?.fileName || '').trim();
+        if (!fileName) continue;
+
+        const year = extractYear(fileName);
+        if (!yearMap.has(year)) yearMap.set(year, new Map());
+        const subjectMap = yearMap.get(year);
+
+        if (!subjectMap.has(subject)) subjectMap.set(subject, new Map());
+        const fileMap = subjectMap.get(subject);
+
+        if (!fileMap.has(fileName)) {
+          fileMap.set(fileName, {
+            fileName,
+            label: cleanFileLabel(fileName),
+            topics: new Set()
+          });
+        }
+        if (topic) fileMap.get(fileName).topics.add(topic);
       }
-      if (topic) byFile.get(fileName).topics.add(topic);
     }
   }
 
-  const byYear = new Map();
-  for (const exam of byFile.values()) {
-    if (!byYear.has(exam.year)) byYear.set(exam.year, []);
-    byYear.get(exam.year).push({
-      fileName: exam.fileName,
-      label: cleanFileLabel(exam.fileName),
-      topics: Array.from(exam.topics).sort((a, b) => a.localeCompare(b)),
-      href: `/exam-viewer?file=${encodeURIComponent(exam.fileName)}`
-    });
-  }
-
-  const years = Array.from(byYear.keys()).sort((a, b) => {
-    if (a === 'Sans année') return 1;
-    if (b === 'Sans année') return -1;
+  const years = Array.from(yearMap.keys()).sort((a, b) => {
+    if (a === 'Sans annee') return 1;
+    if (b === 'Sans annee') return -1;
     return Number(b) - Number(a);
   });
 
-  return years.map((year) => ({
-    year,
-    exams: (byYear.get(year) || []).sort((a, b) => a.label.localeCompare(b.label))
-  }));
+  return years.map((year) => {
+    const subjectMap = yearMap.get(year);
+    const subjects = Array.from(subjectMap.entries())
+      .map(([subject, fileMap]) => ({
+        subject,
+        exams: Array.from(fileMap.values())
+          .map((exam) => ({
+            fileName: exam.fileName,
+            label: exam.label,
+            topics: Array.from(exam.topics).sort((a, b) => a.localeCompare(b))
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label))
+      }))
+      .sort((a, b) => a.subject.localeCompare(b.subject));
+
+    return {
+      year,
+      subjects,
+      subjectSummary: subjects.map((row) => row.subject).join(' - ')
+    };
+  });
 }
 
 export default function ProbableExercisesPage() {
   const router = useRouter();
   const [items, setItems] = useState([]);
   const [level, setLevel] = useState('NSIV');
-  const [selectedSubject, setSelectedSubject] = useState('');
-  const [expandedYear, setExpandedYear] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -100,41 +102,25 @@ export default function ProbableExercisesPage() {
         const nextItems = Array.isArray(data?.items) ? data.items : [];
         setLevel(String(data?.level || 'NSIV'));
         setItems(nextItems);
-        const firstKey = nextItems.length ? toSubjectKey(nextItems[0].subject) : '';
-        setSelectedSubject(firstKey);
-        setExpandedYear('');
       })
       .catch((e) => setError(e.message || 'Impossible de charger les examens passés.'))
       .finally(() => setLoading(false));
   }, []);
 
-  const availableSubjects = useMemo(() => {
-    const subjectMap = new Map();
-    for (const row of items) {
-      const key = toSubjectKey(row?.subject);
-      if (!key) continue;
-      if (!subjectMap.has(key)) subjectMap.set(key, toSubjectLabel(key));
-    }
-    return Array.from(subjectMap.entries()).map(([key, label]) => ({ key, label }));
-  }, [items]);
-
-  const selectedRows = useMemo(
-    () => items.filter((row) => toSubjectKey(row?.subject) === selectedSubject),
-    [items, selectedSubject]
-  );
-
-  const yearGroups = useMemo(() => {
-    const topicRows = selectedRows.flatMap((row) => row?.topics || []);
-    return groupExamsByYear(topicRows);
-  }, [selectedRows]);
+  const yearBuckets = useMemo(() => buildYearBuckets(items), [items]);
 
   useEffect(() => {
-    if (!yearGroups.length) {
-      setExpandedYear('');
+    if (!yearBuckets.length) {
+      setSelectedYear('');
       return;
     }
-    setExpandedYear((prev) => (prev && yearGroups.some((group) => group.year === prev) ? prev : yearGroups[0].year));
-  }, [yearGroups]);
+    setSelectedYear((prev) => (prev && yearBuckets.some((row) => row.year === prev) ? prev : yearBuckets[0].year));
+  }, [yearBuckets]);
+
+  const activeYear = useMemo(
+    () => yearBuckets.find((row) => row.year === selectedYear) || null,
+    [yearBuckets, selectedYear]
+  );
 
   function openExamPdf(fileName) {
     if (typeof window === 'undefined') return;
@@ -160,27 +146,28 @@ export default function ProbableExercisesPage() {
   return (
     <section className="space-y-5">
       <div className="card">
-        <h1 className="text-3xl font-bold text-brand-900">Examens passés</h1>
+        <h1 className="text-3xl font-bold text-brand-900">Examens passes</h1>
         <p className="mt-2 text-sm text-brand-700">
-          Sélectionne une matière puis une année pour ouvrir les PDF des examens précédents.
+          Les sujets sont organises par annee, puis par matiere.
         </p>
-        <p className="mt-1 text-xs font-semibold text-brand-700">Niveau filtré: {levelLabel}</p>
+        <p className="mt-1 text-xs font-semibold text-brand-700">Niveau filtre: {levelLabel}</p>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-brand-100 bg-white/70">
         <div className="flex min-w-max">
-        {availableSubjects.map((subject) => (
-          <button
-            key={subject.key}
-            type="button"
-            className={`min-w-[220px] border-r border-brand-100 px-6 py-4 text-left text-2xl font-semibold text-brand-900 transition ${
-              selectedSubject === subject.key ? 'bg-brand-50' : 'bg-transparent'
-            }`}
-            onClick={() => setSelectedSubject(subject.key)}
-          >
-            {subject.label}
-          </button>
-        ))}
+          {yearBuckets.map((row, idx) => (
+            <button
+              key={row.year}
+              type="button"
+              className={`min-w-[180px] px-6 py-4 text-center text-3xl font-bold text-brand-900 transition ${
+                selectedYear === row.year ? 'bg-brand-50' : 'bg-transparent'
+              }`}
+              onClick={() => setSelectedYear(row.year)}
+            >
+              {row.year}
+              {idx < yearBuckets.length - 1 ? <span className="ml-6 text-brand-400">-</span> : null}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -188,61 +175,49 @@ export default function ProbableExercisesPage() {
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
       {!loading && !error ? (
-        yearGroups.length === 0 ? (
+        !activeYear ? (
           <div className="card">
-            <p className="text-lg font-semibold text-brand-900">{toSubjectLabel(selectedSubject || 'Matière')}</p>
-            <p className="mt-2 text-sm text-brand-700">Aucun PDF d’examen disponible pour le moment.</p>
+            <p className="text-sm text-brand-700">Aucun PDF d examen disponible pour le moment.</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {yearGroups.map((group) => (
-              <article key={`${selectedSubject}-${group.year}`} className="card">
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <h2 className="text-xl font-semibold text-brand-900">
-                    {group.year === 'Sans année' ? 'Année non précisée' : `Année ${group.year}`}
-                  </h2>
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700">
-                      {group.exams.length} PDF
-                    </span>
-                    <button
-                      type="button"
-                      className="btn-secondary !px-3 !py-1.5 text-xs"
-                      onClick={() => setExpandedYear((prev) => (prev === group.year ? '' : group.year))}
-                    >
-                      {expandedYear === group.year ? 'Masquer' : 'Voir les PDF'}
-                    </button>
-                  </div>
-                </div>
+            <article className="card">
+              <h2 className="text-2xl font-semibold text-brand-900">
+                {activeYear.year === 'Sans annee' ? 'Annee non precisee' : `Annee ${activeYear.year}`}
+              </h2>
+              <p className="mt-2 text-sm text-brand-700">
+                Matieres: {activeYear.subjectSummary || 'Aucune matiere detectee'}
+              </p>
+            </article>
 
-                {expandedYear === group.year ? (
-                  <div className="space-y-3">
-                    {group.exams.map((exam) => (
-                      <div key={`${group.year}-${exam.fileName}`} className="rounded-xl border border-brand-100 p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="truncate text-lg font-semibold text-brand-900">{exam.label}</p>
-                            {exam.topics.length > 0 ? (
-                              <p className="mt-1 text-sm text-brand-700">
-                                Thèmes: {exam.topics.slice(0, 3).join(', ')}
-                                {exam.topics.length > 3 ? ', ...' : ''}
-                              </p>
-                            ) : null}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => openExamPdf(exam.fileName)}
-                            className="btn-primary !px-3 !py-1.5 text-xs whitespace-nowrap"
-                          >
-                            Ouvrir PDF
-                          </button>
-                        </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {activeYear.subjects.map((subjectRow) => (
+                <article key={`${activeYear.year}-${subjectRow.subject}`} className="card">
+                  <h3 className="text-xl font-semibold text-brand-900">{subjectRow.subject}</h3>
+                  <p className="mt-1 text-xs font-semibold text-brand-600">{subjectRow.exams.length} PDF</p>
+                  <div className="mt-3 space-y-3">
+                    {subjectRow.exams.map((exam) => (
+                      <div key={`${subjectRow.subject}-${exam.fileName}`} className="rounded-xl border border-brand-100 p-4">
+                        <p className="text-base font-semibold text-brand-900">{exam.label}</p>
+                        {exam.topics.length > 0 ? (
+                          <p className="mt-1 text-sm text-brand-700">
+                            Themes: {exam.topics.slice(0, 3).join(', ')}
+                            {exam.topics.length > 3 ? ', ...' : ''}
+                          </p>
+                        ) : null}
+                        <button
+                          type="button"
+                          className="btn-primary mt-3 !px-3 !py-1.5 text-xs"
+                          onClick={() => openExamPdf(exam.fileName)}
+                        >
+                          Ouvrir PDF
+                        </button>
                       </div>
                     ))}
                   </div>
-                ) : null}
-              </article>
-            ))}
+                </article>
+              ))}
+            </div>
           </div>
         )
       ) : null}
