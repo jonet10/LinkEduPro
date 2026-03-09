@@ -1,5 +1,6 @@
 const DEFAULT_LOCAL_API_BASE_URL = 'http://localhost:5000/api';
 const LEGACY_BACKEND_HOSTS = new Set(['linkedupro-2.onrender.com']);
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '0.0.0.0']);
 
 function normalizeApiBaseUrl(value) {
   const raw = String(value || '').trim();
@@ -42,7 +43,12 @@ function resolveBrowserApiBaseUrl(configuredApiBaseUrl) {
   if (!origin) return '';
 
   const configuredHost = getHostname(configuredApiBaseUrl);
-  if (LEGACY_BACKEND_HOSTS.has(configuredHost)) {
+  if (!configuredHost || LEGACY_BACKEND_HOSTS.has(configuredHost) || LOCAL_HOSTS.has(configuredHost)) {
+    return `${origin}/api`;
+  }
+
+  const browserHost = getHostname(origin);
+  if (browserHost.endsWith('.onrender.com') && configuredHost.endsWith('.onrender.com') && configuredHost !== browserHost) {
     return `${origin}/api`;
   }
 
