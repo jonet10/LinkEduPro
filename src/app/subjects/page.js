@@ -101,7 +101,10 @@ export default function SubjectsPage() {
     setCanSeeProbableExercises(student?.role !== 'STUDENT' || isNsiv);
 
     apiClient('/subjects', { token })
-      .then(setSubjects)
+      .then((data) => {
+        const rows = Array.isArray(data) ? data : (Array.isArray(data?.subjects) ? data.subjects : []);
+        setSubjects(rows);
+      })
       .catch((e) => setError(e.message || 'Impossible de charger les matières'));
   }, [router]);
 

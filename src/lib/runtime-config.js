@@ -47,11 +47,6 @@ function resolveBrowserApiBaseUrl(configuredApiBaseUrl) {
     return `${origin}/api`;
   }
 
-  const browserHost = getHostname(origin);
-  if (browserHost.endsWith('.onrender.com') && configuredHost.endsWith('.onrender.com') && configuredHost !== browserHost) {
-    return `${origin}/api`;
-  }
-
   return '';
 }
 
