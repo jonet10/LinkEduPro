@@ -248,7 +248,12 @@ export default function HeaderNav() {
     if (!token) return undefined;
 
     const streamUrl = `${getApiBaseUrl()}/realtime/stream?token=${encodeURIComponent(token)}`;
-    const source = new EventSource(streamUrl);
+    let source = null;
+    try {
+      source = new EventSource(streamUrl);
+    } catch (_) {
+      return undefined;
+    }
 
     const onRefresh = () => {
       loadNotificationsRef.current();
