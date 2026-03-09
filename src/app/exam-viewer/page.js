@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { API_BASE_URL } from '@/lib/runtime-config';
-
-const API_URL = API_BASE_URL;
+import { getApiBaseUrl } from '@/lib/runtime-config';
 
 export default function ExamViewerPage() {
   const [file, setFile] = useState('');
@@ -17,7 +15,7 @@ export default function ExamViewerPage() {
 
   useEffect(() => {
     if (!file) return;
-    setSrc(`${API_URL}/public/exam-pdfs/${encodeURIComponent(file)}`);
+    setSrc(`${getApiBaseUrl()}/public/exam-pdfs/${encodeURIComponent(file)}`);
   }, [file]);
 
   if (!file) {

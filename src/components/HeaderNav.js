@@ -5,7 +5,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { clearAuth, getDarkMode, getStudent, getToken, isNsivStudent, setDarkModePreference } from '@/lib/auth';
-import { API_URL, apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api';
+import { getApiBaseUrl } from '@/lib/runtime-config';
 import { resolveMediaUrl } from '@/lib/media';
 import { prepareNotices, pushNotice } from '@/lib/notices';
 
@@ -246,7 +247,7 @@ export default function HeaderNav() {
     const token = getToken();
     if (!token) return undefined;
 
-    const streamUrl = `${API_URL}/realtime/stream?token=${encodeURIComponent(token)}`;
+    const streamUrl = `${getApiBaseUrl()}/realtime/stream?token=${encodeURIComponent(token)}`;
     const source = new EventSource(streamUrl);
 
     const onRefresh = () => {

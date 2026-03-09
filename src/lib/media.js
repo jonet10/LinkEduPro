@@ -1,4 +1,4 @@
-import { API_BASE_URL, BACKEND_ORIGIN } from '@/lib/runtime-config';
+import { getApiBaseUrl, getBackendOrigin } from '@/lib/runtime-config';
 
 const mediaBaseEnv = process.env.NEXT_PUBLIC_MEDIA_BASE_URL || '';
 
@@ -11,7 +11,9 @@ function getBackendBaseUrl() {
     return normalizeBase(mediaBaseEnv);
   }
 
-  return normalizeBase(BACKEND_ORIGIN || API_BASE_URL.replace(/\/api\/?$/, ''));
+  const backendOrigin = getBackendOrigin();
+  if (backendOrigin) return normalizeBase(backendOrigin);
+  return normalizeBase(getApiBaseUrl().replace(/\/api\/?$/, ''));
 }
 
 export function resolveMediaUrl(url) {
