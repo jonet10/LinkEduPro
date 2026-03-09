@@ -1,0 +1,746 @@
+[
+  {
+    "name": "Anglais",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Anglais).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Vocabulary\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Arts",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 0,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020, 2019, 2018) pour Anglais.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Vocabulary"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Reading comprehension\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Arts",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 0,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020) pour Anglais.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Reading comprehension"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Grammar and tenses\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Arts",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 0,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020) pour Anglais.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Grammar and tenses"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Written expression\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Arts",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 0,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020) pour Anglais.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Written expression"
+      }
+    ]
+  },
+  {
+    "name": "Arts",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Arts).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Folklore\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Arts",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2018, 2016, 2002) pour Arts.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Folklore"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Musique et theatre\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Arts",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2020, 2016, 2015) pour Arts.",
+        "isPremium": true,
+        "frequencyScore": 85,
+        "sourceTopic": "Musique et theatre"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Peinture\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Arts",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2019) pour Arts.",
+        "isPremium": true,
+        "frequencyScore": 85,
+        "sourceTopic": "Peinture"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Patrimoine culturel\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Arts",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020) pour Arts.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Patrimoine culturel"
+      }
+    ]
+  },
+  {
+    "name": "Chimie",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (CHIMIE).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Fonctions organiques\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Chimie",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2020, 2019, 2018) pour Chimie.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Fonctions organiques"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Structure de la matiere\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Chimie",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020, 2019, 2015) pour Chimie.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Structure de la matiere"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Acides et bases\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Chimie",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2021, 2019, 2016, 2015) pour Chimie.",
+        "isPremium": true,
+        "frequencyScore": 92,
+        "sourceTopic": "Acides et bases"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Hydrocarbures\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Chimie",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2020, 2019) pour Chimie.",
+        "isPremium": true,
+        "frequencyScore": 85,
+        "sourceTopic": "Hydrocarbures"
+      }
+    ]
+  },
+  {
+    "name": "Economie",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Économie).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Menages et epargne\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Economie",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2019, 2018) pour Economie.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Menages et epargne"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Croissance et developpement\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Economie",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2019, 2018) pour Economie.",
+        "isPremium": true,
+        "frequencyScore": 92,
+        "sourceTopic": "Croissance et developpement"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Monnaie et inflation\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Economie",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2019) pour Economie.",
+        "isPremium": true,
+        "frequencyScore": 78,
+        "sourceTopic": "Monnaie et inflation"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Politiques economiques\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Economie",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2019) pour Economie.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Politiques economiques"
+      }
+    ]
+  },
+  {
+    "name": "Espagnol",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Espagnol).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Vocabulario y comprension\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Espagnol",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020, 2019, 2018) pour Espagnol.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Vocabulario y comprension"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Lectura y expresion\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Espagnol",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2002) pour Espagnol.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Lectura y expresion"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Gramatica espanola\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Espagnol",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020) pour Espagnol.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Gramatica espanola"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Produccion escrita\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Espagnol",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020) pour Espagnol.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Produccion escrita"
+      }
+    ]
+  },
+  {
+    "name": "Histoire-Geo",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Geo-Histoire).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Histoire nationale\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022) pour Histoire-Geo.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Histoire nationale"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Croissance et economie\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2021, 2020, 2019, 2018) pour Histoire-Geo.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Croissance et economie"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Espaces et climat\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2019) pour Histoire-Geo.",
+        "isPremium": true,
+        "frequencyScore": 92,
+        "sourceTopic": "Espaces et climat"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Population et demographie\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 1,
+        "explanation": "Theme observe dans les sujets NSIV (2019, 2018) pour Histoire-Geo.",
+        "isPremium": true,
+        "frequencyScore": 64,
+        "sourceTopic": "Population et demographie"
+      }
+    ]
+  },
+  {
+    "name": "Informatique",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Informatique).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Algorithmique\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2018) pour Informatique.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Algorithmique"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Systemes et reseaux\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2018) pour Informatique.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Systemes et reseaux"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Programmation\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2018, 2016, 2015) pour Informatique.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Programmation"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Bases de donnees\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Informatique",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2018, 2016, 2015) pour Informatique.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Bases de donnees"
+      }
+    ]
+  },
+  {
+    "name": "Kreyol",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Kreyol).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Ekriti kreyol\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Kreyol",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020, 2019, 2018, 2016) pour Kreyol.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Ekriti kreyol"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Lekti ak konpreyansyon\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Kreyol",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020, 2019, 2018) pour Kreyol.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Lekti ak konpreyansyon"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Vokabiler\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Kreyol",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020) pour Kreyol.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Vokabiler"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Kominikasyon\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Kreyol",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020) pour Kreyol.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Kominikasyon"
+      }
+    ]
+  },
+  {
+    "name": "Mathematiques",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Mathematiques).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Algebre et calcul\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Mathematiques",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2019, 2018) pour Mathematiques.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Algebre et calcul"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Fonctions\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Mathematiques",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020, 2019) pour Mathematiques.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Fonctions"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Geometrie analytique\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Mathematiques",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2021, 2019, 2018) pour Mathematiques.",
+        "isPremium": true,
+        "frequencyScore": 92,
+        "sourceTopic": "Geometrie analytique"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Statistiques\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Mathematiques",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020) pour Mathematiques.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Statistiques"
+      }
+    ]
+  },
+  {
+    "name": "Philosophie",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (PHILOSOPHIE).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Philosophes classiques\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Philosophie",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022) pour Philosophie.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Philosophes classiques"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Connaissance et raison\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Philosophie",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2019) pour Philosophie.",
+        "isPremium": true,
+        "frequencyScore": 92,
+        "sourceTopic": "Connaissance et raison"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Ethique et culture\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Philosophie",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2019, 2018) pour Philosophie.",
+        "isPremium": true,
+        "frequencyScore": 92,
+        "sourceTopic": "Ethique et culture"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Metaphysique\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Philosophie",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2020) pour Philosophie.",
+        "isPremium": true,
+        "frequencyScore": 71,
+        "sourceTopic": "Metaphysique"
+      }
+    ]
+  },
+  {
+    "name": "Physique",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (PHYSIQUE).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Electricite et magnetisme\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Physique",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2019) pour Physique.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Electricite et magnetisme"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Ondes et lumiere\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Physique",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2019) pour Physique.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Ondes et lumiere"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Mecanique\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Physique",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2025, 2022, 2021, 2020) pour Physique.",
+        "isPremium": true,
+        "frequencyScore": 92,
+        "sourceTopic": "Mecanique"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Cosmologie\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Physique",
+          "SVT"
+        ],
+        "correctOption": 2,
+        "explanation": "Theme observe dans les sujets NSIV (2025, 2024, 2023) pour Physique.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Cosmologie"
+      }
+    ]
+  },
+  {
+    "name": "SVT",
+    "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (SVT).",
+    "questions": [
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Geologie\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Physique",
+          "SVT"
+        ],
+        "correctOption": 3,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2019, 2018, 2016) pour SVT.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Geologie"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Genetique et heredite\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Physique",
+          "SVT"
+        ],
+        "correctOption": 3,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020, 2018, 2016) pour SVT.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Genetique et heredite"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Cytologie et anatomie\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Physique",
+          "SVT"
+        ],
+        "correctOption": 3,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2019, 2002) pour SVT.",
+        "isPremium": true,
+        "frequencyScore": 99,
+        "sourceTopic": "Cytologie et anatomie"
+      },
+      {
+        "prompt": "Dans les annales NSIV, le theme \"Ecologie\" appartient principalement a quelle matiere ?",
+        "options": [
+          "Anglais",
+          "Histoire-Geo",
+          "Physique",
+          "SVT"
+        ],
+        "correctOption": 3,
+        "explanation": "Theme observe dans les sujets NSIV (2022, 2021, 2020) pour SVT.",
+        "isPremium": true,
+        "frequencyScore": 57,
+        "sourceTopic": "Ecologie"
+      }
+    ]
+  }
+]
