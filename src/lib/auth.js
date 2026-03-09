@@ -44,7 +44,13 @@ export function getToken() {
 export function getStudent() {
   if (typeof window === 'undefined') return null;
   const raw = localStorage.getItem(STUDENT_KEY);
-  return raw ? JSON.parse(raw) : null;
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (_) {
+    localStorage.removeItem(STUDENT_KEY);
+    return null;
+  }
 }
 
 export function normalizeAcademicLevel(student) {
