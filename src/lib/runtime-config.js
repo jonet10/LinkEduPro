@@ -1,11 +1,5 @@
 const DEFAULT_LOCAL_API_BASE_URL = 'http://localhost:5000/api';
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '0.0.0.0']);
-const API_HOST_FALLBACKS = new Map([
-  ['linkedupro-api.onrender.com', 'https://linkedupro-2.onrender.com/api']
-]);
-const FRONTEND_TO_BACKEND_MAP = new Map([
-  ['linkedupro-1.onrender.com', 'https://linkedupro-2.onrender.com/api']
-]);
 
 function normalizeApiBaseUrl(value) {
   const raw = String(value || '').trim();
@@ -47,17 +41,8 @@ function resolveBrowserApiBaseUrl(configuredApiBaseUrl) {
   const origin = String(window.location?.origin || '').replace(/\/+$/, '');
   if (!origin) return '';
 
-  const browserHost = getHostname(origin);
   const configuredHost = getHostname(configuredApiBaseUrl);
-
-  const directHostFallback = API_HOST_FALLBACKS.get(configuredHost);
-  if (directHostFallback) {
-    return directHostFallback;
-  }
-
-  if (!configuredHost || LOCAL_HOSTS.has(configuredHost) || configuredHost === browserHost) {
-    const mappedBackend = FRONTEND_TO_BACKEND_MAP.get(browserHost);
-    if (mappedBackend) return mappedBackend;
+  if (!configuredHost || LOCAL_HOSTS.has(configuredHost)) {
     return `${origin}/api`;
   }
 
