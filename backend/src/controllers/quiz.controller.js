@@ -99,26 +99,74 @@ function normalizeQuestionData(payload, existingQuestion = null) {
   };
 }
 
-function isPhysicsSubjectName(name) {
-  return name === 'Physique' || name.startsWith('Physique -');
+const SUBJECT_GROUPS = [
+  { key: 'mathematiques', label: 'Mathematiques', aliases: ['mathematiques', 'maths', 'math'] },
+  { key: 'physique', label: 'Physique', aliases: ['physique'] },
+  { key: 'chimie', label: 'Chimie', aliases: ['chimie'] },
+  { key: 'svt', label: 'SVT', aliases: ['svt', 'science de la vie', 'science de la terre'] },
+  { key: 'histoire-geo', label: 'Histoire-Geo', aliases: ['histoire-geo', 'histoire geo', 'geo-histoire', 'hist geo'] },
+  { key: 'philosophie', label: 'Philosophie', aliases: ['philosophie', 'philo'] },
+  { key: 'informatique', label: 'Informatique', aliases: ['informatique'] },
+  { key: 'anglais', label: 'Anglais', aliases: ['anglais'] },
+  { key: 'espagnol', label: 'Espagnol', aliases: ['espagnol'] },
+  { key: 'kreyol', label: 'Kreyol', aliases: ['kreyol', 'kretol', 'creole'] },
+  { key: 'arts', label: 'Arts', aliases: ['arts', 'art'] },
+  { key: 'economie', label: 'Economie', aliases: ['economie', 'economique'] }
+];
+
+function normalizeName(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
 }
 
-function toSetName(subjectName) {
-  if (subjectName === 'Physique') return 'Revision generale';
-  return subjectName.replace('Physique - ', '');
+function findGroupForSubjectName(name) {
+  const normalized = normalizeName(name);
+  for (const group of SUBJECT_GROUPS) {
+    for (const alias of group.aliases) {
+      const base = normalizeName(alias);
+      if (!base) continue;
+      if (normalized === base || normalized.startsWith(`${base} -`) || normalized.startsWith(`${base}:`)) {
+        return group;
+      }
+    }
+  }
+  return null;
 }
 
-async function getPhysicsSubjects() {
-  return prisma.subject.findMany({
-    where: {
-      OR: [{ name: 'Physique' }, { name: { startsWith: 'Physique -' } }]
-    },
+function toSetName(subjectName, groupLabel) {
+  const normalizedSubject = normalizeName(subjectName);
+  const normalizedGroup = normalizeName(groupLabel);
+  if (normalizedSubject === normalizedGroup) return 'Quiz principal';
+
+  const cleaned = String(subjectName || '')
+    .replace(new RegExp(`^${groupLabel}\\s*[-:]\\s*`, 'i'), '')
+    .trim();
+  return cleaned || 'Quiz principal';
+}
+
+function pickRepresentativeSubject(subjects, groupLabel) {
+  const normalizedGroup = normalizeName(groupLabel);
+  const exact = subjects.find((s) => normalizeName(s.name) === normalizedGroup);
+  if (exact) return exact;
+  return [...subjects].sort((a, b) => a.id - b.id)[0];
+}
+
+async function getSubjectsForGroup(groupKey) {
+  const all = await prisma.subject.findMany({
     include: {
       _count: {
         select: { questions: true }
       }
     },
     orderBy: { id: 'asc' }
+  });
+
+  return all.filter((subject) => {
+    const group = findGroupForSubjectName(subject.name);
+    return group && group.key === groupKey;
   });
 }
 
@@ -131,22 +179,23 @@ async function getQuizSets(req, res, next) {
       return res.status(404).json({ message: 'Matière introuvable.' });
     }
 
-    if (!isPhysicsSubjectName(subject.name)) {
+    const group = findGroupForSubjectName(subject.name);
+    if (!group) {
       return res.json({
         subject: { id: subject.id, name: subject.name },
         sets: [{ key: 'default', name: 'Quiz principal', questionCount: await prisma.question.count({ where: { subjectId } }) }]
       });
     }
 
-    const physicsSubjects = await getPhysicsSubjects();
-    const sets = physicsSubjects.map((s) => ({
+    const groupedSubjects = await getSubjectsForGroup(group.key);
+    const sets = groupedSubjects.map((s) => ({
       key: String(s.id),
-      name: toSetName(s.name),
+      name: toSetName(s.name, group.label),
       questionCount: s._count.questions
     }));
 
     return res.json({
-      subject: { id: subject.id, name: 'Physique' },
+      subject: { id: subject.id, name: group.label },
       sets
     });
   } catch (error) {
@@ -170,19 +219,20 @@ async function getQuizQuestions(req, res, next) {
     let subjectLabel = subject.name;
     let selectedSet = null;
 
-    if (isPhysicsSubjectName(subject.name)) {
-      const physicsSubjects = await getPhysicsSubjects();
+    const group = findGroupForSubjectName(subject.name);
+    if (group) {
+      const groupedSubjects = await getSubjectsForGroup(group.key);
       const chosen = set
-        ? physicsSubjects.find((s) => String(s.id) === String(set))
-        : physicsSubjects.find((s) => s.id === subjectId) || physicsSubjects[0];
+        ? groupedSubjects.find((s) => String(s.id) === String(set))
+        : groupedSubjects.find((s) => s.id === subjectId) || pickRepresentativeSubject(groupedSubjects, group.label);
 
       if (!chosen) {
-        return res.status(404).json({ message: 'Quiz de physique introuvable.' });
+        return res.status(404).json({ message: `Quiz de ${group.label} introuvable.` });
       }
 
       targetSubject = chosen;
-      subjectLabel = 'Physique';
-      selectedSet = { key: String(chosen.id), name: toSetName(chosen.name) };
+      subjectLabel = group.label;
+      selectedSet = { key: String(chosen.id), name: toSetName(chosen.name, group.label) };
     }
 
     const baseWhere = premium
