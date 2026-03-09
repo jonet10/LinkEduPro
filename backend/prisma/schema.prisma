@@ -1325,13 +1325,14 @@ model probable_exercise_likes {
 
 model probable_exercise_sources {
   id         Int      @id @default(autoincrement())
+  level      AcademicLevel @default(NSIV)
   subject    String
   topic      String
   file_name  String
   created_at DateTime @default(now())
 
-  @@unique([subject, topic, file_name], map: "probable_exercise_sources_unique")
-  @@index([subject, topic])
+  @@unique([subject, topic, file_name, level], map: "probable_exercise_sources_unique")
+  @@index([level, subject, topic], map: "probable_exercise_sources_level_subject_topic_idx")
 }
 
 enum Sex {

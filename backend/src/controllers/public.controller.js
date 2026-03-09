@@ -61,6 +61,50 @@ function topicKey(subject, topic) {
   return `${String(subject || '').trim().toLowerCase()}::${String(topic || '').trim().toLowerCase()}`;
 }
 
+const EDUCATION_TO_ACADEMIC = {
+  LEVEL_9E: 'LEVEL_9E',
+  NS1: 'NSI',
+  NS2: 'NSII',
+  NS3: 'NSIII',
+  TERMINALE: 'NSIV',
+  UNIVERSITE: 'UNIVERSITAIRE'
+};
+
+function normalizeAcademicLevel(value) {
+  const raw = String(value || '').trim().toUpperCase();
+  if (!raw) return '';
+  if (raw === '9E' || raw === 'LEVEL_9E') return 'LEVEL_9E';
+  if (raw === 'NS1' || raw === 'NSI') return 'NSI';
+  if (raw === 'NS2' || raw === 'NSII') return 'NSII';
+  if (raw === 'NS3' || raw === 'NSIII') return 'NSIII';
+  if (raw === 'NS4' || raw === 'NSIV' || raw === 'TERMINALE') return 'NSIV';
+  if (raw === 'UNIVERSITE' || raw === 'UNIVERSITAIRE') return 'UNIVERSITAIRE';
+  return '';
+}
+
+async function resolveViewerAcademicLevel(userId) {
+  if (!userId) return 'NSIV';
+
+  const [profile, student] = await Promise.all([
+    prisma.studentProfile.findUnique({
+      where: { userId },
+      select: { level: true }
+    }).catch(() => null),
+    prisma.student.findUnique({
+      where: { id: userId },
+      select: { level: true }
+    }).catch(() => null)
+  ]);
+
+  const profileLevel = normalizeAcademicLevel(profile?.level);
+  if (profileLevel) return profileLevel;
+
+  const mapped = EDUCATION_TO_ACADEMIC[String(student?.level || '').trim().toUpperCase()];
+  if (mapped) return mapped;
+
+  return 'NSIV';
+}
+
 async function getPublicBlogPost(req, res, next) {
   try {
     const postId = Number(req.params.postId);
@@ -104,6 +148,8 @@ async function getPublicBlogPost(req, res, next) {
 
 async function listProbableExercises(req, res, next) {
   try {
+    const targetLevel = await resolveViewerAcademicLevel(req.user?.id);
+
     const rows = await prisma.$queryRaw(
       Prisma.sql`
         SELECT
@@ -116,7 +162,7 @@ async function listProbableExercises(req, res, next) {
           ) AS sample_question
         FROM exam_questions q
         INNER JOIN exams e ON e.id = q.exam_id
-        WHERE e.level = CAST('NSIV' AS "AcademicLevel")
+        WHERE e.level = CAST(${targetLevel} AS "AcademicLevel")
         GROUP BY e.subject, q.topic
         ORDER BY e.subject ASC, frequency DESC, q.topic ASC
       `
@@ -191,6 +237,7 @@ async function listProbableExercises(req, res, next) {
         Prisma.sql`
           SELECT subject, topic, file_name AS "fileName"
           FROM probable_exercise_sources
+          WHERE level = CAST(${targetLevel} AS "AcademicLevel")
         `
       );
     } catch (_) {
@@ -254,13 +301,41 @@ async function listProbableExercises(req, res, next) {
       });
     }
 
+    // Ensure standalone PDF sources are visible even if no exam_questions rows exist for this level/topic.
+    for (const row of sourceRows) {
+      const subject = String(row.subject || '').trim();
+      const topic = String(row.topic || '').trim();
+      const fileName = String(row.fileName || '').trim();
+      if (!subject || !topic || !fileName) continue;
+
+      if (!bySubject.has(subject)) {
+        bySubject.set(subject, []);
+      }
+      const topics = bySubject.get(subject);
+      const existing = topics.find((item) => String(item.topic || '').toLowerCase() === topic.toLowerCase());
+      if (existing) continue;
+
+      const key = topicKey(subject, topic);
+      topics.push({
+        topic,
+        frequency: 0,
+        classification: 'Occasionnel',
+        sampleQuestion: null,
+        likes: likeMap.get(key) || 0,
+        commentsCount: commentCountMap.get(key) || 0,
+        comments: commentsMap.get(key) || [],
+        likedByMe: myLikes.has(key),
+        sources: sourcesMap.get(key) || []
+      });
+    }
+
     const items = Array.from(bySubject.entries()).map(([subject, topics]) => ({
       subject,
-      topics
+      topics: topics.sort((a, b) => Number(b.frequency || 0) - Number(a.frequency || 0) || String(a.topic || '').localeCompare(String(b.topic || '')))
     }));
 
     return res.json({
-      level: 'NSIV',
+      level: targetLevel,
       items
     });
   } catch (error) {

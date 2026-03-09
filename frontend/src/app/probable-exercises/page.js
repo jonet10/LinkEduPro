@@ -87,6 +87,7 @@ function groupExamsByYear(subjectRows) {
 export default function ProbableExercisesPage() {
   const router = useRouter();
   const [items, setItems] = useState([]);
+  const [level, setLevel] = useState('NSIV');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [expandedYear, setExpandedYear] = useState('');
   const [loading, setLoading] = useState(true);
@@ -97,6 +98,7 @@ export default function ProbableExercisesPage() {
     apiClient('/public/probable-exercises', { token: authToken })
       .then((data) => {
         const nextItems = Array.isArray(data?.items) ? data.items : [];
+        setLevel(String(data?.level || 'NSIV'));
         setItems(nextItems);
         const firstKey = nextItems.length ? toSubjectKey(nextItems[0].subject) : '';
         setSelectedSubject(firstKey);
@@ -145,6 +147,16 @@ export default function ProbableExercisesPage() {
     router.push(`/exam-viewer?file=${encodeURIComponent(fileName)}`);
   }
 
+  const levelLabel = useMemo(() => {
+    const raw = String(level || '').toUpperCase();
+    if (raw === 'LEVEL_9E') return '9e AF';
+    if (raw === 'NSI') return 'NSI';
+    if (raw === 'NSII') return 'NSII';
+    if (raw === 'NSIII') return 'NSIII';
+    if (raw === 'UNIVERSITAIRE') return 'Universitaire';
+    return 'NSIV';
+  }, [level]);
+
   return (
     <section className="space-y-5">
       <div className="card">
@@ -152,6 +164,7 @@ export default function ProbableExercisesPage() {
         <p className="mt-2 text-sm text-brand-700">
           Sélectionne une matière puis une année pour ouvrir les PDF des examens précédents.
         </p>
+        <p className="mt-1 text-xs font-semibold text-brand-700">Niveau filtré: {levelLabel}</p>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-brand-100 bg-white/70">
