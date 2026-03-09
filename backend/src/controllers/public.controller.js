@@ -404,6 +404,10 @@ async function streamExamPdf(req, res, next) {
       return res.status(404).json({ message: 'PDF introuvable.' });
     }
 
+    // This endpoint is consumed from a different frontend origin inside an iframe.
+    // Override strict defaults so browser can render the PDF.
+    res.removeHeader('X-Frame-Options');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="${safeName}"`);
     return fs.createReadStream(filePath).pipe(res);
