@@ -199,6 +199,14 @@ function resolveSubjectSlot(subjectName) {
   return null;
 }
 
+function normalizeCommunityPayload(payload) {
+  return {
+    leaderboard: Array.isArray(payload?.leaderboard) ? payload.leaderboard : [],
+    recent: Array.isArray(payload?.recent) ? payload.recent : [],
+    schools: Array.isArray(payload?.schools) ? payload.schools : []
+  };
+}
+
 function LearningShowcaseSection({ section }) {
   const isSubjectIconImage = (src) => /^\/images\/subject-/.test(String(src || ''));
   const trackRef = useRef(null);
@@ -321,14 +329,15 @@ export default function HomePage() {
 
   const myRanking = useMemo(() => {
     if (!student?.id) return null;
-    const index = community.leaderboard.findIndex((row) => row.studentId === student.id);
+    const leaderboard = Array.isArray(community?.leaderboard) ? community.leaderboard : [];
+    const index = leaderboard.findIndex((row) => row?.studentId === student.id);
     if (index < 0) return null;
     return {
       position: index + 1,
-      average: community.leaderboard[index].average,
-      best: community.leaderboard[index].best
+      average: leaderboard[index]?.average,
+      best: leaderboard[index]?.best
     };
-  }, [community.leaderboard, student?.id]);
+  }, [community?.leaderboard, student?.id]);
   const dailyObjective = useMemo(() => getDailyObjective(student), [student]);
   const isStudentRole = student?.role === 'STUDENT';
   const isAdminRole = student?.role === 'ADMIN';
@@ -456,7 +465,7 @@ export default function HomePage() {
       apiClient('/results/progress', { token })
     ])
       .then(([communityData, progressData]) => {
-        setCommunity(communityData);
+        setCommunity(normalizeCommunityPayload(communityData));
         if (progressData?.overview) {
           setProgress(progressData);
         }
