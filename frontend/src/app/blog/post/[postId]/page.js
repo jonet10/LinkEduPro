@@ -1,19 +1,9 @@
 import Link from 'next/link';
 import { API_BASE_URL } from '@/lib/runtime-config';
+import { resolveMediaUrl as resolveMediaAsset } from '@/lib/media';
 
 function getApiBaseUrl() {
   return API_BASE_URL.replace(/\/+$/, '');
-}
-
-function resolveMediaUrl(url) {
-  if (!url) return null;
-  const raw = String(url).trim();
-  if (!raw) return null;
-  if (/^(https?:)?\/\//i.test(raw)) return raw;
-
-  const apiBase = getApiBaseUrl();
-  const backendOrigin = apiBase.replace(/\/api\/?$/, '');
-  return raw.startsWith('/') ? `${backendOrigin}${raw}` : `${backendOrigin}/${raw}`;
 }
 
 async function fetchPost(postId) {
@@ -32,7 +22,7 @@ export async function generateMetadata({ params }) {
     return { title: 'Article introuvable - LinkEduPro' };
   }
 
-  const image = resolveMediaUrl(post.imageUrl);
+  const image = resolveMediaAsset(post.imageUrl);
   return {
     title: `${post.title} - LinkEduPro`,
     description: post.excerpt || post.title,
@@ -65,7 +55,7 @@ export default async function PublicBlogPostPage({ params }) {
     );
   }
 
-  const imageUrl = resolveMediaUrl(post.imageUrl);
+  const imageUrl = resolveMediaAsset(post.imageUrl);
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">

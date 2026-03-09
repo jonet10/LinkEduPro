@@ -57,23 +57,23 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: process.env.JSON_BODY_LIMIT || '100kb' }));
 app.use(express.urlencoded({ extended: false, limit: process.env.FORM_BODY_LIMIT || '50kb' }));
 app.use(morgan('dev'));
-app.use(
-  '/storage',
-  express.static(getStorageRoot(), {
-    index: false,
-    maxAge: '7d',
-    setHeaders(res, filePath) {
-      // Frontend and backend run on different origins in production.
-      // Allow embedding/reading media (covers + PDF) from frontend.
-      res.removeHeader('X-Frame-Options');
-      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-      if (/\.pdf$/i.test(filePath)) {
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline');
-      }
+const storageStaticOptions = {
+  index: false,
+  maxAge: '7d',
+  setHeaders(res, filePath) {
+    // Frontend and backend run on different origins in production.
+    // Allow embedding/reading media (covers + PDF) from frontend.
+    res.removeHeader('X-Frame-Options');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    if (/\.pdf$/i.test(filePath)) {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'inline');
     }
-  })
-);
+  }
+};
+
+app.use('/storage', express.static(getStorageRoot(), storageStaticOptions));
+app.use('/api/storage', express.static(getStorageRoot(), storageStaticOptions));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', apiBaseUrl: API_BASE_URL });

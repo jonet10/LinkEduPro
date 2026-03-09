@@ -19,7 +19,8 @@ function getBackendBaseUrl() {
 export function resolveMediaUrl(url) {
   if (!url) return null;
 
-  const raw = String(url).trim();
+  const rawInput = String(url).trim();
+  const raw = rawInput.replace(/^\/api\/storage\//i, '/storage/');
   if (!raw) return null;
 
   if (/^(https?:)?\/\//i.test(raw) || raw.startsWith('data:') || raw.startsWith('blob:')) {
@@ -32,8 +33,8 @@ export function resolveMediaUrl(url) {
   }
 
   if (raw.startsWith('/')) {
-    return `${backendBaseUrl}${raw}`;
+    return `${backendBaseUrl}${encodeURI(raw)}`;
   }
 
-  return `${backendBaseUrl}/${raw}`;
+  return `${backendBaseUrl}/${encodeURI(raw)}`;
 }
