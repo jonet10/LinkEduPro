@@ -12,13 +12,26 @@ export async function apiClient(path, options = {}) {
     ...(options.headers || {})
   };
 
-  const res = await fetch(`${getApiBaseUrl()}${path}`, {
+  const apiBaseUrl = getApiBaseUrl();
+  const res = await fetch(`${apiBaseUrl}${path}`, {
     method: options.method || 'GET',
     headers,
     body: options.body
   });
 
-  const data = await res.json().catch(() => ({}));
+  const contentType = String(res.headers.get('content-type') || '').toLowerCase();
+  const isJson = contentType.includes('application/json');
+  const data = isJson
+    ? await res.json().catch(() => ({}))
+    : { message: await res.text().catch(() => '') };
+
+  if (!isJson) {
+    const error = new Error(`Réponse API invalide (${res.status}) depuis ${apiBaseUrl}${path}`);
+    error.status = res.status;
+    error.code = 'INVALID_API_RESPONSE';
+    error.data = data;
+    throw error;
+  }
 
   if (!res.ok) {
     if (res.status === 401 && options.token && typeof window !== 'undefined') {
