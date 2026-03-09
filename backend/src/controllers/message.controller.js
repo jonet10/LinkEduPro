@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const { emitRefresh } = require('../services/realtime');
+const PRIVATE_CONVERSATION_DB_VALUE = 'private';
 
 const API_LEVEL_TO_DB = {
   '9e': 'LEVEL_9E',
@@ -220,7 +221,7 @@ async function getUnreadMessageSummary(req, res, next) {
         FROM conversation_participants cp
         INNER JOIN conversations c
           ON c.id = cp.conversation_id
-         AND c.type = 'private'
+         AND LOWER(c.type::text) = LOWER(${PRIVATE_CONVERSATION_DB_VALUE})
         INNER JOIN messages m
           ON m.conversation_id = cp.conversation_id
          AND m.sender_id <> cp.user_id
@@ -234,7 +235,7 @@ async function getUnreadMessageSummary(req, res, next) {
           FROM conversation_participants cp
           INNER JOIN conversations c
             ON c.id = cp.conversation_id
-           AND c.type = 'private'
+           AND LOWER(c.type::text) = LOWER(${PRIVATE_CONVERSATION_DB_VALUE})
           INNER JOIN messages m
             ON m.conversation_id = cp.conversation_id
            AND m.sender_id <> cp.user_id
