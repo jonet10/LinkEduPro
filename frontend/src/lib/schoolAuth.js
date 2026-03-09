@@ -15,7 +15,13 @@ export function getSchoolToken() {
 export function getSchoolAdmin() {
   if (typeof window === 'undefined') return null;
   const raw = localStorage.getItem(SCHOOL_ADMIN_KEY);
-  return raw ? JSON.parse(raw) : null;
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (_) {
+    localStorage.removeItem(SCHOOL_ADMIN_KEY);
+    return null;
+  }
 }
 
 export function clearSchoolAuth() {
