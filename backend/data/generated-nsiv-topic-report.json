@@ -1,308 +1,353 @@
 {
-  "generatedAt": "2026-03-10T00:14:45.953Z",
+  "generatedAt": "2026-03-10T00:27:52.196Z",
   "sourceRoot": "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV",
   "requestedSubjects": [
-    "svt",
-    "mathematiques",
-    "philosophie",
-    "anglais"
+    "kreyol",
+    "geo-histoire",
+    "espagnol",
+    "chimie",
+    "arts"
   ],
-  "subjectCount": 4,
-  "questionCount": 16,
+  "subjectCount": 5,
+  "questionCount": 20,
   "pack": [
     {
-      "name": "Anglais",
-      "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Anglais).",
+      "name": "Arts",
+      "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Arts).",
       "questions": [
         {
-          "prompt": "En anglais, quel est le meilleur reflexe pour apprendre durablement du vocabulaire ?",
+          "prompt": "En arts, le folklore designe principalement :",
           "options": [
-            "Memoriser des mots isoles sans contexte",
-            "Apprendre les mots dans des phrases et les reutiliser",
-            "Eviter toute revision",
-            "Traduire mot a mot sans pratiquer"
+            "Des traditions artistiques et culturelles populaires",
+            "Une formule mathematique",
+            "Un protocole de laboratoire",
+            "Un format de fichier"
+          ],
+          "correctOption": 0,
+          "explanation": "Le folklore regroupe des pratiques culturelles transmises dans la communaute. (annales observees: 2022, 2018, 2016, 2002).",
+          "isPremium": true,
+          "frequencyScore": 99,
+          "sourceTopic": "Folklore"
+        },
+        {
+          "prompt": "En arts de scene, une performance reussie repose d abord sur :",
+          "options": [
+            "Improviser sans preparation",
+            "L articulation, le rythme et l expression",
+            "Ignorer le public",
+            "Parler le plus vite possible"
           ],
           "correctOption": 1,
-          "explanation": "Le contexte et la reutilisation active ameliorent la retention du vocabulaire. (annales observees: 2022, 2021, 2020, 2019, 2018).",
-          "isPremium": true,
-          "frequencyScore": 99,
-          "sourceTopic": "Vocabulary"
-        },
-        {
-          "prompt": "Quelle strategie aide le plus en reading comprehension ?",
-          "options": [
-            "Lire uniquement le titre",
-            "Sauter les connecteurs logiques",
-            "Identifier idee principale, details et inferer",
-            "Repondre sans relire le texte"
-          ],
-          "correctOption": 2,
-          "explanation": "Une lecture structuree (idee principale, details, inferrence) augmente la precision. (annales observees: 2022, 2021, 2020).",
-          "isPremium": true,
-          "frequencyScore": 57,
-          "sourceTopic": "Reading comprehension"
-        },
-        {
-          "prompt": "En anglais, le choix du temps verbal depend surtout de :",
-          "options": [
-            "La longueur de la phrase",
-            "La couleur du mot",
-            "Le contexte temporel et l intention",
-            "Le hasard"
-          ],
-          "correctOption": 2,
-          "explanation": "Le contexte et l intention de communication determinent le temps verbal. (annales observees: 2022, 2021, 2020).",
-          "isPremium": true,
-          "frequencyScore": 57,
-          "sourceTopic": "Grammar and tenses"
-        },
-        {
-          "prompt": "Pour une bonne production ecrite en anglais, il faut en priorite :",
-          "options": [
-            "Empiler des mots compliques",
-            "Structurer introduction, developpement et conclusion",
-            "Eviter toute ponctuation",
-            "Copier une phrase connue"
-          ],
-          "correctOption": 1,
-          "explanation": "La structure logique et la coherence sont essentielles en expression ecrite. (annales observees: 2022, 2021, 2020).",
-          "isPremium": true,
-          "frequencyScore": 57,
-          "sourceTopic": "Written expression"
-        }
-      ]
-    },
-    {
-      "name": "Mathematiques",
-      "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Mathematiques).",
-      "questions": [
-        {
-          "prompt": "En algebre, simplifier une expression sert d abord a :",
-          "options": [
-            "Rendre les calculs et raisonnements plus fiables",
-            "Complexifier la notation",
-            "Eviter les resultats",
-            "Ignorer les proprietes"
-          ],
-          "correctOption": 0,
-          "explanation": "La simplification facilite verification et resolution. (annales observees: 2022, 2021, 2019, 2018).",
-          "isPremium": true,
-          "frequencyScore": 99,
-          "sourceTopic": "Algebre et calcul"
-        },
-        {
-          "prompt": "En mathematiques, une fonction associe :",
-          "options": [
-            "Chaque valeur d entree a une valeur de sortie",
-            "Plusieurs sorties aleatoires",
-            "Uniquement des constantes",
-            "Aucune variable"
-          ],
-          "correctOption": 0,
-          "explanation": "Une fonction relie une variable independante a une image. (annales observees: 2022, 2021, 2020, 2019).",
-          "isPremium": true,
-          "frequencyScore": 99,
-          "sourceTopic": "Fonctions"
-        },
-        {
-          "prompt": "La geometrie analytique combine principalement :",
-          "options": [
-            "Algebre et representation geometrique",
-            "Biologie et chimie",
-            "Histoire et litterature",
-            "Economie et droit"
-          ],
-          "correctOption": 0,
-          "explanation": "Elle etudie les objets geometriques via des equations. (annales observees: 2021, 2019, 2018).",
+          "explanation": "L articulation, le rythme et l expression soutiennent la qualite artistique. (annales observees: 2022, 2020, 2016, 2015).",
           "isPremium": true,
           "frequencyScore": 85,
-          "sourceTopic": "Geometrie analytique"
+          "sourceTopic": "Musique et theatre"
         },
         {
-          "prompt": "En statistique, la moyenne est :",
+          "prompt": "Quel element est fondamental dans l analyse d une oeuvre picturale ?",
           "options": [
-            "Un indicateur de tendance centrale",
-            "Une mesure de longueur",
-            "Une unite chimique",
-            "Une loi physique"
+            "La composition, la couleur et la lumiere",
+            "Le prix du papier",
+            "Le nom du quartier",
+            "La vitesse de lecture"
           ],
           "correctOption": 0,
-          "explanation": "La moyenne resume une serie numerique autour d une valeur centrale. (annales observees: 2022, 2021, 2020).",
+          "explanation": "Composition, couleur et lumiere sont des criteres centraux en peinture. (annales observees: 2022, 2019).",
+          "isPremium": true,
+          "frequencyScore": 85,
+          "sourceTopic": "Peinture"
+        },
+        {
+          "prompt": "Le patrimoine culturel est important parce qu il :",
+          "options": [
+            "Freine la creativite",
+            "Coupe les generations",
+            "Transmet identite, histoire et valeurs",
+            "Remplace toutes les disciplines"
+          ],
+          "correctOption": 2,
+          "explanation": "Le patrimoine soutient la memoire collective et l identite culturelle. (annales observees: 2022, 2021, 2020).",
           "isPremium": true,
           "frequencyScore": 57,
-          "sourceTopic": "Statistiques"
+          "sourceTopic": "Patrimoine culturel"
         }
       ]
     },
     {
-      "name": "Philosophie",
-      "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (PHILOSOPHIE).",
+      "name": "Chimie",
+      "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (CHIMIE).",
       "questions": [
         {
-          "prompt": "Etudier les philosophes classiques permet surtout de :",
+          "prompt": "En chimie organique, une fonction sert surtout a :",
           "options": [
-            "Comprendre des cadres de pensee majeurs",
-            "Memoriser des noms sans idees",
-            "Eviter la discussion",
-            "Remplacer tout raisonnement"
+            "Classer les composes selon leur groupe caracteristique",
+            "Mesurer la pression atmospherique",
+            "Definir un angle geometrique",
+            "Coder un programme"
           ],
           "correctOption": 0,
-          "explanation": "Leurs concepts servent de base a l analyse philosophique. (annales observees: 2022).",
+          "explanation": "Les fonctions organiques classent les molecules par groupe caracteristique. (annales observees: 2022, 2020, 2019, 2018).",
           "isPremium": true,
           "frequencyScore": 99,
-          "sourceTopic": "Philosophes classiques"
+          "sourceTopic": "Fonctions organiques"
         },
         {
-          "prompt": "En philosophie, la raison est surtout mobilisee pour :",
+          "prompt": "La structure de la matiere etudie principalement :",
           "options": [
-            "Argumenter et justifier des idees",
-            "Eviter toute question",
-            "Remplacer la science par l opinion",
-            "Supprimer la logique"
+            "Atomes, ions, molecules et liaisons",
+            "Seulement les planetes",
+            "Uniquement les cellules",
+            "Les courants marins"
           ],
           "correctOption": 0,
-          "explanation": "La raison structure l argumentation et la validite des jugements. (annales observees: 2022, 2021, 2019).",
+          "explanation": "Ce theme porte sur les entites microscopiques et leurs interactions. (annales observees: 2022, 2021, 2020, 2019, 2015).",
+          "isPremium": true,
+          "frequencyScore": 99,
+          "sourceTopic": "Structure de la matiere"
+        },
+        {
+          "prompt": "Un indicateur acido-basique sert principalement a :",
+          "options": [
+            "Mesurer la masse molaire",
+            "Identifier le caractere acide ou basique d une solution",
+            "Calculer la vitesse",
+            "Mesurer une distance"
+          ],
+          "correctOption": 1,
+          "explanation": "Un indicateur met en evidence la nature acide ou basique. (annales observees: 2021, 2019, 2016, 2015).",
           "isPremium": true,
           "frequencyScore": 92,
-          "sourceTopic": "Connaissance et raison"
+          "sourceTopic": "Acides et bases"
         },
         {
-          "prompt": "L ethique traite principalement de :",
+          "prompt": "Les hydrocarbures sont des composes formes essentiellement de :",
           "options": [
-            "La question du bien et du juste",
-            "La composition chimique",
-            "Le cablage reseau",
-            "Les calculs integrals"
+            "Sodium et chlore",
+            "Carbone et hydrogene",
+            "Oxygene et azote",
+            "Calcium et fer"
           ],
-          "correctOption": 0,
-          "explanation": "L ethique analyse les normes et choix moraux. (annales observees: 2022, 2019, 2018).",
+          "correctOption": 1,
+          "explanation": "Un hydrocarbure est constitue principalement de carbone et hydrogene. (annales observees: 2022, 2020, 2019).",
           "isPremium": true,
-          "frequencyScore": 92,
-          "sourceTopic": "Ethique et culture"
-        },
-        {
-          "prompt": "La metaphysique interroge notamment :",
-          "options": [
-            "L etre, la realite et les principes ultimes",
-            "La grammaire anglaise",
-            "La topographie urbaine",
-            "Le codage binaire"
-          ],
-          "correctOption": 0,
-          "explanation": "La metaphysique traite des fondements de la realite. (annales observees: 2022, 2020).",
-          "isPremium": true,
-          "frequencyScore": 71,
-          "sourceTopic": "Metaphysique"
+          "frequencyScore": 85,
+          "sourceTopic": "Hydrocarbures"
         }
       ]
     },
     {
-      "name": "SVT",
-      "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (SVT).",
+      "name": "Espagnol",
+      "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Espagnol).",
       "questions": [
         {
-          "prompt": "La geologie permet notamment de :",
+          "prompt": "En espagnol, pour ameliorer la comprension d un texte, il faut :",
           "options": [
-            "Comprendre roches, structures et evolution de la Terre",
-            "Analyser la conjugaison",
-            "Definir des algorithmes",
-            "Etudier uniquement la musique"
+            "Ignorer le contexte",
+            "Identifier mots-cles et idees principales",
+            "Traduire lettre par lettre",
+            "Eviter toute relecture"
           ],
-          "correctOption": 0,
-          "explanation": "La geologie etudie les materiaux, structures et processus terrestres. (annales observees: 2022, 2019, 2018, 2016).",
+          "correctOption": 1,
+          "explanation": "Les mots-cles et idees principales guident la comprehension globale. (annales observees: 2022, 2021, 2020, 2019, 2018).",
           "isPremium": true,
           "frequencyScore": 99,
-          "sourceTopic": "Geologie"
+          "sourceTopic": "Vocabulario y comprension"
         },
         {
-          "prompt": "La genetique etudie surtout :",
+          "prompt": "En expresion escrita, une production claire doit :",
           "options": [
-            "Transmission des caracteres hereditaires",
-            "Formation des nuages",
-            "Circuits electriques",
-            "Marches financiers"
+            "Avoir des idees organisees et des connecteurs logiques",
+            "Etre une liste sans lien",
+            "Eviter les verbes",
+            "Copier un paragraphe appris"
           ],
           "correctOption": 0,
-          "explanation": "Elle analyse genes, heredite et variabilite. (annales observees: 2022, 2021, 2020, 2018, 2016).",
+          "explanation": "La coherence et les connecteurs renforcent la qualite de l expression. (annales observees: 2022, 2002).",
           "isPremium": true,
           "frequencyScore": 99,
-          "sourceTopic": "Genetique et heredite"
+          "sourceTopic": "Lectura y expresion"
         },
         {
-          "prompt": "La cytologie concerne principalement :",
+          "prompt": "En gramatica espanola, l accord sujet-verbe sert a :",
           "options": [
-            "L etude des cellules",
-            "L etude des planetes",
-            "La programmation web",
-            "L histoire des idees"
+            "Relier sujet et action correctement",
+            "Changer la ponctuation seulement",
+            "Supprimer les pronoms",
+            "Allonger les phrases"
           ],
           "correctOption": 0,
-          "explanation": "La cytologie est la branche qui etudie la cellule. (annales observees: 2022, 2019, 2002).",
-          "isPremium": true,
-          "frequencyScore": 99,
-          "sourceTopic": "Cytologie et anatomie"
-        },
-        {
-          "prompt": "En ecologie, un ecosysteme designe :",
-          "options": [
-            "Un milieu et les etres vivants qui y interagissent",
-            "Un seul organisme isole",
-            "Un schema electrique",
-            "Un tableau statistique"
-          ],
-          "correctOption": 0,
-          "explanation": "Un ecosysteme inclut les organismes et leur environnement. (annales observees: 2022, 2021, 2020).",
+          "explanation": "L accord sujet-verbe est une regle centrale pour la correction grammaticale. (annales observees: 2022, 2021, 2020).",
           "isPremium": true,
           "frequencyScore": 57,
-          "sourceTopic": "Ecologie"
+          "sourceTopic": "Gramatica espanola"
+        },
+        {
+          "prompt": "Quelle pratique ameliore le plus la produccion escrita ?",
+          "options": [
+            "Ecrire sans plan",
+            "Planifier, rediger puis corriger",
+            "Eviter les revisions",
+            "Ecrire une seule phrase"
+          ],
+          "correctOption": 1,
+          "explanation": "La qualite augmente avec planification, redaction et relecture. (annales observees: 2022, 2021, 2020).",
+          "isPremium": true,
+          "frequencyScore": 57,
+          "sourceTopic": "Produccion escrita"
+        }
+      ]
+    },
+    {
+      "name": "Histoire-Geo",
+      "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Geo-Histoire).",
+      "questions": [
+        {
+          "prompt": "L etude de l histoire nationale sert surtout a :",
+          "options": [
+            "Memoriser des dates sans contexte",
+            "Comprendre les luttes, acteurs et transformations du pays",
+            "Eviter toute analyse critique",
+            "Remplacer la geographie"
+          ],
+          "correctOption": 1,
+          "explanation": "Elle construit une comprehension structuree des dynamiques historiques nationales. (annales observees: 2022).",
+          "isPremium": true,
+          "frequencyScore": 99,
+          "sourceTopic": "Histoire nationale"
+        },
+        {
+          "prompt": "En histoire-geo economique, un indicateur de croissance mesure surtout :",
+          "options": [
+            "La variation de la production",
+            "Le style litteraire",
+            "La composition d un tableau",
+            "Le rythme cardiaque"
+          ],
+          "correctOption": 0,
+          "explanation": "La croissance se lit par l evolution de la production et de l activite economique. (annales observees: 2021, 2020, 2019, 2018).",
+          "isPremium": true,
+          "frequencyScore": 99,
+          "sourceTopic": "Croissance et economie"
+        },
+        {
+          "prompt": "L etude des espaces et du climat permet notamment de :",
+          "options": [
+            "Comprendre les contraintes et potentialites d un territoire",
+            "Determiner une formule chimique",
+            "Programmer une application",
+            "Classer des romans"
+          ],
+          "correctOption": 0,
+          "explanation": "Le milieu physique influence fortement les activites humaines. (annales observees: 2022, 2021, 2019).",
+          "isPremium": true,
+          "frequencyScore": 92,
+          "sourceTopic": "Espaces et climat"
+        },
+        {
+          "prompt": "La demographie etudie principalement :",
+          "options": [
+            "La dynamique des populations",
+            "Les reactions chimiques",
+            "Le codage informatique",
+            "La musique classique"
+          ],
+          "correctOption": 0,
+          "explanation": "La demographie analyse taille, structure et evolution des populations. (annales observees: 2019, 2018).",
+          "isPremium": true,
+          "frequencyScore": 64,
+          "sourceTopic": "Population et demographie"
+        }
+      ]
+    },
+    {
+      "name": "Kreyol",
+      "description": "Quiz NSIV genere automatiquement depuis EXAMENS/NSIV (Kreyol).",
+      "questions": [
+        {
+          "prompt": "Nan ekriti kreyol, kisa ki pi enpotan pou klate mesaj la ?",
+          "options": [
+            "Fraz byen estriktire ak vokabiler adapte",
+            "Mete mo o aza",
+            "Ekri san ponktiyasyon",
+            "Repete menm mo yo"
+          ],
+          "correctOption": 0,
+          "explanation": "Bon estrikti ak bon chwa mo rann mesaj la pi klere. (annales observees: 2022, 2021, 2020, 2019, 2018, 2016).",
+          "isPremium": true,
+          "frequencyScore": 99,
+          "sourceTopic": "Ekriti kreyol"
+        },
+        {
+          "prompt": "Nan Kreyol, pou bon konpreyansyon teks, ou dwe :",
+          "options": [
+            "Chache lide prensipal ak mo kle yo",
+            "Li yon sel fwa san reflechi",
+            "Evite kestyon yo",
+            "Sote paragraf yo"
+          ],
+          "correctOption": 0,
+          "explanation": "Konpreyansyon depann de idantifikasyon lide prensipal ak detay enpotan. (annales observees: 2022, 2021, 2020, 2019, 2018).",
+          "isPremium": true,
+          "frequencyScore": 99,
+          "sourceTopic": "Lekti ak konpreyansyon"
+        },
+        {
+          "prompt": "Pou agrandi vokabiler, met ki metod ki pi efikas ?",
+          "options": [
+            "Pratike mo yo nan kontes reyel",
+            "Memorize mo yo san itilize",
+            "Evite li teks",
+            "Pa janm revize"
+          ],
+          "correctOption": 0,
+          "explanation": "Itilizasyon mo yo nan kontes ede retansyon alontem. (annales observees: 2022, 2021, 2020).",
+          "isPremium": true,
+          "frequencyScore": 57,
+          "sourceTopic": "Vokabiler"
+        },
+        {
+          "prompt": "Yon bon kominikasyon ekri dwe genyen :",
+          "options": [
+            "Objektif klè ak lide byen klase",
+            "Fraz san lyezon",
+            "Mo teknik san eksplikasyon",
+            "Pa gen konklizyon"
+          ],
+          "correctOption": 0,
+          "explanation": "Kominikasyon efikas mande estrikti klè ak lojik. (annales observees: 2022, 2021, 2020).",
+          "isPremium": true,
+          "frequencyScore": 57,
+          "sourceTopic": "Kominikasyon"
         }
       ]
     }
   ],
   "audit": {
     "sourceRoot": "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV",
-    "totalFiles": 223,
+    "totalFiles": 208,
     "extensionCounts": {
-      ".docx": 59,
-      ".pdf": 152,
-      ".doc": 12
+      ".pdf": 140,
+      ".docx": 64,
+      ".doc": 4
     },
     "suspiciousFileNames": [
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\1) (SVT-SMP)-Analytique.pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\10) SES-GRAPHIQUE.pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\2) (SVT-SMP)-Rationnel.pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\3) SVT-SMP-Parametre.pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\4) SVT-SMP-Complexe.pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\6) LLA-CARTESIEN.pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\7) LLA-METHODIQUE.pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\8) SES-ELASTICITE.pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\Maths  (SVT-SMP).pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\Maths NS IV (SMP _ SVT) (1).pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\Maths-2015 (6 examens).docx",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\PHILOSOPHIE\\PHILOSOPHIE(Réflexion sur l'éduc.)-1.pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\PHILOSOPHIE\\PHILOSOPHIE(Réflexion sur l'éduc.)-2.pdf",
-      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\SVT\\SVT_2021_SVT_Claustration).pdf"
+      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Espagnol\\Espagnol_2021_SVT-SM-SES_Vivienda).pdf",
+      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Espagnol\\Espagnol_2022_LLA+Pacifico.docx",
+      "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Espagnol\\Espagnol_2022_SVT-SES-SMP_Optimista).docx"
     ],
     "duplicateBySize": [
       {
-        "size": 1004547,
+        "size": 509929,
         "files": [
-          "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\7) LLA-METHODIQUE.pdf",
-          "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Mathematiques\\Maths_2018_LLA-METHODIQUE.pdf"
+          "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Arts\\Arts_2002_Tambour.pdf",
+          "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Arts\\Arts_2022_Tambour.pdf"
         ]
       },
       {
-        "size": 900608,
+        "size": 813121,
         "files": [
-          "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\SVT\\Géologie_2016_LLA-SES-SMP_Polymérique.doc",
-          "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\SVT\\Géologie_2016_LLA_SES_SMP_Protomère.doc"
-        ]
-      },
-      {
-        "size": 389988,
-        "files": [
-          "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\SVT\\SVT_2002_SVT_Histologie.pdf",
-          "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\SVT\\SVT_2022_SVT_Histologie.pdf"
+          "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Arts\\Arts_2022_Compas.pdf",
+          "C:\\Users\\herod\\OneDrive\\Desktop\\LinkEduPro\\EXAMENS\\NSIV\\Arts\\Arts_2022_Compas_Compas.pdf"
         ]
       }
     ]
