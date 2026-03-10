@@ -6,6 +6,10 @@ import { apiClient } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { getApiBaseUrl } from '@/lib/runtime-config';
 
+function subjectKey(year, subject) {
+  return `${String(year || '').trim()}::${String(subject || '').trim()}`;
+}
+
 function extractYear(fileName) {
   const match = String(fileName || '').match(/(19\d{2}|20\d{2})/);
   return match ? match[1] : 'Sans annee';
@@ -92,6 +96,7 @@ export default function ProbableExercisesPage() {
   const [items, setItems] = useState([]);
   const [level, setLevel] = useState('NSIV');
   const [selectedYear, setSelectedYear] = useState('');
+  const [expandedSubjects, setExpandedSubjects] = useState(() => new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -117,6 +122,11 @@ export default function ProbableExercisesPage() {
     setSelectedYear((prev) => (prev && yearBuckets.some((row) => row.year === prev) ? prev : yearBuckets[0].year));
   }, [yearBuckets]);
 
+  useEffect(() => {
+    // Default state: exams hidden. Reset when year changes so the UI stays predictable.
+    setExpandedSubjects(new Set());
+  }, [selectedYear]);
+
   const activeYear = useMemo(
     () => yearBuckets.find((row) => row.year === selectedYear) || null,
     [yearBuckets, selectedYear]
@@ -131,6 +141,16 @@ export default function ProbableExercisesPage() {
       return;
     }
     router.push(`/exam-viewer?file=${encodeURIComponent(fileName)}`);
+  }
+
+  function toggleSubject(year, subject) {
+    const key = subjectKey(year, subject);
+    setExpandedSubjects((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
   }
 
   const levelLabel = useMemo(() => {
@@ -193,28 +213,46 @@ export default function ProbableExercisesPage() {
             <div className="grid gap-4 md:grid-cols-2">
               {activeYear.subjects.map((subjectRow) => (
                 <article key={`${activeYear.year}-${subjectRow.subject}`} className="card">
-                  <h3 className="text-xl font-semibold text-brand-900">{subjectRow.subject}</h3>
-                  <p className="mt-1 text-xs font-semibold text-brand-600">{subjectRow.exams.length} PDF</p>
-                  <div className="mt-3 space-y-3">
-                    {subjectRow.exams.map((exam) => (
-                      <div key={`${subjectRow.subject}-${exam.fileName}`} className="rounded-xl border border-brand-100 p-4">
-                        <p className="text-base font-semibold text-brand-900">{exam.label}</p>
-                        {exam.topics.length > 0 ? (
-                          <p className="mt-1 text-sm text-brand-700">
-                            Themes: {exam.topics.slice(0, 3).join(', ')}
-                            {exam.topics.length > 3 ? ', ...' : ''}
-                          </p>
-                        ) : null}
-                        <button
-                          type="button"
-                          className="btn-primary mt-3 !px-3 !py-1.5 text-xs"
-                          onClick={() => openExamPdf(exam.fileName)}
-                        >
-                          Ouvrir PDF
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                  <button
+                    type="button"
+                    className="flex w-full items-start justify-between gap-4 text-left"
+                    onClick={() => toggleSubject(activeYear.year, subjectRow.subject)}
+                    aria-expanded={expandedSubjects.has(subjectKey(activeYear.year, subjectRow.subject))}
+                  >
+                    <div>
+                      <h3 className="text-xl font-semibold text-brand-900">{subjectRow.subject}</h3>
+                      <p className="mt-1 text-xs font-semibold text-brand-600">{subjectRow.exams.length} PDF</p>
+                      {!expandedSubjects.has(subjectKey(activeYear.year, subjectRow.subject)) ? (
+                        <p className="mt-2 text-xs text-brand-600">Clique pour afficher les examens.</p>
+                      ) : null}
+                    </div>
+                    <span className="mt-1 select-none text-2xl text-brand-500">
+                      {expandedSubjects.has(subjectKey(activeYear.year, subjectRow.subject)) ? '▾' : '▸'}
+                    </span>
+                  </button>
+
+                  {expandedSubjects.has(subjectKey(activeYear.year, subjectRow.subject)) ? (
+                    <div className="mt-3 space-y-3">
+                      {subjectRow.exams.map((exam) => (
+                        <div key={`${subjectRow.subject}-${exam.fileName}`} className="rounded-xl border border-brand-100 p-4">
+                          <p className="text-base font-semibold text-brand-900">{exam.label}</p>
+                          {exam.topics.length > 0 ? (
+                            <p className="mt-1 text-sm text-brand-700">
+                              Themes: {exam.topics.slice(0, 3).join(', ')}
+                              {exam.topics.length > 3 ? ', ...' : ''}
+                            </p>
+                          ) : null}
+                          <button
+                            type="button"
+                            className="btn-primary mt-3 !px-3 !py-1.5 text-xs"
+                            onClick={() => openExamPdf(exam.fileName)}
+                          >
+                            Ouvrir PDF
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </article>
               ))}
             </div>

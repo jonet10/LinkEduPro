@@ -155,7 +155,9 @@ export default function SubjectsPage() {
 
   return (
     <section>
-      <h1 className="mb-6 text-3xl font-bold text-brand-900">Catalogue des rubriques</h1>
+      <div className="mb-6 inline-flex items-center rounded-2xl bg-white/70 px-4 py-3 shadow-sm ring-1 ring-black/5 backdrop-blur">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">Catalogue des rubriques</h1>
+      </div>
       {error ? <p className="mb-4 text-red-600">{error}</p> : null}
       {canSeeProbableExercises && !isNsivSectionVisible ? (
         <article className="card mb-4">
