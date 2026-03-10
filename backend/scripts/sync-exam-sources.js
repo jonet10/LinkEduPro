@@ -5,7 +5,10 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-const ROOT_EXAMS_DIR = path.resolve(__dirname, '../../EXAMENS');
+const ROOT_EXAMS_DIR = path.resolve(
+  __dirname,
+  String(process.env.EXAMS_ROOT_DIR || '../../EXAMENS').trim()
+);
 const TARGET_PDF_DIR = path.resolve(__dirname, '../exam-pdfs');
 
 const LEVEL_MAP = {
@@ -33,6 +36,23 @@ function normalizeNoAccent(value) {
 function normalizeLevelFolder(folderName) {
   const key = normalizeNoAccent(folderName).replace(/\s+/g, '').toUpperCase();
   return LEVEL_MAP[key] || '';
+}
+
+function normalizeKey(value) {
+  return normalizeNoAccent(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function parseFilterSet(raw) {
+  const value = String(raw || '').trim();
+  if (!value) return null;
+  const items = value
+    .split(',')
+    .map((item) => normalizeKey(item))
+    .filter(Boolean);
+  return items.length ? new Set(items) : null;
 }
 
 function formatSubjectName(value) {
@@ -100,13 +120,26 @@ async function main() {
   }
 
   const levelDirs = fs.readdirSync(ROOT_EXAMS_DIR, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+  const levelFilter = parseFilterSet(process.env.EXAMS_LEVEL_FILTER);
+  const subjectFilter = parseFilterSet(process.env.EXAMS_SUBJECT_FILTER);
   let scanned = 0;
   let copied = 0;
   let linked = 0;
+  let ignoredByFilter = 0;
+
+  if (levelFilter) {
+    console.log(`Filtre niveaux actif: ${Array.from(levelFilter.values()).join(', ')}`);
+  }
+  if (subjectFilter) {
+    console.log(`Filtre matieres actif: ${Array.from(subjectFilter.values()).join(', ')}`);
+  }
 
   for (const levelEntry of levelDirs) {
     const level = normalizeLevelFolder(levelEntry.name);
     if (!level) continue;
+    if (levelFilter && !levelFilter.has(normalizeKey(level)) && !levelFilter.has(normalizeKey(levelEntry.name))) {
+      continue;
+    }
 
     const levelDir = path.join(ROOT_EXAMS_DIR, levelEntry.name);
     const files = walkFilesRecursive(levelDir).filter((filePath) => /\.pdf$/i.test(filePath));
@@ -116,6 +149,10 @@ async function main() {
       const relative = path.relative(levelDir, filePath);
       const parts = relative.split(path.sep).filter(Boolean);
       const subject = formatSubjectName(parts.length > 1 ? parts[0] : 'General');
+      if (subjectFilter && !subjectFilter.has(normalizeKey(subject))) {
+        ignoredByFilter += 1;
+        continue;
+      }
       const originalFileName = path.basename(filePath);
       const targetName = buildStableTargetName(level, subject, originalFileName);
       const targetPath = path.join(TARGET_PDF_DIR, targetName);
@@ -138,6 +175,7 @@ async function main() {
   console.log(`EXAMENS scannes: ${scanned}`);
   console.log(`PDF copies vers backend/exam-pdfs: ${copied}`);
   console.log(`Sources liees (probable_exercise_sources): ${linked}`);
+  console.log(`PDF ignores par filtre: ${ignoredByFilter}`);
 }
 
 main()
