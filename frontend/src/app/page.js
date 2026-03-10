@@ -7,6 +7,7 @@ import { getToken, getStudent, isNsivStudent } from '@/lib/auth';
 import { resolveMediaUrl } from '@/lib/media';
 import VerifiedTestimonials from '@/components/VerifiedTestimonials';
 import SectionIcon from '@/components/ui/SectionIcon';
+import StudentDashboard from '@/components/student-dashboard/StudentDashboard';
 
 const LANDING_SUBJECTS = [
   { id: 'chimie', label: 'Chimie', iconImage: '/images/subject-chimie.png' },
@@ -188,17 +189,6 @@ function getDailyObjective(student) {
   return byTrack[track] || byTrack.ORDINAIRE;
 }
 
-function resolveSubjectSlot(subjectName) {
-  const value = String(subjectName || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  if (!value) return null;
-  if (value.includes('math')) return 'Mathematiques';
-  if (value.includes('physique') || value.includes('chimie')) return 'Physique-Chimie';
-  if (value.includes('franc')) return 'Francais';
-  if (value.includes('histoire') || value.includes('geo')) return 'Histoire-Geo';
-  if (value.includes('philo')) return 'Philosophie';
-  return null;
-}
-
 function normalizeCommunityPayload(payload) {
   return {
     leaderboard: Array.isArray(payload?.leaderboard) ? payload.leaderboard : [],
@@ -349,69 +339,11 @@ export default function HomePage() {
     if (!Number.isFinite(value) || value <= 0) return 20;
     return Math.max(5, Math.min(95, Math.round(value)));
   }, [myRanking?.average, progress?.overview?.averageScore]);
-  const courseProgressPercent = 100 - quizProgressPercent;
   const studentTrackLabel = useMemo(() => {
     const track = String(student?.nsivTrack || '').trim().toUpperCase();
     if (!track) return 'General';
     return track;
   }, [student?.nsivTrack]);
-  const topSubject = useMemo(() => {
-    const rows = Array.isArray(progress?.subjectStats) ? progress.subjectStats : [];
-    if (!rows.length) return null;
-    const sorted = [...rows].sort((a, b) => Number(b?.average || 0) - Number(a?.average || 0));
-    const best = sorted[0];
-    return {
-      name: best?.subject || 'Quiz',
-      average: Math.max(0, Math.min(100, Number(best?.average || 0)))
-    };
-  }, [progress?.subjectStats]);
-
-  const predictiveNodes = useMemo(() => {
-    const slotTemplate = [
-      { slot: 'Mathematiques', label: 'Mathematiques', tone: 'cyan', offset: 'left-5 top-10' },
-      { slot: 'Physique-Chimie', label: 'Physique-Chimie', tone: 'mint', offset: 'left-4 bottom-14' },
-      { slot: 'Francais', label: 'Francais', tone: 'violet', offset: 'left-28 top-3' },
-      { slot: 'Histoire-Geo', label: 'Histoire-Geo', tone: 'blue', offset: 'right-5 bottom-16' },
-      { slot: 'Philosophie', label: 'Philosophie', tone: 'blue', offset: 'right-16 top-28' }
-    ];
-
-    const slotValues = new Map();
-    for (const row of progress.subjectStats || []) {
-      const slot = resolveSubjectSlot(row?.subject);
-      if (!slot) continue;
-      const avg = Math.max(0, Math.min(100, Number(row?.average || 0)));
-      const attempts = Number(row?.attempts || 0);
-      const current = slotValues.get(slot);
-      if (!current || avg > current.value) {
-        slotValues.set(slot, { value: avg, attempts });
-      }
-    }
-
-    const filled = slotTemplate.map((item) => {
-      const data = slotValues.get(item.slot) || null;
-      return {
-        ...item,
-        value: data ? data.value : 0,
-        attempts: data ? data.attempts : 0
-      };
-    });
-
-    filled.push({
-      label: studentTrackLabel,
-      tone: 'gold',
-      offset: 'right-8 top-10',
-      highlight: true,
-      value: quizProgressPercent
-    });
-    filled.push({
-      label: 'Knowledge-cible',
-      tone: 'blue',
-      offset: 'left-[36%] top-[43%]',
-      core: true,
-      value: quizProgressPercent
-    });
-    return filled;
-  }, [progress.subjectStats, quizProgressPercent, studentTrackLabel]);
 
 
   const managerQuickActions = useMemo(() => {
@@ -712,68 +644,14 @@ export default function HomePage() {
       ) : null}
 
       {isStudentRole ? (
-        <section className="student-neo-hud motion-enter motion-delay-1" aria-label="Parcours prédictif élève">
-          <div className="student-neo-grid">
-            <div className="student-neo-orbit">
-              <p className="student-neo-kicker">Ton parcours predictif</p>
-              <div className="student-neo-sphere-wrap">
-                <div className="student-neo-sphere">
-                  {predictiveNodes.map((node) => (
-                    <div
-                      key={`${node.label}-${node.offset}`}
-                      className={`student-neo-node ${node.tone || 'blue'} ${node.offset} ${node.highlight ? 'is-highlight' : ''} ${node.core ? 'is-core' : ''}`}
-                    >
-                      <span className="student-neo-node-title">{node.label}</span>
-                      {typeof node.value === 'number' ? (
-                        <span className="student-neo-node-score">{Math.round(node.value)}%</span>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <aside className="student-neo-objective">
-              <div className="student-neo-user">
-                <span className="student-neo-avatar">{getUserInitials(student)}</span>
-                <div>
-                  <p className="student-neo-user-name">{student?.firstName || 'Eleve'}</p>
-                  <p className="student-neo-user-meta">Track: {studentTrackLabel}</p>
-                </div>
-              </div>
-
-              <h2 className="student-neo-title">Objectif du moment (IA-assiste)</h2>
-              <p className="student-neo-desc">{dailyObjective.description}</p>
-
-              <div className="student-neo-progress-row">
-                <span>{studentTrackLabel}: {quizProgressPercent}% complete</span>
-                <span>Cours: {courseProgressPercent}%</span>
-              </div>
-              <div className="student-neo-progress-track" aria-label={`Progression globale ${quizProgressPercent}%`}>
-                <div className="student-neo-progress-fill" style={{ width: `${quizProgressPercent}%` }} />
-              </div>
-              {topSubject ? (
-                <p className="student-neo-best-subject">
-                  Meilleure matiere: {topSubject.name} ({topSubject.average}%)
-                </p>
-              ) : null}
-
-              <div className="student-neo-cta-grid">
-                <Link href="/video-lessons" className="student-neo-cta">Classe Numerique</Link>
-                <Link href="/probable-exercises" className="student-neo-cta">Exercices probables</Link>
-                <Link href={dailyObjective.ctaHref} className="student-neo-cta student-neo-cta-primary">{dailyObjective.ctaLabel}</Link>
-                <Link href="/subjects" className="student-neo-cta">Quiz valides</Link>
-              </div>
-            </aside>
-          </div>
-
-          <nav className="student-neo-bottom-nav" aria-label="Raccourcis eleve">
-            <Link href="/library" className="student-neo-pill">Ressources</Link>
-            <Link href="/subjects" className="student-neo-pill">Exercices</Link>
-            <Link href="/support" className="student-neo-pill">Support IA</Link>
-            <Link href="/blog" className="student-neo-pill">Forum</Link>
-          </nav>
-        </section>
+        <StudentDashboard
+          student={student}
+          progress={progress}
+          dailyObjective={dailyObjective}
+          trackLabel={studentTrackLabel}
+          overallPercent={quizProgressPercent}
+          community={community}
+        />
       ) : null}
 
       {isStudentRole && !hasDepartmentAndCommune(student?.school) ? (
@@ -817,51 +695,7 @@ export default function HomePage() {
 
       {error ? <p className="text-red-600">{error}</p> : null}
 
-      {isStudentRole ? (
-        <div className="motion-enter motion-delay-3">
-          <article className="card lift-card">
-            <h2 className="mb-3 text-xl font-semibold text-brand-900">Plan rapide du jour</h2>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Link href="/subjects" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-1">
-                <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                    <SectionIcon name="compass" />
-                  </span>
-                  Rubriques du jour
-                </p>
-                <p className="mt-1 text-sm text-brand-700">Révision ciblée par matière.</p>
-              </Link>
-              <Link href="/probable-exercises" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-2">
-                <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                    <SectionIcon name="target" />
-                  </span>
-                  Exercices probables
-                </p>
-                <p className="mt-1 text-sm text-brand-700">Sujets les plus fréquents à l&apos;examen.</p>
-              </Link>
-              <Link href="/video-lessons" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-3">
-                <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                    <SectionIcon name="video" />
-                  </span>
-                  Classe Numerique
-                </p>
-                <p className="mt-1 text-sm text-brand-700">Leçons et exercices vidéo gratuits ou payants.</p>
-              </Link>
-              <Link href="/library" className="rounded-xl border border-brand-100 p-4 lift-card palette-card palette-4">
-                <p className="flex items-center gap-2 text-sm font-semibold text-brand-900">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#e8d9d3] text-[#2f5eea] ring-1 ring-[#d8c6bf]/70 shadow-sm">
-                    <SectionIcon name="library" />
-                  </span>
-                  Bibliothèque
-                </p>
-                <p className="mt-1 text-sm text-brand-700">PDF, ressources et fiches utiles.</p>
-              </Link>
-            </div>
-          </article>
-        </div>
-      ) : (
+      {isStudentRole ? null : (
         <article className="card motion-enter motion-delay-3 lift-card home-gold-soft">
           <h2 className="home-gold-title mb-3 text-xl font-semibold text-brand-900">Centre de gestion</h2>
           <div className="grid gap-3 sm:grid-cols-2">
