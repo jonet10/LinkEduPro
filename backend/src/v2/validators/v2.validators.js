@@ -4,6 +4,7 @@ const levelSchema = Joi.string().valid('9e', 'NS1', 'NS2', 'NS3', 'Terminale', '
 const academicLevelSchema = Joi.string().valid('9e', 'NSI', 'NSII', 'NSIII', 'NSIV', 'Universitaire');
 const contentTypeSchema = Joi.string().valid('quiz', 'pdf', 'video', 'revision');
 const contentStatusSchema = Joi.string().valid('draft', 'pending', 'approved', 'rejected');
+const levelsSchema = Joi.array().items(levelSchema).min(1).max(6);
 
 const updateProfileSchema = Joi.object({
   phone: Joi.string().trim().max(30).allow(null, ''),
@@ -11,6 +12,8 @@ const updateProfileSchema = Joi.object({
   address: Joi.string().trim().max(255).allow(null, ''),
   school: Joi.string().trim().max(255).allow(null, ''),
   gradeLevel: Joi.string().trim().max(120).allow(null, ''),
+  teachingSchools: Joi.array().items(Joi.string().trim().min(2).max(255)).max(50).optional(),
+  teachingSubjects: Joi.array().items(Joi.string().trim().min(2).max(120)).max(30).optional(),
   nsivTrack: Joi.string().valid('ORDINAIRE', 'SVT', 'SMP', 'SES', 'LLA', 'AUTRE').allow(null, ''),
   password: Joi.string().min(8).max(128),
   level: academicLevelSchema.optional()
@@ -41,9 +44,18 @@ const focusMusicQuerySchema = Joi.object({
 const createContentSchema = Joi.object({
   title: Joi.string().trim().min(3).max(180).required(),
   body: Joi.string().trim().min(10).max(20000).required(),
-  level: levelSchema.required(),
+  level: levelSchema.optional(),
+  levels: levelsSchema.optional(),
   type: contentTypeSchema.required(),
   status: contentStatusSchema.optional()
+}).custom((value, helpers) => {
+  if (!value.level && !Array.isArray(value.levels)) {
+    return helpers.error('any.required');
+  }
+  if (!value.level && Array.isArray(value.levels) && value.levels.length) {
+    value.level = value.levels[0];
+  }
+  return value;
 });
 
 const reviewContentSchema = Joi.object({

@@ -22,12 +22,11 @@ export default function StudentNavigation({ communityCount = 0 }) {
   const communityBadge = communityCount > 0 ? String(Math.min(99, communityCount)) : '';
 
   return (
-    <nav className="grid gap-3 md:grid-cols-4" aria-label="Student tools">
-      <NavCard href="/library" title="📚 Resources" desc="PDF, fiches, supports." icon="library" />
-      <NavCard href="/probable-exercises" title="📝 Exercises" desc="Examens passes, series." icon="target" />
-      <NavCard href="/focus" title="🤖 AI Tutor" desc="Mode focus + guidance." icon="spark" badge="NEW" />
-      <NavCard href="/blog" title="👥 Community" desc="Posts, conseils, entraide." icon="collection" badge={communityBadge} />
+    <nav className="grid gap-3 md:grid-cols-4" aria-label="Outils élève">
+      <NavCard href="/library" title="📚 Bibliothèque" desc="PDF, fiches, supports." icon="library" />
+      <NavCard href="/probable-exercises" title="📝 Examens passés" desc="Annales organisées par année." icon="target" />
+      <NavCard href="/focus" title="🤖 Tuteur IA" desc="Focus + accompagnement (bientôt)." icon="spark" badge="Bientôt" />
+      <NavCard href="/blog" title="👥 Communauté" desc="Posts, conseils, entraide." icon="collection" badge={communityBadge} />
     </nav>
   );
 }
-

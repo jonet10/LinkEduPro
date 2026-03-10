@@ -6,6 +6,15 @@ import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 
+const LEVEL_CHOICES = [
+  { value: 'LEVEL_9E', label: '9e' },
+  { value: 'NSI', label: 'NSI' },
+  { value: 'NSII', label: 'NSII' },
+  { value: 'NSIII', label: 'NSIII' },
+  { value: 'NSIV', label: 'NSIV' },
+  { value: 'UNIVERSITAIRE', label: 'Universitaire' }
+];
+
 function toDatetimeLocal(value) {
   if (!value) return '';
   const d = new Date(value);
@@ -51,6 +60,7 @@ export default function RattrapagePage() {
   const [form, setForm] = useState({
     title: '',
     level: 'NSIV',
+    levels: ['NSIV'],
     subject: 'Physique',
     isFree: false,
     price: '0',
@@ -142,6 +152,8 @@ export default function RattrapagePage() {
         token,
         body: JSON.stringify({
           ...form,
+          levels: Array.isArray(form.levels) && form.levels.length ? form.levels : [form.level || 'NSIV'],
+          level: (Array.isArray(form.levels) && form.levels.length ? form.levels[0] : form.level) || 'NSIV',
           isFree: Boolean(form.isFree),
           price: form.isFree ? 0 : Number(form.price || 0),
           maxParticipants: Number(form.maxParticipants || 0),
@@ -155,6 +167,7 @@ export default function RattrapagePage() {
       setForm({
         title: '',
         level: 'NSIV',
+        levels: ['NSIV'],
         subject: 'Physique',
         isFree: false,
         price: '0',
@@ -182,9 +195,13 @@ export default function RattrapagePage() {
     setEditingId(session.id);
     setShowPlanner(true);
     setOpenActionsId(null);
+    const nextLevels = Array.isArray(session.targetLevels) && session.targetLevels.length
+      ? session.targetLevels
+      : [session.level || 'NSIV'];
     setForm({
       title: session.title || '',
-      level: session.level || 'NSIV',
+      level: nextLevels[0] || session.level || 'NSIV',
+      levels: nextLevels,
       subject: session.subject || 'Physique',
       isFree: Boolean(session.isFree),
       price: session.price != null ? String(session.price) : '0',
@@ -223,6 +240,8 @@ export default function RattrapagePage() {
         token,
         body: JSON.stringify({
           ...form,
+          levels: Array.isArray(form.levels) && form.levels.length ? form.levels : [form.level || 'NSIV'],
+          level: (Array.isArray(form.levels) && form.levels.length ? form.levels[0] : form.level) || 'NSIV',
           isFree: Boolean(form.isFree),
           price: form.isFree ? 0 : Number(form.price || 0),
           maxParticipants: Number(form.maxParticipants || 0),
@@ -237,6 +256,7 @@ export default function RattrapagePage() {
       setForm({
         title: '',
         level: 'NSIV',
+        levels: ['NSIV'],
         subject: 'Physique',
         isFree: false,
         price: '0',
@@ -448,7 +468,8 @@ export default function RattrapagePage() {
         <h3 className="text-lg font-semibold text-brand-900">{session.title}</h3>
         {session.description ? <p className="mt-1 text-sm text-brand-700">{session.description}</p> : null}
         <p className="mt-1 text-xs text-brand-700">
-          Niveau: {session.level} | {session.isFree ? 'Gratuite' : `Prix: ${formatHTG(session.price)}`} | Places: {session.enrolledCount}/{session.maxParticipants}
+          Niveau: {(Array.isArray(session.targetLevels) && session.targetLevels.length ? session.targetLevels.join(', ') : session.level)} |{' '}
+          {session.isFree ? 'Gratuite' : `Prix: ${formatHTG(session.price)}`} | Places: {session.enrolledCount}/{session.maxParticipants}
         </p>
         {canManage ? (
           <p className="mt-1 text-xs text-brand-700">
@@ -594,14 +615,40 @@ export default function RattrapagePage() {
           {showPlanner || editingId ? (
             <form className="mt-3 grid gap-3 md:grid-cols-2" onSubmit={onSubmitForm}>
             <input className="input" placeholder="Titre" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} required />
-            <select className="input" value={form.level} onChange={(e) => setForm((p) => ({ ...p, level: e.target.value }))} required>
-              <option value="LEVEL_9E">9e</option>
-              <option value="NSI">NSI</option>
-              <option value="NSII">NSII</option>
-              <option value="NSIII">NSIII</option>
-              <option value="NSIV">NSIV</option>
-              <option value="UNIVERSITAIRE">Universitaire</option>
-            </select>
+            <div className="md:col-span-2 space-y-1">
+              <span className="text-sm font-medium text-brand-900">Classes concernées</span>
+              <div className="flex flex-wrap gap-2">
+                {LEVEL_CHOICES.map((entry) => (
+                  <label
+                    key={entry.value}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      Array.isArray(form.levels) && form.levels.includes(entry.value)
+                        ? 'border-brand-200 bg-brand-50 text-brand-800'
+                        : 'border-brand-100 bg-white text-brand-700'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={Array.isArray(form.levels) ? form.levels.includes(entry.value) : form.level === entry.value}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setForm((p) => {
+                          const prevLevels = Array.isArray(p.levels) && p.levels.length ? p.levels : [p.level || 'NSIV'];
+                          const next = new Set(prevLevels);
+                          if (checked) next.add(entry.value);
+                          else next.delete(entry.value);
+                          if (next.size === 0) next.add('NSIV');
+                          const nextLevels = Array.from(next.values());
+                          return { ...p, levels: nextLevels, level: nextLevels[0] || 'NSIV' };
+                        });
+                      }}
+                    />
+                    {entry.label}
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-brand-600">Tu peux sélectionner plusieurs classes (ex: NSIII + NSIV).</p>
+            </div>
             <input className="input" placeholder="Matière (ex: Physique)" value={form.subject} onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))} required />
             <input className="input" type="number" min={1} placeholder="Max participants" value={form.maxParticipants} onChange={(e) => setForm((p) => ({ ...p, maxParticipants: e.target.value }))} required />
             <label className="inline-flex items-center gap-2 text-sm text-brand-800">

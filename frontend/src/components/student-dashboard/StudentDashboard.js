@@ -61,16 +61,16 @@ export default function StudentDashboard({
     <section className="cockpit-shell space-y-4">
       <header className="cockpit-header">
         <div>
-          <p className="cockpit-kicker">AI Learning Cockpit</p>
+          <p className="cockpit-kicker">Cockpit d'apprentissage</p>
           <h1 className="cockpit-h1">Bienvenue, {student?.firstName || 'Eleve'}.</h1>
           <p className="cockpit-subtitle">
-            Vue temps reel: progression, recommandations et prochaine action.
+            Vue en temps réel: progression, recommandations et prochaine action.
           </p>
         </div>
         <div className="cockpit-metric">
-          <p className="text-xs font-semibold text-slate-200/70">Predicted success</p>
+          <p className="text-xs font-semibold text-slate-200/70">Préparation estimée</p>
           <p className="text-2xl font-black text-slate-50">{successProbability}%</p>
-          <p className="text-xs text-slate-200/70">Based on recent performance</p>
+          <p className="text-xs text-slate-200/70">Basé sur tes résultats récents</p>
         </div>
       </header>
 
@@ -100,10 +100,10 @@ export default function StudentDashboard({
       <section className="cockpit-glass rounded-3xl p-5">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <p className="cockpit-kicker">Student Tools</p>
-            <h2 className="cockpit-title-sm">Navigate faster</h2>
+            <p className="cockpit-kicker">Outils</p>
+            <h2 className="cockpit-title-sm">Aller plus vite</h2>
           </div>
-          <p className="text-xs font-semibold text-slate-200/70">Quick access</p>
+          <p className="text-xs font-semibold text-slate-200/70">Accès rapide</p>
         </div>
         <div className="mt-4">
           <StudentNavigation communityCount={communityCount} />
@@ -112,4 +112,3 @@ export default function StudentDashboard({
     </section>
   );
 }
-

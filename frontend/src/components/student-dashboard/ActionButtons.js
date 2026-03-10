@@ -27,19 +27,18 @@ export default function ActionButtons({ primaryCta }) {
     <section className="grid gap-3">
       <ActionCard
         href={primaryCta?.href || '/subjects'}
-        title={primaryCta?.label || 'Launch Study Session'}
-        desc="Demarre une session guidee par l IA."
+        title={primaryCta?.label || 'Démarrer une session'}
+        desc="Commence une session guidée et progresse étape par étape."
         icon="compass"
         tone="gold"
         primary
       />
       <div className="grid gap-3 sm:grid-cols-2">
-        <ActionCard href="/video-lessons" title="Digital Classroom" desc="Lecons video courtes et efficaces." icon="video" tone="cyan" />
-        <ActionCard href="/probable-exercises" title="Practice Exercises" desc="Examens passes organises par annee." icon="target" tone="mint" />
-        <ActionCard href="/subjects" title="Validated Quizzes" desc="Catalogue des rubriques et quiz." icon="quiz" tone="violet" />
-        <ActionCard href="/focus" title="Exam Simulator" desc="Mode focus + entrainement chronometre." icon="timer" tone="blue" />
+        <ActionCard href="/video-lessons" title="Classe numérique" desc="Leçons vidéo courtes et efficaces." icon="video" tone="cyan" />
+        <ActionCard href="/probable-exercises" title="Examens passés" desc="Annales organisées par année." icon="target" tone="mint" />
+        <ActionCard href="/subjects" title="Quiz & rubriques" desc="Catalogue des matières et quiz." icon="quiz" tone="violet" />
+        <ActionCard href="/focus" title="Mode focus" desc="Entraînement chronométré (bientôt)." icon="timer" tone="blue" />
       </div>
     </section>
   );
 }
-

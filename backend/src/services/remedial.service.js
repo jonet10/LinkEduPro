@@ -19,10 +19,10 @@ function decimal(value) {
 function toAcademicFromEducation(level) {
   if (!level) return null;
   if (level === 'LEVEL_9E' || level === '9e') return 'LEVEL_9E';
-  if (level === 'NS1') return 'NSI';
-  if (level === 'NS2') return 'NSII';
-  if (level === 'NS3') return 'NSIII';
-  if (level === 'TERMINALE' || level === 'NSIV') return 'NSIV';
+  if (level === 'NS1' || level === 'NSI') return 'NSI';
+  if (level === 'NS2' || level === 'NSII') return 'NSII';
+  if (level === 'NS3' || level === 'NSIII') return 'NSIII';
+  if (level === 'TERMINALE' || level === 'NS4' || level === 'NSIV') return 'NSIV';
   if (level === 'UNIVERSITE' || level === 'UNIVERSITAIRE' || level === 'Universitaire') return 'UNIVERSITAIRE';
   return null;
 }
@@ -45,10 +45,21 @@ function normalizeSessionPayload(input) {
     ? input.isFree
     : Number(input.price || 0) <= 0;
 
+  const requestedLevels = Array.isArray(input.levels) ? input.levels : [];
+  const normalizedLevels = [
+    ...requestedLevels,
+    ...(input.level ? [input.level] : [])
+  ]
+    .map((item) => toAcademicFromEducation(item))
+    .filter(Boolean);
+  const targetLevels = Array.from(new Set(normalizedLevels));
+  const primaryLevel = targetLevels[0] || toAcademicFromEducation(input.level) || 'NSIV';
+
   return {
     title: input.title?.trim(),
     description: input.description ? input.description.trim() : null,
-    level: input.level || 'NSIV',
+    level: primaryLevel,
+    targetLevels: targetLevels.length ? targetLevels : [primaryLevel],
     subject: input.subject?.trim(),
     isFree,
     price: isFree ? 0 : Number(input.price),
@@ -71,12 +82,16 @@ function isSessionExpired(session) {
 function mapSessionForResponse(session, enrollment, confirmedCount = 0) {
   const startsAt = session.startTime;
   const endsAt = new Date(new Date(session.startTime).getTime() + Number(session.duration || 0) * 60000);
+  const targetLevels = Array.isArray(session.targetLevels) && session.targetLevels.length
+    ? session.targetLevels
+    : (session.level ? [session.level] : []);
 
   return {
     id: session.id,
     title: session.title,
     description: session.description,
     level: session.level,
+    targetLevels,
     subject: session.subject,
     isFree: Boolean(session.isFree),
     price: Number(session.price || 0),
@@ -123,12 +138,21 @@ function buildStudentVisibilityFilter(student) {
 
   return {
     status: 'SCHEDULED',
-    level,
-    OR: [
-      { invitationScope: 'GLOBAL' },
+    AND: [
       {
-        invitationScope: 'SCHOOL',
-        targetSchool: student.school || null
+        OR: [
+          { level },
+          { targetLevels: { has: level } }
+        ]
+      },
+      {
+        OR: [
+          { invitationScope: 'GLOBAL' },
+          {
+            invitationScope: 'SCHOOL',
+            targetSchool: student.school || null
+          }
+        ]
       }
     ]
   };
@@ -160,8 +184,16 @@ async function syncSessionStatuses() {
 async function listSessions({ viewer, page = 1, pageSize = 20, level, subject }) {
   await syncSessionStatuses();
 
+  const normalizedLevel = level ? toAcademicFromEducation(level) : null;
   const whereBase = {
-    ...(level ? { level } : {}),
+    ...(normalizedLevel
+      ? {
+        OR: [
+          { level: normalizedLevel },
+          { targetLevels: { has: normalizedLevel } }
+        ]
+      }
+      : {}),
     ...(subject ? { subject: { contains: subject, mode: 'insensitive' } } : {})
   };
 
@@ -247,7 +279,11 @@ async function createSession({ actor, payload }) {
   if (!data.title || !data.subject || !data.meetingLink || !data.startTime || !data.duration) {
     return { ok: false, status: 400, message: 'Champs requis manquants.' };
   }
-  if (!['LEVEL_9E', 'NSI', 'NSII', 'NSIII', 'NSIV', 'UNIVERSITAIRE'].includes(data.level)) {
+  const allowedLevels = new Set(['LEVEL_9E', 'NSI', 'NSII', 'NSIII', 'NSIV', 'UNIVERSITAIRE']);
+  if (!allowedLevels.has(data.level) || !Array.isArray(data.targetLevels) || data.targetLevels.length === 0) {
+    return { ok: false, status: 400, message: 'Niveau invalide.' };
+  }
+  if (data.targetLevels.some((lv) => !allowedLevels.has(lv))) {
     return { ok: false, status: 400, message: 'Niveau invalide.' };
   }
   if (!Number.isFinite(data.duration) || data.duration < 15) {
@@ -287,6 +323,7 @@ async function createSession({ actor, payload }) {
       title: data.title,
       description: data.description,
       level: data.level,
+      targetLevels: data.targetLevels,
       subject: data.subject,
       isFree: data.isFree,
       price: decimal(data.price || 0),
@@ -314,7 +351,7 @@ async function createSession({ actor, payload }) {
         OR: [
           { role: 'TEACHER', school: data.targetSchool },
           { role: 'ADMIN' },
-          { role: 'STUDENT', school: data.targetSchool, studentProfile: { is: { level: data.level } } }
+          { role: 'STUDENT', school: data.targetSchool, studentProfile: { is: { level: { in: data.targetLevels } } } }
         ]
       };
     }
@@ -323,7 +360,7 @@ async function createSession({ actor, payload }) {
       OR: [
         { role: 'TEACHER' },
         { role: 'ADMIN' },
-        { role: 'STUDENT', studentProfile: { is: { level: data.level } } }
+        { role: 'STUDENT', studentProfile: { is: { level: { in: data.targetLevels } } } }
       ]
     };
   })();
@@ -372,10 +409,19 @@ async function updateSession({ actor, sessionId, payload }) {
   }
 
   const data = normalizeSessionPayload(payload);
+  if (payload.level !== undefined || payload.levels !== undefined) {
+    const allowedLevels = new Set(['LEVEL_9E', 'NSI', 'NSII', 'NSIII', 'NSIV', 'UNIVERSITAIRE']);
+    if (!allowedLevels.has(data.level) || !Array.isArray(data.targetLevels) || data.targetLevels.some((lv) => !allowedLevels.has(lv))) {
+      return { ok: false, status: 400, message: 'Niveau invalide.' };
+    }
+  }
   const updateData = {};
   if (payload.title !== undefined) updateData.title = data.title;
   if (payload.description !== undefined) updateData.description = data.description;
-  if (payload.level !== undefined) updateData.level = data.level;
+  if (payload.level !== undefined || payload.levels !== undefined) {
+    updateData.level = data.level;
+    updateData.targetLevels = data.targetLevels;
+  }
   if (payload.subject !== undefined) updateData.subject = data.subject;
   if (payload.isFree !== undefined || payload.price !== undefined) {
     updateData.isFree = data.isFree;
@@ -440,7 +486,11 @@ async function enrollStudent({ student, sessionId }) {
   }
 
   const studentLevel = getAcademicLevel(fullStudent);
-  if (!studentLevel || session.level !== studentLevel) {
+  const isLevelAllowed = studentLevel && (
+    session.level === studentLevel ||
+    (Array.isArray(session.targetLevels) && session.targetLevels.includes(studentLevel))
+  );
+  if (!isLevelAllowed) {
     return { ok: false, status: 403, message: 'Session non accessible pour ton niveau.' };
   }
   if (session.invitationScope === 'TEACHERS' || session.invitationScope === 'TEACHER') {

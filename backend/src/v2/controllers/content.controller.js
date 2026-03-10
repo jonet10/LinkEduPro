@@ -7,11 +7,15 @@ const STATUS_BY_ACTION = {
 };
 
 function toApiContent(content) {
+  const levels = Array.isArray(content.targetLevels) && content.targetLevels.length
+    ? content.targetLevels
+    : (content.level ? [content.level] : []);
   return {
     id: content.id,
     title: content.title,
     body: content.body,
     level: toApiLevel(content.level),
+    levels: levels.map(toApiLevel).filter(Boolean),
     type: content.type.toLowerCase(),
     status: content.status.toLowerCase(),
     teacherId: content.teacherId,
@@ -21,7 +25,15 @@ function toApiContent(content) {
 
 async function createContent(req, res, next) {
   try {
-    const level = normalizeLevelInput(req.body.level);
+    const requestedLevels = Array.isArray(req.body.levels) ? req.body.levels : [];
+    const normalizedLevels = [
+      ...requestedLevels,
+      ...(req.body.level ? [req.body.level] : [])
+    ]
+      .map((entry) => normalizeLevelInput(entry))
+      .filter(Boolean);
+    const uniqueLevels = Array.from(new Set(normalizedLevels));
+    const level = uniqueLevels[0] || normalizeLevelInput(req.body.level) || 'TERMINALE';
     const type = req.body.type.toUpperCase();
 
     let status = 'PENDING';
@@ -34,6 +46,7 @@ async function createContent(req, res, next) {
         title: req.body.title,
         body: req.body.body,
         level,
+        targetLevels: uniqueLevels,
         type,
         status,
         teacherId: req.user.id
@@ -73,8 +86,11 @@ async function listApprovedForMyLevel(req, res, next) {
 
     const contents = await prisma.content.findMany({
       where: {
-        level,
-        status: 'APPROVED'
+        status: 'APPROVED',
+        OR: [
+          { level },
+          { targetLevels: { has: level } }
+        ]
       },
       orderBy: { createdAt: 'desc' }
     });

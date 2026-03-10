@@ -52,6 +52,8 @@ function toProfile(student) {
     photoUrl: student.photoUrl,
     darkMode: student.darkMode,
     school: student.school,
+    teachingSchools: Array.isArray(student.teachingSchools) ? student.teachingSchools : [],
+    teachingSubjects: Array.isArray(student.teachingSubjects) ? student.teachingSubjects : [],
     gradeLevel: student.gradeLevel,
     lastLoginAt: student.lastLoginAt || null
   };
@@ -76,7 +78,7 @@ async function getMyProfile(req, res, next) {
 
 async function updateMyProfile(req, res, next) {
   try {
-    const { phone, email, address, school, gradeLevel, nsivTrack, password, level } = req.body;
+    const { phone, email, address, school, gradeLevel, teachingSchools, teachingSubjects, nsivTrack, password, level } = req.body;
 
     const existing = await prisma.student.findUnique({
       where: { id: req.user.id },
@@ -113,6 +115,24 @@ async function updateMyProfile(req, res, next) {
 
     if (gradeLevel !== undefined) {
       data.gradeLevel = gradeLevel || existing.gradeLevel;
+    }
+
+    if (teachingSchools !== undefined) {
+      if (existing.role !== 'TEACHER') {
+        return res.status(400).json({ message: 'Écoles enseignées réservées aux Professeurs.' });
+      }
+      data.teachingSchools = Array.isArray(teachingSchools)
+        ? teachingSchools.map((s) => String(s || '').trim()).filter(Boolean)
+        : [];
+    }
+
+    if (teachingSubjects !== undefined) {
+      if (existing.role !== 'TEACHER') {
+        return res.status(400).json({ message: 'Matières enseignées réservées aux Professeurs.' });
+      }
+      data.teachingSubjects = Array.isArray(teachingSubjects)
+        ? teachingSubjects.map((s) => String(s || '').trim()).filter(Boolean)
+        : [];
     }
 
     if (password !== undefined) {

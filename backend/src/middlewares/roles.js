@@ -4,11 +4,22 @@ function requireRoles(roles) {
       return res.status(401).json({ message: 'Authentification requise.' });
     }
 
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Permissions insuffisantes.' });
+    const normalizedRoles = Array.isArray(roles) ? roles : [];
+    const userRole = String(req.user.role || '').trim();
+    if (normalizedRoles.includes(userRole)) {
+      return next();
     }
 
-    return next();
+    // Support pseudo role SUPER_ADMIN (ADMIN + email match SUPER_ADMIN_EMAIL).
+    if (normalizedRoles.includes('SUPER_ADMIN')) {
+      const superAdminEmail = String(process.env.SUPER_ADMIN_EMAIL || '').trim();
+      if (userRole === 'ADMIN' && superAdminEmail && String(req.user.email || '').trim() === superAdminEmail) {
+        return next();
+      }
+    }
+
+    return res.status(403).json({ message: 'Permissions insuffisantes.' });
+
   };
 }
 

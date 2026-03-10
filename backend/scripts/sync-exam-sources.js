@@ -1,9 +1,11 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { PrismaClient } = require('@prisma/client');
 
-const prisma = new PrismaClient();
+const SKIP_DB = String(process.env.EXAMS_SKIP_DB || '').trim().toLowerCase() === 'true';
+const prisma = SKIP_DB ? null : new PrismaClient();
 
 const ROOT_EXAMS_DIR = path.resolve(
   __dirname,
@@ -38,6 +40,20 @@ function normalizeLevelFolder(folderName) {
   return LEVEL_MAP[key] || '';
 }
 
+function inferLevelFromFileName(fileName) {
+  const raw = normalizeNoAccent(fileName).toUpperCase();
+  if (!raw) return 'NSIV';
+
+  if (/\b9\s*E\b/.test(raw) || raw.includes('9E') || raw.includes('9EME')) return 'LEVEL_9E';
+  if (raw.includes('NSIII') || raw.includes('NS-3') || /\bNS\s*3\b/.test(raw)) return 'NSIII';
+  if (raw.includes('NSII') || raw.includes('NS-2') || /\bNS\s*2\b/.test(raw)) return 'NSII';
+  if (raw.includes('NSI') || raw.includes('NS-1') || /\bNS\s*1\b/.test(raw)) return 'NSI';
+  if (raw.includes('NSIV') || raw.includes('NS-4') || /\bNS\s*4\b/.test(raw) || raw.includes('TERMINALE')) return 'NSIV';
+  if (raw.includes('UNIVERSIT')) return 'UNIVERSITAIRE';
+
+  return 'NSIV';
+}
+
 function normalizeKey(value) {
   return normalizeNoAccent(value)
     .toLowerCase()
@@ -55,6 +71,33 @@ function parseFilterSet(raw) {
   return items.length ? new Set(items) : null;
 }
 
+const SUBJECT_KEYWORDS = [
+  { subject: 'Mathématiques', keys: ['math', 'mathem', 'algebre', 'geometrie', 'trigo', 'analyse'] },
+  { subject: 'Physique', keys: ['physique'] },
+  { subject: 'Chimie', keys: ['chimie'] },
+  { subject: 'Biologie', keys: ['biologie'] },
+  { subject: 'SVT', keys: ['svt'] },
+  { subject: 'Informatique', keys: ['informatique', 'info', 'programmation'] },
+  { subject: 'Anglais', keys: ['anglais', 'english'] },
+  { subject: 'Espagnol', keys: ['espagnol', 'espanol', 'spanish'] },
+  { subject: 'Français', keys: ['francais', 'français', 'franc'] },
+  { subject: 'Philosophie', keys: ['philosophie', 'philo'] },
+  { subject: 'Histoire-Géographie', keys: ['histoire', 'geo', 'geographie', 'géographie', 'hist'] },
+  { subject: 'Économie', keys: ['economie', 'économie'] },
+  { subject: 'Art & Musique', keys: ['art', 'musique'] }
+];
+
+function inferSubjectFromFileName(fileName) {
+  const normalized = normalizeNoAccent(fileName).toLowerCase();
+  for (const entry of SUBJECT_KEYWORDS) {
+    if (entry.keys.some((key) => normalized.includes(normalizeNoAccent(key).toLowerCase()))) {
+      return entry.subject;
+    }
+  }
+  const firstToken = normalizeNoAccent(fileName).split(' ').filter(Boolean)[0];
+  return firstToken ? formatSubjectName(firstToken) : 'General';
+}
+
 function formatSubjectName(value) {
   const clean = normalizeNoAccent(value);
   return clean || 'General';
@@ -70,7 +113,12 @@ function buildStableTargetName(level, subject, originalFileName) {
   const base = path.basename(originalFileName, ext);
   const safeBase = normalizeNoAccent(base).replace(/\s+/g, '_');
   const safeSubject = normalizeNoAccent(subject).replace(/\s+/g, '_');
-  return `${level}_${safeSubject}_${safeBase}${ext}`;
+  const rawName = `${level}_${safeSubject}_${safeBase}${ext}`;
+  // Keep deterministic names, but avoid Windows path length issues by trimming excessively long bases.
+  if (rawName.length <= 220) return rawName;
+  const hash = crypto.createHash('sha1').update(rawName).digest('hex').slice(0, 8);
+  const trimmedBase = safeBase.slice(0, 120);
+  return `${level}_${safeSubject}_${trimmedBase}_${hash}${ext}`;
 }
 
 function walkFilesRecursive(rootDir) {
@@ -125,6 +173,7 @@ async function uploadPdfIfEnabled({ filePath, targetName }) {
 }
 
 async function upsertSource({ level, subject, topic, fileName }) {
+  if (SKIP_DB) return false;
   await prisma.probable_exercise_sources.upsert({
     where: {
       subject_topic_file_name_level: {
@@ -142,6 +191,7 @@ async function upsertSource({ level, subject, topic, fileName }) {
       file_name: fileName
     }
   });
+  return true;
 }
 
 async function main() {
@@ -152,7 +202,14 @@ async function main() {
     fs.mkdirSync(TARGET_PDF_DIR, { recursive: true });
   }
 
+  if (SKIP_DB) {
+    console.log('Mode EXAMS_SKIP_DB=true: copie PDF uniquement (pas de mise à jour DB).');
+  }
+
   const levelDirs = fs.readdirSync(ROOT_EXAMS_DIR, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+  const rootPdfFiles = fs.readdirSync(ROOT_EXAMS_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && /\.pdf$/i.test(entry.name))
+    .map((entry) => path.join(ROOT_EXAMS_DIR, entry.name));
   const levelFilter = parseFilterSet(process.env.EXAMS_LEVEL_FILTER);
   const subjectFilter = parseFilterSet(process.env.EXAMS_SUBJECT_FILTER);
   let scanned = 0;
@@ -202,20 +259,55 @@ async function main() {
       const didUpload = await uploadPdfIfEnabled({ filePath, targetName });
       if (didUpload) uploaded += 1;
 
-      await upsertSource({
+      const didUpsert = await upsertSource({
         level,
         subject,
         topic: formatTopicFromFileName(originalFileName),
         fileName: targetName
       });
-      linked += 1;
+      if (didUpsert) linked += 1;
     }
+  }
+
+  // Also ingest PDFs placed directly under the EXAMENS root.
+  for (const filePath of rootPdfFiles) {
+    scanned += 1;
+    const originalFileName = path.basename(filePath);
+    const level = inferLevelFromFileName(originalFileName);
+    if (levelFilter && !levelFilter.has(normalizeKey(level))) {
+      continue;
+    }
+
+    const subject = inferSubjectFromFileName(originalFileName);
+    if (subjectFilter && !subjectFilter.has(normalizeKey(subject))) {
+      ignoredByFilter += 1;
+      continue;
+    }
+
+    const targetName = buildStableTargetName(level, subject, originalFileName);
+    const targetPath = path.join(TARGET_PDF_DIR, targetName);
+
+    if (!fs.existsSync(targetPath)) {
+      fs.copyFileSync(filePath, targetPath);
+      copied += 1;
+    }
+
+    const didUpload = await uploadPdfIfEnabled({ filePath, targetName });
+    if (didUpload) uploaded += 1;
+
+    const didUpsert = await upsertSource({
+      level,
+      subject,
+      topic: formatTopicFromFileName(originalFileName),
+      fileName: targetName
+    });
+    if (didUpsert) linked += 1;
   }
 
   console.log(`EXAMENS scannes: ${scanned}`);
   console.log(`PDF copies vers backend/exam-pdfs: ${copied}`);
   console.log(`PDF uploades vers storage: ${uploaded}`);
-  console.log(`Sources liees (probable_exercise_sources): ${linked}`);
+  console.log(`Sources liees (probable_exercise_sources): ${linked}${SKIP_DB ? ' (SKIP_DB)' : ''}`);
   console.log(`PDF ignores par filtre: ${ignoredByFilter}`);
 }
 
@@ -225,5 +317,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    if (prisma) await prisma.$disconnect();
   });

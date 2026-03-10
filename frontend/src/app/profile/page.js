@@ -66,7 +66,9 @@ export default function ProfilePage() {
     department: '',
     commune: '',
     schoolInput: '',
-    schoolFromList: ''
+    schoolFromList: '',
+    teachingSchoolsText: '',
+    teachingSubjectsText: ''
   });
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
@@ -101,7 +103,9 @@ export default function ProfilePage() {
           department: parsedSchool.department,
           commune: parsedSchool.commune,
           schoolInput: hasSuggestedMatch ? '' : parsedSchool.schoolInput,
-          schoolFromList: hasSuggestedMatch ? parsedSchool.schoolInput : ''
+          schoolFromList: hasSuggestedMatch ? parsedSchool.schoolInput : '',
+          teachingSchoolsText: Array.isArray(p.teachingSchools) ? p.teachingSchools.join('\n') : '',
+          teachingSubjectsText: Array.isArray(p.teachingSubjects) ? p.teachingSubjects.join('\n') : ''
         });
       })
       .catch((e) => setError(e.message || 'Erreur de chargement du profil'))
@@ -189,6 +193,13 @@ export default function ProfilePage() {
     }
   }
 
+  function parseMultiValue(text) {
+    return String(text || '')
+      .split(/[\n,]+/g)
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+  }
+
   async function onSaveProfile() {
     const token = getToken();
     if (!token) return;
@@ -223,6 +234,10 @@ export default function ProfilePage() {
       if (profile.role === 'STUDENT' && form.level) {
         payload.level = form.level;
       }
+      if (profile.role === 'TEACHER') {
+        payload.teachingSchools = parseMultiValue(form.teachingSchoolsText);
+        payload.teachingSubjects = parseMultiValue(form.teachingSubjectsText);
+      }
 
       if (form.password.trim()) {
         payload.password = form.password;
@@ -249,7 +264,9 @@ export default function ProfilePage() {
           photoUrl: data.profile.photoUrl,
           school: data.profile.school,
           gradeLevel: data.profile.gradeLevel,
-          nsivTrack: data.profile.nsivTrack
+          nsivTrack: data.profile.nsivTrack,
+          teachingSchools: data.profile.teachingSchools,
+          teachingSubjects: data.profile.teachingSubjects
         });
       }
 
@@ -278,7 +295,9 @@ export default function ProfilePage() {
       department: parsedSchool.department,
       commune: parsedSchool.commune,
       schoolInput: hasSuggestedMatch ? '' : parsedSchool.schoolInput,
-      schoolFromList: hasSuggestedMatch ? parsedSchool.schoolInput : ''
+      schoolFromList: hasSuggestedMatch ? parsedSchool.schoolInput : '',
+      teachingSchoolsText: Array.isArray(profile.teachingSchools) ? profile.teachingSchools.join('\n') : '',
+      teachingSubjectsText: Array.isArray(profile.teachingSubjects) ? profile.teachingSubjects.join('\n') : ''
     });
     setSelectedPhoto(null);
     setPhotoPreview('');
@@ -398,6 +417,30 @@ export default function ProfilePage() {
               placeholder="Saisis le nom de ton École si elle n'est pas listée"
             />
           </div>
+          {profile.role === 'TEACHER' ? (
+            <>
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-sm font-medium">Écoles où j'enseigne (une par ligne)</label>
+                <textarea
+                  className="input min-h-[90px]"
+                  value={form.teachingSchoolsText}
+                  onChange={(e) => onChangeField('teachingSchoolsText', e.target.value)}
+                  disabled={!editMode}
+                  placeholder={"Ex:\nLycée A\nCollège B"}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-sm font-medium">Matières enseignées (une par ligne)</label>
+                <textarea
+                  className="input min-h-[90px]"
+                  value={form.teachingSubjectsText}
+                  onChange={(e) => onChangeField('teachingSubjectsText', e.target.value)}
+                  disabled={!editMode}
+                  placeholder={"Ex:\nMathématiques\nPhysique"}
+                />
+              </div>
+            </>
+          ) : null}
           <div className="sm:col-span-2">
             <label className="mb-1 block text-sm font-medium">Nouveau mot de passe</label>
             <input

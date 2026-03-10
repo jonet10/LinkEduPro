@@ -1,4 +1,4 @@
-# Scripts de Déploiement LinkEduPro
+j# Scripts de Déploiement LinkEduPro
 
 Automátatisez vos commits et pushes git.
 

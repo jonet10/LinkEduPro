@@ -61,6 +61,40 @@ function topicKey(subject, topic) {
   return `${String(subject || '').trim().toLowerCase()}::${String(topic || '').trim().toLowerCase()}`;
 }
 
+function inferProbableSourcesFromDisk(level) {
+  const inferred = [];
+  const candidates = [
+    path.resolve(__dirname, '../../exam-pdfs'),
+    process.env.STORAGE_ROOT ? path.resolve(String(process.env.STORAGE_ROOT).trim(), 'exam-pdfs') : null
+  ].filter(Boolean);
+
+  for (const dir of candidates) {
+    try {
+      if (!fs.existsSync(dir)) continue;
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isFile() || !/\.pdf$/i.test(entry.name)) continue;
+        const name = String(entry.name || '').trim();
+        if (!name) continue;
+        const prefix = `${level}_`;
+        if (!name.startsWith(prefix)) continue;
+        const rest = name.slice(prefix.length);
+        const withoutExt = rest.replace(/\.pdf$/i, '');
+        const firstUnderscore = withoutExt.indexOf('_');
+        const rawSubject = firstUnderscore >= 0 ? withoutExt.slice(0, firstUnderscore) : 'General';
+        const rawTopic = firstUnderscore >= 0 ? withoutExt.slice(firstUnderscore + 1) : withoutExt;
+        const subject = rawSubject.replace(/_+/g, ' ').trim() || 'General';
+        const topic = rawTopic.replace(/_+/g, ' ').trim() || 'Sujet';
+        inferred.push({ subject, topic, fileName: name });
+      }
+    } catch (_) {
+      // Best-effort fallback only.
+    }
+  }
+
+  return inferred;
+}
+
 const EDUCATION_TO_ACADEMIC = {
   LEVEL_9E: 'LEVEL_9E',
   NS1: 'NSI',
@@ -241,7 +275,11 @@ async function listProbableExercises(req, res, next) {
         `
       );
     } catch (_) {
-      sourceRows = [];
+      sourceRows = inferProbableSourcesFromDisk(targetLevel);
+    }
+
+    if (!sourceRows.length) {
+      sourceRows = inferProbableSourcesFromDisk(targetLevel);
     }
 
     const likeMap = new Map();
@@ -278,7 +316,7 @@ async function listProbableExercises(req, res, next) {
       if (!sourcesMap.has(key)) sourcesMap.set(key, []);
       sourcesMap.get(key).push({
         fileName: row.fileName,
-        url: `/public/exam-pdfs/${encodeURIComponent(row.fileName)}`
+        url: `/api/public/exam-pdfs/${encodeURIComponent(row.fileName)}`
       });
     }
 
@@ -367,6 +405,8 @@ async function streamExamPdf(req, res, next) {
     const candidateDirs = [
       // Exam PDFs packaged inside backend repository (works for monorepo and backend-only repo)
       path.resolve(__dirname, '../../exam-pdfs'),
+      // Monorepo root EXAMENS folder (new uploads are sometimes dropped here before syncing)
+      path.resolve(__dirname, '../../../EXAMENS'),
       // Existing local folders (development repository)
       path.resolve(__dirname, '../../../Examen Physiques'),
       path.resolve(__dirname, '../../../Documents/Chimie'),
