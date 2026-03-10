@@ -128,6 +128,17 @@ const SUBJECT_ALIASES = {
   'svt': 'SVT'
 };
 
+function parseRequestedSubjects() {
+  const raw = String(process.env.NSIV_SUBJECT_FILTER || '').trim();
+  if (!raw) return null;
+  const values = raw
+    .split(',')
+    .map((item) => normalize(item))
+    .map((item) => toKey(item))
+    .filter(Boolean);
+  return values.length ? new Set(values) : null;
+}
+
 function normalize(value) {
   return String(value || '')
     .normalize('NFD')
@@ -602,7 +613,15 @@ function buildPack() {
     throw new Error(`Dossier NSIV introuvable: ${ROOT_NSIV_DIR}`);
   }
 
-  const subjectDirs = fs.readdirSync(ROOT_NSIV_DIR, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+  const requestedSubjects = parseRequestedSubjects();
+  let subjectDirs = fs.readdirSync(ROOT_NSIV_DIR, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+  if (requestedSubjects) {
+    subjectDirs = subjectDirs.filter((entry) => {
+      const folderKey = toKey(entry.name);
+      const labelKey = toKey(toSubjectLabel(entry.name));
+      return requestedSubjects.has(folderKey) || requestedSubjects.has(labelKey);
+    });
+  }
   const subjects = [];
   const auditRows = [];
 
@@ -697,6 +716,7 @@ function buildPack() {
   return {
     generatedAt: new Date().toISOString(),
     sourceRoot: ROOT_NSIV_DIR,
+    requestedSubjects: requestedSubjects ? Array.from(requestedSubjects.values()) : [],
     subjectCount: pack.length,
     questionCount: pack.reduce((sum, s) => sum + s.questions.length, 0),
     pack,

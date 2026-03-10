@@ -7,6 +7,26 @@ const prisma = new PrismaClient();
 const INPUT_FILE = path.resolve(__dirname, '../data/generated-nsiv-topic-quizzes.json');
 const LEGACY_PROMPT_PREFIX = 'Dans les annales NSIV, le theme "';
 
+function normalizeKey(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function parseRequestedSubjects() {
+  const raw = String(process.env.NSIV_SUBJECT_FILTER || '').trim();
+  if (!raw) return null;
+  const values = raw
+    .split(',')
+    .map((item) => normalizeKey(item))
+    .filter(Boolean);
+  return values.length ? new Set(values) : null;
+}
+
 function normalizeQuestionData(question) {
   const options = Array.isArray(question.options)
     ? question.options.map((opt) => String(opt || '').trim()).filter(Boolean)
@@ -33,7 +53,12 @@ async function main() {
   }
 
   const raw = JSON.parse(fs.readFileSync(INPUT_FILE, 'utf8'));
-  const packs = Array.isArray(raw) ? raw : [];
+  const requestedSubjects = parseRequestedSubjects();
+  const packs = (Array.isArray(raw) ? raw : []).filter((pack) => {
+    if (!requestedSubjects) return true;
+    const key = normalizeKey(pack?.name);
+    return requestedSubjects.has(key);
+  });
   let createdSubjects = 0;
   let createdQuestions = 0;
   let updatedQuestions = 0;
@@ -100,6 +125,9 @@ async function main() {
   }
 
   console.log(`Sujets crees: ${createdSubjects}`);
+  if (requestedSubjects) {
+    console.log(`Filtre sujets actif: ${Array.from(requestedSubjects.values()).join(', ')}`);
+  }
   console.log(`Anciennes questions NSIV supprimees: ${deletedLegacyQuestions}`);
   console.log(`Questions ajoutees: ${createdQuestions}`);
   console.log(`Questions mises a jour: ${updatedQuestions}`);
