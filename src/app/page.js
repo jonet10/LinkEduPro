@@ -351,6 +351,7 @@ export default function HomePage() {
       return [
         { href: '/admin/super-dashboard', title: 'Supervision globale', desc: 'Suivre les Élèves, Écoles et activités.', icon: 'chart' },
         { href: '/school-management/dashboard', title: 'Gestion scolaire', desc: 'Piloter classes, Élèves et paiements.', icon: 'school' },
+        { href: '/teacher/exams', title: 'Examens passés', desc: 'Ajouter des PDF (annales, sujets, modèles).', icon: 'target' },
         { href: '/messages', title: 'Communication', desc: 'Publier annonces et Gérer les messages.', icon: 'message' },
         { href: '/blog', title: 'Contenus communauté', desc: 'Valider et organiser les publications.', icon: 'collection' }
       ];
@@ -359,6 +360,7 @@ export default function HomePage() {
     return [
       { href: '/blog', title: 'Publications pédagogiques', desc: 'Poster supports, conseils et ressources.', icon: 'write' },
       { href: '/rattrapage', title: 'Sessions rattrapage', desc: 'Programmer et suivre les sessions live.', icon: 'video' },
+      { href: '/teacher/exams', title: 'Examens passés', desc: 'Ajouter des PDF pour les élèves.', icon: 'target' },
       { href: '/messages', title: 'Messagerie', desc: 'Répondre aux Élèves et diffuser des annonces.', icon: 'mail' },
       { href: '/library', title: 'Ressources', desc: 'Partager des PDF et références utiles.', icon: 'library' }
     ];

@@ -7,7 +7,7 @@ function buildNodes(subjectStats, fallbackTrack) {
   const rows = Array.isArray(subjectStats) ? subjectStats : [];
   if (!rows.length) {
     return [
-      { subject: 'Math', score: 55 },
+      { subject: 'Mathématiques', score: 55 },
       { subject: 'Physique', score: 60 },
       { subject: 'SVT', score: 50 },
       { subject: 'Philosophie', score: 48 },
@@ -62,16 +62,16 @@ export default function SubjectGalaxy({
   }, [nodes]);
 
   return (
-    <section className="cockpit-glass relative overflow-hidden rounded-3xl p-5" aria-label="Learning Universe">
+    <section className="cockpit-glass relative overflow-hidden rounded-3xl p-5" aria-label="Univers d'apprentissage">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="cockpit-kicker">Learning Universe</p>
-          <h2 className="cockpit-title">Knowledge Galaxy</h2>
-          <p className="cockpit-subtitle">Clique une matiere pour ouvrir tes rubriques et quiz.</p>
+          <p className="cockpit-kicker">Univers d'apprentissage</p>
+          <h2 className="cockpit-title">Galaxie des matières</h2>
+          <p className="cockpit-subtitle">Clique une matière pour ouvrir tes rubriques et quiz.</p>
         </div>
         <div className="text-right">
-          <p className="text-xs font-semibold text-slate-200/70">Prediction</p>
-          <p className="text-sm font-bold text-slate-100">{successProbability}% BAC Ready</p>
+          <p className="text-xs font-semibold text-slate-200/70">Préparation</p>
+          <p className="text-sm font-bold text-slate-100">{successProbability}%</p>
         </div>
       </div>
 
@@ -81,13 +81,13 @@ export default function SubjectGalaxy({
         <button
           type="button"
           className="galaxy-core absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          onClick={() => onOpenSubject?.('Knowledge-cible')}
-          aria-label="Ouvrir Knowledge-cible"
+          onClick={() => onOpenSubject?.('Tableau de bord')}
+          aria-label="Ouvrir le tableau de bord"
         >
           <div className="galaxy-core-inner">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-200/70">Knowledge-cible</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-200/70">Progression</p>
             <p className="mt-1 text-3xl font-black text-slate-50">{toPercent(overallPercent, 0)}%</p>
-            <p className="mt-1 text-xs font-semibold text-slate-200/70">Global progress</p>
+            <p className="mt-1 text-xs font-semibold text-slate-200/70">Global</p>
           </div>
         </button>
 
@@ -118,9 +118,9 @@ export default function SubjectGalaxy({
         {hovered ? (
           <div className="galaxy-tooltip" role="status" aria-live="polite">
             <p className="text-xs font-semibold text-slate-200/70">{hovered.subject}</p>
-            <p className="mt-1 text-sm font-bold text-slate-50">{toPercent(hovered.score, 0)}% • Mastery {hovered.mastery.label}</p>
+            <p className="mt-1 text-sm font-bold text-slate-50">{toPercent(hovered.score, 0)}% • Maîtrise {hovered.mastery.label}</p>
             {Number(hovered.attempts || 0) > 0 ? (
-              <p className="mt-1 text-xs text-slate-200/70">{hovered.attempts} tentative(s) recente(s)</p>
+              <p className="mt-1 text-xs text-slate-200/70">{hovered.attempts} tentative(s) récente(s)</p>
             ) : (
               <p className="mt-1 text-xs text-slate-200/70">Clique pour explorer</p>
             )}
@@ -130,4 +130,3 @@ export default function SubjectGalaxy({
     </section>
   );
 }
-

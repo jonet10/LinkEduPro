@@ -101,6 +101,15 @@ function parseVideoBody(rawBody) {
 
 function mapContentToVideo(item) {
   const body = parseVideoBody(item?.body);
+  const rawLevels = Array.isArray(item?.levels) ? item.levels : [];
+  const levels = rawLevels.length
+    ? rawLevels.map((lv) => toApiLevel(lv)).filter(Boolean)
+    : [toApiLevel(item?.level)].filter(Boolean);
+  const classLabel = levels.length
+    ? levels
+      .map((lv) => CLASS_OPTIONS.find((entry) => entry.value === lv)?.label || lv)
+      .join(' + ')
+    : (CLASS_OPTIONS.find((entry) => entry.value === toApiLevel(item?.level))?.label || toApiLevel(item?.level));
   return {
     id: item?.id,
     title: item?.title || 'Sans titre',
@@ -110,7 +119,8 @@ function mapContentToVideo(item) {
     isPaid: body.isPaid,
     price: Math.max(0, Number(body.price || 0)),
     level: toApiLevel(item?.level),
-    classLabel: CLASS_OPTIONS.find((entry) => entry.value === toApiLevel(item?.level))?.label || toApiLevel(item?.level),
+    levels,
+    classLabel,
     status: String(item?.status || 'pending').toUpperCase(),
     createdAt: item?.createdAt || null
   };
@@ -194,6 +204,7 @@ export default function VideoLessonsPage() {
     price: '',
     videoUrl: '',
     level: 'Terminale',
+    levels: ['Terminale'],
     publishNow: false
   });
 
@@ -207,7 +218,7 @@ export default function VideoLessonsPage() {
     const fallbackLevel = toApiLevel(normalizeAcademicLevel(currentStudent) || currentStudent?.level);
     setToken(currentToken);
     setStudent(currentStudent);
-    setForm((prev) => ({ ...prev, level: fallbackLevel }));
+    setForm((prev) => ({ ...prev, level: fallbackLevel, levels: [fallbackLevel] }));
     setReady(true);
   }, [router]);
 
@@ -262,7 +273,9 @@ export default function VideoLessonsPage() {
       next = next.filter((item) => item.status === statusFilter);
     }
     if (classFilter !== 'ALL') {
-      next = next.filter((item) => item.level === classFilter);
+      next = next.filter((item) => (
+        Array.isArray(item.levels) ? item.levels.includes(classFilter) : item.level === classFilter
+      ));
     }
     return next;
   }, [filter, statusFilter, classFilter, videos]);
@@ -321,8 +334,17 @@ export default function VideoLessonsPage() {
     }
 
     try {
+      const selectedLevelsRaw = Array.isArray(form.levels) && form.levels.length ? form.levels : [form.level];
+      const selectedLevels = Array.from(new Set(selectedLevelsRaw.map((lv) => toApiLevel(lv)).filter(Boolean)));
+      if (!selectedLevels.length) {
+        setSubmitting(false);
+        setError('Choisis au moins une classe.');
+        return;
+      }
+
       const basePayload = {
-        level: toApiLevel(form.level),
+        level: selectedLevels[0],
+        levels: selectedLevels,
         type: 'video'
       };
       const shouldPublishNow = student?.role === 'ADMIN' && form.publishNow;
@@ -478,14 +500,40 @@ export default function VideoLessonsPage() {
               </select>
             </label>
 
-            <label className="space-y-1">
-              <span className="text-sm font-medium text-brand-900">Niveau académique concerné</span>
-              <select className="input w-full" value={form.level} onChange={(e) => onChangeField('level', e.target.value)}>
-                {CLASS_OPTIONS.map((level) => (
-                  <option key={level.value} value={level.value}>{level.label}</option>
+            <div className="space-y-1 md:col-span-2">
+              <span className="text-sm font-medium text-brand-900">Classes concernées</span>
+              <div className="flex flex-wrap gap-2">
+                {CLASS_OPTIONS.map((entry) => (
+                  <label
+                    key={entry.value}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      Array.isArray(form.levels) && form.levels.includes(entry.value)
+                        ? 'border-brand-200 bg-brand-50 text-brand-800'
+                        : 'border-brand-100 bg-white text-brand-700'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={Array.isArray(form.levels) ? form.levels.includes(entry.value) : form.level === entry.value}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setForm((prev) => {
+                          const prevLevels = Array.isArray(prev.levels) && prev.levels.length ? prev.levels : [prev.level || 'Terminale'];
+                          const next = new Set(prevLevels);
+                          if (checked) next.add(entry.value);
+                          else next.delete(entry.value);
+                          if (next.size === 0) next.add('Terminale');
+                          const nextLevels = Array.from(next.values());
+                          return { ...prev, levels: nextLevels, level: nextLevels[0] || 'Terminale' };
+                        });
+                      }}
+                    />
+                    {entry.label}
+                  </label>
                 ))}
-              </select>
-            </label>
+              </div>
+              <p className="text-xs text-brand-600">Sélection multiple possible (ex: NSI + NSII).</p>
+            </div>
 
             <label className="space-y-1 md:col-span-2">
               <span className="text-sm font-medium text-brand-900">Description</span>

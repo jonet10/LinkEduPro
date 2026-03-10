@@ -47,10 +47,10 @@ function pickWeakSubjects(subjectStats) {
 function recommendFromWeak(weak) {
   return weak.map((row) => {
     const normalized = normalizeText(row.subject).toLowerCase();
-    if (normalized.includes('phys') || normalized.includes('chim')) return { title: `Serie de calcul: ${row.subject}`, hint: '20 min + 1 correction' };
+    if (normalized.includes('phys') || normalized.includes('chim')) return { title: `Série de calcul: ${row.subject}`, hint: '20 min + 1 correction' };
     if (normalized.includes('math')) return { title: `Exercices rapides: ${row.subject}`, hint: '15 min + 5 questions' };
-    if (normalized.includes('philo')) return { title: `Notions cle: ${row.subject}`, hint: '1 fiche + 1 mini quiz' };
-    return { title: `Revision guidee: ${row.subject}`, hint: '1 quiz + 1 correction' };
+    if (normalized.includes('philo')) return { title: `Notions clés: ${row.subject}`, hint: '1 fiche + 1 mini-quiz' };
+    return { title: `Révision guidée: ${row.subject}`, hint: '1 quiz + 1 correction' };
   });
 }
 
@@ -60,18 +60,18 @@ export default function LearningAnalytics({ subjectStats, recentAttempts }) {
   const recs = useMemo(() => recommendFromWeak(weak), [weak]);
 
   return (
-    <section className="cockpit-glass rounded-3xl p-5" aria-label="Smart Analytics">
+    <section className="cockpit-glass rounded-3xl p-5" aria-label="Analytique élève">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="cockpit-kicker">Smart Analytics</p>
-          <h3 className="cockpit-title-sm">Performance Insights</h3>
+          <p className="cockpit-kicker">Analytique</p>
+          <h3 className="cockpit-title-sm">Aperçu de performance</h3>
         </div>
         <p className="text-xs font-semibold text-slate-200/70">7 jours</p>
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-200/70">Weekly activity</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-200/70">Activité hebdomadaire</p>
           <div className="mt-3 flex items-end justify-between gap-2">
             {bars.map((bar) => (
               <div key={bar.key} className="flex flex-1 flex-col items-center gap-2">
@@ -89,7 +89,7 @@ export default function LearningAnalytics({ subjectStats, recentAttempts }) {
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-200/70">Weak subjects</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-200/70">Matières à renforcer</p>
           {weak.length ? (
             <div className="mt-3 space-y-3">
               {weak.map((row) => {
@@ -98,7 +98,7 @@ export default function LearningAnalytics({ subjectStats, recentAttempts }) {
                   <div key={row.subject} className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-bold text-slate-50">{row.subject}</p>
-                      <p className="text-[11px] text-slate-200/70">Mastery {mastery.label}</p>
+                      <p className="text-[11px] text-slate-200/70">Maîtrise {mastery.label}</p>
                     </div>
                     <p className="text-sm font-black text-slate-50">{row.score}%</p>
                   </div>
@@ -106,12 +106,12 @@ export default function LearningAnalytics({ subjectStats, recentAttempts }) {
               })}
             </div>
           ) : (
-            <p className="mt-3 text-sm text-slate-200/70">Pas assez de donnees. Lance 2 quiz pour activer l analyse.</p>
+            <p className="mt-3 text-sm text-slate-200/70">Pas assez de données. Lance 2 quiz pour activer l'analyse.</p>
           )}
 
           {recs.length ? (
             <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-200/70">Recommended next</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-200/70">Prochaine action</p>
               <ul className="mt-2 space-y-2">
                 {recs.slice(0, 3).map((row) => (
                   <li key={row.title} className="text-xs text-slate-100">
@@ -127,4 +127,3 @@ export default function LearningAnalytics({ subjectStats, recentAttempts }) {
     </section>
   );
 }
-

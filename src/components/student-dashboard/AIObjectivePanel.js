@@ -14,9 +14,9 @@ function computeXp(progress) {
 
 function badgesFrom(progressPercent, xp) {
   const out = [];
-  if (xp >= 600) out.push({ label: 'Quiz Master', tone: 'violet' });
-  if (progressPercent >= 75) out.push({ label: 'BAC Ready', tone: 'mint' });
-  if (xp >= 300) out.push({ label: 'Science Explorer', tone: 'cyan' });
+  if (xp >= 600) out.push({ label: 'Maître des quiz', tone: 'violet' });
+  if (progressPercent >= 75) out.push({ label: 'Prêt pour le Bac', tone: 'mint' });
+  if (xp >= 300) out.push({ label: 'Explorateur', tone: 'cyan' });
   return out.slice(0, 3);
 }
 
@@ -34,7 +34,7 @@ export default function AIObjectivePanel({
 
   const objective = dailyObjective || {
     title: 'Objectif du jour',
-    description: 'Complete 1 serie puis revise 20 minutes.',
+    description: 'Fais 1 série de quiz puis révise 20 minutes.',
     ctaLabel: 'Commencer',
     ctaHref: '/subjects'
   };
@@ -47,13 +47,13 @@ export default function AIObjectivePanel({
   }, [overallPercent]);
 
   return (
-    <aside className="cockpit-glass rounded-3xl p-5" aria-label="AI Learning Assistant">
+    <aside className="cockpit-glass rounded-3xl p-5" aria-label="Assistant IA">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="cockpit-avatar" aria-hidden="true">{makeInitials(student)}</div>
           <div>
             <p className="text-sm font-black text-slate-50">{student?.firstName || 'Eleve'} {student?.lastName || ''}</p>
-            <p className="mt-1 text-xs text-slate-200/70">Track: {trackLabel || 'General'} · Streak: {streak} jour(s)</p>
+            <p className="mt-1 text-xs text-slate-200/70">Filière: {trackLabel || 'Général'} · Série: {streak} jour(s)</p>
           </div>
         </div>
         <div className="text-right">
@@ -63,11 +63,13 @@ export default function AIObjectivePanel({
       </div>
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-200/70">Smart coach</p>
-        <p className="mt-2 text-sm font-bold text-slate-50">Great progress {student?.firstName || ''}! You are {success}% ready for the BAC.</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-200/70">Coach intelligent</p>
+        <p className="mt-2 text-sm font-bold text-slate-50">
+          Beau progrès {student?.firstName || ''} — préparation estimée: {success}%.
+        </p>
         <div className="mt-3">
           <div className="flex items-center justify-between text-[11px] font-semibold text-slate-200/70">
-            <span>Global progress</span>
+            <span>Progression globale</span>
             <span>{toPercent(overallPercent, 0)}%</span>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-black/30">
@@ -85,11 +87,11 @@ export default function AIObjectivePanel({
       </div>
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-200/70">AI Objective System</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-200/70">Objectif IA</p>
         <p className="mt-2 text-sm font-black text-slate-50">{objective.title}</p>
         <p className="mt-2 text-sm text-slate-200/80">{objective.description}</p>
         <div className="mt-3 flex items-center justify-between text-[11px] font-semibold text-slate-200/70">
-          <span>Estimated time</span>
+          <span>Temps estimé</span>
           <span>{formatMinutes(eta)}</span>
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-black/30">
@@ -103,4 +105,3 @@ export default function AIObjectivePanel({
     </aside>
   );
 }
-
