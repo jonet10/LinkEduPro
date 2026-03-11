@@ -82,7 +82,7 @@ async function listApprovedForMyLevel(req, res, next) {
 
     const level = resolveStudentLevel(student);
     if (!level) {
-      return res.status(400).json({ message: 'Niveau utilisateur non defini.' });
+      return res.status(400).json({ message: 'Niveau utilisateur non défini.' });
     }
 
     const contents = await prisma.content.findMany({

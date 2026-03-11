@@ -341,7 +341,7 @@ export default function HomePage() {
   }, [myRanking?.average, progress?.overview?.averageScore]);
   const studentTrackLabel = useMemo(() => {
     const track = String(student?.nsivTrack || '').trim().toUpperCase();
-    if (!track) return 'General';
+    if (!track) return 'Général';
     return track;
   }, [student?.nsivTrack]);
 
@@ -352,7 +352,7 @@ export default function HomePage() {
         { href: '/admin/super-dashboard', title: 'Supervision globale', desc: 'Suivre les Élèves, Écoles et activités.', icon: 'chart' },
         { href: '/school-management/dashboard', title: 'Gestion scolaire', desc: 'Piloter classes, Élèves et paiements.', icon: 'school' },
         { href: '/teacher/exams', title: 'Examens passés', desc: 'Ajouter des PDF (annales, sujets, modèles).', icon: 'target' },
-        { href: '/messages', title: 'Communication', desc: 'Publier annonces et Gérer les messages.', icon: 'message' },
+        { href: '/messages', title: 'Communication', desc: 'Publier des annonces et gérer les messages.', icon: 'message' },
         { href: '/blog', title: 'Contenus communauté', desc: 'Valider et organiser les publications.', icon: 'collection' }
       ];
     }

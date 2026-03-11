@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
+import { OFFICIAL_9E_EXAM_SUBJECTS, getExamSubjectSuggestions } from '@/lib/exam-subjects';
 
 const LEVEL_OPTIONS = [
   { value: '9e', label: '9e AF' },
@@ -41,7 +42,11 @@ export default function TeacherExamsPage() {
     setReady(true);
   }, []);
 
-  const canManage = useMemo(() => ['TEACHER', 'ADMIN'].includes(student?.role), [student?.role]);
+  const canManage = useMemo(() => ['TEACHER', 'ADMIN', 'SUPER_ADMIN'].includes(student?.role), [student?.role]);
+
+  const subjectSuggestions = useMemo(() => {
+    return getExamSubjectSuggestions(level);
+  }, [level]);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -62,7 +67,7 @@ export default function TeacherExamsPage() {
       return;
     }
     if (!subject.trim()) {
-      setError('Indique la matière (ex: Maths, Physique, SVT...).');
+      setError('Indique la matière (ex : Mathématiques, Anglais...).');
       return;
     }
 
@@ -141,10 +146,19 @@ export default function TeacherExamsPage() {
               className="input"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
+              list="linkedupro-exam-subject-suggestions"
               placeholder="Ex: Mathématiques"
               maxLength={120}
               required
             />
+            <datalist id="linkedupro-exam-subject-suggestions">
+              {subjectSuggestions.map((item) => (
+                <option key={item} value={item} />
+              ))}
+            </datalist>
+            {level === '9e' ? (
+              <p className="text-xs text-brand-600">Suggestions officielles 9e : {OFFICIAL_9E_EXAM_SUBJECTS.join(' • ')}</p>
+            ) : null}
           </label>
 
           <label className="space-y-1 md:col-span-2">
@@ -198,4 +212,3 @@ export default function TeacherExamsPage() {
     </main>
   );
 }
-

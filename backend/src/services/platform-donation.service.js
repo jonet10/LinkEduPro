@@ -29,7 +29,7 @@ async function createPlatformDonationCheckout({ donor, amount, paymentMethod = '
     return { ok: false, status: 400, message: 'Montant invalide.' };
   }
   if (paymentMethod !== 'MONCASH') {
-    return { ok: false, status: 400, message: 'Seul MonCash est supporte actuellement.' };
+    return { ok: false, status: 400, message: 'Seul MonCash est supporté actuellement.' };
   }
 
   const resolvedDonor = donor?.id ? donor : await ensureGuestDonor();
@@ -58,7 +58,7 @@ async function createPlatformDonationCheckout({ donor, amount, paymentMethod = '
 async function confirmPlatformDonationByReference({ orderRef, providerTxId, amount }) {
   const parsed = parsePlatformDonationOrderReference(orderRef);
   if (!parsed) {
-    return { ok: false, status: 400, message: 'Reference don invalide.' };
+    return { ok: false, status: 400, message: 'Référence de don invalide.' };
   }
 
   const donation = await prisma.platformDonation.findFirst({

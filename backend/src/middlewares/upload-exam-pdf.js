@@ -20,7 +20,7 @@ const uploadExamPdfFile = multer({
   fileFilter: (_, file, cb) => {
     const isPdf = file.mimetype === 'application/pdf' || /\.pdf$/i.test(file.originalname);
     if (!isPdf) {
-      const error = new Error('Le fichier doit etre un PDF.');
+      const error = new Error('Le fichier doit être un PDF.');
       error.status = 400;
       return cb(error);
     }
@@ -45,4 +45,3 @@ function uploadExamPdf(req, res, next) {
 }
 
 module.exports = { uploadExamPdf };
-

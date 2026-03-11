@@ -736,7 +736,7 @@ export default function RattrapagePage() {
 
       <div className="card">
         <h2 className="text-lg font-semibold text-brand-900">Sessions actives</h2>
-        <div className="mt-3 grid gap-4 md:grid-cols-2">
+        <div className="rattrapage-active-sessions mt-3 grid max-h-[70vh] gap-4 overflow-y-auto pr-2 md:grid-cols-2">
           {activeSessions.map((session) => renderSessionCard(session))}
           {!loading && activeSessions.length === 0 ? <p className="text-sm text-brand-700">Aucune session active pour le moment.</p> : null}
         </div>

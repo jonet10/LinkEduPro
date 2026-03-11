@@ -22,7 +22,7 @@ const uploadLibraryFiles = multer({
     if (file.fieldname === 'file') {
       const isPdf = file.mimetype === 'application/pdf' || /\.pdf$/i.test(file.originalname);
       if (!isPdf) {
-        const error = new Error('Le corps du livre doit etre un PDF.');
+        const error = new Error('Le corps du livre doit être un PDF.');
         error.status = 400;
         return cb(error);
       }
@@ -32,14 +32,14 @@ const uploadLibraryFiles = multer({
     if (file.fieldname === 'coverImage') {
       const isImage = /^image\/(jpeg|png|webp|jpg)$/i.test(file.mimetype) || /\.(jpe?g|png|webp)$/i.test(file.originalname);
       if (!isImage) {
-        const error = new Error('La couverture doit etre une image JPG, PNG ou WEBP.');
+        const error = new Error('La couverture doit être une image JPG, PNG ou WEBP.');
         error.status = 400;
         return cb(error);
       }
       return cb(null, true);
     }
 
-    const error = new Error('Champ fichier non supporte.');
+    const error = new Error('Champ fichier non supporté.');
     error.status = 400;
     return cb(error);
   }

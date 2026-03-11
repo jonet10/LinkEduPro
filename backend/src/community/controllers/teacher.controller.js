@@ -70,7 +70,7 @@ async function reviewVerification(req, res, next) {
     }
 
     if (verification.status !== 'PENDING') {
-      return res.status(400).json({ message: 'Demande deja traitee.' });
+      return res.status(400).json({ message: 'Demande déjà traitée.' });
     }
 
     const reviewed = await prisma.teacherVerification.update({

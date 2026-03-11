@@ -160,7 +160,7 @@ async function updatePost(req, res, next) {
 
     const canEdit = req.user.role === 'ADMIN' || req.user.id === existing.authorId;
     if (!canEdit) {
-      return res.status(403).json({ message: 'Action non autorisee.' });
+      return res.status(403).json({ message: 'Action non autorisée.' });
     }
 
     const autoApproved = true;
@@ -343,7 +343,7 @@ async function approvePost(req, res, next) {
     }
 
     if (post.isApproved) {
-      return res.status(400).json({ message: 'Post deja approuve.' });
+      return res.status(400).json({ message: 'Post déjà approuvé.' });
     }
 
     const approved = await prisma.blogPost.update({
@@ -419,7 +419,7 @@ async function likePost(req, res, next) {
     return res.status(201).json({ post: updated });
   } catch (error) {
     if (error && error.code === 'P2002') {
-      return res.status(409).json({ message: 'Post deja like par cet utilisateur.' });
+      return res.status(409).json({ message: 'Post déjà liké par cet utilisateur.' });
     }
     return next(error);
   }
@@ -668,7 +668,7 @@ async function markCommentHelpful(req, res, next) {
     }
 
     if (comment.isHelpful) {
-      return res.status(400).json({ message: 'Commentaire deja marque utile.' });
+      return res.status(400).json({ message: 'Commentaire déjà marqué utile.' });
     }
 
     const updated = await prisma.blogComment.update({
@@ -799,7 +799,7 @@ async function softDeletePost(req, res, next) {
     const isTeacherDeletingStudentPost = req.user.role === 'TEACHER' && post.author?.role === 'STUDENT';
 
     if (!isAdmin && !isOwner && !isTeacherDeletingStudentPost) {
-      return res.status(403).json({ message: 'Action non autorisee.' });
+      return res.status(403).json({ message: 'Action non autorisée.' });
     }
 
     await prisma.blogPost.update({
@@ -814,7 +814,7 @@ async function softDeletePost(req, res, next) {
       entityId: String(postId)
     });
 
-    return res.json({ message: 'Post supprime (soft delete).' });
+    return res.json({ message: 'Post supprimé.' });
   } catch (error) {
     return next(error);
   }
@@ -838,7 +838,7 @@ async function createCategory(req, res, next) {
     return res.status(201).json({ category });
   } catch (error) {
     if (error && error.code === 'P2002') {
-      return res.status(409).json({ message: 'Categorie deja existante.' });
+      return res.status(409).json({ message: 'Catégorie déjà existante.' });
     }
     return next(error);
   }
@@ -861,7 +861,7 @@ async function createTag(req, res, next) {
     return res.status(201).json({ tag });
   } catch (error) {
     if (error && error.code === 'P2002') {
-      return res.status(409).json({ message: 'Tag deja existant.' });
+      return res.status(409).json({ message: 'Tag déjà existant.' });
     }
     return next(error);
   }
@@ -883,7 +883,7 @@ async function uploadPostImage(req, res, next) {
 async function getReviewSummary(req, res, next) {
   try {
     if (!['TEACHER', 'ADMIN'].includes(req.user.role)) {
-      return res.status(403).json({ message: 'Acces reserve professeur/admin.' });
+      return res.status(403).json({ message: 'Accès réservé professeur/admin.' });
     }
 
     const wherePosts = {

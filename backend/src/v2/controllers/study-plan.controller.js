@@ -129,7 +129,7 @@ async function getMyStudyPlan(req, res, next) {
 
     const level = resolveStudentLevel(student);
     if (!level) {
-      return res.status(400).json({ message: 'Niveau utilisateur non defini.' });
+      return res.status(400).json({ message: 'Niveau utilisateur non défini.' });
     }
 
     const plansPromise = prisma.studyPlan.findMany({
@@ -178,7 +178,7 @@ async function updateStudyPlan(req, res, next) {
     const isAdmin = req.user.role === 'ADMIN';
     const isOwnerTeacher = req.user.role === 'TEACHER' && existing.createdById === req.user.id;
     if (!isAdmin && !isOwnerTeacher) {
-      return res.status(403).json({ message: 'Action non autorisee.' });
+      return res.status(403).json({ message: 'Action non autorisée.' });
     }
 
     const updated = await prisma.studyPlan.update({
@@ -217,7 +217,7 @@ async function deleteStudyPlan(req, res, next) {
     const isAdmin = req.user.role === 'ADMIN';
     const isOwnerTeacher = req.user.role === 'TEACHER' && existing.createdById === req.user.id;
     if (!isAdmin && !isOwnerTeacher) {
-      return res.status(403).json({ message: 'Action non autorisee.' });
+      return res.status(403).json({ message: 'Action non autorisée.' });
     }
 
     await prisma.studyPlan.delete({ where: { id: planId } });

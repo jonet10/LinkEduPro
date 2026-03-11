@@ -52,7 +52,7 @@ export default function AIObjectivePanel({
         <div className="flex items-center gap-3">
           <div className="cockpit-avatar" aria-hidden="true">{makeInitials(student)}</div>
           <div>
-            <p className="text-sm font-black text-slate-50">{student?.firstName || 'Eleve'} {student?.lastName || ''}</p>
+            <p className="text-sm font-black text-slate-50">{student?.firstName || 'Élève'} {student?.lastName || ''}</p>
             <p className="mt-1 text-xs text-slate-200/70">Filière: {trackLabel || 'Général'} · Série: {streak} jour(s)</p>
           </div>
         </div>

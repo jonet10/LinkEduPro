@@ -46,7 +46,7 @@ async function getMusicTracks(req, res, next) {
     const targetLevel = requestedLevel || resolveStudentLevel(student);
 
     if (!targetLevel) {
-      return res.status(400).json({ message: 'Niveau utilisateur non defini.' });
+      return res.status(400).json({ message: 'Niveau utilisateur non défini.' });
     }
 
     const tracks = await prisma.musicTrack.findMany({

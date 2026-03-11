@@ -1066,6 +1066,7 @@ model Message {
   conversationId Int          @map("conversation_id")
   senderId       Int          @map("sender_id")
   content        String
+  attachments    Json?        @map("attachments")
   createdAt      DateTime     @default(now()) @map("created_at")
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender         Student      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)

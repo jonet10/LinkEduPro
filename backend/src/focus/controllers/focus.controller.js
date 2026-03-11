@@ -112,7 +112,7 @@ async function startPomodoro(req, res, next) {
     });
 
     if (running) {
-      return res.status(409).json({ message: 'Une session Pomodoro est deja en cours.', sessionId: running.id });
+      return res.status(409).json({ message: 'Une session Pomodoro est déjà en cours.', sessionId: running.id });
     }
 
     const session = await prisma.pomodoroSession.create({

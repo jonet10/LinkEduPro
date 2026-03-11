@@ -22,7 +22,7 @@ const uploadProfilePhoto = multer({
     const allowedExt = /\.(jpg|jpeg|png|webp)$/i.test(file.originalname);
 
     if (!allowedMime.includes(file.mimetype) || !allowedExt) {
-      return cb(new Error('Fichier invalide. Autorise: JPG/PNG/WEBP (max 5MB).'));
+      return cb(new Error('Fichier invalide. Autorisés : JPG/PNG/WEBP (max 5MB).'));
     }
 
     return cb(null, true);

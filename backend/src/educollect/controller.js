@@ -138,7 +138,7 @@ async function listProjects(req, res, next) {
 
     if (requestedStatus) {
       if (!isAdmin && !isMine && requestedStatus !== 'APPROVED') {
-        return res.status(403).json({ message: 'Statut non autorise pour cette vue.' });
+        return res.status(403).json({ message: 'Statut non autorisé pour cette vue.' });
       }
       where.status = requestedStatus;
     }
@@ -267,7 +267,7 @@ async function createProject(req, res, next) {
       }
     });
     if (activeCount > 0) {
-      return res.status(400).json({ message: 'Un seul projet actif est autorise par eleve.' });
+      return res.status(400).json({ message: 'Un seul projet actif est autorisé par élève.' });
     }
 
     const targetAmount = Number(req.body.targetAmount || 0);
@@ -333,7 +333,7 @@ async function donateToProject(req, res, next) {
     const project = await prisma.eduCollectProject.findUnique({ where: { id: projectId } });
     if (!project) return res.status(404).json({ message: 'Projet introuvable.' });
     if (project.ownerId === req.user.id) {
-      return res.status(400).json({ message: 'Auto-don non autorise.' });
+      return res.status(400).json({ message: 'Auto-don non autorisé.' });
     }
     if (project.status !== 'APPROVED') {
       return res.status(400).json({ message: 'Ce projet ne peut plus recevoir de dons.' });
@@ -449,7 +449,7 @@ async function submitProjectReport(req, res, next) {
     const isOwner = req.user.id === project.ownerId;
     const isAdmin = req.user.role === 'ADMIN';
     if (!isOwner && !isAdmin) {
-      return res.status(403).json({ message: 'Action non autorisee.' });
+      return res.status(403).json({ message: 'Action non autorisée.' });
     }
 
     const report = await prisma.eduCollectProjectReport.create({
@@ -564,7 +564,7 @@ async function disburseProject(req, res, next) {
     if (!project) return res.status(404).json({ message: 'Projet introuvable.' });
 
     if (asAmount(project.currentAmount) < asAmount(project.targetAmount)) {
-      return res.status(400).json({ message: 'Objectif non atteint. Decaissement non autorise.' });
+      return res.status(400).json({ message: 'Objectif non atteint. Décaissement non autorisé.' });
     }
 
     const updated = await prisma.eduCollectProject.update({
@@ -581,7 +581,7 @@ async function disburseProject(req, res, next) {
     await createNotification({
       userId: project.ownerId,
       type: 'EDUCOLLECT_PROJECT_FUNDED',
-      title: 'Decaissement autorise',
+      title: 'Décaissement autorisé',
       message: `Le projet "${project.title}" a ete marque finance.`,
       entityType: 'EduCollectProject',
       entityId: String(project.id)

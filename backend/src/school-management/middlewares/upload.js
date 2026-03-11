@@ -17,7 +17,7 @@ const uploadStudentImport = multer({
   fileFilter: (_, file, cb) => {
     const valid = /\.(xlsx|csv)$/i.test(file.originalname);
     if (!valid) {
-      return cb(new Error('Format non supporte. Utiliser .xlsx ou .csv'));
+      return cb(new Error('Format non supporté. Utilisez .xlsx ou .csv.'));
     }
     return cb(null, true);
   }

@@ -18,7 +18,7 @@ async function ensureNativeNoticeReady() {
     await LocalNotifications.createChannel({
       id: 'linkedupro-notices',
       name: 'LinkEduPro',
-      description: 'Notifications de messages et activites',
+      description: 'Notifications de messages et activités',
       importance: 5,
       visibility: 1
     });

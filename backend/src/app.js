@@ -46,7 +46,7 @@ const corsOptions = {
   origin(origin, callback) {
     if (!origin) return callback(null, true);
     if (allowedOrigins.has(origin)) return callback(null, true);
-    return callback(new Error('Origin non autorisee par CORS.'));
+    return callback(new Error('Origine non autorisée par CORS.'));
   }
 };
 
@@ -110,8 +110,8 @@ app.use((req, res) => {
 
 app.use((error, req, res, next) => {
   console.error(error);
-  if (error && error.message === 'Origin non autorisee par CORS.') {
-    return res.status(403).json({ message: 'Origine non autorisee.' });
+  if (error && error.message === 'Origine non autorisée par CORS.') {
+    return res.status(403).json({ message: 'Origine non autorisée.' });
   }
   const status = Number(error?.status) || 500;
   const isProd = process.env.NODE_ENV === 'production';

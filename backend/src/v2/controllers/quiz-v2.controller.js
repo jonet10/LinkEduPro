@@ -53,7 +53,7 @@ async function listQuizzes(req, res, next) {
     const level = queryLevel || resolveStudentLevel(student);
 
     if (!level) {
-      return res.status(400).json({ message: 'Niveau utilisateur non defini.' });
+      return res.status(400).json({ message: 'Niveau utilisateur non défini.' });
     }
 
     const quizzes = await prisma.levelQuiz.findMany({

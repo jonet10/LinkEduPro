@@ -17,7 +17,7 @@ async function schoolAuthMiddleware(req, res, next) {
 
     const admin = await prisma.schoolAdmin.findUnique({ where: { id: payload.sub } });
     if (!admin || !admin.isActive) {
-      return res.status(401).json({ message: 'Compte non autorise.' });
+      return res.status(401).json({ message: 'Compte non autorisé.' });
     }
 
     let schoolActive = true;

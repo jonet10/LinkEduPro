@@ -99,7 +99,7 @@ async function updateMyProfile(req, res, next) {
       if (normalizedEmail && normalizedEmail !== existing.email) {
         const used = await prisma.student.findUnique({ where: { email: normalizedEmail } });
         if (used && used.id !== existing.id) {
-          return res.status(409).json({ message: 'Email deja utilise.' });
+          return res.status(409).json({ message: 'Email déjà utilisé.' });
         }
       }
       data.email = normalizedEmail;

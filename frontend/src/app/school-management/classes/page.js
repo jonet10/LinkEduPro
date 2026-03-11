@@ -333,10 +333,10 @@ export default function SchoolClassesPage() {
                   checked={yearForm.isActive}
                   onChange={(e) => setYearForm((prev) => ({ ...prev, isActive: e.target.checked }))}
                 />
-                Definir comme annee active
+                Définir comme année active
               </label>
               <button className="btn-primary w-fit" type="submit" disabled={creatingYear}>
-                {creatingYear ? 'création...' : 'Ajouter annee (2025-2026)'}
+                {creatingYear ? 'Création...' : 'Ajouter une année (2025-2026)'}
               </button>
             </form>
           </article>
@@ -570,7 +570,7 @@ export default function SchoolClassesPage() {
                 disabled={safePage <= 1}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               >
-                Precedent
+                Précédent
               </button>
               <button
                 type="button"

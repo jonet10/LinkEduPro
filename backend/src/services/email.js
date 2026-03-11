@@ -40,7 +40,7 @@ async function sendEmail({ to, subject, html, text }) {
   }
 
   if (provider !== 'brevo') {
-    throw new Error(`EMAIL_PROVIDER non supporte: ${provider}`);
+    throw new Error(`EMAIL_PROVIDER non supporté : ${provider}`);
   }
 
   await sendViaBrevo({ to, subject, html, text });

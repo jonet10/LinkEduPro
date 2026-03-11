@@ -118,7 +118,7 @@ async function sendVerificationEmail({ to, name, token }) {
 async function verifyAndConsumeEmailToken(rawToken) {
   const token = typeof rawToken === 'string' ? rawToken.trim() : '';
   if (!token) {
-    return { ok: false, message: 'Token de verification manquant.' };
+    return { ok: false, message: 'Token de vérification manquant.' };
   }
 
   const tokenHash = hashEmailVerificationToken(token);
@@ -130,7 +130,7 @@ async function verifyAndConsumeEmailToken(rawToken) {
   });
 
   if (!student) {
-    return { ok: false, message: 'Lien de verification invalide ou deja utilise.' };
+    return { ok: false, message: 'Lien de vérification invalide ou déjà utilisé.' };
   }
 
   const now = new Date();
@@ -142,7 +142,7 @@ async function verifyAndConsumeEmailToken(rawToken) {
         tokenExpiry: null
       }
     });
-    return { ok: false, message: 'Lien de verification expire.' };
+    return { ok: false, message: 'Lien de vérification expiré.' };
   }
 
   await prisma.student.update({
@@ -216,7 +216,7 @@ async function register(req, res, next) {
 
     const existing = await prisma.student.findUnique({ where: { email: normalizedEmail } });
     if (existing) {
-      return res.status(409).json({ message: 'Email deja utilise.' });
+      return res.status(409).json({ message: 'Email déjà utilisé.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -355,7 +355,7 @@ async function acceptTeacherInvite(req, res, next) {
 
     const existing = await prisma.student.findUnique({ where: { email: invitation.email } });
     if (existing) {
-      return res.status(409).json({ message: 'Un compte existe deja pour cet email.' });
+      return res.status(409).json({ message: 'Un compte existe déjà pour cet email.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -485,7 +485,7 @@ async function updateUnverifiedEmail(req, res, next) {
     }
 
     if (currentEmail === newEmail) {
-      return res.status(400).json({ message: 'Le nouvel email doit etre different.' });
+      return res.status(400).json({ message: 'Le nouvel email doit être différent.' });
     }
 
     const student = await prisma.student.findUnique({ where: { email: currentEmail } });
@@ -504,7 +504,7 @@ async function updateUnverifiedEmail(req, res, next) {
 
     const taken = await prisma.student.findUnique({ where: { email: newEmail } });
     if (taken) {
-      return res.status(409).json({ message: 'Le nouvel email est deja utilise.' });
+      return res.status(409).json({ message: 'Le nouvel email est déjà utilisé.' });
     }
 
     const { plainToken, tokenHash, tokenExpiry } = createEmailVerificationToken();

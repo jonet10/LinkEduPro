@@ -192,11 +192,11 @@ const createLibraryPurchaseSchema = Joi.object({
 
 const privateMessageSchema = Joi.object({
   recipientId: Joi.number().integer().positive().required(),
-  content: Joi.string().trim().min(1).max(5000).required()
+  content: Joi.string().trim().max(5000).allow('').default('')
 });
 
 const globalMessageSchema = Joi.object({
-  content: Joi.string().trim().min(1).max(5000).required(),
+  content: Joi.string().trim().max(5000).allow('').default(''),
   audience: Joi.string().valid('ALL', 'LEVEL').default('ALL'),
   level: Joi.when('audience', {
     is: 'LEVEL',

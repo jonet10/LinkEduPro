@@ -274,7 +274,7 @@ async function updateBook(req, res, next) {
     const owner = book.uploadedBy === req.user.id;
     const admin = req.user.role === 'ADMIN';
     if (!owner && !admin) {
-      return res.status(403).json({ message: 'Action non autorisee.' });
+      return res.status(403).json({ message: 'Action non autorisée.' });
     }
 
     const pdfFile = req.files?.file?.[0];
@@ -381,7 +381,7 @@ async function softDeleteBook(req, res, next) {
     const admin = req.user.role === 'ADMIN';
 
     if (!owner && !admin) {
-      return res.status(403).json({ message: 'Action non autorisee.' });
+      return res.status(403).json({ message: 'Action non autorisée.' });
     }
 
     await prisma.libraryBook.update({

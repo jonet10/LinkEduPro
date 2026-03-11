@@ -20,7 +20,7 @@ const uploader = multer({
     const isPdf = file.mimetype === 'application/pdf' || /\.pdf$/i.test(file.originalname);
     const isImage = /^image\/(jpeg|png|webp|jpg)$/i.test(file.mimetype) || /\.(jpe?g|png|webp)$/i.test(file.originalname);
     if (!isPdf && !isImage) {
-      const error = new Error('Le justificatif doit etre un PDF ou une image (JPG, PNG, WEBP).');
+      const error = new Error('Le justificatif doit être un PDF ou une image (JPG, PNG, WEBP).');
       error.status = 400;
       return cb(error);
     }

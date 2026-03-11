@@ -68,7 +68,7 @@ async function importStudentsFromFile({ schoolId, actor, filePath, classId, acad
     const student = toCreate[i];
     const key = `${student.firstName.toLowerCase()}-${student.lastName.toLowerCase()}`;
     if (existingSet.has(key)) {
-      errors.push({ row: student.rowIndex, message: 'Élève deja present en base.' });
+      errors.push({ row: student.rowIndex, message: 'Élève déjà présent en base.' });
       continue;
     }
 

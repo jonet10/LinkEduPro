@@ -205,7 +205,7 @@ async function updateStudent(req, res, next) {
     });
 
     if (duplicate) {
-      return res.status(400).json({ message: 'Matricule deja utilise dans cette École.' });
+      return res.status(400).json({ message: 'Matricule déjà utilisé dans cette École.' });
     }
 
     const updated = await prisma.schoolStudent.update({

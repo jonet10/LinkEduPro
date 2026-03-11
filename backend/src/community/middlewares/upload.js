@@ -18,7 +18,7 @@ const uploadTeacherDocument = multer({
     const allowedMime = ['application/pdf', 'image/jpeg', 'image/png'];
     const allowedExt = /\.(pdf|jpg|jpeg|png)$/i.test(file.originalname);
     if (!allowedMime.includes(file.mimetype) || !allowedExt) {
-      return cb(new Error('Fichier invalide. Autorise: PDF/JPG/PNG (max 5MB).'));
+      return cb(new Error('Fichier invalide. Autorisés : PDF/JPG/PNG (max 5MB).'));
     }
     return cb(null, true);
   }
@@ -44,7 +44,7 @@ const uploadBlogImage = multer({
     const allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
     const allowedExt = /\.(jpg|jpeg|png|webp)$/i.test(file.originalname);
     if (!allowedMime.includes(file.mimetype) || !allowedExt) {
-      return cb(new Error('Image invalide. Autorise: JPG/PNG/WEBP (max 5MB).'));
+      return cb(new Error('Image invalide. Autorisées : JPG/PNG/WEBP (max 5MB).'));
     }
     return cb(null, true);
   }

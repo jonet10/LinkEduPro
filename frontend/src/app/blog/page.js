@@ -60,6 +60,7 @@ export default function BlogPage() {
   const [uploadingEditImage, setUploadingEditImage] = useState(false);
   const [editingPostId, setEditingPostId] = useState(null);
   const [expandedPostId, setExpandedPostId] = useState(null);
+  const [showComposer, setShowComposer] = useState(false);
   const [form, setForm] = useState(emptyForm());
   const [editForm, setEditForm] = useState(emptyForm());
   const [publicItems, setPublicItems] = useState([]);
@@ -863,7 +864,7 @@ export default function BlogPage() {
         <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]">
           <input className="input" placeholder="Recherche forum" value={search} onChange={(e) => setSearch(e.target.value)} />
           <select className="input" value={postTypeFilter} onChange={(e) => setPostTypeFilter(e.target.value)}>
-            <option value="">Tous contenus</option>
+            <option value="">Tous les contenus</option>
             <option value="EXERCISE">Exercices</option>
             <option value="ARTICLE">Articles</option>
           </select>
@@ -876,74 +877,79 @@ export default function BlogPage() {
 
       {canCreatePost ? (
         <section className="space-y-4 rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-800">
-              {getInitials(student?.firstName, student?.lastName)}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-800">
+                {getInitials(student?.firstName, student?.lastName)}
+              </div>
+              <p className="text-sm font-semibold text-brand-900">{composerPrompt}</p>
             </div>
-            <input
-              className="input flex-1 rounded-full"
-              value={form.content}
-              onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
-              placeholder={composerPrompt}
-            />
+            <button type="button" className="btn-primary" onClick={() => setShowComposer((v) => !v)}>
+              {showComposer ? 'Masquer' : 'Nouvelle publication'}
+            </button>
           </div>
-          <div className="grid grid-cols-2 gap-2 border-y border-brand-100 py-2">
-            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => onPickImage('create', 'camera')}>📷 Photo</button>
-            <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => onPickImage('create', 'gallery')}>🖼️ Galerie</button>
-          </div>
-          <input ref={createGalleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
-          <input ref={createCameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
-          {uploadingCreateImage ? <p className="text-xs text-brand-700">Upload image...</p> : null}
-          {form.imageUrl ? (
-            <img
-              src={resolveMediaUrl(form.imageUrl)}
-              alt="Aperçu image publication"
-              className="max-h-56 w-full rounded-lg border border-brand-100 object-cover"
-            />
+
+          {showComposer ? (
+            <>
+              <div className="grid grid-cols-2 gap-2 border-y border-brand-100 py-2">
+                <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => onPickImage('create', 'camera')}>📷 Photo</button>
+                <button type="button" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50" onClick={() => onPickImage('create', 'gallery')}>🖼️ Galerie</button>
+              </div>
+              <input ref={createGalleryInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
+              <input ref={createCameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0], 'create')} />
+              {uploadingCreateImage ? <p className="text-xs text-brand-700">Upload image...</p> : null}
+              {form.imageUrl ? (
+                <img
+                  src={resolveMediaUrl(form.imageUrl)}
+                  alt="Aperçu image publication"
+                  className="max-h-56 w-full rounded-lg border border-brand-100 object-cover"
+                />
+              ) : null}
+
+              <textarea className="input min-h-[140px]" placeholder={contentPlaceholder} value={form.content} onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))} />
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <div>
+                  <p className="mb-2 text-sm font-semibold text-slate-700">Catégories</p>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat) => (
+                      <label key={cat.id} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
+                        <input type="checkbox" checked={form.categoryIds.includes(cat.id)} onChange={() => toggleArraySelection('create', 'categoryIds', cat.id)} />
+                        {cat.name}
+                      </label>
+                    ))}
+                  </div>
+                  {categories.length === 0 ? <p className="text-xs text-brand-700">Aucune catégorie disponible.</p> : null}
+                </div>
+
+                <div>
+                  <p className="mb-2 text-sm font-semibold text-slate-700">Tags</p>
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <label key={tag.id} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
+                        <input type="checkbox" checked={form.tagIds.includes(tag.id)} onChange={() => toggleArraySelection('create', 'tagIds', tag.id)} />
+                        {tag.name}
+                      </label>
+                    ))}
+                  </div>
+                  {tags.length === 0 ? <p className="text-xs text-brand-700">Aucun tag disponible.</p> : null}
+                </div>
+              </div>
+
+              {createError ? <p className="text-sm text-red-600">{createError}</p> : null}
+              {createInfo ? <p className="text-sm text-green-600">{createInfo}</p> : null}
+
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-brand-700">Connecté en tant que {student?.role || 'USER'}</p>
+                <button className="btn-primary" disabled={creating} onClick={createPost}>{creating ? 'Publication...' : 'Publier'}</button>
+              </div>
+            </>
           ) : null}
-
-          <textarea className="input min-h-[140px]" placeholder={contentPlaceholder} value={form.content} onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))} />
-
-          <div className="grid gap-3 md:grid-cols-2">
-            <div>
-              <p className="mb-2 text-sm font-semibold text-slate-700">Catégories</p>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((cat) => (
-                  <label key={cat.id} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
-                    <input type="checkbox" checked={form.categoryIds.includes(cat.id)} onChange={() => toggleArraySelection('create', 'categoryIds', cat.id)} />
-                    {cat.name}
-                  </label>
-                ))}
-              </div>
-              {categories.length === 0 ? <p className="text-xs text-brand-700">Aucune catégorie disponible.</p> : null}
-            </div>
-
-            <div>
-              <p className="mb-2 text-sm font-semibold text-slate-700">Tags</p>
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <label key={tag.id} className="inline-flex items-center gap-1 rounded border border-brand-100 px-2 py-1 text-sm">
-                    <input type="checkbox" checked={form.tagIds.includes(tag.id)} onChange={() => toggleArraySelection('create', 'tagIds', tag.id)} />
-                    {tag.name}
-                  </label>
-                ))}
-              </div>
-              {tags.length === 0 ? <p className="text-xs text-brand-700">Aucun tag disponible.</p> : null}
-            </div>
-          </div>
-
-          {createError ? <p className="text-sm text-red-600">{createError}</p> : null}
-          {createInfo ? <p className="text-sm text-green-600">{createInfo}</p> : null}
-
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-brand-700">Connecté en tant que {student?.role || 'USER'}</p>
-            <button className="btn-primary" disabled={creating} onClick={createPost}>{creating ? 'Publication...' : 'Publier'}</button>
-          </div>
         </section>
       ) : null}
 
       <section className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
-        <p className="text-sm text-brand-700">Categories: {categories.map((c) => c.name).join(', ') || 'Aucune'}</p>
+        <p className="text-sm text-brand-700">Catégories : {categories.map((c) => c.name).join(', ') || 'Aucune'}</p>
         <p className="text-sm text-brand-700">Tags: {tags.map((t) => t.name).join(', ') || 'Aucun'}</p>
       </section>
 
@@ -961,7 +967,7 @@ export default function BlogPage() {
       ) : null}
 
       <section className="flex items-center justify-between">
-        <button className="btn-secondary" disabled={pagination.page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Precedent</button>
+        <button className="btn-secondary" disabled={pagination.page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Précédent</button>
         <p className="text-sm">Page {pagination.page} / {pagination.totalPages}</p>
         <button className="btn-secondary" disabled={pagination.page >= pagination.totalPages} onClick={() => setPage((p) => p + 1)}>Suivant</button>
       </section>

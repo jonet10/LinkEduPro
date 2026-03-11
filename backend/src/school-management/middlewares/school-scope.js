@@ -11,7 +11,7 @@ function enforceSchoolScope(getSchoolId) {
 
     const targetSchoolId = Number(getSchoolId(req));
     if (!targetSchoolId || targetSchoolId !== user.schoolId) {
-      return res.status(403).json({ message: 'Acces refuse hors École.' });
+      return res.status(403).json({ message: 'Accès refusé hors École.' });
     }
 
     return next();

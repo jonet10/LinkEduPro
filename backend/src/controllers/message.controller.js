@@ -1,5 +1,8 @@
 const prisma = require('../config/prisma');
 const { emitRefresh } = require('../services/realtime');
+const fs = require('fs');
+const path = require('path');
+const { resolveStoragePath } = require('../config/storage');
 const PRIVATE_CONVERSATION_DB_VALUE = 'private';
 
 const API_LEVEL_TO_DB = {
@@ -29,6 +32,7 @@ function mapConversation(conversation, unreadCount = 0) {
       ? {
           id: lastMessage.id,
           content: lastMessage.content,
+          attachments: Array.isArray(lastMessage.attachments) ? lastMessage.attachments : [],
           createdAt: lastMessage.createdAt,
           sender: {
             id: lastMessage.sender.id,
@@ -47,10 +51,43 @@ function mapConversation(conversation, unreadCount = 0) {
   };
 }
 
+function safeTrim(value) {
+  return String(value || '').trim();
+}
+
+function toMessageAttachments(files) {
+  const items = Array.isArray(files) ? files : [];
+  return items
+    .filter((file) => file && file.filename)
+    .map((file) => ({
+      originalName: String(file.originalname || '').slice(0, 260),
+      storedName: String(file.filename || ''),
+      mimeType: String(file.mimetype || ''),
+      size: Number(file.size || 0),
+      url: `/storage/message-files/${String(file.filename)}`
+    }));
+}
+
+function removeStoredMessageFiles(attachments) {
+  const list = Array.isArray(attachments) ? attachments : [];
+  for (const att of list) {
+    const storedName = att?.storedName || path.basename(String(att?.url || ''));
+    if (!storedName) continue;
+    const fullPath = resolveStoragePath('message-files', storedName);
+    try {
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+    } catch (_) {
+      // best-effort cleanup
+    }
+  }
+}
+
 function resolveAllowedRecipientRoles(senderRole, roleFilter) {
   const normalizedFilter = String(roleFilter || '').trim().toUpperCase();
 
-  // Restriction demandee: un eleve ne peut pas contacter un autre eleve.
+  // Restriction demandée : un élève ne peut pas contacter un autre élève.
   if (senderRole === 'STUDENT') {
     const allowed = ['TEACHER', 'ADMIN'];
     if (normalizedFilter && allowed.includes(normalizedFilter)) return [normalizedFilter];
@@ -67,10 +104,15 @@ async function sendPrivateMessage(req, res, next) {
     const senderId = req.user.id;
     const senderRole = req.user.role;
     const recipientId = Number(req.body.recipientId);
-    const content = req.body.content.trim();
+    const content = safeTrim(req.body.content);
+    const attachments = toMessageAttachments(req.files);
+
+    if (!content && attachments.length === 0) {
+      return res.status(400).json({ message: 'Message vide : texte ou fichier requis.' });
+    }
 
     if (senderId === recipientId) {
-      return res.status(400).json({ message: 'Vous ne pouvez pas vous envoyér un message.' });
+      return res.status(400).json({ message: 'Vous ne pouvez pas vous envoyer un message.' });
     }
 
     const recipient = await prisma.student.findUnique({
@@ -129,7 +171,8 @@ async function sendPrivateMessage(req, res, next) {
         data: {
           conversationId: conversation.id,
           senderId,
-          content
+          content,
+          attachments: attachments.length ? attachments : null
         },
         include: {
           sender: {
@@ -147,6 +190,7 @@ async function sendPrivateMessage(req, res, next) {
         id: message.id,
         conversationId: message.conversationId,
         content: message.content,
+        attachments: Array.isArray(message.attachments) ? message.attachments : [],
         createdAt: message.createdAt,
         sender: message.sender
       }
@@ -350,7 +394,7 @@ async function getConversationById(req, res, next) {
     });
 
     if (!membership) {
-      return res.status(403).json({ message: 'Acces refuse a cette conversation.' });
+      return res.status(403).json({ message: 'Accès refusé à cette conversation.' });
     }
 
     const conversation = await prisma.conversation.findUnique({
@@ -413,6 +457,7 @@ async function getConversationById(req, res, next) {
         messages: conversation.messages.map((message) => ({
           id: message.id,
           content: message.content,
+          attachments: Array.isArray(message.attachments) ? message.attachments : [],
           createdAt: message.createdAt,
           sender: message.sender
         }))
@@ -426,8 +471,13 @@ async function getConversationById(req, res, next) {
 async function sendGlobalMessage(req, res, next) {
   try {
     const senderId = req.user.id;
-    const content = req.body.content.trim();
+    const content = safeTrim(req.body.content);
+    const attachments = toMessageAttachments(req.files);
     const audience = req.body.audience || 'ALL';
+
+    if (!content && attachments.length === 0) {
+      return res.status(400).json({ message: 'Annonce vide : texte ou fichier requis.' });
+    }
 
     let targetLevel = null;
     let recipientIds = [];
@@ -472,6 +522,7 @@ async function sendGlobalMessage(req, res, next) {
             create: {
               senderId,
               content,
+              attachments: attachments.length ? attachments : null,
               createdAt: now
             }
           }
@@ -509,7 +560,9 @@ async function sendGlobalMessage(req, res, next) {
           userId,
           type: 'GLOBAL_ANNOUNCEMENT',
           title: 'Nouvelle annonce',
-          message: content.length > 160 ? `${content.slice(0, 157)}...` : content,
+          message: content
+            ? (content.length > 160 ? `${content.slice(0, 157)}...` : content)
+            : 'Nouvelle annonce (pièce jointe).',
           entityType: 'Conversation',
           entityId: String(conversation.id)
         }))
@@ -529,6 +582,7 @@ async function sendGlobalMessage(req, res, next) {
           ? {
               id: conversation.messages[0].id,
               content: conversation.messages[0].content,
+              attachments: Array.isArray(conversation.messages[0].attachments) ? conversation.messages[0].attachments : [],
               createdAt: conversation.messages[0].createdAt,
               sender: conversation.messages[0].sender
             }
@@ -564,7 +618,7 @@ async function deleteConversation(req, res, next) {
 
     const participantIds = conversation.participants.map((p) => p.userId);
     if (!participantIds.includes(userId)) {
-      return res.status(403).json({ message: 'Acces refuse a cette conversation.' });
+      return res.status(403).json({ message: 'Accès refusé à cette conversation.' });
     }
 
     await prisma.$transaction(async (tx) => {
@@ -613,6 +667,7 @@ async function deleteMessage(req, res, next) {
         id: true,
         senderId: true,
         conversationId: true,
+        attachments: true,
         conversation: {
           select: {
             participants: {
@@ -629,12 +684,12 @@ async function deleteMessage(req, res, next) {
 
     const participantIds = (message.conversation?.participants || []).map((p) => p.userId);
     if (!participantIds.includes(userId)) {
-      return res.status(403).json({ message: 'Acces refuse a ce message.' });
+      return res.status(403).json({ message: 'Accès refusé à ce message.' });
     }
 
-    const canDelete = req.user.role === 'ADMIN' || message.senderId === userId;
+    const canDelete = req.user.role === 'ADMIN' || req.user.role === 'SUPER_ADMIN' || message.senderId === userId;
     if (!canDelete) {
-      return res.status(403).json({ message: 'Action non autorisee.' });
+      return res.status(403).json({ message: 'Action non autorisée.' });
     }
 
     await prisma.$transaction(async (tx) => {
@@ -648,6 +703,8 @@ async function deleteMessage(req, res, next) {
         await tx.conversation.delete({ where: { id: message.conversationId } });
       }
     });
+
+    removeStoredMessageFiles(message.attachments);
 
     emitRefresh(participantIds, ['messages']);
     return res.json({ message: 'Message supprimé.' });

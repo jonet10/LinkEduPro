@@ -18,4 +18,3 @@ router.post('/', auth, requireRoles(['ADMIN', 'SUPER_ADMIN']), uploadExamPdf, (r
 });
 
 module.exports = router;
-

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
+import { resolveMediaUrl } from '@/lib/media';
 
 const LEVEL_OPTIONS = ['9e', 'NSI', 'NSII', 'NSIII', 'NSIV', 'Universitaire'];
 
@@ -39,6 +40,16 @@ function conversationRecipientId(conversation, currentUserId) {
   return other ? other.userId : null;
 }
 
+function messagePreview(message) {
+  if (!message) return 'Aucun message';
+  const content = String(message.content || '').trim();
+  if (content) return content;
+  const files = Array.isArray(message.attachments) ? message.attachments : [];
+  if (files.length === 1) return '📎 1 pièce jointe';
+  if (files.length > 1) return `📎 ${files.length} pièces jointes`;
+  return 'Message';
+}
+
 export default function MessagesPage() {
   const router = useRouter();
   const [token, setToken] = useState(null);
@@ -60,13 +71,16 @@ export default function MessagesPage() {
   const [selectedRecipientLabel, setSelectedRecipientLabel] = useState('');
   const [searchingRecipients, setSearchingRecipients] = useState(false);
   const [privateComposerText, setPrivateComposerText] = useState('');
+  const [privateFiles, setPrivateFiles] = useState([]);
   const [replyText, setReplyText] = useState('');
+  const [replyFiles, setReplyFiles] = useState([]);
   const [sendingPrivate, setSendingPrivate] = useState(false);
   const recipientSearchSeq = useRef(0);
 
   const [globalAudience, setGlobalAudience] = useState('ALL');
   const [globalLevel, setGlobalLevel] = useState('NSIV');
   const [globalContent, setGlobalContent] = useState('');
+  const [globalFiles, setGlobalFiles] = useState([]);
   const [sendingGlobal, setSendingGlobal] = useState(false);
   const [showNewMessageComposer, setShowNewMessageComposer] = useState(false);
   const isDarkMode = Boolean(student?.darkMode);
@@ -212,19 +226,25 @@ export default function MessagesPage() {
       setError('Sélectionne un destinataire depuis les résultats de recherche.');
       return;
     }
-    if (!content) return;
+    if (!content && privateFiles.length === 0) return;
 
     setSendingPrivate(true);
     setError('');
 
     try {
+      const body = new FormData();
+      body.append('recipientId', String(targetId));
+      body.append('content', content);
+      privateFiles.forEach((file) => body.append('files', file, file.name));
+
       await apiClient('/messages/private', {
         method: 'POST',
         token,
-        body: JSON.stringify({ recipientId: targetId, content })
+        body
       });
 
       setPrivateComposerText('');
+      setPrivateFiles([]);
       setRecipientId('');
       setRecipientQuery('');
       setSelectedRecipientLabel('');
@@ -244,21 +264,28 @@ export default function MessagesPage() {
 
     const content = replyText.trim();
     const targetId = conversationRecipientId(selectedConversation, student?.id);
-    if (!content || !targetId) return;
+    if (!targetId) return;
+    if (!content && replyFiles.length === 0) return;
 
     setSendingPrivate(true);
     setError('');
 
     try {
+      const body = new FormData();
+      body.append('recipientId', String(targetId));
+      body.append('content', content);
+      replyFiles.forEach((file) => body.append('files', file, file.name));
+
       await apiClient('/messages/private', {
         method: 'POST',
         token,
-        body: JSON.stringify({ recipientId: targetId, content })
+        body
       });
       setReplyText('');
+      setReplyFiles([]);
       await loadConversationById(token, selectedConversation.id);
     } catch (e) {
-      setError(e.message || 'Erreur envoi Réponse.');
+      setError(e.message || 'Erreur envoi réponse.');
     } finally {
       setSendingPrivate(false);
     }
@@ -312,31 +339,31 @@ export default function MessagesPage() {
 
   async function handleSendGlobal(event) {
     event.preventDefault();
-    if (!token || student?.role !== 'ADMIN') return;
+    if (!token || !['ADMIN', 'SUPER_ADMIN'].includes(student?.role)) return;
 
     const content = globalContent.trim();
-    if (!content) return;
-
-    const payload = {
-      content,
-      audience: globalAudience
-    };
-
-    if (globalAudience === 'LEVEL') {
-      payload.level = globalLevel;
-    }
+    if (!content && globalFiles.length === 0) return;
 
     setSendingGlobal(true);
     setError('');
 
     try {
+      const body = new FormData();
+      body.append('content', content);
+      body.append('audience', globalAudience);
+      if (globalAudience === 'LEVEL') {
+        body.append('level', globalLevel);
+      }
+      globalFiles.forEach((file) => body.append('files', file, file.name));
+
       await apiClient('/messages/global', {
         method: 'POST',
         token,
-        body: JSON.stringify(payload)
+        body
       });
 
       setGlobalContent('');
+      setGlobalFiles([]);
       await loadConversations(token);
     } catch (e) {
       setError(e.message || 'Erreur envoi annonce.');
@@ -452,8 +479,21 @@ export default function MessagesPage() {
                       ? 'Consigne de devoir, objectifs, date limite...'
                       : 'Écrire un message...'
                   }
-                  required
                 />
+                <label className="flex cursor-pointer items-center justify-between rounded-lg border border-brand-100 bg-white px-3 py-2 text-xs text-brand-700 hover:bg-brand-50">
+                  <span>{privateFiles.length ? `${privateFiles.length} fichier(s) sélectionné(s)` : '📎 Joindre des fichiers'}</span>
+                  <input
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => setPrivateFiles(Array.from(e.target.files || []))}
+                  />
+                </label>
+                {privateFiles.length ? (
+                  <button type="button" className="btn-secondary w-full" onClick={() => setPrivateFiles([])}>
+                    Retirer les fichiers
+                  </button>
+                ) : null}
                 <button type="submit" className="btn-primary w-full" disabled={sendingPrivate || !recipientId}>
                   {sendingPrivate ? 'Envoi...' : 'Envoyer'}
                 </button>
@@ -476,7 +516,7 @@ export default function MessagesPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-brand-900">{conversationLabel(conversation, student?.id)}</p>
-                    <p className="mt-0.5 line-clamp-1 text-xs text-brand-700">{conversation.lastMessage?.content || 'Aucun message'}</p>
+                    <p className="mt-0.5 line-clamp-1 text-xs text-brand-700">{messagePreview(conversation.lastMessage)}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[11px] text-brand-700">{formatTimeShort(conversation.lastMessage?.createdAt || conversation.createdAt)}</p>
@@ -540,10 +580,31 @@ export default function MessagesPage() {
                         {message.sender.firstName} {message.sender.lastName}
                       </p>
                     ) : null}
-                    <p className="mt-0.5 whitespace-pre-wrap">{message.content}</p>
+                    {String(message.content || '').trim() ? (
+                      <p className="mt-0.5 whitespace-pre-wrap">{message.content}</p>
+                    ) : null}
+                    {Array.isArray(message.attachments) && message.attachments.length ? (
+                      <div className="mt-2 space-y-1">
+                        {message.attachments.map((att, idx) => (
+                          <a
+                            key={`${message.id}-${att?.storedName || idx}`}
+                            href={resolveMediaUrl(att?.url)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`block rounded-lg border px-2 py-1 text-xs font-semibold ${
+                              mine && isDarkMode
+                                ? 'border-white/30 bg-white/10 text-white'
+                                : 'border-brand-100 bg-white/70 text-brand-900'
+                            }`}
+                          >
+                            📎 {att?.originalName || att?.storedName || 'Fichier'}
+                          </a>
+                        ))}
+                      </div>
+                    ) : null}
                     <div className="mt-1 flex items-center justify-end gap-2">
                       <p className={`text-right text-[11px] ${mine && isDarkMode ? 'text-white/80' : 'text-brand-700'}`}>{formatTimeShort(message.createdAt)}</p>
-                      {(mine || student?.role === 'ADMIN') ? (
+                      {(mine || ['ADMIN', 'SUPER_ADMIN'].includes(student?.role)) ? (
                         <button
                           type="button"
                           className={`text-[11px] underline ${mine && isDarkMode ? 'text-white/80' : 'text-brand-700'}`}
@@ -565,12 +626,20 @@ export default function MessagesPage() {
 
           {selectedConversation?.type === 'PRIVATE' ? (
             <form className="flex gap-2 border-t border-slate-200 bg-white p-3" onSubmit={handleReply}>
+              <label className="flex items-center justify-center rounded-full border border-slate-200 px-3 text-sm hover:bg-brand-50">
+                <span className="select-none">📎</span>
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => setReplyFiles(Array.from(e.target.files || []))}
+                />
+              </label>
               <input
                 className="input !rounded-full"
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder="Écrire un message..."
-                required
               />
               <button type="submit" className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" disabled={sendingPrivate}>
                 {sendingPrivate ? '...' : 'Envoyer'}
@@ -595,7 +664,7 @@ export default function MessagesPage() {
               className="rounded-lg border border-brand-100 bg-white px-3 py-2 text-left hover:bg-brand-50"
             >
               <p className="font-semibold text-brand-900">{conversationLabel(conversation, student?.id)}</p>
-              <p className="mt-1 text-sm text-brand-700 line-clamp-3">{conversation.lastMessage?.content || 'Annonce'}</p>
+              <p className="mt-1 text-sm text-brand-700 line-clamp-3">{messagePreview(conversation.lastMessage) || 'Annonce'}</p>
               <p className="mt-1 text-[11px] text-brand-700">{formatDateTime(conversation.lastMessage?.createdAt || conversation.createdAt)}</p>
             </button>
           ))}
@@ -604,9 +673,9 @@ export default function MessagesPage() {
           ) : null}
         </div>
 
-        {student?.role === 'ADMIN' ? (
+        {['ADMIN', 'SUPER_ADMIN'].includes(student?.role) ? (
           <form className="mt-5 space-y-2 rounded-lg border border-brand-100 p-3" onSubmit={handleSendGlobal}>
-            <h3 className="text-sm font-semibold text-brand-900">Nouvelle annonce (Admin)</h3>
+            <h3 className="text-sm font-semibold text-brand-900">Nouvelle annonce</h3>
             <div className="grid gap-2 md:grid-cols-3">
               <select className="input" value={globalAudience} onChange={(e) => setGlobalAudience(e.target.value)}>
                 <option value="ALL">Tous les utilisateurs</option>
@@ -628,10 +697,23 @@ export default function MessagesPage() {
               value={globalContent}
               onChange={(e) => setGlobalContent(e.target.value)}
               placeholder="Message global..."
-              required
             />
+            <label className="flex cursor-pointer items-center justify-between rounded-lg border border-brand-100 bg-white px-3 py-2 text-xs text-brand-700 hover:bg-brand-50">
+              <span>{globalFiles.length ? `${globalFiles.length} fichier(s) sélectionné(s)` : '📎 Joindre des fichiers'}</span>
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => setGlobalFiles(Array.from(e.target.files || []))}
+              />
+            </label>
+            {globalFiles.length ? (
+              <button type="button" className="btn-secondary" onClick={() => setGlobalFiles([])}>
+                Retirer les fichiers
+              </button>
+            ) : null}
             <button type="submit" className="btn-primary" disabled={sendingGlobal}>
-              {sendingGlobal ? 'Envoi...' : 'envoyér annonce'}
+              {sendingGlobal ? 'Envoi...' : 'Envoyer l’annonce'}
             </button>
           </form>
         ) : null}

@@ -461,7 +461,7 @@ export default function SchoolStudentsPage() {
                 disabled={safePage <= 1}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               >
-                Precedent
+                Précédent
               </button>
               <button
                 type="button"
