@@ -2,10 +2,13 @@
 
 import styles from './Search.module.css';
 
-const groups = ['courses', 'publications', 'teachers', 'events'];
+const groups = ['quizzes', 'exams', 'books', 'videos', 'publications', 'teachers', 'events'];
 
 function groupLabel(key) {
-  if (key === 'courses') return 'Cours';
+  if (key === 'quizzes') return 'Quiz';
+  if (key === 'exams') return 'Examens passés';
+  if (key === 'books') return 'Bibliothèque';
+  if (key === 'videos') return 'Classe numérique';
   if (key === 'publications') return 'Publications';
   if (key === 'teachers') return 'Enseignants';
   return 'Événements';

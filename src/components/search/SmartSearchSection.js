@@ -19,7 +19,15 @@ export default function SmartSearchSection({ className = '', initialQuery = '' }
     tags: ''
   });
   const [results, setResults] = useState(null);
-  const [suggestions, setSuggestions] = useState({ courses: [], publications: [], teachers: [], events: [] });
+  const [suggestions, setSuggestions] = useState({
+    quizzes: [],
+    exams: [],
+    books: [],
+    videos: [],
+    publications: [],
+    teachers: [],
+    events: []
+  });
   const [history, setHistory] = useState([]);
   const [loadingResults, setLoadingResults] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
@@ -35,7 +43,10 @@ export default function SmartSearchSection({ className = '', initialQuery = '' }
     }
 
     return [
-      ...(suggestions.courses || []).map((s) => ({ type: 'suggestion', label: s.label })),
+      ...(suggestions.quizzes || []).map((s) => ({ type: 'suggestion', label: s.label })),
+      ...(suggestions.exams || []).map((s) => ({ type: 'suggestion', label: s.label })),
+      ...(suggestions.books || []).map((s) => ({ type: 'suggestion', label: s.label })),
+      ...(suggestions.videos || []).map((s) => ({ type: 'suggestion', label: s.label })),
       ...(suggestions.publications || []).map((s) => ({ type: 'suggestion', label: s.label })),
       ...(suggestions.teachers || []).map((s) => ({ type: 'suggestion', label: s.label })),
       ...(suggestions.events || []).map((s) => ({ type: 'suggestion', label: s.label }))
@@ -68,7 +79,7 @@ export default function SmartSearchSection({ className = '', initialQuery = '' }
     setActiveIndex(-1);
 
     if (!trimmed) {
-      setSuggestions({ courses: [], publications: [], teachers: [], events: [] });
+      setSuggestions({ quizzes: [], exams: [], books: [], videos: [], publications: [], teachers: [], events: [] });
       return;
     }
 
@@ -79,7 +90,7 @@ export default function SmartSearchSection({ className = '', initialQuery = '' }
         const data = await apiClient(`/search/suggestions?q=${encodeURIComponent(trimmed)}&category=${encodeURIComponent(filters.category)}`, { token });
         setSuggestions(data);
       } catch (_) {
-        setSuggestions({ courses: [], publications: [], teachers: [], events: [] });
+        setSuggestions({ quizzes: [], exams: [], books: [], videos: [], publications: [], teachers: [], events: [] });
       } finally {
         setLoadingSuggestions(false);
       }

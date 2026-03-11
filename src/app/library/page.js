@@ -29,6 +29,22 @@ const LIBRARY_LEVEL_OPTIONS = [
   'Universitaire'
 ];
 
+const LIBRARY_SUBJECT_SUGGESTIONS = [
+  'Mathématiques',
+  'Physique',
+  'Chimie',
+  'SVT',
+  'Français',
+  'Histoire',
+  'Géographie',
+  'Philosophie',
+  'Anglais',
+  'Espagnol',
+  'Informatique',
+  'Dictionnaires',
+  'Encyclopédies'
+];
+
 function BookCard({ book, preordered = false, onPreorder = null, onPurchase = null, purchasingId = null, onOpenPdf = null }) {
   const [showDescription, setShowDescription] = useState(false);
   const hasDescription = Boolean(String(book.description || '').trim());
@@ -124,6 +140,8 @@ export default function LibraryPage() {
   const [coverImage, setCoverImage] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [requestedBookId, setRequestedBookId] = useState(0);
+  const requestedBookOpenedRef = useRef(false);
 
   const canUpload = useMemo(() => {
     return student && ['ADMIN', 'TEACHER', 'STUDENT'].includes(student.role);
@@ -182,6 +200,25 @@ export default function LibraryPage() {
     setStudent(me);
     loadBooks();
   }, [router]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const q = String(params.get('prefill') || params.get('q') || '').trim();
+    if (q) setSearchTerm(q);
+    const bookId = Number(params.get('bookId') || params.get('book') || 0);
+    if (bookId > 0) setRequestedBookId(bookId);
+  }, []);
+
+  useEffect(() => {
+    if (!requestedBookId || requestedBookOpenedRef.current) return;
+    if (!approvedBooks.length) return;
+
+    const book = approvedBooks.find((item) => Number(item.id) === Number(requestedBookId));
+    if (!book) return;
+    requestedBookOpenedRef.current = true;
+    openPdfViewer(book);
+  }, [approvedBooks, requestedBookId]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -490,7 +527,21 @@ export default function LibraryPage() {
             <form className="grid gap-3 md:grid-cols-2" onSubmit={onSubmitBook}>
             <input className="input" placeholder="Titre" value={title} onChange={(e) => setTitle(e.target.value)} required />
             <input className="input" placeholder="Auteur" value={author} onChange={(e) => setAuthor(e.target.value)} required />
-            <input className="input" placeholder="Matière" value={subject} onChange={(e) => setSubject(e.target.value)} required />
+            <div className="md:col-span-2">
+              <input
+                className="input"
+                placeholder="Matière"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                list="linkedupro-library-subject-suggestions"
+                required
+              />
+              <datalist id="linkedupro-library-subject-suggestions">
+                {LIBRARY_SUBJECT_SUGGESTIONS.map((item) => (
+                  <option key={item} value={item} />
+                ))}
+              </datalist>
+            </div>
             <div className="space-y-2 rounded-lg border border-brand-100 p-3 md:col-span-2">
               <p className="text-sm font-medium text-brand-900">Niveaux concernés (choix multiple)</p>
               <div className="flex flex-wrap gap-3">
