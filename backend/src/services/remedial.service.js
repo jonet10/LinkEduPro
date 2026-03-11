@@ -141,8 +141,8 @@ function buildStudentVisibilityFilter(student) {
     AND: [
       {
         OR: [
-          { level },
-          { targetLevels: { has: level } }
+          { targetLevels: { has: level } },
+          { AND: [{ targetLevels: { isEmpty: true } }, { level }] }
         ]
       },
       {
@@ -189,8 +189,8 @@ async function listSessions({ viewer, page = 1, pageSize = 20, level, subject })
     ...(normalizedLevel
       ? {
         OR: [
-          { level: normalizedLevel },
-          { targetLevels: { has: normalizedLevel } }
+          { targetLevels: { has: normalizedLevel } },
+          { AND: [{ targetLevels: { isEmpty: true } }, { level: normalizedLevel }] }
         ]
       }
       : {}),
@@ -486,9 +486,11 @@ async function enrollStudent({ student, sessionId }) {
   }
 
   const studentLevel = getAcademicLevel(fullStudent);
+  const hasExplicitTargets = Array.isArray(session.targetLevels) && session.targetLevels.length > 0;
   const isLevelAllowed = studentLevel && (
-    session.level === studentLevel ||
-    (Array.isArray(session.targetLevels) && session.targetLevels.includes(studentLevel))
+    (hasExplicitTargets
+      ? session.targetLevels.includes(studentLevel)
+      : session.level === studentLevel)
   );
   if (!isLevelAllowed) {
     return { ok: false, status: 403, message: 'Session non accessible pour ton niveau.' };

@@ -88,8 +88,10 @@ async function listApprovedForMyLevel(req, res, next) {
       where: {
         status: 'APPROVED',
         OR: [
-          { level },
-          { targetLevels: { has: level } }
+          // If explicit targetLevels exist, they are the source of truth.
+          { targetLevels: { has: level } },
+          // Backward compatible: older rows without targetLevels use the single level field.
+          { AND: [{ targetLevels: { isEmpty: true } }, { level }] }
         ]
       },
       orderBy: { createdAt: 'desc' }
