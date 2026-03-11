@@ -37,8 +37,9 @@ async function createContent(req, res, next) {
     const type = req.body.type.toUpperCase();
 
     let status = 'PENDING';
-    if (req.user.role === 'ADMIN' && req.body.status) {
-      status = req.body.status.toUpperCase();
+    if (req.user.role === 'ADMIN') {
+      // Admin publications should be visible immediately unless explicitly set otherwise.
+      status = req.body.status ? req.body.status.toUpperCase() : 'APPROVED';
     }
 
     const content = await prisma.content.create({
