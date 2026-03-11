@@ -19,6 +19,11 @@ function defaultTopicFromFile(file) {
   return name || '';
 }
 
+function defaultYearFromFile(file) {
+  const match = String(file?.name || '').match(/(19\d{2}|20\d{2})/);
+  return match ? match[1] : '';
+}
+
 export default function TeacherExamsPage() {
   const [ready, setReady] = useState(false);
   const [student, setStudent] = useState(null);
@@ -27,6 +32,7 @@ export default function TeacherExamsPage() {
   const [level, setLevel] = useState('NSIV');
   const [subject, setSubject] = useState('');
   const [topic, setTopic] = useState('');
+  const [year, setYear] = useState('');
   const [file, setFile] = useState(null);
 
   const [submitting, setSubmitting] = useState(false);
@@ -70,6 +76,10 @@ export default function TeacherExamsPage() {
       setError('Indique la matière (ex : Mathématiques, Anglais...).');
       return;
     }
+    if (!year.trim() || !/^(19\d{2}|20\d{2})$/.test(year.trim())) {
+      setError("Indique l'année (ex : 2024).");
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -77,6 +87,7 @@ export default function TeacherExamsPage() {
       formData.append('level', level);
       formData.append('subject', subject.trim());
       formData.append('topic', topic.trim());
+      formData.append('year', year.trim());
       formData.append('file', file, file.name);
 
       const data = await apiClient('/exams/sources', {
@@ -89,6 +100,7 @@ export default function TeacherExamsPage() {
       setLastCreated(data.source || null);
       setTopic('');
       setSubject('');
+      setYear('');
       setFile(null);
     } catch (e2) {
       setError(e2.message || "Impossible d'ajouter l'examen.");
@@ -173,6 +185,21 @@ export default function TeacherExamsPage() {
             <p className="text-xs text-brand-600">Optionnel: si vide, le titre est déduit du nom du fichier.</p>
           </label>
 
+          <label className="space-y-1">
+            <span className="text-sm font-medium text-brand-900">Année</span>
+            <input
+              className="input"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              placeholder="Ex: 2025"
+              inputMode="numeric"
+              pattern="^(19\\d{2}|20\\d{2})$"
+              maxLength={4}
+              required
+            />
+            <p className="text-xs text-brand-600">Ex: 2024, 2025…</p>
+          </label>
+
           <label className="space-y-1 md:col-span-2">
             <span className="text-sm font-medium text-brand-900">PDF</span>
             <input
@@ -184,6 +211,9 @@ export default function TeacherExamsPage() {
                 setFile(nextFile);
                 if (!topic.trim() && nextFile) {
                   setTopic(defaultTopicFromFile(nextFile));
+                }
+                if (!year.trim() && nextFile) {
+                  setYear(defaultYearFromFile(nextFile));
                 }
               }}
               required

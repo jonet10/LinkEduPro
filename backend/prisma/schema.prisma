@@ -1334,6 +1334,7 @@ model probable_exercise_sources {
   subject    String
   topic      String
   file_name  String
+  exam_year  Int?
   created_at DateTime @default(now())
 
   @@unique([subject, topic, file_name, level], map: "probable_exercise_sources_unique")

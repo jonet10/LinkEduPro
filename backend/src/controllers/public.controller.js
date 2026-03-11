@@ -61,6 +61,14 @@ function topicKey(subject, topic) {
   return `${String(subject || '').trim().toLowerCase()}::${String(topic || '').trim().toLowerCase()}`;
 }
 
+function extractExamYear(value) {
+  const match = String(value || '').match(/(19\d{2}|20\d{2})/);
+  if (!match) return null;
+  const parsed = Number(match[1]);
+  if (!Number.isFinite(parsed) || parsed < 1990 || parsed > 2100) return null;
+  return parsed;
+}
+
 function inferProbableSourcesFromDisk(level) {
   const inferred = [];
   const candidates = [
@@ -85,7 +93,7 @@ function inferProbableSourcesFromDisk(level) {
         const rawTopic = firstUnderscore >= 0 ? withoutExt.slice(firstUnderscore + 1) : withoutExt;
         const subject = rawSubject.replace(/_+/g, ' ').trim() || 'General';
         const topic = rawTopic.replace(/_+/g, ' ').trim() || 'Sujet';
-        inferred.push({ subject, topic, fileName: name });
+        inferred.push({ subject, topic, fileName: name, year: extractExamYear(name) || extractExamYear(topic) });
       }
     } catch (_) {
       // Best-effort fallback only.
@@ -269,7 +277,7 @@ async function listProbableExercises(req, res, next) {
     try {
       sourceRows = await prisma.$queryRaw(
         Prisma.sql`
-          SELECT subject, topic, file_name AS "fileName"
+          SELECT subject, topic, file_name AS "fileName", exam_year AS "year"
           FROM probable_exercise_sources
           WHERE level = CAST(${targetLevel} AS "AcademicLevel")
         `
@@ -316,6 +324,7 @@ async function listProbableExercises(req, res, next) {
       if (!sourcesMap.has(key)) sourcesMap.set(key, []);
       sourcesMap.get(key).push({
         fileName: row.fileName,
+        year: row.year || extractExamYear(row.fileName) || extractExamYear(row.topic),
         url: `/api/public/exam-pdfs/${encodeURIComponent(row.fileName)}`
       });
     }

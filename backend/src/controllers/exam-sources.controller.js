@@ -7,7 +7,14 @@ const { resolveStoragePath } = require('../config/storage');
 const inputSchema = Joi.object({
   level: Joi.string().trim().required(),
   subject: Joi.string().trim().min(2).max(120).required(),
-  topic: Joi.string().trim().min(2).max(200).allow('', null).optional()
+  topic: Joi.string().trim().min(2).max(200).allow('', null).optional(),
+  year: Joi.alternatives()
+    .try(
+      Joi.number().integer().min(1990).max(2100),
+      Joi.string().trim().pattern(/^(19\d{2}|20\d{2})$/)
+    )
+    .allow('', null)
+    .optional()
 });
 
 function normalizeAcademicLevel(value) {
@@ -37,6 +44,25 @@ function toSafeSegment(value) {
 
 function topicFromFileName(fileName) {
   return normalizeNoAccent(String(fileName || '').replace(/\.pdf$/i, '')).trim() || 'Sujet';
+}
+
+function extractYear(value) {
+  const match = String(value || '').match(/(19\d{2}|20\d{2})/);
+  if (!match) return null;
+  const parsed = Number(match[1]);
+  if (!Number.isFinite(parsed) || parsed < 1990 || parsed > 2100) return null;
+  return parsed;
+}
+
+function normalizeExamYear(raw, { fileName, topic }) {
+  if (raw !== undefined && raw !== null && String(raw).trim() !== '') {
+    const parsed = Number(raw);
+    if (Number.isInteger(parsed) && parsed >= 1990 && parsed <= 2100) return parsed;
+    const fromText = extractYear(raw);
+    if (fromText) return fromText;
+  }
+
+  return extractYear(topic) || extractYear(fileName);
 }
 
 function buildStoredName({ level, subject, originalName }) {
@@ -85,6 +111,7 @@ async function createExamSource(req, res, next) {
 
     const subject = String(value.subject || '').trim();
     const topic = String(value.topic || '').trim() || topicFromFileName(req.file.originalname);
+    const year = normalizeExamYear(value.year, { fileName: req.file.originalname, topic });
 
     const targetDir = resolveStoragePath('exam-pdfs');
     const uploadedPath = path.join(targetDir, req.file.filename);
@@ -117,7 +144,8 @@ async function createExamSource(req, res, next) {
         level,
         subject,
         topic,
-        file_name: finalName
+        file_name: finalName,
+        exam_year: year || null
       }
     });
 
@@ -128,6 +156,7 @@ async function createExamSource(req, res, next) {
         level,
         subject,
         topic,
+        year: created.exam_year || null,
         fileName: finalName,
         url: `/api/public/exam-pdfs/${encodeURIComponent(finalName)}`
       }
@@ -138,4 +167,3 @@ async function createExamSource(req, res, next) {
 }
 
 module.exports = { createExamSource };
-
