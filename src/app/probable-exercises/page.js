@@ -15,6 +15,14 @@ function extractYear(fileName) {
   return match ? match[1] : 'Sans année';
 }
 
+function normalizeSourceYear(source) {
+  const fromApi = source?.year;
+  if (typeof fromApi === 'number' && Number.isFinite(fromApi)) return String(fromApi);
+  const trimmed = String(fromApi || '').trim();
+  if (/^(19\d{2}|20\d{2})$/.test(trimmed)) return trimmed;
+  return '';
+}
+
 function cleanFileLabel(fileName) {
   return String(fileName || '')
     .replace(/\.pdf$/i, '')
@@ -43,7 +51,7 @@ function buildYearBuckets(items) {
         const fileName = String(source?.fileName || '').trim();
         if (!fileName) continue;
 
-        const year = extractYear(fileName);
+        const year = normalizeSourceYear(source) || extractYear(fileName);
         if (!yearMap.has(year)) yearMap.set(year, new Map());
         const subjectMap = yearMap.get(year);
 
