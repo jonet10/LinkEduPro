@@ -24,6 +24,12 @@ function defaultYearFromFile(file) {
   return match ? match[1] : '';
 }
 
+function normalizeYearInput(value) {
+  return String(value || '')
+    .replace(/[^\d]/g, '')
+    .slice(0, 4);
+}
+
 export default function TeacherExamsPage() {
   const [ready, setReady] = useState(false);
   const [student, setStudent] = useState(null);
@@ -190,10 +196,11 @@ export default function TeacherExamsPage() {
             <input
               className="input"
               value={year}
-              onChange={(e) => setYear(e.target.value)}
+              onChange={(e) => setYear(normalizeYearInput(e.target.value))}
               placeholder="Ex: 2025"
+              type="text"
               inputMode="numeric"
-              pattern="^(19\\d{2}|20\\d{2})$"
+              pattern="(19[0-9]{2}|20[0-9]{2})"
               maxLength={4}
               required
             />
@@ -213,7 +220,7 @@ export default function TeacherExamsPage() {
                   setTopic(defaultTopicFromFile(nextFile));
                 }
                 if (!year.trim() && nextFile) {
-                  setYear(defaultYearFromFile(nextFile));
+                  setYear(normalizeYearInput(defaultYearFromFile(nextFile)));
                 }
               }}
               required
