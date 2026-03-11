@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { getStudent, getToken } from '@/lib/auth';
 import { getApiBaseUrl } from '@/lib/runtime-config';
 
 function subjectKey(year, subject) {
@@ -95,6 +95,7 @@ export default function ProbableExercisesPage() {
   const router = useRouter();
   const [items, setItems] = useState([]);
   const [level, setLevel] = useState('NSIV');
+  const [student, setStudent] = useState(null);
   const [selectedYear, setSelectedYear] = useState('');
   const [expandedSubjects, setExpandedSubjects] = useState(() => new Set());
   const [loading, setLoading] = useState(true);
@@ -102,6 +103,7 @@ export default function ProbableExercisesPage() {
 
   useEffect(() => {
     const authToken = getToken();
+    setStudent(getStudent());
     apiClient('/public/probable-exercises', { token: authToken })
       .then((data) => {
         const nextItems = Array.isArray(data?.items) ? data.items : [];
@@ -163,14 +165,28 @@ export default function ProbableExercisesPage() {
     return 'NSIV';
   }, [level]);
 
+  const canUploadExams = useMemo(
+    () => Boolean(student && ['TEACHER', 'ADMIN', 'SUPER_ADMIN'].includes(student.role)),
+    [student]
+  );
+
   return (
     <section className="space-y-5">
       <div className="card">
-        <h1 className="text-3xl font-bold text-brand-900">Examens passés</h1>
-        <p className="mt-2 text-sm text-brand-700">
-          Les sujets sont organisés par année, puis par matière.
-        </p>
-        <p className="mt-1 text-xs font-semibold text-brand-700">Niveau filtré : {levelLabel}</p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-bold text-brand-900">Examens passés</h1>
+            <p className="mt-2 text-sm text-brand-700">
+              Les sujets sont organisés par année, puis par matière.
+            </p>
+            <p className="mt-1 text-xs font-semibold text-brand-700">Niveau filtré : {levelLabel}</p>
+          </div>
+          {canUploadExams ? (
+            <button type="button" className="btn-primary" onClick={() => router.push('/teacher/exams')}>
+              Ajouter un PDF
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-brand-100 bg-white/70">

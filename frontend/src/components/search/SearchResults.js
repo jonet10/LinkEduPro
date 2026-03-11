@@ -31,6 +31,7 @@ export default function SearchResults({ data, loading, error, query, onPageChang
   if (!data) return null;
 
   const hasAny = (data.totals?.all || 0) > 0;
+  const quizzes = data.results?.quizzes || data.results?.courses || [];
 
   return (
     <div>
@@ -43,14 +44,64 @@ export default function SearchResults({ data, loading, error, query, onPageChang
       ) : (
         <div className="space-y-5">
           <CategoryBlock
-            title="Cours"
-            rows={data.results.courses}
+            title="Quiz"
+            rows={quizzes}
             renderRow={(item) => (
-              <Link key={`course_${item.id}`} href={`/quiz/${item.id}`} className={styles.resultLinkCard}>
+              <Link key={`quiz_${item.id}`} href={`/quiz/${item.id}`} className={styles.resultLinkCard}>
                 <article className={styles.resultCard}>
                   <p className="font-semibold text-brand-900">{item.name}</p>
                   <p className="mt-1 text-sm text-brand-700">{item.description || 'Sans description.'}</p>
                   <p className={styles.meta}>Tags: {(item.tags || []).join(', ') || 'N/A'} | Tentatives: {item.attemptCount}</p>
+                </article>
+              </Link>
+            )}
+          />
+
+          <CategoryBlock
+            title="Examens passés (PDF)"
+            rows={data.results.exams}
+            renderRow={(item) => (
+              <Link
+                key={`exam_${item.id}`}
+                href={`/exam-viewer?file=${encodeURIComponent(item.fileName)}`}
+                className={styles.resultLinkCard}
+              >
+                <article className={styles.resultCard}>
+                  <p className="font-semibold text-brand-900">{item.subject}</p>
+                  <p className="mt-1 text-sm text-brand-700">{item.topic || 'Sujet d’examen'}</p>
+                  <p className={styles.meta}>Niveau: {String(item.level || '').replace('LEVEL_9E', '9e')} | Fichier: {item.fileName}</p>
+                </article>
+              </Link>
+            )}
+          />
+
+          <CategoryBlock
+            title="Bibliothèque (PDF)"
+            rows={data.results.books}
+            renderRow={(item) => (
+              <Link
+                key={`book_${item.id}`}
+                href={`/library?bookId=${encodeURIComponent(item.id)}`}
+                className={styles.resultLinkCard}
+              >
+                <article className={styles.resultCard}>
+                  <p className="font-semibold text-brand-900">{item.title}</p>
+                  <p className="mt-1 text-sm text-brand-700">{item.author ? `Auteur: ${item.author}` : (item.description || 'Livre PDF LinkEduPro.')}</p>
+                  <p className={styles.meta}>Matière: {item.subject} | Niveau: {item.level}</p>
+                </article>
+              </Link>
+            )}
+          />
+
+          <CategoryBlock
+            title="Classe numérique (Vidéos)"
+            rows={data.results.videos}
+            renderRow={(item) => (
+              <Link key={`video_${item.id}`} href="/video-lessons" className={styles.resultLinkCard}>
+                <article className={styles.resultCard}>
+                  <p className="font-semibold text-brand-900">{item.title}</p>
+                  <p className="mt-1 text-sm text-brand-700">{item.excerpt || 'Contenu vidéo.'}</p>
+                  <p className={styles.meta}>Niveau: {String(item.level || '')}</p>
                 </article>
               </Link>
             )}

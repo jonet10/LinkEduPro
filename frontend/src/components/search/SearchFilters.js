@@ -7,7 +7,10 @@ export default function SearchFilters({ filters, onChange }) {
     <div className={styles.filters} aria-label="Filtres de recherche">
       <select className={styles.control} value={filters.category} onChange={(e) => onChange('category', e.target.value)}>
         <option value="all">Toutes catégories</option>
-        <option value="courses">Cours</option>
+        <option value="quizzes">Quiz</option>
+        <option value="exams">Examens passés (PDF)</option>
+        <option value="books">Bibliothèque (PDF)</option>
+        <option value="videos">Classe numérique (Vidéos)</option>
         <option value="publications">Publications</option>
         <option value="teachers">Enseignants</option>
       </select>

@@ -6,6 +6,21 @@ const mockPrisma = {
     findMany: jest.fn(),
     count: jest.fn()
   },
+  libraryBook: {
+    findMany: jest.fn(),
+    count: jest.fn()
+  },
+  content: {
+    findMany: jest.fn(),
+    count: jest.fn()
+  },
+  probable_exercise_sources: {
+    findMany: jest.fn(),
+    count: jest.fn()
+  },
+  studentProfile: {
+    findUnique: jest.fn()
+  },
   blogPost: {
     findMany: jest.fn(),
     count: jest.fn()
@@ -44,6 +59,13 @@ describe('search routes integration', () => {
 
     mockPrisma.subject.findMany.mockResolvedValue([]);
     mockPrisma.subject.count.mockResolvedValue(0);
+    mockPrisma.libraryBook.findMany.mockResolvedValue([]);
+    mockPrisma.libraryBook.count.mockResolvedValue(0);
+    mockPrisma.content.findMany.mockResolvedValue([]);
+    mockPrisma.content.count.mockResolvedValue(0);
+    mockPrisma.probable_exercise_sources.findMany.mockResolvedValue([]);
+    mockPrisma.probable_exercise_sources.count.mockResolvedValue(0);
+    mockPrisma.studentProfile.findUnique.mockResolvedValue(null);
     mockPrisma.blogPost.findMany.mockResolvedValue([]);
     mockPrisma.blogPost.count.mockResolvedValue(0);
     mockPrisma.student.findMany.mockResolvedValue([]);

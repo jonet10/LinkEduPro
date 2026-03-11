@@ -5,6 +5,27 @@ function shouldSearch(requested, target) {
   return requested === 'all' || requested === target;
 }
 
+function mapAcademicToEducationLevel(value) {
+  const raw = String(value || '').trim().toUpperCase();
+  if (!raw) return null;
+  if (raw === 'LEVEL_9E' || raw === '9E') return 'LEVEL_9E';
+  if (raw === 'NSI') return 'NS1';
+  if (raw === 'NSII') return 'NS2';
+  if (raw === 'NSIII') return 'NS3';
+  if (raw === 'NSIV' || raw === 'TERMINALE') return 'TERMINALE';
+  if (raw === 'UNIVERSITAIRE' || raw === 'UNIVERSITE') return 'UNIVERSITE';
+  return null;
+}
+
+async function resolveUserAcademicLevel(userId) {
+  if (!userId) return null;
+  const profile = await prisma.studentProfile.findUnique({
+    where: { userId: Number(userId) },
+    select: { level: true }
+  });
+  return profile?.level || null;
+}
+
 function tagWhereClause(tags) {
   if (!tags.length) return undefined;
   return {
@@ -38,6 +59,17 @@ function teacherOrderBy({ date, popularity }) {
     return [{ reputationScore: 'desc' }, { createdAt: date === 'oldest' ? 'asc' : 'desc' }];
   }
   return [{ createdAt: date === 'oldest' ? 'asc' : 'desc' }];
+}
+
+function bookOrderBy({ date, popularity }) {
+  if (popularity) {
+    return [{ purchases: { _count: 'desc' } }, { createdAt: date === 'oldest' ? 'asc' : 'desc' }];
+  }
+  return [{ createdAt: date === 'oldest' ? 'asc' : 'desc' }];
+}
+
+function examOrderBy({ date }) {
+  return [{ created_at: date === 'oldest' ? 'asc' : 'desc' }];
 }
 
 async function persistSearchHistory(userId, query) {
@@ -82,10 +114,17 @@ async function advancedSearch(req, res, next) {
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
+    const userAcademicLevel = req.user?.id ? await resolveUserAcademicLevel(req.user.id) : null;
+    const userEducationLevel = mapAcademicToEducationLevel(userAcademicLevel);
+
     const queryByCategory = {
-      courses: shouldSearch(category, 'courses'),
+      courses: shouldSearch(category, 'courses') || shouldSearch(category, 'quizzes'),
+      quizzes: shouldSearch(category, 'courses') || shouldSearch(category, 'quizzes'),
       publications: shouldSearch(category, 'publications'),
       teachers: shouldSearch(category, 'teachers'),
+      books: shouldSearch(category, 'books'),
+      videos: shouldSearch(category, 'videos'),
+      exams: shouldSearch(category, 'exams'),
       events: shouldSearch(category, 'events')
     };
 
@@ -98,6 +137,45 @@ async function advancedSearch(req, res, next) {
           ]
         },
         ...(tags.length ? [{ courseTags: { some: tagWhereClause(tags) } }] : [])
+      ]
+    };
+
+    const bookWhere = {
+      isDeleted: false,
+      status: 'APPROVED',
+      OR: [
+        { title: { contains: q, mode: 'insensitive' } },
+        { author: { contains: q, mode: 'insensitive' } },
+        { subject: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } }
+      ]
+    };
+
+    const videoWhere = {
+      type: 'VIDEO',
+      status: 'APPROVED',
+      AND: [
+        {
+          OR: [
+            { title: { contains: q, mode: 'insensitive' } },
+            { body: { contains: q, mode: 'insensitive' } }
+          ]
+        },
+        ...(userEducationLevel ? [{
+          OR: [
+            { level: userEducationLevel },
+            { targetLevels: { has: userEducationLevel } }
+          ]
+        }] : [])
+      ]
+    };
+
+    const examWhere = {
+      ...(userAcademicLevel ? { level: userAcademicLevel } : {}),
+      OR: [
+        { subject: { contains: q, mode: 'insensitive' } },
+        { topic: { contains: q, mode: 'insensitive' } },
+        { file_name: { contains: q, mode: 'insensitive' } }
       ]
     };
 
@@ -147,7 +225,13 @@ async function advancedSearch(req, res, next) {
       publications,
       publicationsCount,
       teachers,
-      teachersCount
+      teachersCount,
+      books,
+      booksCount,
+      videos,
+      videosCount,
+      exams,
+      examsCount
     ] = await Promise.all([
       queryByCategory.courses
         ? prisma.subject.findMany({
@@ -195,7 +279,38 @@ async function advancedSearch(req, res, next) {
             take
           })
         : [],
-      queryByCategory.teachers ? prisma.student.count({ where: teacherWhere }) : 0
+      queryByCategory.teachers ? prisma.student.count({ where: teacherWhere }) : 0,
+
+      queryByCategory.books
+        ? prisma.libraryBook.findMany({
+            where: bookWhere,
+            include: { _count: { select: { purchases: true } } },
+            orderBy: bookOrderBy({ date, popularity: usePopularity }),
+            skip,
+            take
+          })
+        : [],
+      queryByCategory.books ? prisma.libraryBook.count({ where: bookWhere }) : 0,
+
+      queryByCategory.videos
+        ? prisma.content.findMany({
+            where: videoWhere,
+            orderBy: [{ createdAt: date === 'oldest' ? 'asc' : 'desc' }],
+            skip,
+            take
+          })
+        : [],
+      queryByCategory.videos ? prisma.content.count({ where: videoWhere }) : 0,
+
+      queryByCategory.exams
+        ? prisma.probable_exercise_sources.findMany({
+            where: examWhere,
+            orderBy: examOrderBy({ date }),
+            skip,
+            take
+          })
+        : [],
+      queryByCategory.exams ? prisma.probable_exercise_sources.count({ where: examWhere }) : 0
     ]);
 
     const mappedCourses = courses
@@ -240,6 +355,58 @@ async function advancedSearch(req, res, next) {
       createdAt: teacher.createdAt
     }));
 
+    const mappedBooks = books
+      .map((book) => ({
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        subject: book.subject,
+        level: book.level,
+        description: book.description,
+        coverImageUrl: book.coverImageUrl,
+        fileUrl: book.fileUrl,
+        purchasesCount: book._count?.purchases || 0,
+        score: scoreResult({
+          query: q,
+          title: book.title,
+          content: [book.author, book.subject, book.description].filter(Boolean).join(' '),
+          tags: [book.subject, book.level].filter(Boolean)
+        }),
+        createdAt: book.createdAt
+      }))
+      .sort((a, b) => b.score - a.score || b.purchasesCount - a.purchasesCount);
+
+    const mappedVideos = videos
+      .map((content) => ({
+        id: content.id,
+        title: content.title,
+        excerpt: String(content.body || '').slice(0, 220),
+        level: content.level,
+        type: content.type,
+        score: scoreResult({ query: q, title: content.title, content: content.body }),
+        createdAt: content.createdAt
+      }))
+      .sort((a, b) => b.score - a.score);
+
+    const mappedExams = exams
+      .map((row) => {
+        const fileName = String(row.file_name || '').trim();
+        return {
+          id: row.id,
+          level: row.level,
+          subject: row.subject,
+          topic: row.topic,
+          fileName,
+          score: scoreResult({
+            query: q,
+            title: `${row.subject} - ${row.topic}`,
+            content: fileName
+          }),
+          createdAt: row.created_at
+        };
+      })
+      .sort((a, b) => b.score - a.score);
+
     if (req.user?.id) {
       await persistSearchHistory(req.user.id, q);
     }
@@ -259,15 +426,23 @@ async function advancedSearch(req, res, next) {
       },
       totals: {
         courses: coursesCount,
+        quizzes: coursesCount,
         publications: publicationsCount,
         teachers: teachersCount,
+        books: booksCount,
+        videos: videosCount,
+        exams: examsCount,
         events: 0,
-        all: coursesCount + publicationsCount + teachersCount
+        all: coursesCount + publicationsCount + teachersCount + booksCount + videosCount + examsCount
       },
       results: {
         courses: mappedCourses,
+        quizzes: mappedCourses,
         publications: mappedPublications,
         teachers: mappedTeachers,
+        books: mappedBooks,
+        videos: mappedVideos,
+        exams: mappedExams,
         events: []
       }
     });
@@ -281,8 +456,11 @@ async function getSuggestions(req, res, next) {
     const { q, category } = req.query;
     const tags = normalizeTags(req.query.tags);
 
-    const [courses, publications, teachers] = await Promise.all([
-      shouldSearch(category, 'courses')
+    const userAcademicLevel = req.user?.id ? await resolveUserAcademicLevel(req.user.id) : null;
+    const userEducationLevel = mapAcademicToEducationLevel(userAcademicLevel);
+
+    const [courses, publications, teachers, books, videos, exams] = await Promise.all([
+      (shouldSearch(category, 'courses') || shouldSearch(category, 'quizzes'))
         ? prisma.subject.findMany({
             where: {
               OR: [
@@ -326,6 +504,62 @@ async function getSuggestions(req, res, next) {
             orderBy: { reputationScore: 'desc' },
             take: 5
           })
+        : [],
+      shouldSearch(category, 'books')
+        ? prisma.libraryBook.findMany({
+            where: {
+              isDeleted: false,
+              status: 'APPROVED',
+              OR: [
+                { title: { contains: q, mode: 'insensitive' } },
+                { author: { contains: q, mode: 'insensitive' } },
+                { subject: { contains: q, mode: 'insensitive' } }
+              ]
+            },
+            select: { id: true, title: true },
+            orderBy: { createdAt: 'desc' },
+            take: 5
+          })
+        : [],
+      shouldSearch(category, 'videos')
+        ? prisma.content.findMany({
+            where: {
+              type: 'VIDEO',
+              status: 'APPROVED',
+              AND: [
+                {
+                  OR: [
+                    { title: { contains: q, mode: 'insensitive' } },
+                    { body: { contains: q, mode: 'insensitive' } }
+                  ]
+                },
+                ...(userEducationLevel ? [{
+                  OR: [
+                    { level: userEducationLevel },
+                    { targetLevels: { has: userEducationLevel } }
+                  ]
+                }] : [])
+              ]
+            },
+            select: { id: true, title: true },
+            orderBy: { createdAt: 'desc' },
+            take: 5
+          })
+        : [],
+      shouldSearch(category, 'exams')
+        ? prisma.probable_exercise_sources.findMany({
+            where: {
+              ...(userAcademicLevel ? { level: userAcademicLevel } : {}),
+              OR: [
+                { subject: { contains: q, mode: 'insensitive' } },
+                { topic: { contains: q, mode: 'insensitive' } },
+                { file_name: { contains: q, mode: 'insensitive' } }
+              ]
+            },
+            select: { id: true, subject: true, topic: true },
+            orderBy: { created_at: 'desc' },
+            take: 5
+          })
         : []
     ]);
 
@@ -336,6 +570,12 @@ async function getSuggestions(req, res, next) {
         label: item.name,
         highlighted: extractHighlighted(item.name, q),
         category: 'courses'
+      })),
+      quizzes: courses.slice(0, 5).map((item) => ({
+        id: item.id,
+        label: item.name,
+        highlighted: extractHighlighted(item.name, q),
+        category: 'quizzes'
       })),
       publications: publications.slice(0, 5).map((item) => ({
         id: item.id,
@@ -348,6 +588,24 @@ async function getSuggestions(req, res, next) {
         label: `${item.firstName} ${item.lastName}`,
         highlighted: extractHighlighted(`${item.firstName} ${item.lastName}`, q),
         category: 'teachers'
+      })),
+      books: books.slice(0, 5).map((item) => ({
+        id: item.id,
+        label: item.title,
+        highlighted: extractHighlighted(item.title, q),
+        category: 'books'
+      })),
+      videos: videos.slice(0, 5).map((item) => ({
+        id: item.id,
+        label: item.title,
+        highlighted: extractHighlighted(item.title, q),
+        category: 'videos'
+      })),
+      exams: exams.slice(0, 5).map((item) => ({
+        id: item.id,
+        label: `${item.subject}${item.topic ? ` — ${item.topic}` : ''}`,
+        highlighted: extractHighlighted(`${item.subject}${item.topic ? ` — ${item.topic}` : ''}`, q),
+        category: 'exams'
       })),
       events: []
     });

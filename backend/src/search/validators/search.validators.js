@@ -4,7 +4,7 @@ const sortDateSchema = Joi.string().valid('newest', 'oldest').default('newest');
 
 const advancedSearchQuerySchema = Joi.object({
   q: Joi.string().trim().min(1).max(120).required(),
-  category: Joi.string().valid('all', 'courses', 'publications', 'teachers', 'events').default('all'),
+  category: Joi.string().valid('all', 'courses', 'quizzes', 'publications', 'teachers', 'books', 'videos', 'exams', 'events').default('all'),
   date: sortDateSchema,
   popularity: Joi.alternatives().try(
     Joi.boolean(),
@@ -21,7 +21,7 @@ const advancedSearchQuerySchema = Joi.object({
 
 const suggestionsQuerySchema = Joi.object({
   q: Joi.string().trim().min(1).max(120).required(),
-  category: Joi.string().valid('all', 'courses', 'publications', 'teachers', 'events').default('all')
+  category: Joi.string().valid('all', 'courses', 'quizzes', 'publications', 'teachers', 'books', 'videos', 'exams', 'events').default('all')
 });
 
 module.exports = {

@@ -20,7 +20,7 @@ export default function SearchBar({ value, onChange, onSubmit, onFocus, onKeyDow
           onChange={(event) => onChange(event.target.value)}
           onFocus={onFocus}
           onKeyDown={onKeyDown}
-          placeholder="Rechercher cours, publications, enseignants..."
+          placeholder="Rechercher quiz, examens passés, livres, vidéos..."
           aria-label="Champ de recherche"
         />
         {isLoading ? <span className={styles.loaderDot} aria-hidden="true" /> : null}
