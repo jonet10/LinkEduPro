@@ -4,6 +4,34 @@ const { isConfiguredSuperAdmin } = require('../services/access');
 const { createNotification, notifyRole, notifyAdmins } = require('../services/notifications');
 const { createLibraryCheckout } = require('../services/library-purchase.service');
 
+const ACADEMIC_TO_LIBRARY_LABEL = {
+  LEVEL_9E: '9e',
+  NSI: 'NSI',
+  NSII: 'NSII',
+  NSIII: 'NSIII',
+  NSIV: 'NSIV',
+  UNIVERSITAIRE: 'Universitaire'
+};
+const EDUCATION_TO_ACADEMIC = {
+  LEVEL_9E: 'LEVEL_9E',
+  NS1: 'NSI',
+  NS2: 'NSII',
+  NS3: 'NSIII',
+  TERMINALE: 'NSIV',
+  UNIVERSITE: 'UNIVERSITAIRE'
+};
+
+async function resolveViewerLibraryLevel(userId) {
+  if (!userId) return null;
+  const student = await prisma.student.findUnique({
+    where: { id: userId },
+    include: { studentProfile: true }
+  });
+  if (!student) return null;
+  const academic = student.studentProfile?.level || EDUCATION_TO_ACADEMIC[student.level] || null;
+  return academic ? (ACADEMIC_TO_LIBRARY_LABEL[academic] || null) : null;
+}
+
 function toClientBook(book, viewer) {
   const hasPaidPurchase = Array.isArray(book.purchases) && book.purchases.some((p) => p.status === 'PAID');
   const canAccess = !book.isPaid
@@ -55,9 +83,18 @@ async function listBooks(req, res, next) {
     }
 
     if (req.user.role === 'TEACHER' || req.user.role === 'STUDENT') {
+      const viewerLevel = req.user.role === 'STUDENT'
+        ? await resolveViewerLibraryLevel(req.user.id)
+        : null;
+      const approvedFilter = req.user.role === 'STUDENT'
+        ? (viewerLevel
+          ? { status: 'APPROVED', level: { contains: viewerLevel, mode: 'insensitive' } }
+          : { id: { in: [] } })
+        : { status: 'APPROVED' };
+
       where = {
         ...whereBase,
-        OR: [{ status: 'APPROVED' }, { uploadedBy: req.user.id }]
+        OR: [approvedFilter, { uploadedBy: req.user.id }]
       };
     }
 

@@ -1,5 +1,47 @@
 const prisma = require('../config/prisma');
 
+const EDUCATION_TO_ACADEMIC = {
+  LEVEL_9E: 'LEVEL_9E',
+  NS1: 'NSI',
+  NS2: 'NSII',
+  NS3: 'NSIII',
+  TERMINALE: 'NSIV',
+  UNIVERSITE: 'UNIVERSITAIRE'
+};
+
+async function resolveViewerAcademicLevel(userId) {
+  if (!userId) return null;
+  const student = await prisma.student.findUnique({
+    where: { id: userId },
+    include: { studentProfile: true }
+  });
+  if (!student) return null;
+  return student.studentProfile?.level || EDUCATION_TO_ACADEMIC[student.level] || null;
+}
+
+function normalizeForPrefixCheck(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function is9eSubject(subjectName) {
+  const normalized = normalizeForPrefixCheck(subjectName);
+  return normalized.startsWith('9e') || normalized.startsWith('9eme');
+}
+
+function ensureSubjectAccessible(viewerRole, viewerAcademicLevel, subjectName) {
+  if (viewerRole !== 'STUDENT' || !viewerAcademicLevel) return true;
+  const is9eViewer = viewerAcademicLevel === 'LEVEL_9E';
+  const is9e = is9eSubject(subjectName);
+  if (is9eViewer && !is9e) return false;
+  if (!is9eViewer && is9e) return false;
+  return true;
+}
+
 function toClientQuestion(question) {
   return {
     id: question.id,
@@ -172,11 +214,18 @@ async function getSubjectsForGroup(groupKey) {
 
 async function getQuizSets(req, res, next) {
   try {
+    const viewerLevel = req.user?.role === 'STUDENT'
+      ? await resolveViewerAcademicLevel(req.user.id)
+      : null;
+
     const subjectId = Number(req.params.subjectId);
     const subject = await prisma.subject.findUnique({ where: { id: subjectId } });
 
     if (!subject) {
       return res.status(404).json({ message: 'Matière introuvable.' });
+    }
+    if (!ensureSubjectAccessible(req.user.role, viewerLevel, subject.name)) {
+      return res.status(403).json({ message: 'Matière non accessible pour ton niveau.' });
     }
 
     const group = findGroupForSubjectName(subject.name);
@@ -205,6 +254,10 @@ async function getQuizSets(req, res, next) {
 
 async function getQuizQuestions(req, res, next) {
   try {
+    const viewerLevel = req.user?.role === 'STUDENT'
+      ? await resolveViewerAcademicLevel(req.user.id)
+      : null;
+
     const subjectId = Number(req.params.subjectId);
     const limit = Number(req.query.limit || 10);
     const set = req.query.set;
@@ -213,6 +266,9 @@ async function getQuizQuestions(req, res, next) {
     const subject = await prisma.subject.findUnique({ where: { id: subjectId } });
     if (!subject) {
       return res.status(404).json({ message: 'Matière introuvable.' });
+    }
+    if (!ensureSubjectAccessible(req.user.role, viewerLevel, subject.name)) {
+      return res.status(403).json({ message: 'Matière non accessible pour ton niveau.' });
     }
 
     let targetSubject = subject;
@@ -228,6 +284,9 @@ async function getQuizQuestions(req, res, next) {
 
       if (!chosen) {
         return res.status(404).json({ message: `Quiz de ${group.label} introuvable.` });
+      }
+      if (!ensureSubjectAccessible(req.user.role, viewerLevel, chosen.name)) {
+        return res.status(403).json({ message: 'Matière non accessible pour ton niveau.' });
       }
 
       targetSubject = chosen;
@@ -271,6 +330,17 @@ async function submitQuiz(req, res, next) {
   try {
     const studentId = req.user.id;
     const { subjectId, answers, startedAt, durationSec } = req.body;
+
+    const subject = await prisma.subject.findUnique({ where: { id: subjectId } });
+    if (!subject) {
+      return res.status(404).json({ message: 'Matière introuvable.' });
+    }
+    const viewerLevel = req.user?.role === 'STUDENT'
+      ? await resolveViewerAcademicLevel(req.user.id)
+      : null;
+    if (!ensureSubjectAccessible(req.user.role, viewerLevel, subject.name)) {
+      return res.status(403).json({ message: 'Matière non accessible pour ton niveau.' });
+    }
 
     const questionIds = answers.map((a) => a.questionId);
     const questions = await prisma.question.findMany({
@@ -524,10 +594,17 @@ async function toggleQuizAttemptLike(req, res, next) {
 
 async function getPremiumInsights(req, res, next) {
   try {
+    const viewerLevel = req.user?.role === 'STUDENT'
+      ? await resolveViewerAcademicLevel(req.user.id)
+      : null;
+
     const subjectId = Number(req.params.subjectId);
     const subject = await prisma.subject.findUnique({ where: { id: subjectId } });
     if (!subject) {
       return res.status(404).json({ message: 'Matière introuvable.' });
+    }
+    if (!ensureSubjectAccessible(req.user.role, viewerLevel, subject.name)) {
+      return res.status(403).json({ message: 'Matière non accessible pour ton niveau.' });
     }
 
     const premiumQuestions = await prisma.question.findMany({

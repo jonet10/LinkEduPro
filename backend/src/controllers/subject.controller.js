@@ -45,8 +45,37 @@ function pickRepresentativeSubject(subjects, groupLabel) {
   return [...subjects].sort((a, b) => a.id - b.id)[0];
 }
 
+const EDUCATION_TO_ACADEMIC = {
+  LEVEL_9E: 'LEVEL_9E',
+  NS1: 'NSI',
+  NS2: 'NSII',
+  NS3: 'NSIII',
+  TERMINALE: 'NSIV',
+  UNIVERSITE: 'UNIVERSITAIRE'
+};
+
+async function resolveViewerAcademicLevel(userId) {
+  if (!userId) return null;
+  const student = await prisma.student.findUnique({
+    where: { id: userId },
+    include: { studentProfile: true }
+  });
+  if (!student) return null;
+  return student.studentProfile?.level || EDUCATION_TO_ACADEMIC[student.level] || null;
+}
+
+function is9eSubject(subjectName) {
+  const normalized = normalizeName(subjectName).replace(/\s+/g, ' ');
+  return normalized.startsWith('9e') || normalized.startsWith('9eme') || normalized.startsWith('9ème');
+}
+
 async function listSubjects(req, res, next) {
   try {
+    const viewerLevel = req.user?.role === 'STUDENT'
+      ? await resolveViewerAcademicLevel(req.user.id)
+      : null;
+    const strict9e = viewerLevel === 'LEVEL_9E';
+
     const subjects = await prisma.subject.findMany({
       orderBy: { name: 'asc' },
       include: {
@@ -60,6 +89,12 @@ async function listSubjects(req, res, next) {
     const ungrouped = [];
 
     for (const subject of subjects) {
+      if (viewerLevel) {
+        const is9e = is9eSubject(subject.name);
+        if (strict9e && !is9e) continue;
+        if (!strict9e && is9e) continue;
+      }
+
       const group = findGroupForSubjectName(subject.name);
       if (!group) {
         ungrouped.push(subject);
