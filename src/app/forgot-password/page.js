@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
             required
           />
           <button className="btn-primary w-full" disabled={loading}>
-            {loading ? 'Envoi...' : 'envoyér le code email'}
+            {loading ? 'Envoi...' : 'Envoyer le code email'}
           </button>
         </form>
       ) : (

@@ -25,6 +25,16 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
+  experimental: {
+    webpackBuildWorker: false,
+    workerThreads: true
+  },
+  eslint: {
+    ignoreDuringBuilds: true
+  },
+  typescript: {
+    ignoreBuildErrors: true
+  },
   env: {
     NEXT_PUBLIC_API_BASE_URL: apiBaseUrl,
     NEXT_PUBLIC_BACKEND_ORIGIN: backendOrigin

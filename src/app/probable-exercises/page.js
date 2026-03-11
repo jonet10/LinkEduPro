@@ -12,7 +12,7 @@ function subjectKey(year, subject) {
 
 function extractYear(fileName) {
   const match = String(fileName || '').match(/(19\d{2}|20\d{2})/);
-  return match ? match[1] : 'Sans annee';
+  return match ? match[1] : 'Sans année';
 }
 
 function cleanFileLabel(fileName) {
@@ -63,8 +63,8 @@ function buildYearBuckets(items) {
   }
 
   const years = Array.from(yearMap.keys()).sort((a, b) => {
-    if (a === 'Sans annee') return 1;
-    if (b === 'Sans annee') return -1;
+    if (a === 'Sans année') return 1;
+    if (b === 'Sans année') return -1;
     return Number(b) - Number(a);
   });
 
@@ -166,11 +166,11 @@ export default function ProbableExercisesPage() {
   return (
     <section className="space-y-5">
       <div className="card">
-        <h1 className="text-3xl font-bold text-brand-900">Examens passes</h1>
+        <h1 className="text-3xl font-bold text-brand-900">Examens passés</h1>
         <p className="mt-2 text-sm text-brand-700">
-          Les sujets sont organises par annee, puis par matiere.
+          Les sujets sont organisés par année, puis par matière.
         </p>
-        <p className="mt-1 text-xs font-semibold text-brand-700">Niveau filtre: {levelLabel}</p>
+        <p className="mt-1 text-xs font-semibold text-brand-700">Niveau filtré : {levelLabel}</p>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-brand-100 bg-white/70">
@@ -197,16 +197,16 @@ export default function ProbableExercisesPage() {
       {!loading && !error ? (
         !activeYear ? (
           <div className="card">
-            <p className="text-sm text-brand-700">Aucun PDF d examen disponible pour le moment.</p>
+            <p className="text-sm text-brand-700">Aucun PDF d’examen disponible pour le moment.</p>
           </div>
         ) : (
           <div className="space-y-4">
             <article className="card">
               <h2 className="text-2xl font-semibold text-brand-900">
-                {activeYear.year === 'Sans annee' ? 'Annee non precisee' : `Annee ${activeYear.year}`}
+                {activeYear.year === 'Sans année' ? 'Année non précisée' : `Année ${activeYear.year}`}
               </h2>
               <p className="mt-2 text-sm text-brand-700">
-                Matieres: {activeYear.subjectSummary || 'Aucune matiere detectee'}
+                Matières : {activeYear.subjectSummary || 'Aucune matière détectée'}
               </p>
             </article>
 
@@ -237,8 +237,8 @@ export default function ProbableExercisesPage() {
                         <div key={`${subjectRow.subject}-${exam.fileName}`} className="rounded-xl border border-brand-100 p-4">
                           <p className="text-base font-semibold text-brand-900">{exam.label}</p>
                           {exam.topics.length > 0 ? (
-                            <p className="mt-1 text-sm text-brand-700">
-                              Themes: {exam.topics.slice(0, 3).join(', ')}
+                          <p className="mt-1 text-sm text-brand-700">
+                              Thèmes : {exam.topics.slice(0, 3).join(', ')}
                               {exam.topics.length > 3 ? ', ...' : ''}
                             </p>
                           ) : null}

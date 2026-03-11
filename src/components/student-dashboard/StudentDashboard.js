@@ -62,7 +62,7 @@ export default function StudentDashboard({
       <header className="cockpit-header">
         <div>
           <p className="cockpit-kicker">Cockpit d'apprentissage</p>
-          <h1 className="cockpit-h1">Bienvenue, {student?.firstName || 'Eleve'}.</h1>
+          <h1 className="cockpit-h1">Bienvenue, {student?.firstName || 'Élève'}.</h1>
           <p className="cockpit-subtitle">
             Vue en temps réel: progression, recommandations et prochaine action.
           </p>

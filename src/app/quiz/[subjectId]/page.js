@@ -480,7 +480,7 @@ export default function QuizPage() {
           <div className="mt-3 grid gap-2 text-sm text-brand-800 sm:grid-cols-2">
             <p><span className="font-semibold">Matière:</span> {examMatterLabel}</p>
             <p><span className="font-semibold">Filière:</span> {FilièreLabel}</p>
-            <p><span className="font-semibold">Type:</span> Annales et questions de cours des examens passes</p>
+            <p><span className="font-semibold">Type:</span> Annales et questions de cours des examens passés</p>
             <p><span className="font-semibold">Niveau:</span> NSIV</p>
           </div>
         </div>
