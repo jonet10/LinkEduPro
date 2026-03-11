@@ -108,7 +108,21 @@ export default function RegisterPage() {
       }
       setTimeout(() => router.push('/login'), 1200);
     } catch (err) {
-      setError(err.message || "Erreur d'inscription");
+      const rawMessage = err?.message || "Erreur d'inscription";
+      const details = Array.isArray(err?.data?.details) ? err.data.details : [];
+      const passwordDetail =
+        details.find((line) => String(line).toLowerCase().includes('mot de passe')) ||
+        details.find((line) => String(line).toLowerCase().includes('password')) ||
+        '';
+
+      if (String(err?.code || '') === 'VALIDATION_ERROR' && rawMessage.toLowerCase().includes('validation error')) {
+        setError(
+          passwordDetail ||
+          'Mot de passe invalide: minimum 10 caractères, avec majuscule, minuscule, chiffre et caractère spécial.'
+        );
+      } else {
+        setError(rawMessage);
+      }
     } finally {
       setLoading(false);
     }
