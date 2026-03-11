@@ -35,6 +35,14 @@ function normalizeLevelInput(value) {
   const upper = raw.toUpperCase();
   if (PRISMA_TO_API_LEVEL[upper]) return upper;
 
+  // Accept AcademicLevel-ish inputs from legacy clients / stored gradeLevel strings.
+  if (upper === 'NSI') return 'NS1';
+  if (upper === 'NSII') return 'NS2';
+  if (upper === 'NSIII') return 'NS3';
+  if (upper === 'NSIV') return 'TERMINALE';
+  if (upper === 'UNIVERSITAIRE') return 'UNIVERSITE';
+  if (upper === '9E' || upper === 'LEVEL_9E') return 'LEVEL_9E';
+
   if (raw.toLowerCase() === 'terminale') return 'TERMINALE';
   if (raw.toLowerCase() === 'universite') return 'UNIVERSITE';
   if (raw.toLowerCase() === '9e') return 'LEVEL_9E';
