@@ -1,35 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import SubjectGalaxy from './SubjectGalaxy';
-import AIObjectivePanel from './AIObjectivePanel';
-import LearningAnalytics from './LearningAnalytics';
-import StudentNavigation from './StudentNavigation';
 import { estimateSuccessProbability, toPercent } from './utils';
-
-function useProgressCelebration(studentId, percent) {
-  const key = `linkedupro:cockpit:progress:${studentId || 'anon'}`;
-  const [celebrate, setCelebrate] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const next = toPercent(percent, 0);
-    try {
-      const raw = window.localStorage.getItem(key);
-      const prev = raw ? Number(raw) : null;
-      window.localStorage.setItem(key, String(next));
-      if (prev !== null && Number.isFinite(prev) && next > prev) {
-        setCelebrate(true);
-        const t = window.setTimeout(() => setCelebrate(false), 1200);
-        return () => window.clearTimeout(t);
-      }
-    } catch (_) {
-    }
-  }, [key, percent]);
-
-  return celebrate;
-}
 
 export default function StudentDashboard({
   student,
@@ -44,70 +18,121 @@ export default function StudentDashboard({
     () => estimateSuccessProbability(progress?.overview?.averageScore || overallPercent),
     [progress?.overview?.averageScore, overallPercent]
   );
-  const celebrate = useProgressCelebration(student?.id, overallPercent);
-
-  function openSubject(subjectName) {
-    // A dedicated subject dashboard can be wired later; keep navigation reliable today.
-    if (!subjectName) {
-      router.push('/subjects');
-      return;
-    }
-    router.push('/subjects');
-  }
 
   const communityCount = Array.isArray(community?.recent) ? community.recent.length : 0;
+  const overallPct = toPercent(overallPercent, 0);
+
+  const objective = dailyObjective || {
+    title: 'Objectif du jour',
+    description: 'Fais 1 série de quiz puis révise 20 minutes.',
+    ctaLabel: 'Commencer',
+    ctaHref: '/subjects'
+  };
+
+  const subjectRows = useMemo(() => {
+    const rows = Array.isArray(progress?.subjectStats) ? progress.subjectStats : [];
+    return [...rows]
+      .map((row) => ({
+        subject: String(row?.subject || 'Rubrique').trim(),
+        score: toPercent(row?.average, 0),
+        attempts: Number(row?.attempts || 0)
+      }))
+      .filter((row) => row.subject)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
+  }, [progress?.subjectStats]);
 
   return (
-    <section className="cockpit-shell space-y-4">
-      <header className="cockpit-header">
-        <div>
-          <p className="cockpit-kicker">Cockpit d'apprentissage</p>
-          <h1 className="cockpit-h1">Bienvenue, {student?.firstName || 'Élève'}.</h1>
-          <p className="cockpit-subtitle">
-            Vue en temps réel: progression, recommandations et prochaine action.
-          </p>
-        </div>
-        <div className="cockpit-metric">
-          <p className="text-xs font-semibold text-slate-200/70">Préparation estimée</p>
-          <p className="text-2xl font-black text-slate-50">{successProbability}%</p>
-          <p className="text-xs text-slate-200/70">Basé sur tes résultats récents</p>
-        </div>
-      </header>
-
-      <div className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-        <div className="space-y-4">
-          <div className="relative">
-            <SubjectGalaxy
-              subjectStats={progress?.subjectStats}
-              overallPercent={overallPercent}
-              successProbability={successProbability}
-              onOpenSubject={openSubject}
-            />
-            {celebrate ? <div className="cockpit-celebrate" aria-hidden="true" /> : null}
-          </div>
-          <LearningAnalytics subjectStats={progress?.subjectStats} recentAttempts={progress?.recentAttempts} />
-        </div>
-
-        <AIObjectivePanel
-          student={student}
-          progress={progress}
-          trackLabel={trackLabel}
-          overallPercent={overallPercent}
-          dailyObjective={dailyObjective}
-        />
-      </div>
-
-      <section className="cockpit-glass rounded-3xl p-5">
-        <div className="flex items-end justify-between gap-3">
+    <section className="space-y-6">
+      <section className="card">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="cockpit-kicker">Outils</p>
-            <h2 className="cockpit-title-sm">Aller plus vite</h2>
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Dashboard élève</p>
+            <h1 className="mt-2 text-3xl font-black text-brand-900">Bienvenue, {student?.firstName || 'Élève'}.</h1>
+            <p className="mt-2 text-sm text-brand-700">
+              Filière: {trackLabel || 'Général'} · Préparation estimée: <span className="font-bold">{successProbability}%</span>
+            </p>
           </div>
-          <p className="text-xs font-semibold text-slate-200/70">Accès rapide</p>
+          <div className="min-w-[240px] rounded-2xl border border-brand-100 bg-white/60 p-4">
+            <p className="text-xs font-semibold text-brand-700">Progression globale</p>
+            <p className="mt-2 text-3xl font-black text-brand-900">{overallPct}%</p>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-brand-100">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-brand-600"
+                style={{ width: `${overallPct}%` }}
+                aria-hidden="true"
+              />
+            </div>
+          </div>
         </div>
-        <div className="mt-4">
-          <StudentNavigation communityCount={communityCount} />
-        </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-3">
+        <section className="card lg:col-span-2">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold text-brand-900">Raccourcis</h2>
+            {communityCount ? (
+              <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-800">
+                {Math.min(99, communityCount)} nouveau(x) post(s)
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Link href="/subjects" className="rounded-2xl border border-brand-100 bg-white/70 p-4 hover:bg-brand-50">
+              <p className="text-sm font-bold text-brand-900">Quiz & rubriques</p>
+              <p className="mt-1 text-xs text-brand-700">Choisir une matière et s'entraîner.</p>
+            </Link>
+            <Link href="/video-lessons" className="rounded-2xl border border-brand-100 bg-white/70 p-4 hover:bg-brand-50">
+              <p className="text-sm font-bold text-brand-900">Classe numérique</p>
+              <p className="mt-1 text-xs text-brand-700">Vidéos pédagogiques par classe.</p>
+            </Link>
+            <Link href="/probable-exercises" className="rounded-2xl border border-brand-100 bg-white/70 p-4 hover:bg-brand-50">
+              <p className="text-sm font-bold text-brand-900">Examens passés</p>
+              <p className="mt-1 text-xs text-brand-700">Annales organisées par année.</p>
+            </Link>
+            <Link href="/library" className="rounded-2xl border border-brand-100 bg-white/70 p-4 hover:bg-brand-50">
+              <p className="text-sm font-bold text-brand-900">Bibliothèque</p>
+              <p className="mt-1 text-xs text-brand-700">PDF, fiches, supports.</p>
+            </Link>
+          </div>
+        </section>
+
+        <section className="card">
+          <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Objectif</p>
+          <h2 className="mt-2 text-xl font-semibold text-brand-900">{objective.title}</h2>
+          <p className="mt-2 text-sm text-brand-700">{objective.description}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button type="button" className="btn-secondary" onClick={() => router.push('/messages')}>
+              Messages
+            </button>
+            <button type="button" className="btn-primary" onClick={() => router.push(objective.ctaHref || '/subjects')}>
+              {objective.ctaLabel || 'Commencer'}
+            </button>
+          </div>
+        </section>
+      </section>
+
+      <section className="card">
+        <h2 className="text-xl font-semibold text-brand-900">Meilleures matières</h2>
+        <p className="mt-1 text-sm text-brand-700">Basé sur tes résultats récents.</p>
+        {subjectRows.length ? (
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {subjectRows.map((row) => (
+              <div key={row.subject} className="rounded-2xl border border-brand-100 bg-white/70 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-bold text-brand-900">{row.subject}</p>
+                  <p className="text-sm font-black text-brand-900">{row.score}%</p>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-brand-100">
+                  <div className="h-full rounded-full bg-brand-600" style={{ width: `${row.score}%` }} aria-hidden="true" />
+                </div>
+                <p className="mt-2 text-xs text-brand-700">{row.attempts} tentative(s)</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-3 text-sm text-brand-700">Pas assez de données. Lance quelques quiz pour voir tes stats.</p>
+        )}
       </section>
     </section>
   );

@@ -180,6 +180,42 @@ function normalizeErrorText(value) {
     .trim();
 }
 
+function safeText(value) {
+  return String(value || '').trim();
+}
+
+function getYoutubeId(rawUrl) {
+  const url = safeText(rawUrl);
+  if (!url) return '';
+
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+
+    if (host.includes('youtube.com')) {
+      const id = parsed.searchParams.get('v');
+      if (id) return id;
+      const parts = parsed.pathname.split('/').filter(Boolean);
+      if (parts[0] === 'shorts' && parts[1]) return parts[1];
+      if (parts[0] === 'embed' && parts[1]) return parts[1];
+    }
+
+    if (host.includes('youtu.be')) {
+      const parts = parsed.pathname.split('/').filter(Boolean);
+      if (parts[0]) return parts[0];
+    }
+  } catch (_) {
+  }
+
+  return '';
+}
+
+function getVideoThumbnail(rawUrl) {
+  const youtubeId = getYoutubeId(rawUrl);
+  if (youtubeId) return `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+  return '';
+}
+
 export default function VideoLessonsPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
@@ -187,6 +223,7 @@ export default function VideoLessonsPage() {
   const [student, setStudent] = useState(null);
   const [token, setToken] = useState(null);
   const [videos, setVideos] = useState([]);
+  const [activeVideo, setActiveVideo] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [filter, setFilter] = useState('ALL');
@@ -194,6 +231,7 @@ export default function VideoLessonsPage() {
   const [classFilter, setClassFilter] = useState('ALL');
   const [submitting, setSubmitting] = useState(false);
   const [showComposer, setShowComposer] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [publicationType, setPublicationType] = useState('SINGLE');
   const [seriesLessons, setSeriesLessons] = useState([createEmptyLesson(0)]);
   const [form, setForm] = useState({
@@ -344,14 +382,14 @@ export default function VideoLessonsPage() {
 
       const basePayload = {
         level: selectedLevels[0],
-        levels: selectedLevels,
-        type: 'video'
+        levels: selectedLevels
       };
       const shouldPublishNow = student?.role === 'ADMIN' && form.publishNow;
 
       const buildPayload = (contentTitle, contentDescription, contentVideoUrl) => {
         const payload = {
           ...basePayload,
+          ...(editingId ? null : { type: 'video' }),
           title: contentTitle,
           body: JSON.stringify({
             description: contentDescription,
@@ -366,6 +404,34 @@ export default function VideoLessonsPage() {
         }
         return payload;
       };
+
+      if (editingId) {
+        const payload = buildPayload(title, description, videoUrl);
+        const data = await apiClient(`/v2/contents/${editingId}`, {
+          method: 'PATCH',
+          token,
+          body: JSON.stringify(payload)
+        });
+        const updatedVideo = mapContentToVideo(data.content);
+        setVideos((prev) => prev.map((item) => (item.id === updatedVideo.id ? updatedVideo : item)));
+        setEditingId(null);
+        setForm((prev) => ({
+          ...prev,
+          title: '',
+          description: '',
+          kind: 'LESSON',
+          isPaid: false,
+          price: '',
+          videoUrl: '',
+          publishNow: false
+        }));
+        setPublicationType('SINGLE');
+        setSeriesLessons([createEmptyLesson(0)]);
+        setShowComposer(false);
+        setSuccess('Vidéo modifiée avec succès.');
+        setSubmitting(false);
+        return;
+      }
 
       const payloads = publicationType === 'SERIES'
         ? seriesLessons
@@ -430,8 +496,53 @@ export default function VideoLessonsPage() {
       }
     } catch (e) {
       setError(e.message || 'Erreur lors de la création du contenu vidéo.');
-    } finally {
+  } finally {
       setSubmitting(false);
+    }
+  }
+
+  function startEditVideo(item) {
+    if (!item?.id) return;
+    setEditingId(item.id);
+    setPublicationType('SINGLE');
+    setSeriesLessons([createEmptyLesson(0)]);
+    setForm((prev) => ({
+      ...prev,
+      title: item.title || '',
+      description: item.description || '',
+      kind: item.kind || 'LESSON',
+      isPaid: Boolean(item.isPaid),
+      price: item.isPaid ? String(item.price || 0) : '',
+      videoUrl: item.videoUrl || '',
+      level: Array.isArray(item.levels) && item.levels.length ? item.levels[0] : (item.level || 'Terminale'),
+      levels: Array.isArray(item.levels) && item.levels.length ? item.levels : [item.level || 'Terminale'],
+      publishNow: false
+    }));
+    setShowComposer(true);
+    setSuccess('');
+    setError('');
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  async function deleteVideo(item) {
+    if (!item?.id || !token) return;
+    const confirmed = typeof window !== 'undefined'
+      ? window.confirm('Supprimer cette vidéo ? Cette action est irréversible.')
+      : false;
+    if (!confirmed) return;
+
+    try {
+      setError('');
+      setSuccess('');
+      await apiClient(`/v2/contents/${item.id}`, { method: 'DELETE', token });
+      setVideos((prev) => prev.filter((row) => row.id !== item.id));
+      if (activeVideo?.id === item.id) setActiveVideo(null);
+      if (editingId === item.id) setEditingId(null);
+      setSuccess('Vidéo supprimée.');
+    } catch (e) {
+      setError(e.message || 'Impossible de supprimer cette vidéo.');
     }
   }
 
@@ -460,9 +571,35 @@ export default function VideoLessonsPage() {
                 Visible pour: ADMIN et TEACHER. Les enseignants créent des contenus en attente de validation.
               </p>
             </div>
-            <button type="button" className="btn-primary" onClick={() => setShowComposer((prev) => !prev)}>
-              {showComposer ? 'Masquer le formulaire' : 'Ajouter une vidéo'}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              {editingId ? (
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setEditingId(null);
+                    setShowComposer(false);
+                    setForm((prev) => ({
+                      ...prev,
+                      title: '',
+                      description: '',
+                      kind: 'LESSON',
+                      isPaid: false,
+                      price: '',
+                      videoUrl: '',
+                      publishNow: false
+                    }));
+                    setPublicationType('SINGLE');
+                    setSeriesLessons([createEmptyLesson(0)]);
+                  }}
+                >
+                  Annuler la modification
+                </button>
+              ) : null}
+              <button type="button" className="btn-primary" onClick={() => setShowComposer((prev) => !prev)}>
+                {showComposer ? 'Masquer le formulaire' : 'Ajouter une vidéo'}
+              </button>
+            </div>
           </div>
 
           {showComposer ? (
@@ -638,7 +775,9 @@ export default function VideoLessonsPage() {
 
             <div className="md:col-span-2">
               <button type="submit" className="btn-primary" disabled={submitting}>
-                {submitting ? 'Publication...' : (publicationType === 'SERIES' ? 'Publier la série' : 'Publier la vidéo')}
+                {submitting
+                  ? (editingId ? 'Modification...' : 'Publication...')
+                  : (editingId ? 'Enregistrer les modifications' : (publicationType === 'SERIES' ? 'Publier la série' : 'Publier la vidéo'))}
               </button>
             </div>
           </form>
@@ -675,47 +814,129 @@ export default function VideoLessonsPage() {
           </div>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <div className="mt-4">
           {loading ? <p className="text-sm text-brand-700">Chargement du catalogue...</p> : null}
-          {filteredVideos.map((item) => (
-            <article key={item.id} className="rounded-xl border border-brand-100 p-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={`rounded-full px-2 py-1 text-xs font-semibold ${item.kind === 'EXERCISE' ? 'bg-amber-50 text-amber-700' : 'bg-brand-50 text-brand-700'}`}>
-                  {getVideoKindLabel(item.kind)}
-                </span>
-                <span className={`rounded-full px-2 py-1 text-xs font-semibold ${item.isPaid ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>
-                  {item.isPaid ? `Payant (${formatHtg(item.price)})` : 'Gratuit'}
-                </span>
-                <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">Classe: {item.classLabel}</span>
-                {canManage ? (
-                  <span className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                    item.status === 'APPROVED'
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : item.status === 'REJECTED'
-                        ? 'bg-red-50 text-red-700'
-                        : 'bg-amber-50 text-amber-700'
-                  }`}>
-                    {item.status === 'APPROVED' ? 'Approuvé' : item.status === 'REJECTED' ? 'Rejeté' : 'En attente'}
-                  </span>
-                ) : null}
+
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+            {filteredVideos.map((item) => {
+              const thumbnail = getVideoThumbnail(item.videoUrl);
+              const statusLabel = item.status === 'APPROVED' ? 'Approuvé' : item.status === 'REJECTED' ? 'Rejeté' : 'En attente';
+              const statusTone = item.status === 'APPROVED'
+                ? 'bg-emerald-50 text-emerald-800'
+                : item.status === 'REJECTED'
+                  ? 'bg-red-50 text-red-800'
+                  : 'bg-amber-50 text-amber-800';
+
+              return (
+                <article key={item.id} className="group">
+                  <button
+                    type="button"
+                    className="relative w-full overflow-hidden rounded-2xl border border-brand-100 bg-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    onClick={() => setActiveVideo(item)}
+                    aria-label={`Ouvrir la vidéo ${item.title}`}
+                  >
+                    <div className="relative aspect-[2/3] w-full">
+                      {thumbnail ? (
+                        <div
+                          className="absolute inset-0 bg-cover bg-center opacity-90"
+                          style={{ backgroundImage: `url(${thumbnail})` }}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-brand-950 to-slate-950" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/30" />
+
+                      <div className="absolute left-2 top-2 flex flex-col gap-1 text-left">
+                        <span className="inline-flex w-fit rounded-lg bg-emerald-600 px-2 py-1 text-[11px] font-black text-white shadow">
+                          {item.classLabel}
+                        </span>
+                        <span className="inline-flex w-fit rounded-lg bg-white/90 px-2 py-1 text-[11px] font-bold text-slate-900 shadow">
+                          {getVideoKindLabel(item.kind)}
+                        </span>
+                      </div>
+
+                      {canManage ? (
+                        <div className="absolute right-2 top-2 flex gap-2">
+                          <button
+                            type="button"
+                            className="rounded-lg bg-white/90 px-2 py-1 text-[11px] font-bold text-slate-900 shadow hover:bg-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEditVideo(item);
+                            }}
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            type="button"
+                            className="rounded-lg bg-red-600/90 px-2 py-1 text-[11px] font-bold text-white shadow hover:bg-red-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteVideo(item);
+                            }}
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      ) : null}
+
+                      <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between gap-2 text-left">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-bold text-white">{item.title}</p>
+                          {canManage ? (
+                            <p className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-bold ${statusTone}`}>
+                              {statusLabel}
+                            </p>
+                          ) : null}
+                        </div>
+                        <span className={`shrink-0 rounded-full px-2 py-1 text-[11px] font-black ${
+                          item.isPaid ? 'bg-red-500/90 text-white' : 'bg-emerald-500/90 text-white'
+                        }`}>
+                          {item.isPaid ? formatHtg(item.price) : 'Gratuit'}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+
+          {!loading && filteredVideos.length === 0 ? (
+            <p className="mt-3 text-sm text-brand-700">Aucune vidéo pour ce filtre.</p>
+          ) : null}
+        </div>
+      </section>
+
+      {activeVideo ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl">
+            <div className="flex items-start justify-between gap-3 border-b border-brand-100 p-4">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-brand-700">{activeVideo.classLabel} • {getVideoKindLabel(activeVideo.kind)}</p>
+                <h3 className="mt-1 truncate text-lg font-bold text-brand-900">{activeVideo.title}</h3>
+                <p className="mt-1 text-sm text-brand-700">{activeVideo.description}</p>
               </div>
-              <h3 className="mt-3 text-lg font-semibold text-brand-900">{item.title}</h3>
-              <p className="mt-1 text-sm text-brand-700">{item.description || 'Aucune description.'}</p>
-              {item.videoUrl ? (() => {
-                const player = getVideoPlayerConfig(item.videoUrl);
+              <button type="button" className="btn-secondary shrink-0" onClick={() => setActiveVideo(null)}>
+                Fermer
+              </button>
+            </div>
+            <div className="p-4">
+              {activeVideo.videoUrl ? (() => {
+                const player = getVideoPlayerConfig(activeVideo.videoUrl);
                 if (player.type === 'file') {
                   return (
-                    <div className="mt-4 overflow-hidden rounded-lg border border-brand-100 bg-black">
+                    <div className="overflow-hidden rounded-xl border border-brand-100 bg-black">
                       <video className="aspect-video w-full" controls preload="metadata" src={player.src} />
                     </div>
                   );
                 }
                 if (player.type === 'iframe') {
                   return (
-                    <div className="mt-4 overflow-hidden rounded-lg border border-brand-100 bg-black">
+                    <div className="overflow-hidden rounded-xl border border-brand-100 bg-black">
                       <iframe
                         src={player.src}
-                        title={item.title}
+                        title={activeVideo.title}
                         className="aspect-video w-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
@@ -724,20 +945,17 @@ export default function VideoLessonsPage() {
                   );
                 }
                 return (
-                  <a className="btn-secondary mt-4 inline-block" href={item.videoUrl} target="_blank" rel="noreferrer">
+                  <a className="btn-primary inline-block" href={activeVideo.videoUrl} target="_blank" rel="noreferrer">
                     Ouvrir la vidéo
                   </a>
                 );
               })() : (
-                <p className="mt-4 text-xs text-brand-700">Aucun lien vidéo fourni.</p>
+                <p className="text-sm text-brand-700">Aucun lien vidéo fourni.</p>
               )}
-            </article>
-          ))}
-          {!loading && filteredVideos.length === 0 ? (
-            <p className="text-sm text-brand-700">Aucune vidéo pour ce filtre.</p>
-          ) : null}
+            </div>
+          </div>
         </div>
-      </section>
+      ) : null}
     </main>
   );
 }
