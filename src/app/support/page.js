@@ -15,6 +15,7 @@ export default function SupportPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
+  const [shareFeedback, setShareFeedback] = useState('');
   const isAdminViewer = useMemo(
     () => ['ADMIN', 'SUPER_ADMIN'].includes(String(student?.role || '').toUpperCase()),
     [student?.role]
@@ -38,6 +39,34 @@ export default function SupportPage() {
       }
     }
   }, []);
+
+  async function onShareSupport() {
+    const text = 'Soutiens LinkEduPro et partage la plateforme avec tes proches.';
+    const url = typeof window !== 'undefined' ? `${window.location.origin}/` : '';
+
+    try {
+      setShareFeedback('');
+      if (navigator.share) {
+        await navigator.share({
+          title: 'LinkEduPro',
+          text,
+          url
+        });
+        setShareFeedback('Merci. Le lien a été partagé.');
+        return;
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        setShareFeedback('Lien copié. Tu peux le coller dans WhatsApp/Facebook.');
+        return;
+      }
+      setShareFeedback('Partage indisponible sur cet appareil.');
+    } catch (e) {
+      setShareFeedback(e?.message ? String(e.message) : 'Partage annulé.');
+    } finally {
+      window.setTimeout(() => setShareFeedback(''), 5500);
+    }
+  }
 
   const resolvedDonorLabel = useMemo(() => {
     const raw = String(donorName || '').trim();
@@ -88,10 +117,16 @@ export default function SupportPage() {
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
       <section className="card">
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Support LinkEduPro</p>
-        <h1 className="mt-2 text-3xl font-black text-brand-900">Soutenir la plateforme</h1>
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+          <h1 className="text-3xl font-black text-brand-900">Soutenir la plateforme</h1>
+          <button type="button" className="btn-secondary" onClick={onShareSupport}>
+            Partager
+          </button>
+        </div>
         <p className="mt-2 text-sm text-brand-700">
           Tes contributions financent les contenus éducatifs, l’infrastructure et les améliorations continues.
         </p>
+        {shareFeedback ? <p className="mt-2 text-sm text-brand-700">{shareFeedback}</p> : null}
       </section>
 
       {isAdminViewer ? (
