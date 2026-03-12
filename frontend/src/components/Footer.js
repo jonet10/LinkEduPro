@@ -39,8 +39,9 @@ const footerSections = [
     ]
   },
   {
-    title: 'Support',
+    title: 'Faire un Don',
     links: [
+      { label: 'Faire un Don (MonCash)', href: '/support' },
       { label: 'Help Center', href: '/help-center' },
       { label: 'Contact', href: '/contact' },
       { label: 'Report an Issue', href: '/report-issue' },

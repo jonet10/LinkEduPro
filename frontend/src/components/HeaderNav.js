@@ -69,7 +69,7 @@ export default function HeaderNav() {
             digitalLibrary: 'Bibliyotèk dijital',
             digitalClass: 'Klas dijital',
             practiceQuiz: 'Quiz fòmasyon',
-            supportLinkedu: 'Sipò LinkEduPro',
+            supportLinkedu: 'Fè yon Don',
             publicSearchPlaceholder: 'Kisa ou vle aprann?',
             login: 'Konekte',
             register: 'Enskri',
@@ -97,7 +97,7 @@ export default function HeaderNav() {
             digitalLibrary: 'Bibliothèque numérique',
             digitalClass: 'Classe numérique',
             practiceQuiz: "Quiz d'entraînement",
-            supportLinkedu: 'Support LinkEduPro',
+            supportLinkedu: 'Faire un Don',
             publicSearchPlaceholder: 'Que souhaitez-vous apprendre ?',
             login: 'Se connecter',
             register: "S'inscrire",
@@ -140,7 +140,7 @@ export default function HeaderNav() {
       { href: '/library', label: 'Bibliothèque' },
       { href: '/educollect', label: 'EduCollect' },
       { href: '/blog', label: 'Forum' },
-      { href: '/support', label: 'Support' }
+      { href: '/support', label: 'Faire un Don' }
     ];
     if (isAuthed && (roleUpper === 'ADMIN' || roleUpper === 'SUPER_ADMIN')) {
       tabs.push({ href: '/admin/super-dashboard', label: 'Dashboard' });
@@ -152,7 +152,7 @@ export default function HeaderNav() {
       { href: '/library', label: t.digitalLibrary, icon: '📚' },
       { href: '/video-lessons', label: t.digitalClass, icon: '🎬' },
       { href: '/subjects', label: t.practiceQuiz, icon: '🧪' },
-      { href: '/support', label: t.supportLinkedu, icon: '🤝' }
+      { href: '/support', label: t.supportLinkedu, icon: '💝' }
     ]),
     [t]
   );
@@ -467,7 +467,7 @@ export default function HeaderNav() {
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
       { href: '/educollect', label: 'EduCollect', icon: '💸' },
       { href: '/blog', label: 'Forum', icon: '📝' },
-      { href: '/support', label: 'Support', icon: '🤝' },
+      { href: '/support', label: 'Faire un Don', icon: '💝' },
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
     ];
   }, [isAuthed, canSeeCatchup, canSeeProbableExercises, canSeeGlobalAdminDashboard, canSeeStudyPlans, canSeeTeacherDashboard]);
@@ -488,7 +488,7 @@ export default function HeaderNav() {
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
       { href: '/educollect', label: 'EduCollect', icon: '💸' },
       { href: '/blog', label: 'Forum', icon: '📝' },
-      { href: '/support', label: 'Support', icon: '🤝' },
+      { href: '/support', label: 'Faire un Don', icon: '💝' },
       ...(canSeeTeacherDashboard ? [{ href: '/teacher/dashboard', label: 'Revenus', icon: '💼' }] : []),
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : []),
       { href: '/search', label: 'Recherche', icon: '🔎' }
