@@ -91,6 +91,9 @@ model Student {
   eduCollectProjectReports                                            EduCollectProjectReport[]    @relation("EduCollectProjectReportAuthor")
   eduCollectProjectFlags                                              EduCollectProjectFlag[]      @relation("EduCollectProjectFlagReporter")
   eduCollectPartnerProfile                                            EduCollectPartnerProfile?
+  favorites                                                          Favorite[]
+  libraryResourcesCreated                                             LibraryResource[]            @relation("LibraryResourceCreator")
+  dictionaryTermsCreated                                              InformaticsDictionaryTerm[]  @relation("DictionaryTermCreator")
 
   @@index([lastName])
   @@index([role])
@@ -693,6 +696,73 @@ model LibraryPurchase {
   @@index([buyerId, createdAt], map: "LibraryPurchase_buyerId_createdAt_idx")
   @@index([bookId, status], map: "LibraryPurchase_bookId_status_idx")
   @@map("library_purchases")
+}
+
+model LibraryResource {
+  id              Int                     @id @default(autoincrement())
+  title           String                  @map("titre")
+  description     String?                 @map("description")
+  category        String                  @map("categorie")
+  fileType        LibraryResourceFileType @map("type_fichier")
+  author          String?                 @map("auteur")
+  publicationDate DateTime?               @map("date_publication")
+  fileUrl         String                  @map("fichier_url")
+  createdById     Int?                    @map("created_by")
+  createdAt       DateTime                @default(now()) @map("created_at")
+
+  createdBy       Student?                @relation("LibraryResourceCreator", fields: [createdById], references: [id], onDelete: SetNull, map: "LibraryResource_createdBy_fkey")
+  favorites       Favorite[]
+
+  @@index([category, createdAt], map: "LibraryResource_categorie_created_at_idx")
+  @@index([fileType, createdAt], map: "LibraryResource_type_fichier_created_at_idx")
+  @@map("bibliotheque_ressources")
+}
+
+model InformaticsDictionaryTerm {
+  id          Int                @id @default(autoincrement())
+  term        String             @map("terme")
+  kind        DictionaryTermType @map("type")
+  definition  String             @map("definition")
+  example     String?            @map("exemple")
+  letterIndex String             @map("lettre_index")
+  createdById Int?               @map("created_by")
+  createdAt   DateTime           @default(now()) @map("created_at")
+
+  createdBy   Student?           @relation("DictionaryTermCreator", fields: [createdById], references: [id], onDelete: SetNull, map: "InformaticsDictionaryTerm_createdBy_fkey")
+
+  @@index([letterIndex, term], map: "InformaticsDictionaryTerm_lettre_terme_idx")
+  @@index([term], map: "InformaticsDictionaryTerm_terme_idx")
+  @@map("dictionnaire_informatique")
+}
+
+model SearchIndex {
+  id          Int             @id @default(autoincrement())
+  title       String          @map("titre")
+  type        SearchIndexType @map("type")
+  category    String?         @map("categorie")
+  referenceId Int             @map("reference_id")
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  @@index([type, createdAt], map: "SearchIndex_type_created_at_idx")
+  @@index([title], map: "SearchIndex_titre_idx")
+  @@map("search_index")
+}
+
+model Favorite {
+  id          Int          @id @default(autoincrement())
+  userId      Int          @map("user_id")
+  resourceId  Int?         @map("ressource_id")
+  type        FavoriteType @map("type")
+  referenceId Int          @map("reference_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  user        Student      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource    LibraryResource? @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, referenceId], map: "Favorite_user_type_reference_key")
+  @@index([userId, createdAt], map: "Favorite_user_created_at_idx")
+  @@index([type, createdAt], map: "Favorite_type_created_at_idx")
+  @@map("favoris")
 }
 
 model PlatformDonation {
@@ -1473,6 +1543,39 @@ enum ContentStatus {
   PENDING  @map("pending")
   APPROVED @map("approved")
   REJECTED @map("rejected")
+}
+
+enum LibraryResourceFileType {
+  PDF   @map("pdf")
+  DOCX  @map("docx")
+  PPT   @map("ppt")
+  VIDEO @map("video")
+  AUDIO @map("audio")
+  IMAGE @map("image")
+  OTHER @map("other")
+}
+
+enum DictionaryTermType {
+  TERME       @map("Terme")
+  SIGLE       @map("Sigle")
+  ABREVIATION @map("Abreviation")
+  CONCEPT     @map("Concept")
+}
+
+enum SearchIndexType {
+  LIVRE        @map("livre")
+  ARTICLE      @map("article")
+  DOCUMENT     @map("document")
+  DICTIONNAIRE @map("dictionnaire")
+  EXAMEN       @map("examen")
+}
+
+enum FavoriteType {
+  RESOURCE    @map("ressource")
+  BOOK        @map("livre")
+  DOCUMENT    @map("document")
+  DICTIONARY  @map("dictionnaire")
+  EXAM        @map("examen")
 }
 
 enum PlatformDonationStatus {

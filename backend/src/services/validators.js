@@ -190,6 +190,44 @@ const createLibraryPurchaseSchema = Joi.object({
   paymentMethod: Joi.string().valid('MONCASH').default('MONCASH')
 });
 
+const libraryResourceFileTypeSchema = Joi.string().valid('pdf', 'docx', 'ppt', 'video', 'audio', 'image', 'other');
+
+const createLibraryResourceSchema = Joi.object({
+  title: Joi.string().trim().min(3).max(180).required(),
+  description: Joi.string().trim().max(5000).allow('', null).optional(),
+  category: Joi.string().trim().min(2).max(80).required(),
+  fileType: libraryResourceFileTypeSchema.optional(),
+  author: Joi.string().trim().max(160).allow('', null).optional(),
+  datePublication: Joi.date().iso().allow(null, '').optional(),
+  fileUrl: Joi.string().trim().max(2048).allow('', null).optional()
+});
+
+const updateLibraryResourceSchema = Joi.object({
+  title: Joi.string().trim().min(3).max(180).optional(),
+  description: Joi.string().trim().max(5000).allow('', null).optional(),
+  category: Joi.string().trim().min(2).max(80).optional(),
+  fileType: libraryResourceFileTypeSchema.optional(),
+  author: Joi.string().trim().max(160).allow('', null).optional(),
+  datePublication: Joi.date().iso().allow(null, '').optional(),
+  fileUrl: Joi.string().trim().max(2048).allow('', null).optional()
+}).min(1);
+
+const createDictionaryTermSchema = Joi.object({
+  term: Joi.string().trim().min(2).max(120).required(),
+  kind: Joi.string().valid('TERME', 'SIGLE', 'ABREVIATION', 'CONCEPT').default('TERME'),
+  definition: Joi.string().trim().min(5).max(20000).required(),
+  example: Joi.string().trim().max(20000).allow('', null).optional()
+});
+
+const addFavoriteSchema = Joi.object({
+  type: Joi.string().valid('RESOURCE', 'BOOK', 'DOCUMENT', 'DICTIONARY', 'EXAM').default('RESOURCE'),
+  resourceId: Joi.number().integer().positive().optional(),
+  referenceId: Joi.number().integer().positive().optional()
+}).custom((value, helpers) => {
+  if (!value.resourceId && !value.referenceId) return helpers.error('any.required');
+  return value;
+});
+
 const privateMessageSchema = Joi.object({
   recipientId: Joi.number().integer().positive().required(),
   content: Joi.string().trim().max(5000).allow('').default('')
@@ -295,6 +333,10 @@ module.exports = {
   updateLibraryBookSchema,
   reviewLibraryBookSchema,
   createLibraryPurchaseSchema,
+  createLibraryResourceSchema,
+  updateLibraryResourceSchema,
+  createDictionaryTermSchema,
+  addFavoriteSchema,
   privateMessageSchema,
   globalMessageSchema,
   catchupSessionCreateSchema,
