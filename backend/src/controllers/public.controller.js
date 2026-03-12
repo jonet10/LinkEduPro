@@ -112,6 +112,20 @@ const EDUCATION_TO_ACADEMIC = {
   UNIVERSITE: 'UNIVERSITAIRE'
 };
 
+const ACADEMIC_TO_DB_ENUM = {
+  LEVEL_9E: '9e',
+  NSI: 'NSI',
+  NSII: 'NSII',
+  NSIII: 'NSIII',
+  NSIV: 'NSIV',
+  UNIVERSITAIRE: 'Universitaire'
+};
+
+function academicLevelToDbEnum(value) {
+  const normalized = normalizeAcademicLevel(value);
+  return ACADEMIC_TO_DB_ENUM[normalized] || 'NSIV';
+}
+
 function normalizeAcademicLevel(value) {
   const raw = String(value || '').trim().toUpperCase();
   if (!raw) return '';
@@ -191,6 +205,7 @@ async function getPublicBlogPost(req, res, next) {
 async function listProbableExercises(req, res, next) {
   try {
     const targetLevel = await resolveViewerAcademicLevel(req.user?.id);
+    const targetLevelDb = academicLevelToDbEnum(targetLevel);
 
     const rows = await prisma.$queryRaw(
       Prisma.sql`
@@ -204,7 +219,7 @@ async function listProbableExercises(req, res, next) {
           ) AS sample_question
         FROM exam_questions q
         INNER JOIN exams e ON e.id = q.exam_id
-        WHERE e.level = CAST(${targetLevel} AS "AcademicLevel")
+        WHERE e.level = CAST(${targetLevelDb} AS "AcademicLevel")
         GROUP BY e.subject, q.topic
         ORDER BY e.subject ASC, frequency DESC, q.topic ASC
       `
@@ -279,7 +294,7 @@ async function listProbableExercises(req, res, next) {
         Prisma.sql`
           SELECT subject, topic, file_name AS "fileName", exam_year AS "year"
           FROM probable_exercise_sources
-          WHERE level = CAST(${targetLevel} AS "AcademicLevel")
+          WHERE level = CAST(${targetLevelDb} AS "AcademicLevel")
         `
       );
     } catch (_) {
