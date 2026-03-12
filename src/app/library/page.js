@@ -5,6 +5,12 @@ import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 import { resolveMediaUrl } from '@/lib/media';
+import LibrarySectionNav from '@/components/library/LibrarySectionNav';
+import LibrarySearchPanel from '@/components/library/LibrarySearchPanel';
+import ResourcesSection from '@/components/library/ResourcesSection';
+import DictionarySection from '@/components/library/DictionarySection';
+import FavoritesSection from '@/components/library/FavoritesSection';
+import { LIBRARY_SECTIONS } from '@/components/library/library-constants';
 
 function getStorageUrl(fileUrl) {
   if (!fileUrl) return '#';
@@ -116,6 +122,10 @@ function BookCard({ book, preordered = false, onPreorder = null, onPurchase = nu
 export default function LibraryPage() {
   const router = useRouter();
   const [student, setStudent] = useState(null);
+  const [token, setToken] = useState('');
+  const [activeSection, setActiveSection] = useState('livres');
+  const [focusTermId, setFocusTermId] = useState(0);
+  const [focusResourceId, setFocusResourceId] = useState(0);
   const [approvedBooks, setApprovedBooks] = useState([]);
   const [pendingBooks, setPendingBooks] = useState([]);
   const [rejectedBooks, setRejectedBooks] = useState([]);
@@ -161,6 +171,14 @@ export default function LibraryPage() {
     return student && student.role === 'ADMIN';
   }, [student]);
 
+  const canManageResources = useMemo(() => {
+    return student && ['ADMIN', 'TEACHER'].includes(student.role);
+  }, [student]);
+
+  const activeMeta = useMemo(() => {
+    return LIBRARY_SECTIONS.find((row) => row.key === activeSection) || LIBRARY_SECTIONS[0];
+  }, [activeSection]);
+
   const preordersStorageKey = useMemo(() => {
     if (!student?.id) return 'linkedupro_library_preorders_guest';
     return `linkedupro_library_preorders_${student.id}`;
@@ -190,14 +208,15 @@ export default function LibraryPage() {
   }
 
   useEffect(() => {
-    const token = getToken();
+    const tokenValue = getToken();
     const me = getStudent();
-    if (!token || !me) {
+    if (!tokenValue || !me) {
       router.push('/login');
       return;
     }
 
     setStudent(me);
+    setToken(tokenValue);
     loadBooks();
   }, [router]);
 
@@ -208,7 +227,56 @@ export default function LibraryPage() {
     if (q) setSearchTerm(q);
     const bookId = Number(params.get('bookId') || params.get('book') || 0);
     if (bookId > 0) setRequestedBookId(bookId);
+
+    const section = String(params.get('section') || '').trim().toLowerCase();
+    if (section) setActiveSection(section);
+
+    const termId = Number(params.get('termId') || 0);
+    if (termId > 0) setFocusTermId(termId);
+
+    const resourceId = Number(params.get('resourceId') || 0);
+    if (resourceId > 0) setFocusResourceId(resourceId);
   }, []);
+
+  function setSection(nextKey) {
+    const next = String(nextKey || 'livres').trim().toLowerCase();
+    setActiveSection(next);
+    setFocusTermId(0);
+    setFocusResourceId(0);
+
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    params.set('section', next);
+    params.delete('termId');
+    params.delete('resourceId');
+    // keep prefill/bookId if present
+    router.replace(`/library?${params.toString()}`);
+  }
+
+  function openBookFromLibrary(bookId) {
+    const id = Number(bookId || 0);
+    if (!id) return;
+    setActiveSection('livres');
+    setRequestedBookId(id);
+    router.push(`/library?section=livres&bookId=${encodeURIComponent(id)}`);
+  }
+
+  function openDictionaryTerm(termId) {
+    const id = Number(termId || 0);
+    if (!id) return;
+    setActiveSection('dictionnaires');
+    setFocusTermId(id);
+    router.push(`/library?section=dictionnaires&termId=${encodeURIComponent(id)}`);
+  }
+
+  function openResource(resourceId, sectionKey = 'supports') {
+    const id = Number(resourceId || 0);
+    if (!id) return;
+    const section = String(sectionKey || 'supports').trim().toLowerCase();
+    setActiveSection(section);
+    setFocusResourceId(id);
+    router.push(`/library?section=${encodeURIComponent(section)}&resourceId=${encodeURIComponent(id)}`);
+  }
 
   useEffect(() => {
     if (!requestedBookId || requestedBookOpenedRef.current) return;
@@ -499,14 +567,20 @@ export default function LibraryPage() {
       <div className="card">
         <h1 className="text-3xl font-black text-brand-900">Bibliothèque numérique</h1>
         <p className="mt-2 text-sm text-brand-700">
-          Ressources PDF validées pour les élèves. Professeurs et élèves peuvent proposer des livres/recueils, le super admin valide.
+          Centre de ressources et d'apprentissage: livres, supports pédagogiques, dictionnaire informatique, examens et favoris.
         </p>
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
         {success ? <p className="mt-2 text-sm text-green-700">{success}</p> : null}
       </div>
 
-      {canUpload ? (
-        <section className="card">
+      <LibrarySearchPanel token={token} />
+
+      <LibrarySectionNav activeKey={activeSection} onChange={setSection} />
+
+      {activeSection === 'livres' ? (
+        <>
+        {canUpload ? (
+          <section className="card">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-xl font-bold text-brand-900">{editingBookId ? 'Modifier un livre PDF' : 'Ajouter un livre PDF'}</h2>
             <button
@@ -711,6 +785,24 @@ export default function LibraryPage() {
           </div>
         </section>
       ) : null}
+        </>
+      ) : activeSection === 'dictionnaires' ? (
+        <DictionarySection token={token} focusTermId={focusTermId} />
+      ) : activeSection === 'favoris' ? (
+        <FavoritesSection
+          token={token}
+          onOpenBook={openBookFromLibrary}
+          onOpenDictionaryTerm={openDictionaryTerm}
+          onOpenResource={(id) => openResource(id, 'supports')}
+        />
+      ) : (
+        <ResourcesSection
+          token={token}
+          canManage={canManageResources}
+          defaultCategory={activeMeta?.category || ''}
+          focusResourceId={focusResourceId}
+        />
+      )}
 
       {pdfViewer ? (
         <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/70 p-3">
