@@ -1,5 +1,7 @@
 # Fonctionnalités de LinkEduPro (par module et par rôle)
 
+LinkEduPro est une plateforme éducative numérique conçue pour connecter les élèves, les enseignants et les institutions autour de ressources pédagogiques, d’outils d’apprentissage et de collaboration.
+
 Ce document décrit les principales fonctionnalités de la plateforme **LinkEduPro / EduPro** selon les rôles utilisateurs : **Élève**, **Professeur**, **Admin / Super Admin**.
 
 ## Modules (menu principal)
