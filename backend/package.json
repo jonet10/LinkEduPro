@@ -16,6 +16,7 @@
     "quiz:import:nsiv:generated": "node scripts/import-generated-nsiv-quizzes.js",
     "exams:sync": "node scripts/sync-exam-sources.js",
     "school:backup": "node scripts/school-backup.js",
+    "import:dictionary:sql": "node scripts/import-informatics-dictionary-sql.js",
     "deploy": "node scripts/deploy.js"
   },
   "dependencies": {
