@@ -173,10 +173,104 @@ async function reviewContent(req, res, next) {
   }
 }
 
+async function updateContent(req, res, next) {
+  try {
+    const contentId = Number(req.params.contentId);
+    if (!Number.isInteger(contentId) || contentId <= 0) {
+      return res.status(400).json({ message: 'Identifiant de contenu invalide.' });
+    }
+
+    const content = await prisma.content.findUnique({ where: { id: contentId } });
+    if (!content) {
+      return res.status(404).json({ message: 'Contenu introuvable.' });
+    }
+
+    const isAdmin = req.user.role === 'ADMIN';
+    if (!isAdmin && content.teacherId !== req.user.id) {
+      return res.status(403).json({ message: 'Permissions insuffisantes.' });
+    }
+
+    const data = {};
+    const requestedTitle = req.body.title;
+    const requestedBody = req.body.body;
+
+    if (typeof requestedTitle === 'string') {
+      data.title = requestedTitle;
+    }
+
+    if (typeof requestedBody === 'string') {
+      data.body = requestedBody;
+    }
+
+    const requestedLevels = Array.isArray(req.body.levels) ? req.body.levels : [];
+    const normalizedLevels = [
+      ...requestedLevels,
+      ...(req.body.level ? [req.body.level] : [])
+    ]
+      .map((entry) => normalizeLevelInput(entry))
+      .filter(Boolean);
+    const uniqueLevels = Array.from(new Set(normalizedLevels));
+    if (uniqueLevels.length) {
+      data.level = uniqueLevels[0];
+      data.targetLevels = uniqueLevels;
+    } else if (typeof req.body.level === 'string') {
+      const normalized = normalizeLevelInput(req.body.level);
+      if (normalized) {
+        data.level = normalized;
+      }
+    }
+
+    if (isAdmin && typeof req.body.status === 'string' && req.body.status) {
+      data.status = String(req.body.status).toUpperCase();
+    }
+
+    const teacherChangedContent = !isAdmin && Object.keys(data).some((key) => ['title', 'body', 'level', 'targetLevels'].includes(key));
+    if (teacherChangedContent && content.status === 'APPROVED') {
+      data.status = 'PENDING';
+    }
+
+    const updated = await prisma.content.update({
+      where: { id: contentId },
+      data
+    });
+
+    return res.json({ content: toApiContent(updated) });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deleteContent(req, res, next) {
+  try {
+    const contentId = Number(req.params.contentId);
+    if (!Number.isInteger(contentId) || contentId <= 0) {
+      return res.status(400).json({ message: 'Identifiant de contenu invalide.' });
+    }
+
+    const content = await prisma.content.findUnique({ where: { id: contentId } });
+    if (!content) {
+      return res.status(404).json({ message: 'Contenu introuvable.' });
+    }
+
+    const isAdmin = req.user.role === 'ADMIN';
+    if (!isAdmin && content.teacherId !== req.user.id) {
+      return res.status(403).json({ message: 'Permissions insuffisantes.' });
+    }
+
+    await prisma.content.delete({ where: { id: contentId } });
+
+    return res.json({ message: 'Contenu supprimé.', id: contentId });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createContent,
   listMySubmittedContent,
   listApprovedForMyLevel,
   listPendingContent,
-  reviewContent
+  reviewContent,
+  updateContent,
+  deleteContent
 };

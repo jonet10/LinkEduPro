@@ -58,6 +58,22 @@ const createContentSchema = Joi.object({
   return value;
 });
 
+const updateContentSchema = Joi.object({
+  title: Joi.string().trim().min(3).max(180).optional(),
+  body: Joi.string().trim().min(10).max(20000).optional(),
+  level: levelSchema.optional(),
+  levels: levelsSchema.optional(),
+  status: contentStatusSchema.optional(),
+  type: contentTypeSchema.optional()
+})
+  .min(1)
+  .custom((value) => {
+    if (!value.level && Array.isArray(value.levels) && value.levels.length) {
+      value.level = value.levels[0];
+    }
+    return value;
+  });
+
 const reviewContentSchema = Joi.object({
   action: Joi.string().valid('approved', 'rejected').required()
 });
@@ -135,6 +151,7 @@ module.exports = {
   dailyStatsQuerySchema,
   focusMusicQuerySchema,
   createContentSchema,
+  updateContentSchema,
   reviewContentSchema,
   createStudyPlanSchema,
   upsertPersonalStudyPlanSchema,
