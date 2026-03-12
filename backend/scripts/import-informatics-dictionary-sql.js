@@ -127,6 +127,17 @@ async function main() {
     return;
   }
 
+  if (!prisma?.informaticsDictionaryTerm) {
+    console.error(
+      [
+        'Prisma Client ne contient pas le modèle "InformaticsDictionaryTerm".',
+        "Solution: exécute `npx prisma generate` (ou `npm run prisma:generate`) après avoir récupéré la dernière version du backend, puis relance l'import.",
+        "Et assure-toi d'avoir appliqué les migrations (`npx prisma migrate deploy`)."
+      ].join('\n')
+    );
+    process.exit(1);
+  }
+
   console.log(`Trouvé ${parsed.length} termes à importer.`);
   if (dryRun) {
     console.log('Mode --dry-run: aucune écriture en base.');
@@ -184,4 +195,3 @@ main()
       await prisma.$disconnect();
     } catch (_) {}
   });
-
