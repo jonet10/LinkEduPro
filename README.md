@@ -4,6 +4,15 @@ Plateforme SaaS educative (module eleve) avec:
 - Backend: Express + Prisma + PostgreSQL + JWT + Joi
 - Frontend: Next.js (App Router) + React + Tailwind CSS
 
+## Repositories (important)
+
+Ce dossier est un **mono-repo** (backend + frontend). En production / GitHub, le projet est aussi maintenu en **2 repos séparés**:
+
+- Frontend (application Next.js): `jonet10/LinkEduPro`
+- Backend (API Express): `jonet10/linkedupro-backend`
+
+Le repo `jonet10/linkedupro` peut contenir soit le frontend soit une branche de snapshot mono-repo (`monorepo-main`) selon la configuration.
+
 ## Structure
 
 - `backend/`: API REST + base de donnees
