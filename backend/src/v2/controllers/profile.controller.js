@@ -141,17 +141,9 @@ async function updateMyProfile(req, res, next) {
 
     let desiredAcademicLevel = null;
     if (level !== undefined) {
-      if (existing.role !== 'STUDENT') {
-        return res.status(400).json({ message: 'Niveau académique réserve aux Élèves.' });
-      }
-
-      desiredAcademicLevel = parseAcademicLevel(level);
-      if (!desiredAcademicLevel) {
-        return res.status(400).json({ message: 'Niveau invalide.' });
-      }
-      if (gradeLevel === undefined) {
-        data.gradeLevel = ACADEMIC_LEVEL_TO_API[desiredAcademicLevel] || existing.gradeLevel;
-      }
+      return res.status(403).json({
+        message: "Le niveau d’étude ne peut pas être modifié après l’inscription. Contacte un admin si tu t’es trompé."
+      });
     }
 
     const requestedTrack = nsivTrack !== undefined
