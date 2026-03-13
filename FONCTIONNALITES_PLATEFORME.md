@@ -190,6 +190,7 @@ La Bibliothèque est conçue comme un **centre de ressources** structuré.
 ### Comptes & Profil
 - Inscription / connexion.
 - Profil utilisateur (informations, préférences).
+- Le niveau d’étude est défini à l’inscription et n’est pas modifiable par l’utilisateur (contacter l’admin en cas d’erreur).
 
 ### Messagerie / Annonces (si activé)
 - Envoi et réception de messages/annonces.

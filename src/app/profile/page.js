@@ -231,9 +231,7 @@ export default function ProfilePage() {
         school: schoolLabel || null,
         nsivTrack: profile.role === 'STUDENT' && form.level === 'NSIV' ? form.nsivTrack : null
       };
-      if (profile.role === 'STUDENT' && form.level) {
-        payload.level = form.level;
-      }
+      // Le niveau d’étude est verrouillé après l’inscription (modifier via admin uniquement).
       if (profile.role === 'TEACHER') {
         payload.teachingSchools = parseMultiValue(form.teachingSchoolsText);
         payload.teachingSubjects = parseMultiValue(form.teachingSubjectsText);
@@ -455,11 +453,14 @@ export default function ProfilePage() {
           {profile.role === 'STUDENT' ? (
             <div className="sm:col-span-2">
               <label className="mb-1 block text-sm font-medium">Niveau académique</label>
+              <p className="mb-2 text-xs text-brand-700">
+                Le niveau d’étude est verrouillé après l’inscription. Si tu t’es trompé, contacte un admin.
+              </p>
               <select
                 className="input"
                 value={form.level}
                 onChange={(e) => onChangeField('level', e.target.value)}
-                disabled={!editMode}
+                disabled
               >
                 <option value="">Sélectionner un niveau</option>
                 {ACADEMIC_LEVEL_OPTIONS.map((level) => (
