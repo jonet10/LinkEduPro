@@ -100,6 +100,7 @@ export default function SuperDashboardPage() {
     dateTo: '',
     q: ''
   });
+  const [authToken, setAuthToken] = useState(null);
   const [pendingVideos, setPendingVideos] = useState([]);
   const [pendingVideosLoading, setPendingVideosLoading] = useState(true);
   const [pendingVideosError, setPendingVideosError] = useState('');
@@ -117,6 +118,14 @@ export default function SuperDashboardPage() {
 
     load(token);
   }, [router]);
+
+  useEffect(() => {
+    if (!authToken) return undefined;
+    const watcher = setInterval(() => {
+      loadPendingVideos(authToken);
+    }, 30000);
+    return () => clearInterval(watcher);
+  }, [authToken]);
 
   async function loadPendingVideos(forcedToken = null) {
     const token = forcedToken || getToken();
@@ -189,7 +198,8 @@ export default function SuperDashboardPage() {
         setChallengeSubtitle(c.config.homeChallengeSubtitle || 'Choisis la personne qui doit rester en tête cette semaine.');
         setChallengeTheme(c.config.homeChallengeTheme || 'TIKTOKERS');
       }
-      await loadPendingVideos(token);
+    await loadPendingVideos(token);
+    setAuthToken(token);
       await loadStudents(token, studentFilters);
       await loadUsers(token, userFilters);
     } catch (e) {
