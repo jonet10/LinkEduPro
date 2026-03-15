@@ -69,12 +69,25 @@ function is9eSubject(subjectName) {
   return normalized.startsWith('9e') || normalized.startsWith('9eme') || normalized.startsWith('9ème');
 }
 
+function extractAcademicLevelFromSubjectName(subjectName) {
+  const normalized = normalizeName(subjectName).replace(/\s+/g, ' ');
+  if (!normalized) return null;
+
+  if (/^(9e|9eme|9eme)\b/.test(normalized)) return 'LEVEL_9E';
+  if (/\b(nsiv|ns4|terminale|bac)\b/.test(normalized)) return 'NSIV';
+  if (/\b(nsiii|ns3)\b/.test(normalized)) return 'NSIII';
+  if (/\b(nsii|ns2)\b/.test(normalized)) return 'NSII';
+  if (/\b(nsi|ns1)\b/.test(normalized)) return 'NSI';
+  if (/\b(universitaire|universite|fac)\b/.test(normalized)) return 'UNIVERSITAIRE';
+
+  return null;
+}
+
 async function listSubjects(req, res, next) {
   try {
     const viewerLevel = req.user?.role === 'STUDENT'
       ? await resolveViewerAcademicLevel(req.user.id)
       : null;
-    const strict9e = viewerLevel === 'LEVEL_9E';
 
     const subjects = await prisma.subject.findMany({
       orderBy: { name: 'asc' },
@@ -90,9 +103,14 @@ async function listSubjects(req, res, next) {
 
     for (const subject of subjects) {
       if (viewerLevel) {
-        const is9e = is9eSubject(subject.name);
-        if (strict9e && !is9e) continue;
-        if (!strict9e && is9e) continue;
+        const subjectLevel = extractAcademicLevelFromSubjectName(subject.name);
+        if (viewerLevel === 'LEVEL_9E') {
+          // 9e: uniquement les rubriques explicitement 9e.
+          if (subjectLevel !== 'LEVEL_9E') continue;
+        } else if (subjectLevel && subjectLevel !== viewerLevel) {
+          // Autres niveaux: si la rubrique annonce un niveau, il doit correspondre.
+          continue;
+        }
       }
 
       const group = findGroupForSubjectName(subject.name);
