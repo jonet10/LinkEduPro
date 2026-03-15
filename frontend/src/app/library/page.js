@@ -51,7 +51,15 @@ const LIBRARY_SUBJECT_SUGGESTIONS = [
   'Encyclopédies'
 ];
 
-function BookCard({ book, preordered = false, onPreorder = null, onPurchase = null, purchasingId = null, onOpenPdf = null }) {
+function BookCard({
+  book,
+  preordered = false,
+  onPreorder = null,
+  onPurchase = null,
+  purchasingId = null,
+  onOpenPdf = null,
+  actions = null
+}) {
   const [showDescription, setShowDescription] = useState(false);
   const hasDescription = Boolean(String(book.description || '').trim());
   return (
@@ -114,6 +122,11 @@ function BookCard({ book, preordered = false, onPreorder = null, onPurchase = nu
           Lire le PDF
         </button>
       )}
+      {actions ? (
+        <div className="mt-4 flex flex-col gap-2">
+          {actions}
+        </div>
+      ) : null}
       </div>
     </article>
   );
@@ -743,24 +756,28 @@ export default function LibraryPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredApprovedBooks.map((book) => (
               <div key={book.id} className="space-y-2">
-                <BookCard
-                  book={book}
-                  preordered={preorderedBooks.includes(book.id)}
-                  onPreorder={savePreorder}
-                  onPurchase={purchaseBook}
-                  purchasingId={purchasingId}
-                  onOpenPdf={openPdfViewer}
-                />
-                {canEditBook(book) ? (
-                  <button type="button" className="btn-secondary w-full" onClick={() => startEditBook(book)}>
-                    Modifier ce livre
-                  </button>
-                ) : null}
-                {canDeleteBook(book) ? (
-                  <button type="button" className="btn-secondary w-full" onClick={() => deleteBook(book.id)}>
-                    Supprimer ce livre
-                  </button>
-                ) : null}
+                  <BookCard
+                    book={book}
+                    preordered={preorderedBooks.includes(book.id)}
+                    onPreorder={savePreorder}
+                    onPurchase={purchaseBook}
+                    purchasingId={purchasingId}
+                    onOpenPdf={openPdfViewer}
+                    actions={
+                      <>
+                        {canEditBook(book) ? (
+                          <button type="button" className="btn-secondary w-full" onClick={() => startEditBook(book)}>
+                            Modifier ce livre
+                          </button>
+                        ) : null}
+                        {canDeleteBook(book) ? (
+                          <button type="button" className="btn-secondary w-full" onClick={() => deleteBook(book.id)}>
+                            Supprimer ce livre
+                          </button>
+                        ) : null}
+                      </>
+                    }
+                  />
               </div>
             ))}
           </div>
