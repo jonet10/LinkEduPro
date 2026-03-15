@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
 const MIN_SPLASH_MS = 1400;
 
 export default function SplashScreenGate() {
   const [visible, setVisible] = useState(true);
+  const path = usePathname();
 
   useEffect(() => {
     const startedAt = Date.now();
@@ -33,6 +35,14 @@ export default function SplashScreenGate() {
       window.removeEventListener('load', hideWithMinimumDelay);
     };
   }, []);
+
+  useEffect(() => {
+    if (!visible) return undefined;
+    const guard = setTimeout(() => setVisible(false), MIN_SPLASH_MS);
+    return () => {
+      clearTimeout(guard);
+    };
+  }, [path, visible]);
 
   if (!visible) return null;
 
