@@ -1,59 +1,64 @@
-﻿# LinkEduPro - L'education connectee
+# LinkEduPro – L’éducation connectée
 
-Plateforme SaaS educative (module eleve) avec:
-- Backend: Express + Prisma + PostgreSQL + JWT + Joi
-- Frontend: Next.js (App Router) + React + Tailwind CSS
+Plateforme SaaS éducative (module élève) qui rassemble les contenus pédagogiques et la supervision des classes numériques.
 
 ## Repositories (important)
 
-Ce dossier est un **mono-repo** (backend + frontend). En production / GitHub, le projet est aussi maintenu en **2 repos séparés**:
+Ce dossier peut être utilisé comme mono-repo (backend + frontend). En production, les contenus sont maintenus dans deux dépôts distincts :
 
-- Frontend (application Next.js): `jonet10/LinkEduPro`
-- Backend (API Express): `jonet10/linkedupro-backend`
-
-Le repo `jonet10/linkedupro` peut contenir soit le frontend soit une branche de snapshot mono-repo (`monorepo-main`) selon la configuration.
+- Frontend (Next.js / App Router) : `jonet10/LinkEduPro`
+- Backend (Express + Prisma) : `jonet10/linkedupro-backend`
+- Snapshot mono-repo : `jonet10/linkedupro` (branche `monorepo-main`)
 
 ## Structure
 
-- `backend/`: API REST + base de donnees
-- `frontend/`: application web Next.js
+- `backend/` : API REST, Prisma, authentification, gestion des contenus.
+- `frontend/` : Application web Next.js, composants UI, pages, gestion de la classe numérique.
 
-## Prerequis
+## Prérequis
 
 - Node.js 18+
 - PostgreSQL 14+
 
 ## Installation
 
-1. Backend
+1. **Backend**
 
-```bash
-cd backend
-cp .env.example .env
-npm install
-npx prisma generate
-npx prisma migrate dev --name init
-npm run prisma:seed
-npm run dev
-```
+   ```bash
+   cd backend
+   cp .env.example .env
+   npm install
+   npx prisma generate
+   npx prisma migrate dev --name init
+   npm run prisma:seed
+   npm run dev
+   ```
 
-2. Frontend
+2. **Frontend**
+
+   ```bash
+   cd frontend
+   cp .env.example .env
+   npm install
+   npm run dev
+   ```
+
+## Build
 
 ```bash
 cd frontend
-cp .env.example .env.local
-npm install
-npm run dev
+npm run build
+npm start
 ```
 
-## URLs
+## URLs locales
 
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:5000`
-- Health backend: `http://localhost:5000/api/health`
-- Health next api route: `http://localhost:3000/api/health`
+- Frontend : `http://localhost:3000`
+- Backend : `http://localhost:5000`
+- Health API (backend) : `http://localhost:5000/api/health`
+- Health API (Next) : `http://localhost:3000/api/health`
 
-## API REST principales (backend)
+## API REST principales
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
@@ -62,10 +67,20 @@ npm run dev
 - `POST /api/quiz/submit`
 - `GET /api/results/progress`
 
-Toutes les routes sauf auth necessitent `Authorization: Bearer <token>`.
+Toutes les routes (sauf `/auth`) nécessitent l’en-tête `Authorization: Bearer <token>`.
 
 ## Notes
 
-- Le seed ajoute 3 matieres (`Mathematiques`, `Sciences`, `Francais`) avec questions.
-- Le quiz est chronometre cote frontend (5 minutes par defaut).
-- Le dashboard affiche moyenne globale, stats par matiere et dernieres tentatives.
+- Le seed crée trois matières (`Mathematiques`, `Sciences`, `Francais`) avec_questions prédéfinies.
+- Les quiz sont chronométrés côté frontend (5 minutes par défaut).
+- Le dashboard affiche la moyenne globale, les stats par matière et les dernières tentatives.
+
+## PWA (installation)
+
+- Manifest : `frontend/public/manifest.webmanifest`
+- Service Worker : `frontend/public/sw.js`
+
+## Ressources supplémentaires
+
+- `frontend/public/apk/linkedupro.apk` : APK Android prebuilt.
+- `scripts/publish-apk.js` : script pour publier les APK.

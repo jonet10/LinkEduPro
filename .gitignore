@@ -1,3 +1,4 @@
+# Ignore temporary data and build artifacts
 Departements/
 
 # Secrets / env
