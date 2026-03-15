@@ -539,6 +539,30 @@ export default function VideoLessonsPage() {
     }
   }
 
+  async function reviewVideo(item, action) {
+    if (!item?.id || !token) return;
+    const label = action === 'approved' ? 'approuver' : 'rejeter';
+    const confirmed = typeof window !== 'undefined'
+      ? window.confirm(`Voulez-vous ${label} cette vidéo ?`)
+      : false;
+    if (!confirmed) return;
+
+    try {
+      setError('');
+      setSuccess('');
+      const data = await apiClient(`/v2/contents/${item.id}/review`, {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify({ action })
+      });
+      const updatedVideo = mapContentToVideo(data.content);
+      setVideos((prev) => prev.map((row) => (row.id === updatedVideo.id ? updatedVideo : row)));
+      setSuccess(action === 'approved' ? 'Vidéo approuvée.' : 'Vidéo rejetée.');
+    } catch (e) {
+      setError(e.message || 'Impossible de traiter cette demande.');
+    }
+  }
+
   async function deleteVideo(item) {
     if (!item?.id || !token) return;
     const confirmed = typeof window !== 'undefined'
@@ -870,6 +894,30 @@ export default function VideoLessonsPage() {
 
                       {canManage ? (
                         <div className="absolute right-2 top-2 flex gap-2">
+                          {(['ADMIN', 'SUPER_ADMIN'].includes(student?.role)) && item.status === 'PENDING' ? (
+                            <>
+                              <button
+                                type="button"
+                                className="rounded-lg bg-emerald-600/90 px-2 py-1 text-[11px] font-bold text-white shadow hover:bg-emerald-600"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  reviewVideo(item, 'approved');
+                                }}
+                              >
+                                Approuver
+                              </button>
+                              <button
+                                type="button"
+                                className="rounded-lg bg-amber-600/90 px-2 py-1 text-[11px] font-bold text-white shadow hover:bg-amber-600"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  reviewVideo(item, 'rejected');
+                                }}
+                              >
+                                Rejeter
+                              </button>
+                            </>
+                          ) : null}
                           <button
                             type="button"
                             className="rounded-lg bg-white/90 px-2 py-1 text-[11px] font-bold text-slate-900 shadow hover:bg-white"
