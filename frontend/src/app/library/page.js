@@ -752,8 +752,11 @@ export default function LibraryPage() {
           />
         </div>
         {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
-        <div className="max-h-[70vh] overflow-y-auto pr-1">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="max-h-[70vh] overflow-y-auto pr-1">
+            <div
+              className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+              style={{ gridAutoRows: 'minmax(0, auto)' }}
+            >
             {filteredApprovedBooks.map((book) => (
               <div key={book.id} className="space-y-2">
                   <BookCard
