@@ -30,6 +30,35 @@ function escapeCsv(value) {
   return raw;
 }
 
+function parseVideoContentBody(rawBody) {
+  const base = {
+    description: '',
+    videoUrl: '',
+    kind: 'LESSON',
+    isPaid: false,
+    price: 0
+  };
+  if (typeof rawBody !== 'string') {
+    return base;
+  }
+
+  try {
+    const parsed = JSON.parse(rawBody);
+    if (!parsed || typeof parsed !== 'object') {
+      return { ...base, description: rawBody };
+    }
+    return {
+      description: String(parsed.description || ''),
+      videoUrl: String(parsed.videoUrl || ''),
+      kind: String(parsed.kind || 'LESSON').toUpperCase(),
+      isPaid: Boolean(parsed.isPaid),
+      price: Number(parsed.price || 0)
+    };
+  } catch {
+    return { ...base, description: rawBody };
+  }
+}
+
 export default function SuperDashboardPage() {
   const router = useRouter();
   const [dashboard, setDashboard] = useState(null);
@@ -71,6 +100,11 @@ export default function SuperDashboardPage() {
     dateTo: '',
     q: ''
   });
+  const [pendingVideos, setPendingVideos] = useState([]);
+  const [pendingVideosLoading, setPendingVideosLoading] = useState(true);
+  const [pendingVideosError, setPendingVideosError] = useState('');
+  const [pendingVideoActionLoadingId, setPendingVideoActionLoadingId] = useState(null);
+  const [pendingVideoActionMessage, setPendingVideoActionMessage] = useState('');
 
   useEffect(() => {
     const token = getToken();
@@ -83,6 +117,54 @@ export default function SuperDashboardPage() {
 
     load(token);
   }, [router]);
+
+  async function loadPendingVideos(forcedToken = null) {
+    const token = forcedToken || getToken();
+    if (!token) return;
+
+    setPendingVideosError('');
+    setPendingVideoActionMessage('');
+    setPendingVideosLoading(true);
+
+    try {
+      const data = await apiClient('/v2/contents/pending', { token });
+      const pendingVideoContents = (Array.isArray(data.pending) ? data.pending : [])
+        .filter((item) => String(item.type || '').toLowerCase() === 'video');
+      setPendingVideos(pendingVideoContents);
+    } catch (e) {
+      setPendingVideosError(e.message || 'Impossible de charger les vidéos en attente.');
+      setPendingVideos([]);
+    } finally {
+      setPendingVideosLoading(false);
+    }
+  }
+
+  async function reviewPendingVideo(contentId, action) {
+    const token = getToken();
+    if (!token) return;
+
+    setPendingVideosError('');
+    setPendingVideoActionMessage('');
+    setPendingVideoActionLoadingId(contentId);
+
+    try {
+      await apiClient(`/v2/contents/${contentId}/review`, {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify({ action })
+      });
+      setPendingVideos((prev) => prev.filter((item) => item.id !== contentId));
+      setPendingVideoActionMessage(
+        action === 'approved'
+          ? 'Contenu vidéo approuvé.'
+          : 'Contenu vidéo rejeté.'
+      );
+    } catch (e) {
+      setPendingVideosError(e.message || 'Impossible de mettre à jour ce contenu.');
+    } finally {
+      setPendingVideoActionLoadingId(null);
+    }
+  }
 
   async function load(forcedToken = null) {
     const token = forcedToken || getToken();
@@ -107,6 +189,7 @@ export default function SuperDashboardPage() {
         setChallengeSubtitle(c.config.homeChallengeSubtitle || 'Choisis la personne qui doit rester en tête cette semaine.');
         setChallengeTheme(c.config.homeChallengeTheme || 'TIKTOKERS');
       }
+      await loadPendingVideos(token);
       await loadStudents(token, studentFilters);
       await loadUsers(token, userFilters);
     } catch (e) {
@@ -442,12 +525,12 @@ export default function SuperDashboardPage() {
           </div>
         </div>
 
-        {filteredDonations.length === 0 ? (
-          <p className="text-sm text-brand-700">Aucun don enregistré.</p>
-        ) : (
-          <div className="overflow-auto">
-            <table className="min-w-full text-sm">
-              <thead>
+      {filteredDonations.length === 0 ? (
+        <p className="text-sm text-brand-700">Aucun don enregistré.</p>
+      ) : (
+        <div className="overflow-auto">
+          <table className="min-w-full text-sm">
+            <thead>
                 <tr className="text-left">
                   <th>Donateur</th>
                   <th>Email</th>
@@ -473,9 +556,97 @@ export default function SuperDashboardPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            </div>
+          )}
+        </section>
+
+      <section className="card space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-xl font-semibold">Contenus vidéo en attente</h2>
+            <p className="text-sm text-brand-700">
+              Les professeurs publient ici leurs séances pour la classe numérique. Tu peux les approuver ou les rejeter.
+            </p>
           </div>
-        )}
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => loadPendingVideos()}
+            disabled={pendingVideosLoading}
+          >
+            {pendingVideosLoading ? 'Actualisation...' : 'Actualiser'}
+          </button>
+        </div>
+
+        {pendingVideoActionMessage ? <p className="text-sm text-emerald-700">{pendingVideoActionMessage}</p> : null}
+        {pendingVideosError ? <p className="text-sm text-red-600">{pendingVideosError}</p> : null}
+
+        {pendingVideosLoading ? (
+          <p className="text-sm text-brand-700">Chargement des contenus vidéo en attente...</p>
+        ) : null}
+
+        {!pendingVideosLoading && pendingVideos.length === 0 ? (
+          <p className="text-sm text-brand-700">Aucun contenu vidéo en attente de validation.</p>
+        ) : null}
+
+        {!pendingVideosLoading && pendingVideos.length > 0 ? (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {pendingVideos.map((item) => {
+              const teacherName =
+                [item.teacher?.lastName, item.teacher?.firstName].filter(Boolean).join(' ') || 'Professeur';
+              const levelLabel =
+                Array.isArray(item.levels) && item.levels.length
+                  ? item.levels.join(' • ')
+                  : item.level || 'Terminale';
+              const bodyData = parseVideoContentBody(item.body);
+              const created = item.createdAt ? new Date(item.createdAt).toLocaleString('fr-FR') : '';
+
+              return (
+                <article key={item.id} className="rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[11px] uppercase tracking-widest text-brand-500">{bodyData.kind || 'VIDÉO'}</p>
+                      <h3 className="text-lg font-semibold text-brand-900">{item.title}</h3>
+                      <p className="text-xs text-brand-600">{teacherName}</p>
+                    </div>
+                    <span className="text-[11px] font-semibold text-brand-600">{created}</span>
+                  </div>
+                  <p className="mt-2 text-xs font-semibold text-brand-500">{levelLabel}</p>
+                  <p className="mt-2 text-sm text-brand-700">{bodyData.description || 'Pas de description.'}</p>
+                  {bodyData.videoUrl ? (
+                    <a
+                      className="mt-2 inline-flex text-sm font-semibold text-brand-500 hover:underline"
+                      href={bodyData.videoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Ouvrir le lien vidéo
+                    </a>
+                  ) : null}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      disabled={pendingVideoActionLoadingId === item.id}
+                      onClick={() => reviewPendingVideo(item.id, 'approved')}
+                    >
+                      Approuver
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      disabled={pendingVideoActionLoadingId === item.id}
+                      onClick={() => reviewPendingVideo(item.id, 'rejected')}
+                    >
+                      Rejeter
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : null}
       </section>
 
       <section className="card space-y-3">
