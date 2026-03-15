@@ -1,5 +1,6 @@
 const prisma = require('../../config/prisma');
 const { normalizeLevelInput, resolveStudentLevel, toApiLevel } = require('../utils/level');
+const { notifyAdmins } = require('../../services/notifications');
 
 const STATUS_BY_ACTION = {
   approved: 'APPROVED',
@@ -53,6 +54,16 @@ async function createContent(req, res, next) {
         teacherId: req.user.id
       }
     });
+
+    if (status === 'PENDING') {
+      await notifyAdmins({
+        type: 'CONTENT_REVIEW_REQUIRED',
+        title: 'Vidéo à valider',
+        message: `${content.title} a été soumis et attend validation.`,
+        entityType: 'Content',
+        entityId: String(content.id)
+      });
+    }
 
     return res.status(201).json({ content: toApiContent(content) });
   } catch (error) {
