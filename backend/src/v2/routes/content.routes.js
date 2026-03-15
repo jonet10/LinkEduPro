@@ -17,8 +17,8 @@ const router = express.Router();
 router.post('/', requireRoles(['TEACHER', 'ADMIN']), validate(createContentSchema), createContent);
 router.get('/mine', requireRoles(['TEACHER', 'ADMIN']), listMySubmittedContent);
 router.get('/my-level', requireRoles(['STUDENT']), listApprovedForMyLevel);
-router.get('/pending', requireRoles(['ADMIN']), listPendingContent);
-router.patch('/:contentId/review', requireRoles(['ADMIN']), validate(reviewContentSchema), reviewContent);
+router.get('/pending', requireRoles(['ADMIN', 'SUPER_ADMIN']), listPendingContent);
+router.patch('/:contentId/review', requireRoles(['ADMIN', 'SUPER_ADMIN']), validate(reviewContentSchema), reviewContent);
 router.patch('/:contentId', requireRoles(['TEACHER', 'ADMIN']), validate(updateContentSchema), updateContent);
 router.delete('/:contentId', requireRoles(['TEACHER', 'ADMIN']), deleteContent);
 

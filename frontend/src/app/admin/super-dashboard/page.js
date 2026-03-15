@@ -111,7 +111,7 @@ export default function SuperDashboardPage() {
     const token = getToken();
     const student = getStudent();
 
-    if (!token || !student || student.role !== 'ADMIN') {
+    if (!token || !student || !['ADMIN', 'SUPER_ADMIN'].includes(student.role)) {
       router.push('/login');
       return;
     }
