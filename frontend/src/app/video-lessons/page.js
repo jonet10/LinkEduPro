@@ -269,8 +269,21 @@ export default function VideoLessonsPage() {
       if (!currentToken) return;
 
       if (currentStudent && ['ADMIN', 'TEACHER', 'SUPER_ADMIN'].includes(currentStudent.role)) {
-        const data = await apiClient('/v2/contents/mine', { token: currentToken });
-        const mapped = (data.contents || [])
+        let items = [];
+        if (['ADMIN', 'SUPER_ADMIN'].includes(currentStudent.role)) {
+          const [mineData, pendingData] = await Promise.all([
+            apiClient('/v2/contents/mine', { token: currentToken }),
+            apiClient('/v2/contents/pending', { token: currentToken })
+          ]);
+          const merged = [...(pendingData.pending || []), ...(mineData.contents || [])];
+          const byId = new Map(merged.map((item) => [item.id, item]));
+          items = Array.from(byId.values());
+        } else {
+          const data = await apiClient('/v2/contents/mine', { token: currentToken });
+          items = data.contents || [];
+        }
+
+        const mapped = items
           .filter((item) => String(item.type || '').toLowerCase() === 'video')
           .map(mapContentToVideo);
         setVideos(mapped);
