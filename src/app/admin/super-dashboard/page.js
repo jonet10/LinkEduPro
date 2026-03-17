@@ -71,6 +71,10 @@ export default function SuperDashboardPage() {
     dateTo: '',
     q: ''
   });
+  const [withdrawalsPending, setWithdrawalsPending] = useState([]);
+  const [withdrawalsLoading, setWithdrawalsLoading] = useState(false);
+  const [withdrawalActionId, setWithdrawalActionId] = useState(null);
+  const [withdrawalNotes, setWithdrawalNotes] = useState({});
 
   useEffect(() => {
     const token = getToken();
@@ -91,15 +95,17 @@ export default function SuperDashboardPage() {
     try {
       setError('');
       setLoading(true);
-      const [d, i, c, donationsPayload] = await Promise.all([
+      const [d, i, c, donationsPayload, withdrawalsPayload] = await Promise.all([
         apiClient('/community/admin/super-dashboard', { token }),
         apiClient('/community/admin/teacher-invitations', { token }),
         apiClient('/community/admin/config', { token }),
-        apiClient('/platform-donations/admin/all', { token })
+        apiClient('/platform-donations/admin/all', { token }),
+        apiClient('/payouts/pending', { token })
       ]);
       setDashboard(d);
       setInvites(i.invitations || []);
       setPlatformDonations(Array.isArray(donationsPayload?.donations) ? donationsPayload.donations : []);
+      setWithdrawalsPending(Array.isArray(withdrawalsPayload?.pending) ? withdrawalsPayload.pending : []);
       if (c?.config) {
         setCommunityConfig(c.config);
         setTiktokEditors(Array.isArray(c.config.tiktokCreators) ? c.config.tiktokCreators : []);
@@ -323,6 +329,38 @@ export default function SuperDashboardPage() {
     URL.revokeObjectURL(url);
   }
 
+  async function refreshWithdrawals(token) {
+    setWithdrawalsLoading(true);
+    try {
+      const payload = await apiClient('/payouts/pending', { token });
+      setWithdrawalsPending(Array.isArray(payload?.pending) ? payload.pending : []);
+    } finally {
+      setWithdrawalsLoading(false);
+    }
+  }
+
+  async function reviewWithdrawalRequest(id, action) {
+    const token = getToken();
+    if (!token) return;
+    setWithdrawalActionId(id);
+    try {
+      await apiClient(`/payouts/${id}/review`, {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify({
+          action,
+          note: withdrawalNotes[id] || ''
+        })
+      });
+      await refreshWithdrawals(token);
+      setWithdrawalNotes((prev) => ({ ...prev, [id]: '' }));
+    } catch (e) {
+      setError(e.message || 'Erreur validation retrait.');
+    } finally {
+      setWithdrawalActionId(null);
+    }
+  }
+
   if (loading) {
     return <main className="mx-auto max-w-6xl px-4 py-8">Chargement...</main>;
   }
@@ -476,6 +514,89 @@ export default function SuperDashboardPage() {
             </table>
           </div>
         )}
+      </section>
+
+      <section className="card space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-semibold">Demandes de retrait (MonCash/NatCash)</h2>
+          <button
+            className="btn-secondary"
+            type="button"
+            onClick={() => {
+              const token = getToken();
+              if (!token) return;
+              refreshWithdrawals(token);
+            }}
+          >
+            Actualiser
+          </button>
+        </div>
+        {withdrawalsLoading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
+        {!withdrawalsLoading && withdrawalsPending.length === 0 ? (
+          <p className="text-sm text-brand-700">Aucune demande en attente.</p>
+        ) : null}
+        {!withdrawalsLoading && withdrawalsPending.length > 0 ? (
+          <div className="overflow-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left">
+                  <th>Demandeur</th>
+                  <th>Rôle</th>
+                  <th>Montant</th>
+                  <th>Frais</th>
+                  <th>Net</th>
+                  <th>Méthode</th>
+                  <th>Compte</th>
+                  <th>Créée le</th>
+                  <th>Note</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawalsPending.map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.requester?.lastName} {row.requester?.firstName}</td>
+                    <td>{row.requester?.role || '-'}</td>
+                    <td>{formatHtg(row.amount)}</td>
+                    <td>{formatHtg(row.fee)}</td>
+                    <td>{formatHtg(row.netAmount)}</td>
+                    <td>{row.method}</td>
+                    <td>{row.payoutAccount}</td>
+                    <td>{new Date(row.createdAt).toLocaleString()}</td>
+                    <td>
+                      <input
+                        className="input"
+                        placeholder="Note (optionnel)"
+                        value={withdrawalNotes[row.id] || ''}
+                        onChange={(e) => setWithdrawalNotes((prev) => ({ ...prev, [row.id]: e.target.value }))}
+                      />
+                    </td>
+                    <td>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          disabled={withdrawalActionId === row.id}
+                          onClick={() => reviewWithdrawalRequest(row.id, 'approved')}
+                        >
+                          Approuver
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          disabled={withdrawalActionId === row.id}
+                          onClick={() => reviewWithdrawalRequest(row.id, 'rejected')}
+                        >
+                          Rejeter
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
       </section>
 
       <section className="card space-y-3">

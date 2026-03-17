@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
@@ -317,6 +318,11 @@ export default function ProfilePage() {
         <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">
           Mise à jour disponible: la base des Écoles a été enrichie. Vérifie ton École et ton niveau académique puis sauvegarde ton profil.
         </div>
+        {['STUDENT', 'TEACHER'].includes(profile.role) ? (
+          <div className="mb-4">
+            <Link href="/withdrawals" className="btn-secondary">Demander un retrait</Link>
+          </div>
+        ) : null}
 
         <div className="mb-6 flex flex-col items-center gap-3 sm:flex-row sm:items-start">
           <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-brand-100 bg-brand-50 text-xl font-bold text-brand-700">

@@ -81,6 +81,7 @@ export default function TeacherDashboardPage() {
         </p>
         <div className="mt-4">
           <Link href="/rattrapage" className="btn-secondary">Retour aux rattrapages</Link>
+          <Link href="/withdrawals" className="btn-primary ml-2">Demander un retrait</Link>
         </div>
       </div>
 
