@@ -12,6 +12,7 @@ export default function SchoolPaymentsPage() {
   const [payments, setPayments] = useState([]);
   const [paymentTypes, setPaymentTypes] = useState([]);
   const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
   const [classes, setClasses] = useState([]);
   const [academicYears, setAcademicYears] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -109,7 +110,9 @@ export default function SchoolPaymentsPage() {
 
         setPayments(paymentsRes.payments || []);
         setPaymentTypes(typesRes.paymentTypes || []);
-        setStudents(studentsRes.students || []);
+        const allStudents = studentsRes.students || [];
+        setStudents(allStudents);
+        setFilteredStudents(allStudents);
         setClasses(classesRes.classes || []);
         setAcademicYears(yearsRes.academicYears || []);
       } catch (e) {
@@ -226,6 +229,31 @@ export default function SchoolPaymentsPage() {
       setCreatingType(false);
     }
   };
+
+  useEffect(() => {
+    async function loadFilteredStudents() {
+      if (!admin) return;
+      const classId = form.classId;
+      const academicYearId = form.academicYearId;
+      if (!classId || !academicYearId) {
+        setFilteredStudents([]);
+        return;
+      }
+      try {
+        const token = getSchoolToken();
+        const params = new URLSearchParams();
+        params.set('classId', classId);
+        params.set('academicYearId', academicYearId);
+        const res = await apiClient(`/school-management/students/schools/${admin.schoolId}?${params.toString()}`, { token });
+        setFilteredStudents(res.students || []);
+      } catch (e) {
+        setError(e.message || 'Impossible de charger les élèves.');
+        setFilteredStudents([]);
+      }
+    }
+
+    loadFilteredStudents();
+  }, [admin, form.classId, form.academicYearId]);
 
   const handleUpdatePaymentType = async (typeId, patch) => {
     if (!typeId) return;
@@ -510,27 +538,10 @@ export default function SchoolPaymentsPage() {
             <h3 className="text-lg font-semibold text-brand-900 mb-4">Nouveau paiement</h3>
             <form onSubmit={handleCreatePayment} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-brand-700">Élève</label>
-                <select
-                  value={form.studentId}
-                  onChange={(e) => setForm(prev => ({ ...prev, studentId: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
-                  required
-                >
-                  <option value="">Sélectionner un élève</option>
-                  {students.map((student) => (
-                    <option key={student.id} value={student.id}>
-                      {student.firstName} {student.lastName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-brand-700">Classe</label>
                 <select
                   value={form.classId}
-                  onChange={(e) => setForm(prev => ({ ...prev, classId: e.target.value }))}
+                  onChange={(e) => setForm(prev => ({ ...prev, classId: e.target.value, studentId: '' }))}
                   className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
                   required
                 >
@@ -545,13 +556,33 @@ export default function SchoolPaymentsPage() {
                 <label className="block text-sm font-medium text-brand-700">Année académique</label>
                 <select
                   value={form.academicYearId}
-                  onChange={(e) => setForm(prev => ({ ...prev, academicYearId: e.target.value }))}
+                  onChange={(e) => setForm(prev => ({ ...prev, academicYearId: e.target.value, studentId: '' }))}
                   className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
                   required
                 >
                   <option value="">Sélectionner une année</option>
                   {academicYears.map((year) => (
                     <option key={year.id} value={year.id}>{year.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-brand-700">Élève</label>
+                <select
+                  value={form.studentId}
+                  onChange={(e) => setForm(prev => ({ ...prev, studentId: e.target.value }))}
+                  className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
+                  required
+                  disabled={!form.classId || !form.academicYearId}
+                >
+                  <option value="">
+                    {form.classId && form.academicYearId ? 'Sélectionner un élève' : 'Sélectionner classe + année'}
+                  </option>
+                  {filteredStudents.map((student) => (
+                    <option key={student.id} value={student.id}>
+                      {student.firstName} {student.lastName}
+                    </option>
                   ))}
                 </select>
               </div>
