@@ -136,6 +136,17 @@ export default function SchoolManagementDashboardPage() {
     return <main className="mx-auto max-w-5xl px-4 py-10">Chargement du dashboard...</main>;
   }
 
+  const maxMonthly = Math.max(...(stats?.monthlySeries || []).map((item) => Number(item.amount || 0)), 1);
+  const kpiCards = [
+    { label: 'Total élèves', value: stats?.totalStudents ?? 0 },
+    { label: 'Total classes', value: stats?.totalClasses ?? 0 },
+    { label: 'Paiements du jour', value: String(stats?.paymentsToday ?? 0) },
+    { label: 'Revenus mensuels', value: String(stats?.monthlyRevenue ?? 0) },
+    { label: 'Élèves en retard', value: stats?.lateStudents ?? 0 },
+    { label: 'Notes saisies', value: `${stats?.notesCompletion ?? 0}%` },
+    { label: 'Bulletins générés', value: stats?.reportCardsCount ?? 0 }
+  ];
+
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-10">
       <section className="card flex flex-wrap items-center justify-between gap-3">
@@ -161,7 +172,7 @@ export default function SchoolManagementDashboardPage() {
         </div>
       </section>
 
-      {/* Navigation */}
+      {/* Suspension */}
       {admin?.role !== 'SUPER_ADMIN' && admin?.schoolActive === false ? (
         <section className="rounded border border-red-200 bg-red-50 p-4">
           <h2 className="text-lg font-semibold text-red-700">Compte école désactivé</h2>
@@ -173,81 +184,7 @@ export default function SchoolManagementDashboardPage() {
             Contacte le responsable de la plateforme LinkEduPro pour réactiver le compte.
           </p>
         </section>
-      ) : (
-        <section className="card">
-          <h2 className="text-lg font-semibold text-brand-900 mb-3">Navigation</h2>
-          <div className="flex flex-wrap gap-3">
-            {admin?.role !== 'SUPER_ADMIN' && (
-              <>
-                <button
-                  onClick={() => router.push('/school-management/payments')}
-                  className="btn-secondary"
-                >
-                  Gérer les paiements
-                </button>
-                <button
-                  onClick={() => router.push('/school-management/students')}
-                  className="btn-secondary"
-                >
-                  Gérer les élèves
-                </button>
-                <button
-                  onClick={() => router.push('/school-management/classes')}
-                  className="btn-secondary"
-                >
-                  Gérer les classes
-                </button>
-                <button
-                  onClick={() => router.push('/school-management/subjects')}
-                  className="btn-secondary"
-                >
-                  Gérer les matières
-                </button>
-                <button
-                  onClick={() => router.push('/school-management/assessments')}
-                  className="btn-secondary"
-                >
-                  Gérer les évaluations
-                </button>
-                <button
-                  onClick={() => router.push('/school-management/grades')}
-                  className="btn-secondary"
-                >
-                  Saisir les notes
-                </button>
-                <button
-                  onClick={() => router.push('/school-management/report-cards')}
-                  className="btn-secondary"
-                >
-                  Bulletins
-                </button>
-                <button
-                  onClick={() => router.push('/school-management/config')}
-                  className="btn-secondary"
-                >
-                  Barème des notes
-                </button>
-              </>
-            )}
-            {admin?.role === 'SUPER_ADMIN' && (
-              <>
-                <button
-                  onClick={() => router.push('/school-management/schools')}
-                  className="btn-secondary"
-                >
-                  Gérer les écoles
-                </button>
-                <button
-                  onClick={() => router.push('/school-management/students-global')}
-                  className="btn-secondary"
-                >
-                  Élèves globaux
-                </button>
-              </>
-            )}
-          </div>
-        </section>
-      )}
+      ) : null}
 
       {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-red-700">{error}</p> : null}
       {admin?.mustChangePassword ? (
@@ -300,13 +237,75 @@ export default function SchoolManagementDashboardPage() {
           <article className="card"><p className="text-sm">Activité écoles</p><p className="text-3xl font-black">{stats?.schoolActivity?.length ?? 0}</p></article>
         </section>
       ) : (
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <article className="card"><p className="text-sm">Total élèves</p><p className="text-3xl font-black">{stats?.totalStudents ?? 0}</p></article>
-          <article className="card"><p className="text-sm">Total classes</p><p className="text-3xl font-black">{stats?.totalClasses ?? 0}</p></article>
-          <article className="card"><p className="text-sm">Paiements du jour</p><p className="text-3xl font-black">{String(stats?.paymentsToday ?? 0)}</p></article>
-          <article className="card"><p className="text-sm">Revenus mensuels</p><p className="text-3xl font-black">{String(stats?.monthlyRevenue ?? 0)}</p></article>
-          <article className="card"><p className="text-sm">Élèves en retard</p><p className="text-3xl font-black">{stats?.lateStudents ?? 0}</p></article>
-        </section>
+        <>
+          <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {kpiCards.map((card) => (
+              <article key={card.label} className="rounded-2xl border border-brand-100 bg-white/80 p-4 shadow-sm">
+                <p className="text-xs uppercase tracking-wide text-brand-500">{card.label}</p>
+                <p className="mt-2 text-2xl font-bold text-brand-900">{card.value}</p>
+              </article>
+            ))}
+          </section>
+
+          <section className="grid gap-4 lg:grid-cols-3">
+            <article className="rounded-2xl border border-brand-100 bg-white/80 p-4 shadow-sm lg:col-span-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-brand-900">Vue d'ensemble des paiements</h3>
+                <p className="text-xs text-brand-600">6 derniers mois</p>
+              </div>
+              <div className="mt-4 flex items-end gap-3">
+                {(stats?.monthlySeries || []).map((row) => (
+                  <div key={row.month} className="flex flex-1 flex-col items-center">
+                    <div
+                      className="w-full rounded-lg bg-brand-600"
+                      style={{ height: Math.max(8, Math.round((Number(row.amount || 0) / maxMonthly) * 160)) }}
+                    />
+                    <p className="mt-2 text-[11px] text-brand-600">{String(row.month).slice(5)}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            <article className="rounded-2xl border border-brand-100 bg-white/80 p-4 shadow-sm">
+              <h3 className="text-lg font-semibold text-brand-900">Élèves récemment inscrits</h3>
+              <div className="mt-3 space-y-2 text-sm text-brand-700">
+                {(stats?.recentStudents || []).length === 0 ? (
+                  <p>Aucun élève récent.</p>
+                ) : (
+                  stats.recentStudents.map((student) => (
+                    <div key={student.id} className="flex items-center justify-between rounded-xl border border-brand-100 bg-white/60 px-3 py-2">
+                      <span>{student.firstName} {student.lastName}</span>
+                      <span className="text-xs text-brand-500">{new Date(student.createdAt).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </article>
+          </section>
+
+          <section className="grid gap-4 lg:grid-cols-3">
+            <article className="rounded-2xl border border-brand-100 bg-white/80 p-4 shadow-sm lg:col-span-2">
+              <h3 className="text-lg font-semibold text-brand-900">Suivi des notes & bulletins</h3>
+              <div className="mt-3 space-y-2 text-sm text-brand-700">
+                {(stats?.recentReportCards || []).length === 0 ? (
+                  <p>Aucun bulletin généré récemment.</p>
+                ) : (
+                  stats.recentReportCards.map((card) => (
+                    <div key={card.id} className="flex items-center justify-between rounded-xl border border-brand-100 bg-white/60 px-3 py-2">
+                      <span>Bulletin {card.period} - {card.student?.firstName} {card.student?.lastName}</span>
+                      <span className="text-xs text-brand-500">{new Date(card.generatedAt).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </article>
+            <article className="rounded-2xl border border-brand-100 bg-white/80 p-4 shadow-sm">
+              <h3 className="text-lg font-semibold text-brand-900">Absences aujourd'hui</h3>
+              <p className="mt-4 text-3xl font-bold text-brand-900">0</p>
+              <p className="text-xs text-brand-600">À configurer (module absentéisme).</p>
+            </article>
+          </section>
+        </>
       )}
     </main>
   );
