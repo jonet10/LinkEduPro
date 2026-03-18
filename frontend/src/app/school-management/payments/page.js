@@ -19,7 +19,8 @@ export default function SchoolPaymentsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [creatingType, setCreatingType] = useState(false);
-  const [typeForm, setTypeForm] = useState({ name: '', description: '' });
+  const [updatingTypeId, setUpdatingTypeId] = useState(null);
+  const [typeForm, setTypeForm] = useState({ name: '', description: '', category: 'OTHER', period: '' });
 
   const [form, setForm] = useState({
     studentId: '',
@@ -212,15 +213,36 @@ export default function SchoolPaymentsPage() {
         body: JSON.stringify({
           schoolId,
           name: typeForm.name,
-          description: typeForm.description || null
+          description: typeForm.description || null,
+          category: typeForm.category || 'OTHER',
+          period: typeForm.period || null
         })
       });
       setPaymentTypes((prev) => [...prev, response.paymentType].sort((a, b) => a.name.localeCompare(b.name)));
-      setTypeForm({ name: '', description: '' });
+      setTypeForm({ name: '', description: '', category: 'OTHER', period: '' });
     } catch (e) {
       setError(e.message || 'Erreur lors de la création du type de paiement.');
     } finally {
       setCreatingType(false);
+    }
+  };
+
+  const handleUpdatePaymentType = async (typeId, patch) => {
+    if (!typeId) return;
+    setUpdatingTypeId(typeId);
+    setError('');
+    try {
+      const token = getSchoolToken();
+      const res = await apiClient(`/school-management/payments/types/${typeId}`, {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify(patch)
+      });
+      setPaymentTypes((prev) => prev.map((t) => (t.id === typeId ? res.paymentType : t)));
+    } catch (e) {
+      setError(e.message || 'Erreur lors de la mise à jour du type.');
+    } finally {
+      setUpdatingTypeId(null);
     }
   };
 
@@ -338,7 +360,7 @@ export default function SchoolPaymentsPage() {
       {admin?.role === 'SCHOOL_ADMIN' ? (
         <section className="card">
           <h2 className="text-xl font-semibold text-brand-900 mb-4">Types de paiements</h2>
-          <form onSubmit={handleCreatePaymentType} className="grid gap-3 sm:grid-cols-3">
+          <form onSubmit={handleCreatePaymentType} className="grid gap-3 sm:grid-cols-5">
             <input
               className="input"
               placeholder="Nom du type (ex: Cantine, Uniforme)"
@@ -352,10 +374,79 @@ export default function SchoolPaymentsPage() {
               value={typeForm.description}
               onChange={(e) => setTypeForm((prev) => ({ ...prev, description: e.target.value }))}
             />
+            <select
+              className="input"
+              value={typeForm.category}
+              onChange={(e) => setTypeForm((prev) => ({ ...prev, category: e.target.value }))}
+            >
+              <option value="OTHER">Autre</option>
+              <option value="TUITION">Écolage</option>
+              <option value="EXAM">Examen</option>
+            </select>
+            <select
+              className="input"
+              value={typeForm.period}
+              onChange={(e) => setTypeForm((prev) => ({ ...prev, period: e.target.value }))}
+            >
+              <option value="">Période (optionnel)</option>
+              <option value="T1">Trimestre 1</option>
+              <option value="T2">Trimestre 2</option>
+              <option value="T3">Trimestre 3</option>
+              <option value="ANNUAL">Annuel</option>
+            </select>
             <button type="submit" className="btn-primary" disabled={creatingType}>
               {creatingType ? 'création...' : 'Ajouter le type'}
             </button>
           </form>
+
+          {paymentTypes.length > 0 ? (
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-brand-200">
+                    <th className="text-left py-2">Nom</th>
+                    <th className="text-left py-2">Catégorie</th>
+                    <th className="text-left py-2">Période</th>
+                    <th className="text-left py-2">Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paymentTypes.map((type) => (
+                    <tr key={type.id} className="border-b border-brand-100">
+                      <td className="py-2">{type.name}</td>
+                      <td className="py-2">
+                        <select
+                          className="input"
+                          value={type.category || 'OTHER'}
+                          onChange={(e) => handleUpdatePaymentType(type.id, { category: e.target.value })}
+                          disabled={updatingTypeId === type.id}
+                        >
+                          <option value="OTHER">Autre</option>
+                          <option value="TUITION">Écolage</option>
+                          <option value="EXAM">Examen</option>
+                        </select>
+                      </td>
+                      <td className="py-2">
+                        <select
+                          className="input"
+                          value={type.period || ''}
+                          onChange={(e) => handleUpdatePaymentType(type.id, { period: e.target.value || null })}
+                          disabled={updatingTypeId === type.id}
+                        >
+                          <option value="">Aucune</option>
+                          <option value="T1">Trimestre 1</option>
+                          <option value="T2">Trimestre 2</option>
+                          <option value="T3">Trimestre 3</option>
+                          <option value="ANNUAL">Annuel</option>
+                        </select>
+                      </td>
+                      <td className="py-2">{type.isActive ? 'Actif' : 'Inactif'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
         </section>
       ) : null}
 

@@ -197,6 +197,36 @@ export default function SchoolManagementDashboardPage() {
                 >
                   Gérer les classes
                 </button>
+                <button
+                  onClick={() => router.push('/school-management/subjects')}
+                  className="btn-secondary"
+                >
+                  Gérer les matières
+                </button>
+                <button
+                  onClick={() => router.push('/school-management/assessments')}
+                  className="btn-secondary"
+                >
+                  Gérer les évaluations
+                </button>
+                <button
+                  onClick={() => router.push('/school-management/grades')}
+                  className="btn-secondary"
+                >
+                  Saisir les notes
+                </button>
+                <button
+                  onClick={() => router.push('/school-management/report-cards')}
+                  className="btn-secondary"
+                >
+                  Bulletins
+                </button>
+                <button
+                  onClick={() => router.push('/school-management/config')}
+                  className="btn-secondary"
+                >
+                  Barème des notes
+                </button>
               </>
             )}
             {admin?.role === 'SUPER_ADMIN' && (
