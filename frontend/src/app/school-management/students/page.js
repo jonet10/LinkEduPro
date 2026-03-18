@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { clearSchoolAuth, getSchoolAdmin, getSchoolToken } from '@/lib/schoolAuth';
+import { API_BASE_URL } from '@/lib/runtime-config';
 
 export default function SchoolStudentsPage() {
   const pageSize = 10;
@@ -178,18 +179,28 @@ export default function SchoolStudentsPage() {
     }
   }
 
-  function downloadTemplate() {
-    const header = 'nom,Prénom,sexe\n';
-    const sample = 'Doe,John,MALE\n';
-    const blob = new Blob([header + sample], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'modele-import-eleves.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+  async function downloadTemplate(format) {
+    if (!admin) return;
+    const token = getSchoolToken();
+    const url = `${API_BASE_URL}/school-management/students/schools/${admin.schoolId}/import-template?format=${format}`;
+    try {
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Impossible de télécharger le modèle.');
+      const blob = await res.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = `modele-import-eleves.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (e) {
+      setError(e.message || 'Erreur téléchargement modèle.');
+    }
   }
 
   async function handleCreateStudent(e) {
@@ -371,9 +382,14 @@ export default function SchoolStudentsPage() {
           <p className="mb-3 text-sm text-brand-700">
             Colonnes requises: <strong>nom</strong>, <strong>Prénom</strong>, <strong>sexe</strong> (MALE/FEMALE/OTHER).
           </p>
-          <button type="button" className="btn-secondary mb-4" onClick={downloadTemplate}>
-            Télécharger le modèle CSV
-          </button>
+          <div className="mb-4 flex flex-wrap gap-2">
+            <button type="button" className="btn-secondary" onClick={() => downloadTemplate('csv')}>
+              Télécharger modèle CSV
+            </button>
+            <button type="button" className="btn-secondary" onClick={() => downloadTemplate('xlsx')}>
+              Télécharger modèle XLSX
+            </button>
+          </div>
           <form onSubmit={handleImport} className="grid gap-3 sm:grid-cols-2">
             <select className="input" value={importClassId} onChange={(e) => setImportClassId(e.target.value)} required>
               <option value="">Classe cible</option>
