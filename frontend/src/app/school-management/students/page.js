@@ -30,6 +30,15 @@ export default function SchoolStudentsPage() {
   const [importFile, setImportFile] = useState(null);
   const [importing, setImporting] = useState(false);
   const [importHistory, setImportHistory] = useState([]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creatingStudent, setCreatingStudent] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    classId: '',
+    academicYearId: '',
+    firstName: '',
+    lastName: '',
+    sex: 'MALE'
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -71,6 +80,13 @@ export default function SchoolStudentsPage() {
 
         if (classesData.length > 0) setImportClassId(String(classesData[0].id));
         if (yearsData.length > 0) setImportYearId(String(yearsData[0].id));
+        if (classesData.length > 0 && yearsData.length > 0) {
+          setCreateForm((prev) => ({
+            ...prev,
+            classId: String(classesData[0].id),
+            academicYearId: String(yearsData[0].id)
+          }));
+        }
       } catch (e) {
         setError(e.message || 'Impossible de charger les Élèves.');
       } finally {
@@ -162,6 +178,55 @@ export default function SchoolStudentsPage() {
     }
   }
 
+  function downloadTemplate() {
+    const header = 'nom,Prénom,sexe\n';
+    const sample = 'Doe,John,MALE\n';
+    const blob = new Blob([header + sample], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'modele-import-eleves.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
+
+  async function handleCreateStudent(e) {
+    e.preventDefault();
+    if (!admin) return;
+    setCreatingStudent(true);
+    setError('');
+    setSuccess('');
+    try {
+      const token = getSchoolToken();
+      await apiClient(`/school-management/students/schools/${admin.schoolId}`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({
+          schoolId: admin.schoolId,
+          classId: Number(createForm.classId),
+          academicYearId: Number(createForm.academicYearId),
+          firstName: createForm.firstName,
+          lastName: createForm.lastName,
+          sex: createForm.sex
+        })
+      });
+      setShowCreateModal(false);
+      setCreateForm((prev) => ({
+        ...prev,
+        firstName: '',
+        lastName: ''
+      }));
+      setSuccess('Élève ajouté avec succès.');
+      await onFiltersChange(selectedClassId, selectedYearId);
+    } catch (e) {
+      setError(e.message || 'Impossible d’ajouter l’élève.');
+    } finally {
+      setCreatingStudent(false);
+    }
+  }
+
   function startEditStudent(student) {
     setEditingStudentId(student.id);
     setEditForm({
@@ -230,9 +295,14 @@ export default function SchoolStudentsPage() {
           <p className="text-sm text-brand-700">Gestion scolaire</p>
           <h1 className="text-2xl font-bold text-brand-900">Gérer les Élèves</h1>
         </div>
-        <button className="btn-secondary" type="button" onClick={() => router.push('/school-management/dashboard')}>
-          Retour dashboard
-        </button>
+        <div className="flex gap-2">
+          <button className="btn-secondary" type="button" onClick={() => setShowCreateModal(true)}>
+            Ajouter un élève
+          </button>
+          <button className="btn-secondary" type="button" onClick={() => router.push('/school-management/dashboard')}>
+            Retour dashboard
+          </button>
+        </div>
       </section>
 
       {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-red-700">{error}</p> : null}
@@ -298,6 +368,12 @@ export default function SchoolStudentsPage() {
       {admin?.role === 'SCHOOL_ADMIN' ? (
         <section className="card">
           <h2 className="mb-4 text-lg font-semibold text-brand-900">Importer des Élèves (.xlsx / .csv)</h2>
+          <p className="mb-3 text-sm text-brand-700">
+            Colonnes requises: <strong>nom</strong>, <strong>Prénom</strong>, <strong>sexe</strong> (MALE/FEMALE/OTHER).
+          </p>
+          <button type="button" className="btn-secondary mb-4" onClick={downloadTemplate}>
+            Télécharger le modèle CSV
+          </button>
           <form onSubmit={handleImport} className="grid gap-3 sm:grid-cols-2">
             <select className="input" value={importClassId} onChange={(e) => setImportClassId(e.target.value)} required>
               <option value="">Classe cible</option>
@@ -495,6 +571,82 @@ export default function SchoolStudentsPage() {
           </div>
         )}
       </section>
+
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6">
+            <h3 className="text-lg font-semibold text-brand-900 mb-4">Ajouter un élève</h3>
+            <form onSubmit={handleCreateStudent} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-brand-700">Classe</label>
+                <select
+                  className="input w-full"
+                  value={createForm.classId}
+                  onChange={(e) => setCreateForm((prev) => ({ ...prev, classId: e.target.value }))}
+                  required
+                >
+                  <option value="">Sélectionner une classe</option>
+                  {classes.map((cls) => (
+                    <option key={cls.id} value={cls.id}>{cls.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-700">Année académique</label>
+                <select
+                  className="input w-full"
+                  value={createForm.academicYearId}
+                  onChange={(e) => setCreateForm((prev) => ({ ...prev, academicYearId: e.target.value }))}
+                  required
+                >
+                  <option value="">Sélectionner une année</option>
+                  {academicYears.map((year) => (
+                    <option key={year.id} value={year.id}>{year.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-700">Prénom</label>
+                <input
+                  className="input w-full"
+                  value={createForm.firstName}
+                  onChange={(e) => setCreateForm((prev) => ({ ...prev, firstName: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-700">Nom</label>
+                <input
+                  className="input w-full"
+                  value={createForm.lastName}
+                  onChange={(e) => setCreateForm((prev) => ({ ...prev, lastName: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-700">Sexe</label>
+                <select
+                  className="input w-full"
+                  value={createForm.sex}
+                  onChange={(e) => setCreateForm((prev) => ({ ...prev, sex: e.target.value }))}
+                >
+                  <option value="MALE">Masculin</option>
+                  <option value="FEMALE">Féminin</option>
+                  <option value="OTHER">Autre</option>
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <button type="button" className="btn-secondary" onClick={() => setShowCreateModal(false)}>
+                  Annuler
+                </button>
+                <button type="submit" className="btn-primary" disabled={creatingStudent}>
+                  {creatingStudent ? 'Ajout...' : 'Ajouter'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
