@@ -108,19 +108,29 @@ export default function ProbableExercisesPage() {
   const [expandedSubjects, setExpandedSubjects] = useState(() => new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
+    loadExams();
+  }, []);
+
+  async function loadExams() {
     const authToken = getToken();
     setStudent(getStudent());
-    apiClient('/public/probable-exercises', { token: authToken })
-      .then((data) => {
-        const nextItems = Array.isArray(data?.items) ? data.items : [];
-        setLevel(String(data?.level || 'NSIV'));
-        setItems(nextItems);
-      })
-      .catch((e) => setError(e.message || 'Impossible de charger les examens passés.'))
-      .finally(() => setLoading(false));
-  }, []);
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    try {
+      const data = await apiClient('/public/probable-exercises', { token: authToken });
+      const nextItems = Array.isArray(data?.items) ? data.items : [];
+      setLevel(String(data?.level || 'NSIV'));
+      setItems(nextItems);
+    } catch (e) {
+      setError(e.message || 'Impossible de charger les examens passés.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const yearBuckets = useMemo(() => buildYearBuckets(items), [items]);
 
@@ -178,6 +188,23 @@ export default function ProbableExercisesPage() {
     [student]
   );
 
+  async function deleteExam(fileName) {
+    if (!canUploadExams) return;
+    const ok = window.confirm('Supprimer ce PDF ? Cette action est irréversible.');
+    if (!ok) return;
+    try {
+      const token = getToken();
+      await apiClient(`/exams/sources/${encodeURIComponent(fileName)}`, {
+        method: 'DELETE',
+        token
+      });
+      setSuccess('PDF supprimé.');
+      await loadExams();
+    } catch (e) {
+      setError(e.message || 'Impossible de supprimer le PDF.');
+    }
+  }
+
   return (
     <section className="space-y-5">
       <div className="card">
@@ -217,6 +244,7 @@ export default function ProbableExercisesPage() {
 
       {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
 
       {!loading && !error ? (
         !activeYear ? (
@@ -273,6 +301,15 @@ export default function ProbableExercisesPage() {
                           >
                             Ouvrir PDF
                           </button>
+                          {canUploadExams ? (
+                            <button
+                              type="button"
+                              className="btn-secondary mt-2 !px-3 !py-1.5 text-xs"
+                              onClick={() => deleteExam(exam.fileName)}
+                            >
+                              Supprimer
+                            </button>
+                          ) : null}
                         </div>
                       ))}
                     </div>
