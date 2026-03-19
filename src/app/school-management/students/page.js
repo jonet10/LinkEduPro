@@ -38,7 +38,7 @@ export default function SchoolStudentsPage() {
     async function load() {
       const token = getSchoolToken();
       const currentAdmin = getSchoolAdmin();
-      const allowedRoles = ['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT'];
+      const allowedRoles = ['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT', 'SCHOOL_REPORTS_MANAGER'];
 
       if (!token || !currentAdmin) {
         router.push('/school-management/login');
