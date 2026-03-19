@@ -78,7 +78,7 @@ export default function SchoolPaymentsPage() {
     async function load() {
       const token = getSchoolToken();
       const currentAdmin = getSchoolAdmin();
-      const allowedRoles = ['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT'];
+      const allowedRoles = ['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT', 'SCHOOL_PAYMENTS_MANAGER'];
 
       if (!token || !currentAdmin) {
         router.push('/school-management/login');

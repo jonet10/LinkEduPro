@@ -24,7 +24,13 @@ export default function SchoolManagementDashboardPage() {
     async function load() {
       const token = getSchoolToken();
       const currentAdmin = getSchoolAdmin();
-      const allowedRoles = ['SUPER_ADMIN', 'SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT'];
+      const allowedRoles = [
+        'SUPER_ADMIN',
+        'SCHOOL_ADMIN',
+        'SCHOOL_ACCOUNTANT',
+        'SCHOOL_PAYMENTS_MANAGER',
+        'SCHOOL_REPORTS_MANAGER'
+      ];
 
       if (!token || !currentAdmin) {
         router.push('/school-management/login');
@@ -179,24 +185,46 @@ export default function SchoolManagementDashboardPage() {
           <div className="flex flex-wrap gap-3">
             {admin?.role !== 'SUPER_ADMIN' && (
               <>
-                <button
-                  onClick={() => router.push('/school-management/payments')}
-                  className="btn-secondary"
-                >
-                  Gérer les paiements
-                </button>
-                <button
-                  onClick={() => router.push('/school-management/students')}
-                  className="btn-secondary"
-                >
-                  Gérer les élèves
-                </button>
-                <button
-                  onClick={() => router.push('/school-management/classes')}
-                  className="btn-secondary"
-                >
-                  Gérer les classes
-                </button>
+                {['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT', 'SCHOOL_PAYMENTS_MANAGER'].includes(admin?.role) ? (
+                  <button
+                    onClick={() => router.push('/school-management/payments')}
+                    className="btn-secondary"
+                  >
+                    Gérer les paiements
+                  </button>
+                ) : null}
+                {['SCHOOL_ADMIN', 'SCHOOL_REPORTS_MANAGER'].includes(admin?.role) ? (
+                  <button
+                    onClick={() => router.push('/school-management/students')}
+                    className="btn-secondary"
+                  >
+                    Gérer les élèves
+                  </button>
+                ) : null}
+                {['SCHOOL_ADMIN', 'SCHOOL_REPORTS_MANAGER'].includes(admin?.role) ? (
+                  <button
+                    onClick={() => router.push('/school-management/classes')}
+                    className="btn-secondary"
+                  >
+                    Gérer les classes
+                  </button>
+                ) : null}
+                {['SCHOOL_ADMIN', 'SCHOOL_PAYMENTS_MANAGER', 'SCHOOL_ACCOUNTANT'].includes(admin?.role) ? (
+                  <button
+                    onClick={() => router.push('/school-management/settings')}
+                    className="btn-secondary"
+                  >
+                    Paramètres (frais)
+                  </button>
+                ) : null}
+                {admin?.role === 'SCHOOL_ADMIN' ? (
+                  <button
+                    onClick={() => router.push('/school-management/users')}
+                    className="btn-secondary"
+                  >
+                    Comptes & rôles
+                  </button>
+                ) : null}
               </>
             )}
             {admin?.role === 'SUPER_ADMIN' && (
