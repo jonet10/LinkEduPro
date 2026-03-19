@@ -20,6 +20,13 @@ export default function SchoolPaymentsPage() {
   const [creating, setCreating] = useState(false);
   const [creatingType, setCreatingType] = useState(false);
   const [typeForm, setTypeForm] = useState({ name: '', description: '' });
+  const [feePlan, setFeePlan] = useState(null);
+  const [feeMeta, setFeeMeta] = useState({
+    suppliesTotal: 0,
+    studentCount: 0,
+    totalPerStudent: 0,
+    totalCollectable: 0
+  });
 
   const [form, setForm] = useState({
     studentId: '',
@@ -121,6 +128,44 @@ export default function SchoolPaymentsPage() {
     load();
   }, [router]);
 
+  useEffect(() => {
+    async function loadFeePlan() {
+      if (!admin || !form.classId) {
+        setFeePlan(null);
+        setFeeMeta({
+          suppliesTotal: 0,
+          studentCount: 0,
+          totalPerStudent: 0,
+          totalCollectable: 0
+        });
+        return;
+      }
+      try {
+        const token = getSchoolToken();
+        const schoolId = admin.schoolId;
+        const query = form.academicYearId ? `?academicYearId=${encodeURIComponent(form.academicYearId)}` : '';
+        const data = await apiClient(`/school-management/fee-plans/schools/${schoolId}/classes/${form.classId}${query}`, { token });
+        setFeePlan(data.feePlan || null);
+        setFeeMeta({
+          suppliesTotal: Number(data.suppliesTotal || 0),
+          studentCount: Number(data.studentCount || 0),
+          totalPerStudent: Number(data.totalPerStudent || 0),
+          totalCollectable: Number(data.totalCollectable || 0)
+        });
+      } catch (_) {
+        setFeePlan(null);
+        setFeeMeta({
+          suppliesTotal: 0,
+          studentCount: 0,
+          totalPerStudent: 0,
+          totalCollectable: 0
+        });
+      }
+    }
+
+    loadFeePlan();
+  }, [admin, form.classId, form.academicYearId]);
+
   async function reloadPayments(token, schoolId) {
     const paymentsRes = await apiClient(`/school-management/payments/schools/${schoolId}`, { token });
     setPayments(paymentsRes.payments || []);
@@ -170,6 +215,17 @@ export default function SchoolPaymentsPage() {
     } finally {
       setCreating(false);
     }
+  };
+
+  const applyInstallment = (installment) => {
+    if (!installment) return;
+    setForm((prev) => ({
+      ...prev,
+      isInstallment: true,
+      amountDue: feePlan?.totalAmount ? String(feePlan.totalAmount) : prev.amountDue,
+      amountPaid: String(installment.amount || ''),
+      notes: installment.label ? `Versement: ${installment.label}` : prev.notes
+    }));
   };
 
   const downloadReceipt = async (paymentId) => {
@@ -464,6 +520,63 @@ export default function SchoolPaymentsPage() {
                   ))}
                 </select>
               </div>
+
+              {form.classId ? (
+                <div className="rounded-lg border border-brand-100 bg-brand-50/60 p-3 text-sm text-brand-800">
+                  <p className="font-semibold text-brand-900">Résumé des frais de la classe</p>
+                  <div className="mt-2 grid gap-1">
+                    <div className="flex justify-between">
+                      <span>Élèves inscrits</span>
+                      <span className="font-semibold">{feeMeta.studentCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Fournitures / élève</span>
+                      <span className="font-semibold">{feeMeta.suppliesTotal}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total / élève</span>
+                      <span className="font-semibold">{feeMeta.totalPerStudent}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total à encaisser</span>
+                      <span className="font-semibold">{feeMeta.totalCollectable}</span>
+                    </div>
+                  </div>
+                  {feePlan ? (
+                    <div className="mt-3 space-y-2">
+                      <p className="text-xs text-brand-700">
+                        Frais annuels définis: <span className="font-semibold">{feePlan.totalAmount}</span>
+                      </p>
+                      <button
+                        type="button"
+                        className="btn-secondary !px-3 !py-1 text-xs"
+                        onClick={() => setForm((prev) => ({ ...prev, amountDue: String(feePlan.totalAmount || '') }))}
+                      >
+                        Utiliser les frais annuels
+                      </button>
+                      {Array.isArray(feePlan.installments) && feePlan.installments.length > 0 ? (
+                        <div className="space-y-2">
+                          <p className="text-xs text-brand-700">Versements rapides :</p>
+                          <div className="flex flex-wrap gap-2">
+                            {feePlan.installments.map((item, idx) => (
+                              <button
+                                key={`${item.label || 'versement'}-${idx}`}
+                                type="button"
+                                className="btn-secondary !px-3 !py-1 text-xs"
+                                onClick={() => applyInstallment(item)}
+                              >
+                                {item.label || `Versement ${idx + 1}`} : {item.amount}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-xs text-brand-700">Aucun plan de frais défini pour cette classe.</p>
+                  )}
+                </div>
+              ) : null}
 
               <div>
                 <label className="block text-sm font-medium text-brand-700">Type de paiement</label>
