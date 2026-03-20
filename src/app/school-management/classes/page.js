@@ -34,8 +34,14 @@ export default function SchoolClassesPage() {
   const [classes, setClasses] = useState([]);
   const [academicYears, setAcademicYears] = useState([]);
   const [selectedYearId, setSelectedYearId] = useState('');
+  const [levelFilter, setLevelFilter] = useState('');
+  const [sectionFilter, setSectionFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [schoolConfig, setSchoolConfig] = useState(null);
+  const [activeClass, setActiveClass] = useState(null);
+  const [classStudents, setClassStudents] = useState([]);
+  const [classStudentsLoading, setClassStudentsLoading] = useState(false);
   const [yearForm, setYearForm] = useState({
     label: '2025-2026',
     startDate: '2025-09-01',
@@ -91,14 +97,16 @@ export default function SchoolClassesPage() {
       try {
         setError('');
         const schoolId = currentAdmin.schoolId;
-        const [classesRes, yearsRes] = await Promise.all([
+        const [classesRes, yearsRes, configRes] = await Promise.all([
           apiClient(`/school-management/classes/schools/${schoolId}`, { token }),
-          apiClient(`/school-management/schools/${schoolId}/academic-years`, { token })
+          apiClient(`/school-management/schools/${schoolId}/academic-years`, { token }),
+          apiClient(`/school-management/config/schools/${schoolId}`, { token })
         ]);
 
         const years = yearsRes.academicYears || [];
         setAcademicYears(years);
         setClasses(classesRes.classes || []);
+        setSchoolConfig(configRes?.config || null);
         if (years.length > 0) {
           setForm((prev) => ({ ...prev, academicYearId: String(years[0].id) }));
         }
@@ -119,6 +127,12 @@ export default function SchoolClassesPage() {
     const res = await apiClient(`/school-management/classes/schools/${admin.schoolId}${query}`, { token });
     setClasses(res.classes || []);
     setCurrentPage(1);
+  }
+
+  function extractSection(name) {
+    const cleaned = String(name || '').trim();
+    const match = cleaned.match(/([A-Z])$/);
+    return match ? match[1] : '';
   }
 
   async function downloadClassReport(format) {
@@ -155,20 +169,103 @@ export default function SchoolClassesPage() {
     }
   }
 
+  async function loadClassStudents(cls) {
+    if (!admin || !cls) return;
+    setClassStudentsLoading(true);
+    try {
+      const token = getSchoolToken();
+      const params = new URLSearchParams({ classId: String(cls.id), academicYearId: String(cls.academicYearId) });
+      const res = await apiClient(`/school-management/students/schools/${admin.schoolId}?${params.toString()}`, { token });
+      const students = res.students || [];
+      setActiveClass(cls);
+      setClassStudents(students);
+    } catch (e) {
+      setError(e.message || 'Impossible de charger les élèves de la classe.');
+    } finally {
+      setClassStudentsLoading(false);
+    }
+  }
+
+  function openPrintPreview() {
+    if (!activeClass) return;
+    const total = classStudents.length;
+    const girls = classStudents.filter((s) => s.sex === 'FEMALE').length;
+    const boys = classStudents.filter((s) => s.sex === 'MALE').length;
+    const logo = schoolConfig?.logo ? `<img src="${schoolConfig.logo}" style="height:60px;object-fit:contain" />` : '';
+    const header = `
+      <div style="display:flex;align-items:center;gap:16px;border-bottom:1px solid #ddd;padding-bottom:8px;margin-bottom:16px;">
+        ${logo}
+        <div>
+          <div style="font-size:18px;font-weight:700;">${schoolConfig?.name || 'École'}</div>
+          <div style="font-size:12px;">${schoolConfig?.address || ''}</div>
+          <div style="font-size:12px;">${schoolConfig?.phone || ''}</div>
+        </div>
+      </div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px;">Classe: ${activeClass.name}</div>
+      <div style="font-size:12px;margin-bottom:12px;">Total: ${total} · Filles: ${girls} · Garçons: ${boys}</div>
+    `;
+    const rows = classStudents.map((s, idx) => (
+      `<tr>
+        <td style="padding:6px;border:1px solid #ddd;">${idx + 1}</td>
+        <td style="padding:6px;border:1px solid #ddd;">${s.lastName} ${s.firstName}</td>
+        <td style="padding:6px;border:1px solid #ddd;">${s.sex}</td>
+        <td style="padding:6px;border:1px solid #ddd;">${s.studentId || ''}</td>
+      </tr>`
+    )).join('');
+    const html = `
+      <html><head><title>Liste classe</title></head>
+      <body style="font-family:Arial, sans-serif;padding:24px;">
+        ${header}
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr>
+              <th style="padding:6px;border:1px solid #ddd;">#</th>
+              <th style="padding:6px;border:1px solid #ddd;">Élève</th>
+              <th style="padding:6px;border:1px solid #ddd;">Sexe</th>
+              <th style="padding:6px;border:1px solid #ddd;">Matricule</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </body></html>
+    `;
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    win.print();
+  }
+
   const filteredClasses = useMemo(() => {
     const keyword = String(searchTerm || '').trim().toLowerCase();
-    if (!keyword) return classes;
-    return classes.filter((item) => {
-      const name = String(item.name || '').toLowerCase();
-      const level = String(item.level || '').toLowerCase();
-      const year = String(item.academicYear?.label || '').toLowerCase();
-      return name.includes(keyword) || level.includes(keyword) || year.includes(keyword);
-    });
-  }, [classes, searchTerm]);
+    return classes
+      .filter((item) => {
+        if (!keyword) return true;
+        const name = String(item.name || '').toLowerCase();
+        const level = String(item.level || '').toLowerCase();
+        const year = String(item.academicYear?.label || '').toLowerCase();
+        return name.includes(keyword) || level.includes(keyword) || year.includes(keyword);
+      })
+      .filter((item) => {
+        if (!levelFilter) return true;
+        return String(item.level || '').toLowerCase().includes(String(levelFilter).toLowerCase());
+      })
+      .filter((item) => {
+        if (!sectionFilter) return true;
+        return extractSection(item.name) === sectionFilter;
+      });
+  }, [classes, searchTerm, levelFilter, sectionFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredClasses.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
   const paginatedClasses = filteredClasses.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const levelOptions = useMemo(() => (
+    Array.from(new Set(classes.map((c) => c.level).filter(Boolean))).sort((a, b) => a.localeCompare(b))
+  ), [classes]);
+  const sectionOptions = useMemo(() => (
+    Array.from(new Set(classes.map((c) => extractSection(c.name)).filter(Boolean))).sort()
+  ), [classes]);
 
   async function onCreateClass(e) {
     e.preventDefault();
@@ -330,6 +427,47 @@ export default function SchoolClassesPage() {
 
       {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-red-700">{error}</p> : null}
       {success ? <p className="rounded border border-green-200 bg-green-50 p-3 text-green-700">{success}</p> : null}
+
+      <section className="card">
+        <h2 className="mb-4 text-lg font-semibold text-brand-900">Filtres</h2>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <input
+            className="input"
+            placeholder="Rechercher par nom / niveau..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
+          <select
+            className="input"
+            value={levelFilter}
+            onChange={(e) => {
+              setLevelFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Tous les niveaux</option>
+            {levelOptions.map((level) => (
+              <option key={level} value={level}>{level}</option>
+            ))}
+          </select>
+          <select
+            className="input"
+            value={sectionFilter}
+            onChange={(e) => {
+              setSectionFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Toutes les sections</option>
+            {sectionOptions.map((section) => (
+              <option key={section} value={section}>{section}</option>
+            ))}
+          </select>
+        </div>
+      </section>
 
       {admin?.role === 'SCHOOL_ADMIN' ? (
         <section className="grid gap-6 lg:grid-cols-2">
@@ -562,8 +700,12 @@ export default function SchoolClassesPage() {
                     </td>
                     <td className="py-2">{item?._count?.students ?? 0}</td>
                     <td className="py-2">
-                      {admin?.role === 'SCHOOL_ADMIN' ? (
-                        <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
+                        <button type="button" className="btn-secondary !px-3 !py-1" onClick={() => loadClassStudents(item)}>
+                          Voir élèves
+                        </button>
+                        {admin?.role === 'SCHOOL_ADMIN' ? (
+                          <>
                           {editingClassId === item.id ? (
                             <>
                               <button type="button" className="btn-primary !px-3 !py-1" onClick={() => saveEditClass(item.id)}>
@@ -583,8 +725,9 @@ export default function SchoolClassesPage() {
                               </button>
                             </>
                           )}
-                        </div>
-                      ) : <span className="text-xs text-brand-700">Lecture seule</span>}
+                          </>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -616,6 +759,48 @@ export default function SchoolClassesPage() {
           </div>
         ) : null}
       </section>
+
+      {activeClass ? (
+        <section className="card">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <h2 className="text-lg font-semibold text-brand-900">Élèves - {activeClass.name}</h2>
+              <p className="text-sm text-brand-700">
+                Total: {classStudents.length} · Filles: {classStudents.filter((s) => s.sex === 'FEMALE').length} · Garçons: {classStudents.filter((s) => s.sex === 'MALE').length}
+              </p>
+            </div>
+            <button className="btn-secondary" type="button" onClick={openPrintPreview}>
+              Imprimer la liste
+            </button>
+          </div>
+          {classStudentsLoading ? (
+            <p className="text-sm text-brand-700">Chargement des élèves...</p>
+          ) : classStudents.length === 0 ? (
+            <p className="text-sm text-brand-700">Aucun élève trouvé pour cette classe.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-brand-200">
+                    <th className="py-2 text-left">Matricule</th>
+                    <th className="py-2 text-left">Nom</th>
+                    <th className="py-2 text-left">Sexe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {classStudents.map((student) => (
+                    <tr key={student.id} className="border-b border-brand-100">
+                      <td className="py-2">{student.studentId || '-'}</td>
+                      <td className="py-2">{student.lastName} {student.firstName}</td>
+                      <td className="py-2">{student.sex || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      ) : null}
     </main>
   );
 }

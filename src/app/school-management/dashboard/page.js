@@ -8,7 +8,8 @@ import { clearSchoolAuth, getSchoolAdmin, getSchoolToken, setSchoolAuth } from '
 export default function SchoolManagementDashboardPage() {
   const formatCurrency = (value) => {
     const amount = Number(value || 0);
-    return `${amount.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} HTG`;
+    const formatted = amount.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `${formatted.replace(/\//g, ' ')} HTG`;
   };
 
   const router = useRouter();
