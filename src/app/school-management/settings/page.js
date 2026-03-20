@@ -38,7 +38,7 @@ export default function SchoolSettingsPage() {
     totalCollectable: 0
   });
   const [paymentTypes, setPaymentTypes] = useState([]);
-  const [typeForm, setTypeForm] = useState({ name: '', description: '' });
+  const [typeForm, setTypeForm] = useState({ name: '', description: '', amount: '' });
   const [savingType, setSavingType] = useState(false);
   const [supplyForm, setSupplyForm] = useState(emptySupplyForm);
   const [editingSupplyId, setEditingSupplyId] = useState(null);
@@ -289,11 +289,12 @@ export default function SchoolSettingsPage() {
         body: JSON.stringify({
           schoolId: admin.schoolId,
           name: typeForm.name,
-          description: typeForm.description || null
+          description: typeForm.description || null,
+          defaultAmount: typeForm.amount ? Number(typeForm.amount) : null
         })
       });
       setPaymentTypes((prev) => [...prev, response.paymentType].sort((a, b) => a.name.localeCompare(b.name)));
-      setTypeForm({ name: '', description: '' });
+      setTypeForm({ name: '', description: '', amount: '' });
       setSuccess('Type de paiement ajouté.');
     } catch (e) {
       setError(e.message || 'Impossible de créer le type de paiement.');
@@ -716,13 +717,22 @@ export default function SchoolSettingsPage() {
 
         <article className="card">
           <h2 className="text-lg font-semibold text-brand-900 mb-4">Types de paiement</h2>
-          <form onSubmit={createPaymentType} className="grid gap-3 sm:grid-cols-3">
+          <form onSubmit={createPaymentType} className="grid gap-3 sm:grid-cols-4">
             <input
               className="input"
               placeholder="Nom du type (ex: Cantine, Cantique)"
               value={typeForm.name}
               onChange={(e) => setTypeForm((prev) => ({ ...prev, name: e.target.value }))}
               required
+              disabled={!canEdit}
+            />
+            <input
+              className="input"
+              placeholder="Prix (HTG)"
+              type="number"
+              step="0.01"
+              value={typeForm.amount}
+              onChange={(e) => setTypeForm((prev) => ({ ...prev, amount: e.target.value }))}
               disabled={!canEdit}
             />
             <input
@@ -740,7 +750,7 @@ export default function SchoolSettingsPage() {
             <div className="mt-4 flex flex-wrap gap-2">
               {paymentTypes.map((type) => (
                 <span key={type.id} className="rounded-full border border-brand-200 bg-white px-3 py-1 text-xs text-brand-800">
-                  {type.name}
+                  {type.name}{type.defaultAmount ? ` · ${type.defaultAmount}` : ''}
                 </span>
               ))}
             </div>

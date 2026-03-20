@@ -698,11 +698,14 @@ export default function SchoolPaymentsPage() {
                   value={form.paymentTypeId}
                   onChange={(e) => {
                     const nextType = e.target.value;
+                    const chosenType = paymentTypes.find((type) => String(type.id) === String(nextType));
+                    const defaultAmount = chosenType?.defaultAmount ?? '';
                     setForm(prev => ({
                       ...prev,
                       paymentTypeId: nextType,
                       isInstallment: false,
-                      amountPaid: '',
+                      amountDue: defaultAmount !== '' && defaultAmount !== null ? String(defaultAmount) : prev.amountDue,
+                      amountPaid: defaultAmount !== '' && defaultAmount !== null ? String(defaultAmount) : '',
                       notes: ''
                     }));
                     setSelectedInstallment(null);
