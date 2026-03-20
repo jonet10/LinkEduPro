@@ -283,15 +283,39 @@ export default function SchoolSettingsPage() {
     setSuccess('');
     try {
       const token = getSchoolToken();
+      const trimmedName = typeForm.name.trim();
+      const existing = paymentTypes.find(
+        (type) => String(type.name || '').trim().toLowerCase() === trimmedName.toLowerCase()
+      );
+      const payload = {
+        schoolId: admin.schoolId,
+        name: trimmedName,
+        description: typeForm.description || null,
+        defaultAmount: typeForm.amount ? Number(typeForm.amount) : null
+      };
+
+      if (existing) {
+        const response = await apiClient(`/school-management/payments/types/${existing.id}`, {
+          method: 'PATCH',
+          token,
+          body: JSON.stringify({
+            description: payload.description,
+            defaultAmount: payload.defaultAmount
+          })
+        });
+        setPaymentTypes((prev) =>
+          prev.map((type) => (type.id === existing.id ? { ...type, ...response.paymentType } : type))
+            .sort((a, b) => a.name.localeCompare(b.name))
+        );
+        setTypeForm({ name: '', description: '', amount: '' });
+        setSuccess('Type de paiement mis à jour.');
+        return;
+      }
+
       const response = await apiClient('/school-management/payments/types', {
         method: 'POST',
         token,
-        body: JSON.stringify({
-          schoolId: admin.schoolId,
-          name: typeForm.name,
-          description: typeForm.description || null,
-          defaultAmount: typeForm.amount ? Number(typeForm.amount) : null
-        })
+        body: JSON.stringify(payload)
       });
       setPaymentTypes((prev) => [...prev, response.paymentType].sort((a, b) => a.name.localeCompare(b.name)));
       setTypeForm({ name: '', description: '', amount: '' });
