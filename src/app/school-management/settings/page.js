@@ -56,7 +56,7 @@ export default function SchoolSettingsPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const canEdit = ['SCHOOL_ADMIN', 'SCHOOL_PAYMENTS_MANAGER'].includes(admin?.role);
+  const canEdit = admin?.role === 'SCHOOL_ADMIN';
 
   const installmentsTotal = useMemo(() => (
     feeForm.installments.reduce((total, item) => total + Number(item.amount || 0), 0)
@@ -66,7 +66,7 @@ export default function SchoolSettingsPage() {
     async function load() {
       const token = getSchoolToken();
       const currentAdmin = getSchoolAdmin();
-      const allowedRoles = ['SCHOOL_ADMIN', 'SCHOOL_PAYMENTS_MANAGER', 'SCHOOL_ACCOUNTANT'];
+      const allowedRoles = ['SCHOOL_ADMIN'];
 
       if (!token || !currentAdmin) {
         router.push('/school-management/login');

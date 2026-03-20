@@ -209,7 +209,7 @@ export default function SchoolManagementDashboardPage() {
                     Gérer les classes
                   </button>
                 ) : null}
-                {['SCHOOL_ADMIN', 'SCHOOL_PAYMENTS_MANAGER', 'SCHOOL_ACCOUNTANT'].includes(admin?.role) ? (
+                {admin?.role === 'SCHOOL_ADMIN' ? (
                   <button
                     onClick={() => router.push('/school-management/settings')}
                     className="btn-secondary"

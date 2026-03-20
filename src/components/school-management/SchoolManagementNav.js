@@ -8,7 +8,7 @@ import { getSchoolAdmin, getSchoolToken } from '@/lib/schoolAuth';
 const NAV_ITEMS = [
   { href: '/school-management/dashboard', label: 'Dashboard', roles: ['SUPER_ADMIN', 'SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT', 'SCHOOL_PAYMENTS_MANAGER', 'SCHOOL_REPORTS_MANAGER'] },
   { href: '/school-management/payments', label: 'Paiements', roles: ['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT', 'SCHOOL_PAYMENTS_MANAGER'] },
-  { href: '/school-management/settings', label: 'Paramètres', roles: ['SCHOOL_ADMIN', 'SCHOOL_ACCOUNTANT', 'SCHOOL_PAYMENTS_MANAGER'] },
+  { href: '/school-management/settings', label: 'Paramètres', roles: ['SCHOOL_ADMIN'] },
   { href: '/school-management/users', label: 'Comptes & rôles', roles: ['SCHOOL_ADMIN'] },
   { href: '/school-management/students', label: 'Élèves', roles: ['SCHOOL_ADMIN', 'SCHOOL_REPORTS_MANAGER'] },
   { href: '/school-management/classes', label: 'Classes', roles: ['SCHOOL_ADMIN', 'SCHOOL_REPORTS_MANAGER'] },
