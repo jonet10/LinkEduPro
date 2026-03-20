@@ -39,6 +39,7 @@ export default function SchoolSettingsPage() {
   });
   const [paymentTypes, setPaymentTypes] = useState([]);
   const [typeForm, setTypeForm] = useState({ name: '', description: '', amount: '' });
+  const [editingTypeId, setEditingTypeId] = useState(null);
   const [savingType, setSavingType] = useState(false);
   const [supplyForm, setSupplyForm] = useState(emptySupplyForm);
   const [editingSupplyId, setEditingSupplyId] = useState(null);
@@ -294,7 +295,7 @@ export default function SchoolSettingsPage() {
         defaultAmount: typeForm.amount ? Number(typeForm.amount) : null
       };
 
-      if (existing) {
+      if (existing && editingTypeId !== existing.id) {
         const response = await apiClient(`/school-management/payments/types/${existing.id}`, {
           method: 'PATCH',
           token,
@@ -308,23 +309,76 @@ export default function SchoolSettingsPage() {
             .sort((a, b) => a.name.localeCompare(b.name))
         );
         setTypeForm({ name: '', description: '', amount: '' });
+        setEditingTypeId(null);
         setSuccess('Type de paiement mis à jour.');
         return;
       }
 
-      const response = await apiClient('/school-management/payments/types', {
-        method: 'POST',
+      const response = await apiClient(editingTypeId ? `/school-management/payments/types/${editingTypeId}` : '/school-management/payments/types', {
+        method: editingTypeId ? 'PATCH' : 'POST',
         token,
-        body: JSON.stringify(payload)
+        body: JSON.stringify(
+          editingTypeId
+            ? {
+                name: trimmedName,
+                description: payload.description,
+                defaultAmount: payload.defaultAmount
+              }
+            : payload
+        )
       });
-      setPaymentTypes((prev) => [...prev, response.paymentType].sort((a, b) => a.name.localeCompare(b.name)));
+      if (editingTypeId) {
+        setPaymentTypes((prev) =>
+          prev.map((type) => (type.id === editingTypeId ? { ...type, ...response.paymentType } : type))
+            .sort((a, b) => a.name.localeCompare(b.name))
+        );
+        setTypeForm({ name: '', description: '', amount: '' });
+        setEditingTypeId(null);
+        setSuccess('Type de paiement mis à jour.');
+        return;
+      }
+
+      const created = response.paymentType;
+      if (created) {
+        setPaymentTypes((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+      }
       setTypeForm({ name: '', description: '', amount: '' });
       setSuccess('Type de paiement ajouté.');
+      return;
     } catch (e) {
       setError(e.message || 'Impossible de créer le type de paiement.');
     } finally {
       setSavingType(false);
     }
+  }
+
+  async function deletePaymentType(typeId) {
+    if (!admin) return;
+    if (!window.confirm('Supprimer ce type de paiement ?')) return;
+    try {
+      const token = getSchoolToken();
+      await apiClient(`/school-management/payments/types/${typeId}`, {
+        method: 'DELETE',
+        token
+      });
+      setPaymentTypes((prev) => prev.filter((type) => type.id !== typeId));
+      if (editingTypeId === typeId) {
+        setEditingTypeId(null);
+        setTypeForm({ name: '', description: '', amount: '' });
+      }
+      setSuccess('Type de paiement supprimé.');
+    } catch (e) {
+      setError(e.message || 'Impossible de supprimer le type de paiement.');
+    }
+  }
+
+  function startEditPaymentType(type) {
+    setEditingTypeId(type.id);
+    setTypeForm({
+      name: type.name || '',
+      description: type.description || '',
+      amount: type.defaultAmount ? String(type.defaultAmount) : ''
+    });
   }
 
   function startEditSupply(supply) {
@@ -767,15 +821,35 @@ export default function SchoolSettingsPage() {
               disabled={!canEdit}
             />
             <button className="btn-primary" type="submit" disabled={!canEdit || savingType}>
-              {savingType ? 'Ajout...' : 'Ajouter le type'}
+              {savingType ? (editingTypeId ? 'Mise à jour...' : 'Ajout...') : (editingTypeId ? 'Mettre à jour' : 'Ajouter le type')}
             </button>
           </form>
           {paymentTypes.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 grid gap-2">
               {paymentTypes.map((type) => (
-                <span key={type.id} className="rounded-full border border-brand-200 bg-white px-3 py-1 text-xs text-brand-800">
-                  {type.name}{type.defaultAmount ? ` · ${type.defaultAmount}` : ''}
-                </span>
+                <div key={type.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 py-2 text-xs text-brand-800">
+                  <span className="font-semibold">{type.name}</span>
+                  {type.defaultAmount ? <span className="text-brand-600">· {type.defaultAmount} HTG</span> : null}
+                  {type.description ? <span className="text-brand-500">· {type.description}</span> : null}
+                  {canEdit ? (
+                    <div className="ml-auto flex gap-2">
+                      <button
+                        type="button"
+                        className="btn-secondary !px-2 !py-1 text-xs"
+                        onClick={() => startEditPaymentType(type)}
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-secondary !px-2 !py-1 text-xs"
+                        onClick={() => deletePaymentType(type.id)}
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               ))}
             </div>
           ) : (
