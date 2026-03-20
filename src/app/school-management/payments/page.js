@@ -511,77 +511,92 @@ export default function SchoolPaymentsPage() {
           <div className="w-full max-w-md rounded-lg bg-white p-6">
             <h3 className="text-lg font-semibold text-brand-900 mb-4">Nouveau paiement</h3>
             <form onSubmit={handleCreatePayment} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-brand-700">Classe</label>
-                <select
-                  value={form.classId}
-                  onChange={(e) => {
-                    const nextClassId = e.target.value;
-                    setForm(prev => ({ ...prev, classId: nextClassId, studentId: '' }));
-                    setStudentSearch('');
-                    setShowStudentSuggestions(false);
-                  }}
-                  className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
-                  required
-                >
-                  <option value="">Sélectionner une classe</option>
-                  {classes.map((cls) => (
-                    <option key={cls.id} value={cls.id}>{cls.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="relative">
-                <label className="block text-sm font-medium text-brand-700">Élève (recherche)</label>
-                <input
-                  type="text"
-                  value={studentSearch}
-                  onChange={(e) => {
-                    setStudentSearch(e.target.value);
-                    setShowStudentSuggestions(true);
-                  }}
-                  onFocus={() => setShowStudentSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowStudentSuggestions(false), 120)}
-                  className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
-                  placeholder={form.classId ? 'Rechercher un élève...' : 'Choisis d’abord une classe'}
-                  disabled={!form.classId}
-                  required
-                />
-                {showStudentSuggestions && form.classId ? (
-                  <div className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-md border border-brand-200 bg-white shadow-lg">
-                    {studentSuggestions.length === 0 ? (
-                      <div className="px-3 py-2 text-sm text-brand-600">Aucun élève trouvé.</div>
-                    ) : (
-                      studentSuggestions.slice(0, 8).map((student) => (
-                        <button
-                          key={student.id}
-                          type="button"
-                          className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-brand-50"
-                          onMouseDown={() => handleSelectStudent(student)}
-                        >
-                          <span>{student.firstName} {student.lastName}</span>
-                          <span className="text-xs text-brand-500">{student.studentId || ''}</span>
-                        </button>
-                      ))
-                    )}
+              {!form.paymentTypeId ? (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-700">Classe</label>
+                    <select
+                      value={form.classId}
+                      onChange={(e) => {
+                        const nextClassId = e.target.value;
+                        setForm(prev => ({ ...prev, classId: nextClassId, studentId: '' }));
+                        setStudentSearch('');
+                        setShowStudentSuggestions(false);
+                      }}
+                      className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
+                      required
+                    >
+                      <option value="">Sélectionner une classe</option>
+                      {classes.map((cls) => (
+                        <option key={cls.id} value={cls.id}>{cls.name}</option>
+                      ))}
+                    </select>
                   </div>
-                ) : null}
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-brand-700">Année académique</label>
-                <select
-                  value={form.academicYearId}
-                  onChange={(e) => setForm(prev => ({ ...prev, academicYearId: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
-                  required
-                >
-                  <option value="">Sélectionner une année</option>
-                  {academicYears.map((year) => (
-                    <option key={year.id} value={year.id}>{year.label}</option>
-                  ))}
-                </select>
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-700">Année académique</label>
+                    <select
+                      value={form.academicYearId}
+                      onChange={(e) => setForm(prev => ({ ...prev, academicYearId: e.target.value }))}
+                      className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
+                      required
+                    >
+                      <option value="">Sélectionner une année</option>
+                      {academicYears.map((year) => (
+                        <option key={year.id} value={year.id}>{year.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-brand-700">Élève (recherche)</label>
+                    <input
+                      type="text"
+                      value={studentSearch}
+                      onChange={(e) => {
+                        setStudentSearch(e.target.value);
+                        setShowStudentSuggestions(true);
+                      }}
+                      onFocus={() => setShowStudentSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowStudentSuggestions(false), 120)}
+                      className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
+                      placeholder={form.classId ? 'Rechercher un élève...' : 'Choisis d’abord une classe'}
+                      disabled={!form.classId}
+                      required
+                    />
+                    {showStudentSuggestions && form.classId ? (
+                      <div className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-md border border-brand-200 bg-white shadow-lg">
+                        {studentSuggestions.length === 0 ? (
+                          <div className="px-3 py-2 text-sm text-brand-600">Aucun élève trouvé.</div>
+                        ) : (
+                          studentSuggestions.slice(0, 8).map((student) => (
+                            <button
+                              key={student.id}
+                              type="button"
+                              className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-brand-50"
+                              onMouseDown={() => handleSelectStudent(student)}
+                            >
+                              <span>{student.firstName} {student.lastName}</span>
+                              <span className="text-xs text-brand-500">{student.studentId || ''}</span>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-lg border border-brand-100 bg-white px-3 py-2 text-xs text-brand-700">
+                  <span className="font-semibold">Résumé :</span>{' '}
+                  {form.academicYearId ? (academicYears.find((y) => String(y.id) === String(form.academicYearId))?.label || '-') : '-'} ·{' '}
+                  {form.classId ? (classes.find((c) => String(c.id) === String(form.classId))?.name || '-') : '-'} ·{' '}
+                  {form.studentId
+                    ? (students.find((s) => String(s.id) === String(form.studentId))
+                      ? `${students.find((s) => String(s.id) === String(form.studentId)).firstName} ${students.find((s) => String(s.id) === String(form.studentId)).lastName}`
+                      : '-')
+                    : '-'}
+                </div>
+              )}
 
               {form.classId && form.paymentTypeId ? (
                 <div className="rounded-lg border border-brand-100 bg-brand-50/60 p-3 text-sm text-brand-800">
