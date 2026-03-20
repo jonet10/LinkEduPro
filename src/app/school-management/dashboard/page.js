@@ -6,6 +6,11 @@ import { apiClient } from '@/lib/api';
 import { clearSchoolAuth, getSchoolAdmin, getSchoolToken, setSchoolAuth } from '@/lib/schoolAuth';
 
 export default function SchoolManagementDashboardPage() {
+  const formatCurrency = (value) => {
+    const amount = Number(value || 0);
+    return `${amount.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} HTG`;
+  };
+
   const router = useRouter();
   const [admin, setAdmin] = useState(null);
   const [stats, setStats] = useState(null);
@@ -294,15 +299,15 @@ export default function SchoolManagementDashboardPage() {
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <article className="card"><p className="text-sm">Total écoles</p><p className="text-3xl font-black">{stats?.totalSchools ?? 0}</p></article>
           <article className="card"><p className="text-sm">Élèves écoles</p><p className="text-3xl font-black">{stats?.totalSchoolStudents ?? 0}</p></article>
-          <article className="card"><p className="text-sm">Volume paiements</p><p className="text-3xl font-black">{String(stats?.globalPaymentVolume ?? 0)}</p></article>
+          <article className="card"><p className="text-sm">Volume paiements</p><p className="text-3xl font-black">{formatCurrency(stats?.globalPaymentVolume ?? 0)}</p></article>
           <article className="card"><p className="text-sm">Activité écoles</p><p className="text-3xl font-black">{stats?.schoolActivity?.length ?? 0}</p></article>
         </section>
       ) : (
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <article className="card"><p className="text-sm">Total élèves</p><p className="text-3xl font-black">{stats?.totalStudents ?? 0}</p></article>
           <article className="card"><p className="text-sm">Total classes</p><p className="text-3xl font-black">{stats?.totalClasses ?? 0}</p></article>
-          <article className="card"><p className="text-sm">Paiements du jour</p><p className="text-3xl font-black">{String(stats?.paymentsToday ?? 0)}</p></article>
-          <article className="card"><p className="text-sm">Revenus mensuels</p><p className="text-3xl font-black">{String(stats?.monthlyRevenue ?? 0)}</p></article>
+          <article className="card"><p className="text-sm">Paiements du jour</p><p className="text-3xl font-black">{formatCurrency(stats?.paymentsToday ?? 0)}</p></article>
+          <article className="card"><p className="text-sm">Revenus mensuels</p><p className="text-3xl font-black">{formatCurrency(stats?.monthlyRevenue ?? 0)}</p></article>
           <article className="card"><p className="text-sm">Élèves en retard</p><p className="text-3xl font-black">{stats?.lateStudents ?? 0}</p></article>
         </section>
       )}
