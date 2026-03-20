@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { clearSchoolAuth, getSchoolAdmin, getSchoolToken } from '@/lib/schoolAuth';
+import { API_BASE_URL } from '@/lib/runtime-config';
 
 const initialForm = {
   academicYearId: '',
@@ -118,6 +119,29 @@ export default function SchoolClassesPage() {
     const res = await apiClient(`/school-management/classes/schools/${admin.schoolId}${query}`, { token });
     setClasses(res.classes || []);
     setCurrentPage(1);
+  }
+
+  async function downloadClassReport(format) {
+    if (!admin) return;
+    const token = getSchoolToken();
+    const params = new URLSearchParams({ format });
+    if (selectedYearId) params.set('academicYearId', selectedYearId);
+    const url = `${API_BASE_URL}/school-management/reports/schools/${admin.schoolId}/classes?${params.toString()}`;
+    try {
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error('Impossible de télécharger le rapport.');
+      const blob = await res.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `liste-classes.${format === 'xlsx' ? 'xlsx' : 'pdf'}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => window.URL.revokeObjectURL(objectUrl), 30000);
+    } catch (e) {
+      setError(e.message || 'Erreur de téléchargement.');
+    }
   }
 
   async function onFilterYearChange(value) {
@@ -291,9 +315,17 @@ export default function SchoolClassesPage() {
           <p className="text-sm text-brand-700">Gestion scolaire</p>
           <h1 className="text-2xl font-bold text-brand-900">Gérer les classes</h1>
         </div>
-        <button className="btn-secondary" type="button" onClick={() => router.push('/school-management/dashboard')}>
-          Retour dashboard
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button className="btn-secondary" type="button" onClick={() => downloadClassReport('pdf')}>
+            Liste PDF
+          </button>
+          <button className="btn-secondary" type="button" onClick={() => downloadClassReport('xlsx')}>
+            Liste Excel
+          </button>
+          <button className="btn-secondary" type="button" onClick={() => router.push('/school-management/dashboard')}>
+            Retour dashboard
+          </button>
+        </div>
       </section>
 
       {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-red-700">{error}</p> : null}

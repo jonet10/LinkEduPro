@@ -10,6 +10,7 @@ export default function SchoolPaymentsPage() {
   const router = useRouter();
   const [admin, setAdmin] = useState(null);
   const [payments, setPayments] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [paymentTypes, setPaymentTypes] = useState([]);
   const [students, setStudents] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -30,6 +31,11 @@ export default function SchoolPaymentsPage() {
   const [studentSearch, setStudentSearch] = useState('');
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
   const [selectedInstallment, setSelectedInstallment] = useState(null);
+  const [expenseForm, setExpenseForm] = useState({ label: '', amount: '', category: '', expenseDate: '' });
+  const [creatingExpense, setCreatingExpense] = useState(false);
+  const [reportPeriod, setReportPeriod] = useState('day');
+  const [reportFrom, setReportFrom] = useState('');
+  const [reportTo, setReportTo] = useState('');
 
   const [form, setForm] = useState({
     studentId: '',
@@ -131,12 +137,13 @@ export default function SchoolPaymentsPage() {
         const schoolId = currentAdmin.schoolId;
 
         // Load data in parallel
-        const [paymentsRes, typesRes, studentsRes, classesRes, yearsRes] = await Promise.all([
+        const [paymentsRes, typesRes, studentsRes, classesRes, yearsRes, expensesRes] = await Promise.all([
           apiClient(`/school-management/payments/schools/${schoolId}`, { token }),
           apiClient(`/school-management/payments/types/schools/${schoolId}`, { token }),
           apiClient(`/school-management/students/schools/${schoolId}`, { token }),
           apiClient(`/school-management/classes/schools/${schoolId}`, { token }),
-          apiClient(`/school-management/schools/${schoolId}/academic-years`, { token })
+          apiClient(`/school-management/schools/${schoolId}/academic-years`, { token }),
+          apiClient(`/school-management/expenses/schools/${schoolId}`, { token })
         ]);
 
         setPayments(paymentsRes.payments || []);
@@ -144,6 +151,7 @@ export default function SchoolPaymentsPage() {
         setStudents(studentsRes.students || []);
         setClasses(classesRes.classes || []);
         setAcademicYears(yearsRes.academicYears || []);
+        setExpenses(expensesRes.expenses || []);
       } catch (e) {
         setError(e.message || 'Erreur lors du chargement des données.');
       } finally {
@@ -336,6 +344,79 @@ export default function SchoolPaymentsPage() {
     }
   };
 
+  const handleCreateExpense = async (e) => {
+    e.preventDefault();
+    if (!admin) return;
+    setCreatingExpense(true);
+    setError('');
+    setSuccess('');
+    try {
+      const token = getSchoolToken();
+      const payload = {
+        schoolId: admin.schoolId,
+        label: expenseForm.label,
+        amount: Number(expenseForm.amount || 0),
+        category: expenseForm.category || null,
+        expenseDate: expenseForm.expenseDate || null
+      };
+      const res = await apiClient('/school-management/expenses', {
+        method: 'POST',
+        token,
+        body: JSON.stringify(payload)
+      });
+      setExpenses((prev) => [res.expense, ...prev]);
+      setExpenseForm({ label: '', amount: '', category: '', expenseDate: '' });
+      setSuccess('Dépense enregistrée.');
+    } catch (e) {
+      setError(e.message || 'Erreur lors de la création de la dépense.');
+    } finally {
+      setCreatingExpense(false);
+    }
+  };
+
+  const deleteExpense = async (expenseId) => {
+    if (!admin) return;
+    if (!window.confirm('Supprimer cette dépense ?')) return;
+    try {
+      const token = getSchoolToken();
+      await apiClient(`/school-management/expenses/${expenseId}`, {
+        method: 'DELETE',
+        token
+      });
+      setExpenses((prev) => prev.filter((item) => item.id !== expenseId));
+    } catch (e) {
+      setError(e.message || 'Impossible de supprimer cette dépense.');
+    }
+  };
+
+  const downloadFinancialReport = async (format) => {
+    if (!admin) return;
+    const token = getSchoolToken();
+    const params = new URLSearchParams({ format, period: reportPeriod });
+    if (reportPeriod === 'custom' && reportFrom && reportTo) {
+      params.set('from', reportFrom);
+      params.set('to', reportTo);
+    }
+    const url = `${API_BASE_URL}/school-management/reports/schools/${admin.schoolId}/financial?${params.toString()}`;
+    try {
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) {
+        throw new Error('Impossible de télécharger le rapport.');
+      }
+      const blob = await res.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `rapport-financier.${format === 'xlsx' ? 'xlsx' : 'pdf'}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => window.URL.revokeObjectURL(objectUrl), 30000);
+    } catch (e) {
+      setError(e.message || 'Erreur de téléchargement du rapport.');
+    }
+  };
+
   if (loading) {
     return <main className="mx-auto max-w-6xl px-4 py-8">Chargement...</main>;
   }
@@ -470,6 +551,101 @@ export default function SchoolPaymentsPage() {
           </form>
         </section>
       ) : null}
+
+      <section className="card">
+        <h2 className="text-xl font-semibold text-brand-900 mb-4">Rapport financier</h2>
+        <div className="grid gap-3 sm:grid-cols-4">
+          <select className="input" value={reportPeriod} onChange={(e) => setReportPeriod(e.target.value)}>
+            <option value="day">Aujourd’hui</option>
+            <option value="month">Mois en cours</option>
+            <option value="year">Année en cours</option>
+            <option value="custom">Personnalisé</option>
+          </select>
+          {reportPeriod === 'custom' ? (
+            <>
+              <input className="input" type="date" value={reportFrom} onChange={(e) => setReportFrom(e.target.value)} />
+              <input className="input" type="date" value={reportTo} onChange={(e) => setReportTo(e.target.value)} />
+            </>
+          ) : (
+            <div className="sm:col-span-2 text-sm text-brand-700 self-center">Sélection automatique de la période.</div>
+          )}
+          <div className="flex gap-2">
+            <button className="btn-secondary" type="button" onClick={() => downloadFinancialReport('pdf')}>PDF</button>
+            <button className="btn-secondary" type="button" onClick={() => downloadFinancialReport('xlsx')}>Excel</button>
+          </div>
+        </div>
+      </section>
+
+      <section className="card">
+        <h2 className="text-xl font-semibold text-brand-900 mb-4">Dépenses</h2>
+        <form onSubmit={handleCreateExpense} className="grid gap-3 sm:grid-cols-4">
+          <input
+            className="input"
+            placeholder="Libellé"
+            value={expenseForm.label}
+            onChange={(e) => setExpenseForm((p) => ({ ...p, label: e.target.value }))}
+            required
+          />
+          <input
+            className="input"
+            type="number"
+            step="0.01"
+            placeholder="Montant"
+            value={expenseForm.amount}
+            onChange={(e) => setExpenseForm((p) => ({ ...p, amount: e.target.value }))}
+            required
+          />
+          <input
+            className="input"
+            placeholder="Catégorie (optionnel)"
+            value={expenseForm.category}
+            onChange={(e) => setExpenseForm((p) => ({ ...p, category: e.target.value }))}
+          />
+          <input
+            className="input"
+            type="date"
+            value={expenseForm.expenseDate}
+            onChange={(e) => setExpenseForm((p) => ({ ...p, expenseDate: e.target.value }))}
+          />
+          <div className="sm:col-span-4">
+            <button className="btn-primary" type="submit" disabled={creatingExpense}>
+              {creatingExpense ? 'Enregistrement...' : 'Ajouter la dépense'}
+            </button>
+          </div>
+        </form>
+        <div className="mt-4 overflow-x-auto">
+          {expenses.length === 0 ? (
+            <p className="text-sm text-brand-700">Aucune dépense enregistrée.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-brand-200">
+                  <th className="py-2 text-left">Date</th>
+                  <th className="py-2 text-left">Libellé</th>
+                  <th className="py-2 text-left">Catégorie</th>
+                  <th className="py-2 text-left">Montant</th>
+                  <th className="py-2 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.map((exp) => (
+                  <tr key={exp.id} className="border-b border-brand-100">
+                    <td className="py-2">{new Date(exp.expenseDate).toLocaleDateString('fr-FR')}</td>
+                    <td className="py-2">{exp.label}</td>
+                    <td className="py-2">{exp.category || '-'}</td>
+                    <td className="py-2">{exp.amount} HTG</td>
+                    <td className="py-2">
+                      <button className="text-brand-600 hover:text-brand-800 text-sm" onClick={() => deleteExpense(exp.id)}>
+                        Supprimer
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
 
       <section className="card">
         <h2 className="text-xl font-semibold text-brand-900 mb-4">Liste des paiements</h2>

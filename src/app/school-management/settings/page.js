@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { clearSchoolAuth, getSchoolAdmin, getSchoolToken } from '@/lib/schoolAuth';
+import { API_BASE_URL } from '@/lib/runtime-config';
 
 const emptyFeeForm = {
   totalAmount: '',
@@ -54,6 +55,8 @@ export default function SchoolSettingsPage() {
     phone: '',
     address: ''
   });
+  const [logoFile, setLogoFile] = useState(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [savingFeePlan, setSavingFeePlan] = useState(false);
   const [savingSupply, setSavingSupply] = useState(false);
@@ -278,6 +281,35 @@ export default function SchoolSettingsPage() {
       setError(e.message || 'Impossible d’ajouter la fourniture.');
     } finally {
       setSavingSupply(false);
+    }
+  }
+
+  async function uploadLogo() {
+    if (!admin || !logoFile) return;
+    setUploadingLogo(true);
+    setError('');
+    setSuccess('');
+    try {
+      const token = getSchoolToken();
+      const body = new FormData();
+      body.append('file', logoFile);
+      const res = await fetch(`${API_BASE_URL}/school-management/config/schools/${admin.schoolId}/logo`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Erreur lors de l’upload du logo.');
+      }
+      const data = await res.json();
+      setConfigForm((prev) => ({ ...prev, logo: data?.config?.logo || prev.logo }));
+      setLogoFile(null);
+      setSuccess('Logo mis à jour.');
+    } catch (e) {
+      setError(e.message || 'Erreur lors de l’upload du logo.');
+    } finally {
+      setUploadingLogo(false);
     }
   }
 
@@ -793,6 +825,29 @@ export default function SchoolSettingsPage() {
 
         <article className="card">
           <h2 className="text-lg font-semibold text-brand-900 mb-4">Coordonnées de l’école</h2>
+          <div className="mb-4 grid gap-3 sm:grid-cols-2">
+            <input
+              className="input"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+              disabled={!canEdit}
+            />
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={uploadLogo}
+              disabled={!canEdit || uploadingLogo || !logoFile}
+            >
+              {uploadingLogo ? 'Upload...' : 'Importer le logo'}
+            </button>
+          </div>
+          {configForm.logo ? (
+            <div className="mb-4 flex items-center gap-3">
+              <img src={configForm.logo} alt="Logo école" className="h-12 w-12 rounded object-contain border" />
+              <span className="text-xs text-brand-600">Logo actuel</span>
+            </div>
+          ) : null}
           <form onSubmit={saveConfig} className="grid gap-3">
             <input
               className="input"
