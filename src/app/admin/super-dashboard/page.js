@@ -379,7 +379,12 @@ export default function SuperDashboardPage() {
           <div className="card"><p className="text-sm">Écoles</p><p className="text-2xl font-bold">{dashboard.analytics.schools}</p></div>
           <div className="card"><p className="text-sm">Élèves (tous niveaux)</p><p className="text-2xl font-bold">{dashboard.analytics.publicStudents}</p></div>
           <div className="card"><p className="text-sm">Professeurs</p><p className="text-2xl font-bold">{dashboard.analytics.teachers}</p></div>
-          <div className="card"><p className="text-sm">Paiements mensuels</p><p className="text-2xl font-bold">{String(dashboard.analytics.monthlyInternalPayments)}</p></div>
+          <div className="card">
+            <p className="text-sm">Frais School Manager (mois)</p>
+            <p className="text-2xl font-bold">{formatHtg(dashboard.analytics.schoolManagerMonthlyRevenue)}</p>
+            <p className="text-xs text-brand-700">{formatHtg(dashboard.analytics.schoolManagerMonthlyFee)} / école</p>
+            <p className="text-xs text-brand-700">Année: {formatHtg(dashboard.analytics.schoolManagerAnnualRevenue)}</p>
+          </div>
         </section>
       ) : null}
 
