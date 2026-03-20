@@ -61,6 +61,9 @@ export default function SchoolPaymentsPage() {
     && feePlanInstallmentTotal > 0
     && annualFeesValue > 0
     && Math.abs(feePlanInstallmentTotal - annualFeesValue) > 0.01;
+  const selectedPaymentType = paymentTypes.find((type) => String(type.id) === String(form.paymentTypeId));
+  const isTuitionType = selectedPaymentType?.category === 'TUITION'
+    || /scolar/i.test(String(selectedPaymentType?.name || ''));
 
   const paymentSummaries = (() => {
     const map = new Map();
@@ -614,7 +617,7 @@ export default function SchoolPaymentsPage() {
                 </div>
               )}
 
-              {form.classId && form.paymentTypeId ? (
+              {form.classId && form.paymentTypeId && isTuitionType ? (
                 <div className="rounded-lg border border-brand-100 bg-brand-50/60 p-3 text-sm text-brand-800">
                   <p className="font-semibold text-brand-900">Plan de frais de la classe</p>
                   {feePlan ? (
@@ -689,6 +692,15 @@ export default function SchoolPaymentsPage() {
                   ) : (
                     <p className="mt-2 text-xs text-brand-700">Aucun plan de frais défini pour cette classe.</p>
                   )}
+                </div>
+              ) : null}
+
+              {form.paymentTypeId && !isTuitionType ? (
+                <div className="rounded-lg border border-brand-100 bg-brand-50/60 p-3 text-sm text-brand-800">
+                  <p className="font-semibold text-brand-900">Montant du frais sélectionné</p>
+                  <p className="mt-2 text-lg font-bold">
+                    {selectedPaymentType?.defaultAmount ?? 0} HTG
+                  </p>
                 </div>
               ) : null}
 
