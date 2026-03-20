@@ -27,6 +27,8 @@ export default function SchoolPaymentsPage() {
     totalPerStudent: 0,
     totalCollectable: 0
   });
+  const [studentSearch, setStudentSearch] = useState('');
+  const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
 
   const [form, setForm] = useState({
     studentId: '',
@@ -38,6 +40,26 @@ export default function SchoolPaymentsPage() {
     amountPaid: '',
     notes: ''
   });
+
+  const classStudents = form.classId
+    ? students.filter((student) => String(student.classId) === String(form.classId))
+    : [];
+  const studentQuery = studentSearch.trim().toLowerCase();
+  const studentSuggestions = studentQuery
+    ? classStudents.filter((student) => {
+      const label = `${student.firstName || ''} ${student.lastName || ''} ${student.studentId || ''}`.toLowerCase();
+      return label.includes(studentQuery);
+    })
+    : classStudents;
+
+  const feePlanInstallmentTotal = Array.isArray(feePlan?.installments)
+    ? feePlan.installments.reduce((sum, installment) => sum + Number(installment.amount || 0), 0)
+    : 0;
+  const annualFeesValue = Number(form.amountDue || 0);
+  const installmentsMismatch = Boolean(form.isInstallment)
+    && feePlanInstallmentTotal > 0
+    && annualFeesValue > 0
+    && Math.abs(feePlanInstallmentTotal - annualFeesValue) > 0.01;
 
   const paymentSummaries = (() => {
     const map = new Map();
@@ -177,6 +199,9 @@ export default function SchoolPaymentsPage() {
     setError('');
 
     try {
+      if (!form.studentId) {
+        throw new Error('Veuillez sélectionner un élève.');
+      }
       const token = getSchoolToken();
       const schoolId = admin.schoolId;
 
@@ -226,6 +251,18 @@ export default function SchoolPaymentsPage() {
       amountPaid: String(installment.amount || ''),
       notes: installment.label ? `Versement: ${installment.label}` : prev.notes
     }));
+  };
+
+  const handleSelectStudent = (student) => {
+    const label = `${student.firstName || ''} ${student.lastName || ''}`.trim();
+    const defaultAnnualFee = feePlan?.totalAmount ?? feeMeta.totalPerStudent ?? '';
+    setForm((prev) => ({
+      ...prev,
+      studentId: String(student.id),
+      amountDue: defaultAnnualFee !== '' && defaultAnnualFee !== null ? String(defaultAnnualFee) : prev.amountDue
+    }));
+    setStudentSearch(label || '');
+    setShowStudentSuggestions(false);
   };
 
   const downloadReceipt = async (paymentId) => {
@@ -475,27 +512,15 @@ export default function SchoolPaymentsPage() {
             <h3 className="text-lg font-semibold text-brand-900 mb-4">Nouveau paiement</h3>
             <form onSubmit={handleCreatePayment} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-brand-700">Élève</label>
-                <select
-                  value={form.studentId}
-                  onChange={(e) => setForm(prev => ({ ...prev, studentId: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
-                  required
-                >
-                  <option value="">Sélectionner un élève</option>
-                  {students.map((student) => (
-                    <option key={student.id} value={student.id}>
-                      {student.firstName} {student.lastName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-brand-700">Classe</label>
                 <select
                   value={form.classId}
-                  onChange={(e) => setForm(prev => ({ ...prev, classId: e.target.value }))}
+                  onChange={(e) => {
+                    const nextClassId = e.target.value;
+                    setForm(prev => ({ ...prev, classId: nextClassId, studentId: '' }));
+                    setStudentSearch('');
+                    setShowStudentSuggestions(false);
+                  }}
                   className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
                   required
                 >
@@ -504,6 +529,43 @@ export default function SchoolPaymentsPage() {
                     <option key={cls.id} value={cls.id}>{cls.name}</option>
                   ))}
                 </select>
+              </div>
+
+              <div className="relative">
+                <label className="block text-sm font-medium text-brand-700">Élève (recherche)</label>
+                <input
+                  type="text"
+                  value={studentSearch}
+                  onChange={(e) => {
+                    setStudentSearch(e.target.value);
+                    setShowStudentSuggestions(true);
+                  }}
+                  onFocus={() => setShowStudentSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowStudentSuggestions(false), 120)}
+                  className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
+                  placeholder={form.classId ? 'Rechercher un élève...' : 'Choisis d’abord une classe'}
+                  disabled={!form.classId}
+                  required
+                />
+                {showStudentSuggestions && form.classId ? (
+                  <div className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-md border border-brand-200 bg-white shadow-lg">
+                    {studentSuggestions.length === 0 ? (
+                      <div className="px-3 py-2 text-sm text-brand-600">Aucun élève trouvé.</div>
+                    ) : (
+                      studentSuggestions.slice(0, 8).map((student) => (
+                        <button
+                          key={student.id}
+                          type="button"
+                          className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-brand-50"
+                          onMouseDown={() => handleSelectStudent(student)}
+                        >
+                          <span>{student.firstName} {student.lastName}</span>
+                          <span className="text-xs text-brand-500">{student.studentId || ''}</span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                ) : null}
               </div>
 
               <div>
@@ -547,6 +609,14 @@ export default function SchoolPaymentsPage() {
                       <p className="text-xs text-brand-700">
                         Frais annuels définis: <span className="font-semibold">{feePlan.totalAmount}</span>
                       </p>
+                      <p className="text-xs text-brand-700">
+                        Total des versements: <span className="font-semibold">{feePlanInstallmentTotal}</span>
+                      </p>
+                      {installmentsMismatch ? (
+                        <div className="rounded border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-800">
+                          Le total des versements ne correspond pas aux frais annuels.
+                        </div>
+                      ) : null}
                       <button
                         type="button"
                         className="btn-secondary !px-3 !py-1 text-xs"
@@ -606,7 +676,7 @@ export default function SchoolPaymentsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-brand-700">
-                  {form.isInstallment ? 'Frais total a regler' : 'Montant du frais'}
+                  {form.isInstallment ? 'Frais annuels' : 'Montant du frais'}
                 </label>
                 <input
                   type="number"
