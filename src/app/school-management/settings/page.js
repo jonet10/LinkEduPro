@@ -37,6 +37,9 @@ export default function SchoolSettingsPage() {
     studentCount: 0,
     totalCollectable: 0
   });
+  const [paymentTypes, setPaymentTypes] = useState([]);
+  const [typeForm, setTypeForm] = useState({ name: '', description: '' });
+  const [savingType, setSavingType] = useState(false);
   const [supplyForm, setSupplyForm] = useState(emptySupplyForm);
   const [editingSupplyId, setEditingSupplyId] = useState(null);
   const [editSupplyForm, setEditSupplyForm] = useState({
@@ -84,10 +87,11 @@ export default function SchoolSettingsPage() {
       try {
         setError('');
         const schoolId = currentAdmin.schoolId;
-        const [classesRes, yearsRes, configRes] = await Promise.all([
+        const [classesRes, yearsRes, configRes, typesRes] = await Promise.all([
           apiClient(`/school-management/classes/schools/${schoolId}`, { token }),
           apiClient(`/school-management/schools/${schoolId}/academic-years`, { token }),
-          apiClient(`/school-management/config/schools/${schoolId}`, { token })
+          apiClient(`/school-management/config/schools/${schoolId}`, { token }),
+          apiClient(`/school-management/payments/types/schools/${schoolId}`, { token })
         ]);
 
         const classList = classesRes.classes || [];
@@ -99,6 +103,7 @@ export default function SchoolSettingsPage() {
           phone: configRes?.config?.phone || '',
           address: configRes?.config?.address || ''
         });
+        setPaymentTypes(typesRes?.paymentTypes || []);
 
         const defaultClassId = classList[0]?.id ? String(classList[0].id) : '';
         const defaultYearId = yearList[0]?.id ? String(yearList[0].id) : '';
@@ -267,6 +272,33 @@ export default function SchoolSettingsPage() {
       setError(e.message || 'Impossible d’ajouter la fourniture.');
     } finally {
       setSavingSupply(false);
+    }
+  }
+
+  async function createPaymentType(e) {
+    e.preventDefault();
+    if (!admin) return;
+    setSavingType(true);
+    setError('');
+    setSuccess('');
+    try {
+      const token = getSchoolToken();
+      const response = await apiClient('/school-management/payments/types', {
+        method: 'POST',
+        token,
+        body: JSON.stringify({
+          schoolId: admin.schoolId,
+          name: typeForm.name,
+          description: typeForm.description || null
+        })
+      });
+      setPaymentTypes((prev) => [...prev, response.paymentType].sort((a, b) => a.name.localeCompare(b.name)));
+      setTypeForm({ name: '', description: '' });
+      setSuccess('Type de paiement ajouté.');
+    } catch (e) {
+      setError(e.message || 'Impossible de créer le type de paiement.');
+    } finally {
+      setSavingType(false);
     }
   }
 
@@ -680,6 +712,41 @@ export default function SchoolSettingsPage() {
           <p className="mt-4 text-sm text-brand-700">
             Ces coordonnées apparaîtront automatiquement sur la fiche de paiement PDF.
           </p>
+        </article>
+
+        <article className="card">
+          <h2 className="text-lg font-semibold text-brand-900 mb-4">Types de paiement</h2>
+          <form onSubmit={createPaymentType} className="grid gap-3 sm:grid-cols-3">
+            <input
+              className="input"
+              placeholder="Nom du type (ex: Cantine, Cantique)"
+              value={typeForm.name}
+              onChange={(e) => setTypeForm((prev) => ({ ...prev, name: e.target.value }))}
+              required
+              disabled={!canEdit}
+            />
+            <input
+              className="input"
+              placeholder="Description (optionnel)"
+              value={typeForm.description}
+              onChange={(e) => setTypeForm((prev) => ({ ...prev, description: e.target.value }))}
+              disabled={!canEdit}
+            />
+            <button className="btn-primary" type="submit" disabled={!canEdit || savingType}>
+              {savingType ? 'Ajout...' : 'Ajouter le type'}
+            </button>
+          </form>
+          {paymentTypes.length > 0 ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {paymentTypes.map((type) => (
+                <span key={type.id} className="rounded-full border border-brand-200 bg-white px-3 py-1 text-xs text-brand-800">
+                  {type.name}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-brand-700">Aucun type de paiement enregistré.</p>
+          )}
         </article>
       </section>
 

@@ -29,6 +29,7 @@ export default function SchoolPaymentsPage() {
   });
   const [studentSearch, setStudentSearch] = useState('');
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
 
   const [form, setForm] = useState({
     studentId: '',
@@ -216,7 +217,7 @@ export default function SchoolPaymentsPage() {
           : form.notes
       };
 
-      await apiClient('/school-management/payments', {
+      const response = await apiClient('/school-management/payments', {
         method: 'POST',
         token,
         body: JSON.stringify(payload)
@@ -235,6 +236,14 @@ export default function SchoolPaymentsPage() {
         isInstallment: false,
         notes: ''
       });
+      setStudentSearch('');
+      setShowStudentSuggestions(false);
+      setShowNotes(false);
+
+      const createdPaymentId = response?.payment?.id;
+      if (createdPaymentId && window.confirm('Paiement enregistré. Voulez-vous imprimer le reçu ?')) {
+        await downloadReceipt(createdPaymentId);
+      }
     } catch (e) {
       setError(e.message || 'Erreur lors de la création du paiement.');
     } finally {
@@ -660,55 +669,71 @@ export default function SchoolPaymentsPage() {
                 </select>
               </div>
 
-              <div className="sm:col-span-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-brand-700">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(form.isInstallment)}
-                    onChange={(e) => setForm(prev => ({ ...prev, isInstallment: e.target.checked }))}
-                  />
-                  Paiement en plusieurs versements
-                </label>
-              </div>
+              {form.paymentTypeId ? (
+                <>
+                  <div className="sm:col-span-2">
+                    <label className="flex items-center gap-2 text-sm font-medium text-brand-700">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(form.isInstallment)}
+                        onChange={(e) => setForm(prev => ({ ...prev, isInstallment: e.target.checked }))}
+                      />
+                      Paiement en plusieurs versements
+                    </label>
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-brand-700">
-                  {form.isInstallment ? 'Frais annuels' : 'Montant du frais'}
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={form.amountDue}
-                  onChange={(e) => setForm(prev => ({ ...prev, amountDue: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
-                  required
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-700">
+                      {form.isInstallment ? 'Frais annuels' : 'Montant du frais'}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={form.amountDue}
+                      onChange={(e) => setForm(prev => ({ ...prev, amountDue: e.target.value }))}
+                      className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
+                      required
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-brand-700">
-                  {form.isInstallment ? 'Montant de ce versement' : 'Montant paye'}
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={form.amountPaid}
-                  onChange={(e) => setForm(prev => ({ ...prev, amountPaid: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
-                  required
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-700">
+                      {form.isInstallment ? 'Montant de ce versement' : 'Montant paye'}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={form.amountPaid}
+                      onChange={(e) => setForm(prev => ({ ...prev, amountPaid: e.target.value }))}
+                      className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
+                      required
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-brand-700">Notes</label>
-                <textarea
-                  value={form.notes}
-                  onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
-                  rows={3}
-                  placeholder={form.isInstallment ? 'Ex: 1er versement, novembre' : ''}
-                />
-              </div>
+                  <div>
+                    {!showNotes ? (
+                      <button
+                        type="button"
+                        className="btn-secondary !px-3 !py-1 text-xs"
+                        onClick={() => setShowNotes(true)}
+                      >
+                        Ajouter une note
+                      </button>
+                    ) : (
+                      <>
+                        <label className="block text-sm font-medium text-brand-700">Notes</label>
+                        <textarea
+                          value={form.notes}
+                          onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
+                          className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
+                          rows={3}
+                          placeholder={form.isInstallment ? 'Ex: 1er versement, novembre' : ''}
+                        />
+                      </>
+                    )}
+                  </div>
+                </>
+              ) : null}
 
               <div className="flex justify-end gap-3">
                 <button
