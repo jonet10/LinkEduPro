@@ -29,7 +29,7 @@ export default function SchoolPaymentsPage() {
   });
   const [studentSearch, setStudentSearch] = useState('');
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
-  const [showNotes, setShowNotes] = useState(false);
+  const [selectedInstallment, setSelectedInstallment] = useState(null);
 
   const [form, setForm] = useState({
     studentId: '',
@@ -203,6 +203,9 @@ export default function SchoolPaymentsPage() {
       if (!form.studentId) {
         throw new Error('Veuillez sélectionner un élève.');
       }
+      if (!form.amountDue || Number.isNaN(Number(form.amountDue)) || !form.amountPaid || Number.isNaN(Number(form.amountPaid))) {
+        throw new Error('Veuillez choisir un versement ou utiliser les frais annuels.');
+      }
       const token = getSchoolToken();
       const schoolId = admin.schoolId;
 
@@ -238,10 +241,10 @@ export default function SchoolPaymentsPage() {
       });
       setStudentSearch('');
       setShowStudentSuggestions(false);
-      setShowNotes(false);
+      setSelectedInstallment(null);
 
       const createdPaymentId = response?.payment?.id;
-      if (createdPaymentId && window.confirm('Paiement enregistré. Voulez-vous imprimer le reçu ?')) {
+      if (createdPaymentId) {
         await downloadReceipt(createdPaymentId);
       }
     } catch (e) {
@@ -260,6 +263,10 @@ export default function SchoolPaymentsPage() {
       amountPaid: String(installment.amount || ''),
       notes: installment.label ? `Versement: ${installment.label}` : prev.notes
     }));
+    setSelectedInstallment({
+      label: installment.label || '',
+      amount: installment.amount || ''
+    });
   };
 
   const handleSelectStudent = (student) => {
@@ -612,41 +619,72 @@ export default function SchoolPaymentsPage() {
                   <p className="font-semibold text-brand-900">Plan de frais de la classe</p>
                   {feePlan ? (
                     <div className="mt-3 space-y-2">
-                      <p className="text-xs text-brand-700">
-                        Frais annuels définis: <span className="font-semibold">{feePlan.totalAmount}</span>
-                      </p>
-                      <p className="text-xs text-brand-700">
-                        Total des versements: <span className="font-semibold">{feePlanInstallmentTotal}</span>
-                      </p>
-                      {installmentsMismatch ? (
-                        <div className="rounded border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-800">
-                          Le total des versements ne correspond pas aux frais annuels.
+                      {selectedInstallment ? (
+                        <div className="rounded border border-brand-200 bg-white px-3 py-2 text-xs text-brand-800">
+                          Versement choisi : <span className="font-semibold">{selectedInstallment.label || 'Versement'}</span>{' '}
+                          ({selectedInstallment.amount})
+                          <button
+                            type="button"
+                            className="ml-2 text-xs text-brand-600 hover:text-brand-800"
+                            onClick={() => {
+                              setSelectedInstallment(null);
+                              setForm((prev) => ({
+                                ...prev,
+                                isInstallment: false,
+                                amountPaid: '',
+                                notes: ''
+                              }));
+                            }}
+                          >
+                            Changer
+                          </button>
                         </div>
-                      ) : null}
-                      <button
-                        type="button"
-                        className="btn-secondary !px-3 !py-1 text-xs"
-                        onClick={() => setForm((prev) => ({ ...prev, amountDue: String(feePlan.totalAmount || '') }))}
-                      >
-                        Utiliser les frais annuels
-                      </button>
-                      {Array.isArray(feePlan.installments) && feePlan.installments.length > 0 ? (
-                        <div className="space-y-2">
-                          <p className="text-xs text-brand-700">Versements rapides :</p>
-                          <div className="flex flex-wrap gap-2">
-                            {feePlan.installments.map((item, idx) => (
-                              <button
-                                key={`${item.label || 'versement'}-${idx}`}
-                                type="button"
-                                className="btn-secondary !px-3 !py-1 text-xs"
-                                onClick={() => applyInstallment(item)}
-                              >
-                                {item.label || `Versement ${idx + 1}`} : {item.amount}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
+                      ) : (
+                        <>
+                          <p className="text-xs text-brand-700">
+                            Total des versements: <span className="font-semibold">{feePlanInstallmentTotal}</span>
+                          </p>
+                          {installmentsMismatch ? (
+                            <div className="rounded border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-800">
+                              Le total des versements ne correspond pas aux frais annuels.
+                            </div>
+                          ) : null}
+                          <button
+                            type="button"
+                            className="btn-secondary !px-3 !py-1 text-xs"
+                            onClick={() => {
+                              const amount = String(feePlan.totalAmount || '');
+                              setForm((prev) => ({
+                                ...prev,
+                                isInstallment: false,
+                                amountDue: amount,
+                                amountPaid: amount,
+                                notes: ''
+                              }));
+                              setSelectedInstallment(null);
+                            }}
+                          >
+                            Utiliser les frais annuels
+                          </button>
+                          {Array.isArray(feePlan.installments) && feePlan.installments.length > 0 ? (
+                            <div className="space-y-2">
+                              <p className="text-xs text-brand-700">Versements rapides :</p>
+                              <div className="flex flex-wrap gap-2">
+                                {feePlan.installments.map((item, idx) => (
+                                  <button
+                                    key={`${item.label || 'versement'}-${idx}`}
+                                    type="button"
+                                    className="btn-secondary !px-3 !py-1 text-xs"
+                                    onClick={() => applyInstallment(item)}
+                                  >
+                                    {item.label || `Versement ${idx + 1}`} : {item.amount}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
+                        </>
+                      )}
                     </div>
                   ) : (
                     <p className="mt-2 text-xs text-brand-700">Aucun plan de frais défini pour cette classe.</p>
@@ -658,7 +696,17 @@ export default function SchoolPaymentsPage() {
                 <label className="block text-sm font-medium text-brand-700">Type de paiement</label>
                 <select
                   value={form.paymentTypeId}
-                  onChange={(e) => setForm(prev => ({ ...prev, paymentTypeId: e.target.value }))}
+                  onChange={(e) => {
+                    const nextType = e.target.value;
+                    setForm(prev => ({
+                      ...prev,
+                      paymentTypeId: nextType,
+                      isInstallment: false,
+                      amountPaid: '',
+                      notes: ''
+                    }));
+                    setSelectedInstallment(null);
+                  }}
                   className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
                   required
                 >
@@ -669,71 +717,6 @@ export default function SchoolPaymentsPage() {
                 </select>
               </div>
 
-              {form.paymentTypeId ? (
-                <>
-                  <div className="sm:col-span-2">
-                    <label className="flex items-center gap-2 text-sm font-medium text-brand-700">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(form.isInstallment)}
-                        onChange={(e) => setForm(prev => ({ ...prev, isInstallment: e.target.checked }))}
-                      />
-                      Paiement en plusieurs versements
-                    </label>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-brand-700">
-                      {form.isInstallment ? 'Frais annuels' : 'Montant du frais'}
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={form.amountDue}
-                      onChange={(e) => setForm(prev => ({ ...prev, amountDue: e.target.value }))}
-                      className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-brand-700">
-                      {form.isInstallment ? 'Montant de ce versement' : 'Montant paye'}
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={form.amountPaid}
-                      onChange={(e) => setForm(prev => ({ ...prev, amountPaid: e.target.value }))}
-                      className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    {!showNotes ? (
-                      <button
-                        type="button"
-                        className="btn-secondary !px-3 !py-1 text-xs"
-                        onClick={() => setShowNotes(true)}
-                      >
-                        Ajouter une note
-                      </button>
-                    ) : (
-                      <>
-                        <label className="block text-sm font-medium text-brand-700">Notes</label>
-                        <textarea
-                          value={form.notes}
-                          onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
-                          className="mt-1 block w-full rounded-md border border-brand-300 px-3 py-2"
-                          rows={3}
-                          placeholder={form.isInstallment ? 'Ex: 1er versement, novembre' : ''}
-                        />
-                      </>
-                    )}
-                  </div>
-                </>
-              ) : null}
 
               <div className="flex justify-end gap-3">
                 <button
