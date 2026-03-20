@@ -303,7 +303,7 @@ export default function SchoolManagementDashboardPage() {
           <article className="card"><p className="text-sm">Activité écoles</p><p className="text-3xl font-black">{stats?.schoolActivity?.length ?? 0}</p></article>
         </section>
       ) : (
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <article className="card"><p className="text-sm">Total élèves</p><p className="text-3xl font-black">{stats?.totalStudents ?? 0}</p></article>
           <article className="card"><p className="text-sm">Total classes</p><p className="text-3xl font-black">{stats?.totalClasses ?? 0}</p></article>
           <article className="card"><p className="text-sm">Paiements du jour</p><p className="text-3xl font-black">{formatCurrency(stats?.paymentsToday ?? 0)}</p></article>
