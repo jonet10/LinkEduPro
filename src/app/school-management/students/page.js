@@ -19,6 +19,7 @@ export default function SchoolStudentsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [editingStudentId, setEditingStudentId] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showImportSection, setShowImportSection] = useState(false);
   const [creatingStudent, setCreatingStudent] = useState(false);
   const [createForm, setCreateForm] = useState({
     classId: '',
@@ -335,6 +336,15 @@ export default function SchoolStudentsPage() {
               Ajouter un Élève
             </button>
           ) : null}
+          {admin?.role === 'SCHOOL_ADMIN' ? (
+            <button
+              className="btn-secondary"
+              type="button"
+              onClick={() => setShowImportSection((prev) => !prev)}
+            >
+              {showImportSection ? 'Masquer import' : 'Importer des Élèves'}
+            </button>
+          ) : null}
           <button className="btn-secondary" type="button" onClick={() => router.push('/school-management/dashboard')}>
             Retour dashboard
           </button>
@@ -401,7 +411,7 @@ export default function SchoolStudentsPage() {
         </div>
       </section>
 
-      {admin?.role === 'SCHOOL_ADMIN' ? (
+      {admin?.role === 'SCHOOL_ADMIN' && showImportSection ? (
         <section className="card">
           <h2 className="mb-4 text-lg font-semibold text-brand-900">Importer des Élèves (.xlsx / .csv)</h2>
           <div className="mb-3 flex flex-wrap gap-2">
