@@ -23,6 +23,7 @@ export default function SchoolSettingsPage() {
   const [academicYears, setAcademicYears] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState('');
   const [selectedYearId, setSelectedYearId] = useState('');
+  const [feeClassIds, setFeeClassIds] = useState([]);
   const [feeForm, setFeeForm] = useState(emptyFeeForm);
   const [feePlan, setFeePlan] = useState(null);
   const [feeMeta, setFeeMeta] = useState({
@@ -110,6 +111,7 @@ export default function SchoolSettingsPage() {
         const defaultYearId = yearList[0]?.id ? String(yearList[0].id) : '';
         setSelectedClassId(defaultClassId);
         setSelectedYearId(defaultYearId);
+        setFeeClassIds(defaultClassId ? [defaultClassId] : []);
 
         if (defaultClassId) {
           await loadClassData(defaultClassId, defaultYearId, currentAdmin, token);
@@ -132,7 +134,7 @@ export default function SchoolSettingsPage() {
 
     const [feeRes, suppliesRes] = await Promise.all([
       apiClient(`/school-management/fee-plans/schools/${schoolId}/classes/${classId}${query}`, { token }),
-      apiClient(`/school-management/supplies/schools/${schoolId}/classes/${classId}${query}`, { token })
+      apiClient(`/school-management/supplies/schools/${schoolId}${query}`, { token })
     ]);
 
     setFeePlan(feeRes.feePlan || null);
@@ -163,6 +165,7 @@ export default function SchoolSettingsPage() {
 
   async function onClassChange(value) {
     setSelectedClassId(value);
+    setFeeClassIds(value ? [value] : []);
     setError('');
     setSuccess('');
     if (!value) return;
@@ -210,15 +213,15 @@ export default function SchoolSettingsPage() {
 
   async function saveFeePlan(e) {
     e.preventDefault();
-    if (!admin || !selectedClassId || !selectedYearId) return;
+    if (!admin || !selectedYearId) return;
     setSavingFeePlan(true);
     setError('');
     setSuccess('');
     try {
       const token = getSchoolToken();
-      const payload = {
+      const targetClasses = feeClassIds.length ? feeClassIds : (selectedClassId ? [selectedClassId] : []);
+      const payloadBase = {
         schoolId: admin.schoolId,
-        classId: Number(selectedClassId),
         academicYearId: Number(selectedYearId),
         totalAmount: parseFloat(feeForm.totalAmount || 0),
         installments: feeForm.installments
@@ -230,11 +233,14 @@ export default function SchoolSettingsPage() {
           }))
       };
 
-      await apiClient('/school-management/fee-plans', {
+      await Promise.all(targetClasses.map((classId) => apiClient('/school-management/fee-plans', {
         method: 'POST',
         token,
-        body: JSON.stringify(payload)
-      });
+        body: JSON.stringify({
+          ...payloadBase,
+          classId: Number(classId)
+        })
+      })));
 
       await loadClassData(selectedClassId, selectedYearId);
       setSuccess('Frais enregistrés avec succès.');
@@ -247,7 +253,7 @@ export default function SchoolSettingsPage() {
 
   async function createSupply(e) {
     e.preventDefault();
-    if (!admin || !selectedClassId || !selectedYearId) return;
+    if (!admin || !selectedYearId) return;
     setSavingSupply(true);
     setError('');
     setSuccess('');
@@ -258,7 +264,6 @@ export default function SchoolSettingsPage() {
         token,
         body: JSON.stringify({
           schoolId: admin.schoolId,
-          classId: Number(selectedClassId),
           academicYearId: Number(selectedYearId),
           name: supplyForm.name,
           quantity: Number(supplyForm.quantity || 1),
@@ -506,6 +511,32 @@ export default function SchoolSettingsPage() {
             ))}
           </select>
         </div>
+        <div className="mt-3">
+          <p className="text-sm font-semibold text-brand-800">Appliquer les mêmes frais à :</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {classes.map((cls) => {
+              const checked = feeClassIds.includes(String(cls.id));
+              return (
+                <label key={cls.id} className="flex items-center gap-2 rounded-full border border-brand-200 bg-white px-3 py-1 text-xs text-brand-800">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => {
+                      const isChecked = e.target.checked;
+                      setFeeClassIds((prev) => {
+                        const next = new Set(prev);
+                        if (isChecked) next.add(String(cls.id));
+                        else next.delete(String(cls.id));
+                        return Array.from(next);
+                      });
+                    }}
+                  />
+                  {cls.name}
+                </label>
+              );
+            })}
+          </div>
+        </div>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
@@ -620,7 +651,7 @@ export default function SchoolSettingsPage() {
 
       <section className="grid gap-6 lg:grid-cols-2">
         <article className="card">
-          <h2 className="text-lg font-semibold text-brand-900 mb-4">Inventaire des fournitures</h2>
+          <h2 className="text-lg font-semibold text-brand-900 mb-4">Inventaire des fournitures (global)</h2>
           <form onSubmit={createSupply} className="grid gap-3 sm:grid-cols-3">
             <input
               className="input"
