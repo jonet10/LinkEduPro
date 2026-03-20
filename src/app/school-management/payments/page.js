@@ -583,27 +583,9 @@ export default function SchoolPaymentsPage() {
                 </select>
               </div>
 
-              {form.classId ? (
+              {form.classId && form.paymentTypeId ? (
                 <div className="rounded-lg border border-brand-100 bg-brand-50/60 p-3 text-sm text-brand-800">
-                  <p className="font-semibold text-brand-900">Résumé des frais de la classe</p>
-                  <div className="mt-2 grid gap-1">
-                    <div className="flex justify-between">
-                      <span>Élèves inscrits</span>
-                      <span className="font-semibold">{feeMeta.studentCount}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Fournitures / élève</span>
-                      <span className="font-semibold">{feeMeta.suppliesTotal}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Total / élève</span>
-                      <span className="font-semibold">{feeMeta.totalPerStudent}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Total à encaisser</span>
-                      <span className="font-semibold">{feeMeta.totalCollectable}</span>
-                    </div>
-                  </div>
+                  <p className="font-semibold text-brand-900">Plan de frais de la classe</p>
                   {feePlan ? (
                     <div className="mt-3 space-y-2">
                       <p className="text-xs text-brand-700">
