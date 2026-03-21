@@ -79,6 +79,8 @@ export default function SuperDashboardPage() {
   const [aiFiles, setAiFiles] = useState([]);
   const [aiUploading, setAiUploading] = useState(false);
   const [aiMessage, setAiMessage] = useState('');
+  const [aiDocs, setAiDocs] = useState([]);
+  const [aiDocsLoading, setAiDocsLoading] = useState(false);
 
   useEffect(() => {
     const token = getToken();
@@ -119,10 +121,28 @@ export default function SuperDashboardPage() {
       }
       await loadStudents(token, studentFilters);
       await loadUsers(token, userFilters);
+      await loadAiDocs();
     } catch (e) {
       setError(e.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadAiDocs() {
+    setAiDocsLoading(true);
+    try {
+      const res = await fetch(`${AI_SERVICE_URL}/ai/docs`);
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        throw new Error(payload?.detail || 'Erreur chargement documents IA.');
+      }
+      const data = await res.json();
+      setAiDocs(Array.isArray(data.files) ? data.files : []);
+    } catch (e) {
+      setAiMessage(e.message || 'Erreur chargement documents IA.');
+    } finally {
+      setAiDocsLoading(false);
     }
   }
 
@@ -396,13 +416,42 @@ export default function SuperDashboardPage() {
       <section className="card space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xl font-semibold">Documents IA (PDF)</h2>
-          <button
-            className="btn-secondary"
-            type="button"
-            onClick={() => setAiFiles([])}
-          >
-            Réinitialiser
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className="btn-secondary"
+              type="button"
+              onClick={() => setAiFiles([])}
+            >
+              Réinitialiser
+            </button>
+            <button
+              className="btn-secondary"
+              type="button"
+              onClick={loadAiDocs}
+              disabled={aiDocsLoading}
+            >
+              {aiDocsLoading ? 'Chargement...' : 'Rafraîchir liste'}
+            </button>
+            <button
+              className="btn-secondary"
+              type="button"
+              onClick={async () => {
+                setAiMessage('');
+                try {
+                  const res = await fetch(`${AI_SERVICE_URL}/ai/rebuild-docs`, { method: 'POST' });
+                  if (!res.ok) {
+                    const payload = await res.json().catch(() => ({}));
+                    throw new Error(payload?.detail || 'Erreur rebuild IA.');
+                  }
+                  setAiMessage('Index IA reconstruit avec succès.');
+                } catch (e) {
+                  setAiMessage(e.message || 'Erreur rebuild IA.');
+                }
+              }}
+            >
+              Rebuild index
+            </button>
+          </div>
         </div>
         <p className="text-sm text-brand-700">
           Ajoute des PDF pour enrichir la base documentaire IA (RAG). Les fichiers sont indexés automatiquement.
@@ -442,6 +491,7 @@ export default function SuperDashboardPage() {
                 const data = await res.json();
                 setAiMessage(`Upload terminé: ${data.count || 0} fichier(s) indexé(s).`);
                 setAiFiles([]);
+                await loadAiDocs();
               } catch (e) {
                 setAiMessage(e.message || 'Erreur upload IA.');
               } finally {
@@ -451,6 +501,46 @@ export default function SuperDashboardPage() {
           >
             {aiUploading ? 'Upload en cours...' : 'Uploader les PDF'}
           </button>
+        </div>
+        <div className="rounded-lg border border-brand-100 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm font-semibold text-brand-900">PDF indexés</p>
+            <span className="text-xs text-brand-700">{aiDocs.length} fichier(s)</span>
+          </div>
+          {aiDocs.length === 0 ? (
+            <p className="text-sm text-brand-700">Aucun document pour le moment.</p>
+          ) : (
+            <ul className="space-y-2 text-sm">
+              {aiDocs.map((file) => (
+                <li key={file.name} className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-brand-900">{file.name}</span>
+                  <button
+                    className="btn-secondary !px-3 !py-1"
+                    type="button"
+                    onClick={async () => {
+                      if (typeof window !== 'undefined' && !window.confirm('Supprimer ce PDF ?')) return;
+                      setAiMessage('');
+                      try {
+                        const res = await fetch(`${AI_SERVICE_URL}/ai/docs/${encodeURIComponent(file.name)}?rebuild=true`, {
+                          method: 'DELETE'
+                        });
+                        if (!res.ok) {
+                          const payload = await res.json().catch(() => ({}));
+                          throw new Error(payload?.detail || 'Erreur suppression PDF.');
+                        }
+                        setAiMessage('PDF supprimé.');
+                        await loadAiDocs();
+                      } catch (e) {
+                        setAiMessage(e.message || 'Erreur suppression PDF.');
+                      }
+                    }}
+                  >
+                    Supprimer
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
 
