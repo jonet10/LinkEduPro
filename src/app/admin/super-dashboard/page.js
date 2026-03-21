@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
+import { AI_SERVICE_URL } from '@/lib/runtime-config';
 import { getStudent, getToken } from '@/lib/auth';
 
 function formatHtg(value) {
@@ -75,6 +76,9 @@ export default function SuperDashboardPage() {
   const [withdrawalsLoading, setWithdrawalsLoading] = useState(false);
   const [withdrawalActionId, setWithdrawalActionId] = useState(null);
   const [withdrawalNotes, setWithdrawalNotes] = useState({});
+  const [aiFiles, setAiFiles] = useState([]);
+  const [aiUploading, setAiUploading] = useState(false);
+  const [aiMessage, setAiMessage] = useState('');
 
   useEffect(() => {
     const token = getToken();
@@ -373,6 +377,7 @@ export default function SuperDashboardPage() {
       </section>
 
       {error ? <p className="rounded border border-red-300 bg-red-50 p-3 text-red-700">{error}</p> : null}
+      {aiMessage ? <p className="rounded border border-brand-200 bg-brand-50 p-3 text-brand-800">{aiMessage}</p> : null}
 
       {dashboard?.analytics ? (
         <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -387,6 +392,67 @@ export default function SuperDashboardPage() {
           </div>
         </section>
       ) : null}
+
+      <section className="card space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-semibold">Documents IA (PDF)</h2>
+          <button
+            className="btn-secondary"
+            type="button"
+            onClick={() => setAiFiles([])}
+          >
+            Réinitialiser
+          </button>
+        </div>
+        <p className="text-sm text-brand-700">
+          Ajoute des PDF pour enrichir la base documentaire IA (RAG). Les fichiers sont indexés automatiquement.
+        </p>
+        <div className="grid gap-3 md:grid-cols-3">
+          <input
+            className="input md:col-span-2"
+            type="file"
+            accept=".pdf"
+            multiple
+            onChange={(e) => setAiFiles(Array.from(e.target.files || []))}
+          />
+          <button
+            className="btn-primary"
+            type="button"
+            disabled={aiUploading || aiFiles.length === 0}
+            onClick={async () => {
+              if (aiFiles.length === 0) {
+                setAiMessage('Sélectionne au moins un PDF.');
+                return;
+              }
+
+              setAiUploading(true);
+              setAiMessage('');
+              try {
+                const form = new FormData();
+                aiFiles.forEach((file) => form.append('files', file));
+
+                const res = await fetch(`${AI_SERVICE_URL}/ai/upload-docs?rebuild=true`, {
+                  method: 'POST',
+                  body: form
+                });
+                if (!res.ok) {
+                  const payload = await res.json().catch(() => ({}));
+                  throw new Error(payload?.detail || 'Erreur upload IA.');
+                }
+                const data = await res.json();
+                setAiMessage(`Upload terminé: ${data.count || 0} fichier(s) indexé(s).`);
+                setAiFiles([]);
+              } catch (e) {
+                setAiMessage(e.message || 'Erreur upload IA.');
+              } finally {
+                setAiUploading(false);
+              }
+            }}
+          >
+            {aiUploading ? 'Upload en cours...' : 'Uploader les PDF'}
+          </button>
+        </div>
+      </section>
 
       {dashboard?.revenues ? (
         <section className="card space-y-3">

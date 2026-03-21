@@ -63,6 +63,10 @@ export const BACKEND_ORIGIN =
   resolveBackendOrigin(API_BASE_URL) ||
   'http://localhost:5000';
 
+export const AI_SERVICE_URL =
+  (process.env.NEXT_PUBLIC_AI_SERVICE_URL || '').replace(/\/+$/, '') ||
+  'http://localhost:8000';
+
 export function getApiBaseUrl() {
   return resolveBrowserApiBaseUrl(API_BASE_URL) || API_BASE_URL;
 }
