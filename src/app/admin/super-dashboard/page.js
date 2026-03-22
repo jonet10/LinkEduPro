@@ -517,6 +517,7 @@ export default function SuperDashboardPage() {
             <option value="NSI">NSI</option>
             <option value="NSII">NSII</option>
             <option value="NSIII">NSIII</option>
+            <option value="NSIV">NSIV</option>
             <option value="UNIVERSITAIRE">Universitaire</option>
           </select>
           <select
@@ -610,6 +611,7 @@ export default function SuperDashboardPage() {
             <option value="NSI">NSI</option>
             <option value="NSII">NSII</option>
             <option value="NSIII">NSIII</option>
+            <option value="NSIV">NSIV</option>
             <option value="UNIVERSITAIRE">Universitaire</option>
           </select>
           <select
@@ -712,6 +714,7 @@ export default function SuperDashboardPage() {
                           <option value="NSI">NSI</option>
                           <option value="NSII">NSII</option>
                           <option value="NSIII">NSIII</option>
+                          <option value="NSIV">NSIV</option>
                           <option value="UNIVERSITAIRE">Universitaire</option>
                         </select>
                         <select
