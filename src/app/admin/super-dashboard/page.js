@@ -81,14 +81,14 @@ export default function SuperDashboardPage() {
   const [aiMessage, setAiMessage] = useState('');
   const [aiDocs, setAiDocs] = useState([]);
   const [aiDocsLoading, setAiDocsLoading] = useState(false);
-  const [aiLevel, setAiLevel] = useState('NSI');
+  const [aiLevel, setAiLevel] = useState('AF7');
   const [aiSubject, setAiSubject] = useState('Math');
   const [aiDocType, setAiDocType] = useState('COURSE');
   const [aiRebuildLevel, setAiRebuildLevel] = useState('');
   const [aiRebuildSubject, setAiRebuildSubject] = useState('');
   const [aiIndexLog, setAiIndexLog] = useState('');
   const [editingAiDocId, setEditingAiDocId] = useState(null);
-  const [editingAiDoc, setEditingAiDoc] = useState({ level: 'NSI', subject: 'Math', docType: 'COURSE' });
+  const [editingAiDoc, setEditingAiDoc] = useState({ level: 'AF7', subject: 'Math', docType: 'COURSE' });
 
   useEffect(() => {
     const token = getToken();
@@ -511,9 +511,13 @@ export default function SuperDashboardPage() {
             onChange={(e) => setAiLevel(e.target.value)}
             required
           >
+            <option value="AF7">7e AF</option>
+            <option value="AF8">8e AF</option>
+            <option value="AF9">9e AF</option>
             <option value="NSI">NSI</option>
             <option value="NSII">NSII</option>
             <option value="NSIII">NSIII</option>
+            <option value="UNIVERSITAIRE">Universitaire</option>
           </select>
           <select
             className="input"
@@ -600,9 +604,13 @@ export default function SuperDashboardPage() {
             onChange={(e) => setAiRebuildLevel(e.target.value)}
           >
             <option value="">Rebuild: Tous niveaux</option>
+            <option value="AF7">7e AF</option>
+            <option value="AF8">8e AF</option>
+            <option value="AF9">9e AF</option>
             <option value="NSI">NSI</option>
             <option value="NSII">NSII</option>
             <option value="NSIII">NSIII</option>
+            <option value="UNIVERSITAIRE">Universitaire</option>
           </select>
           <select
             className="input"
@@ -698,9 +706,13 @@ export default function SuperDashboardPage() {
                           value={editingAiDoc.level}
                           onChange={(e) => setEditingAiDoc((prev) => ({ ...prev, level: e.target.value }))}
                         >
+                          <option value="AF7">7e AF</option>
+                          <option value="AF8">8e AF</option>
+                          <option value="AF9">9e AF</option>
                           <option value="NSI">NSI</option>
                           <option value="NSII">NSII</option>
                           <option value="NSIII">NSIII</option>
+                          <option value="UNIVERSITAIRE">Universitaire</option>
                         </select>
                         <select
                           className="input"
