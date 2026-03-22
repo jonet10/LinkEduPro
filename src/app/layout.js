@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import SplashScreenGate from '@/components/SplashScreenGate';
 import PwaInit from '@/components/PwaInit';
 import MobileBackButton from '@/components/MobileBackButton';
+import AIChatWidget from '@/components/AIChatWidget';
 
 const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://linkedupro.com';
 
@@ -67,6 +68,7 @@ export default function RootLayout({ children }) {
         </header>
         <main className="relative z-0 mx-auto w-full max-w-6xl flex-1 px-6 py-8 pb-28 md:pb-8">{children}</main>
         <Footer />
+        <AIChatWidget />
       </body>
     </html>
   );
