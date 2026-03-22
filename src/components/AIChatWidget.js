@@ -68,7 +68,19 @@ export default function AIChatWidget() {
 
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
-        throw new Error(payload?.detail || 'Erreur IA.');
+        const serverMessage = payload?.detail || payload?.message || '';
+        if (res.status === 400) {
+          throw new Error(serverMessage || 'Question trop courte (minimum 3 caractères).');
+        }
+        if (res.status === 404) {
+          throw new Error(serverMessage || 'Aucun contenu pertinent trouvé pour cette question.');
+        }
+        if (res.status === 503) {
+          throw new Error(
+            serverMessage || "IA indisponible. Vérifie la configuration (HF_TOKEN) ou réessaie plus tard."
+          );
+        }
+        throw new Error(serverMessage || 'Erreur IA.');
       }
 
       const data = await res.json();
@@ -76,7 +88,10 @@ export default function AIChatWidget() {
       setLastSources(Array.isArray(data.sources) ? data.sources : []);
     } catch (e) {
       setError(e.message || 'Erreur IA.');
-      setMessages((prev) => [...prev, { role: 'ai', text: 'Désolé, une erreur est survenue.' }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'ai', text: "Désolé, je n'ai pas pu répondre. Vérifie ton message ou réessaie." }
+      ]);
     } finally {
       setLoading(false);
     }
