@@ -63,8 +63,15 @@ export const BACKEND_ORIGIN =
   resolveBackendOrigin(API_BASE_URL) ||
   'http://localhost:5000';
 
+function normalizeAiServiceUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (!/^https?:\/\//i.test(raw)) return '';
+  return normalizeApiBaseUrl(raw) || raw.replace(/\/+$/, '');
+}
+
 export const AI_SERVICE_URL =
-  (process.env.NEXT_PUBLIC_AI_SERVICE_URL || '').replace(/\/+$/, '') ||
+  normalizeAiServiceUrl(process.env.NEXT_PUBLIC_AI_SERVICE_URL) ||
   getApiBaseUrl();
 
 export function getApiBaseUrl() {
