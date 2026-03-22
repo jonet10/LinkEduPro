@@ -12,6 +12,8 @@ export default function AIChatWidget() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('chat');
+  const [lastSources, setLastSources] = useState([]);
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -71,6 +73,7 @@ export default function AIChatWidget() {
 
       const data = await res.json();
       setMessages((prev) => [...prev, { role: 'ai', text: data.answer || 'Réponse vide.' }]);
+      setLastSources(Array.isArray(data.sources) ? data.sources : []);
     } catch (e) {
       setError(e.message || 'Erreur IA.');
       setMessages((prev) => [...prev, { role: 'ai', text: 'Désolé, une erreur est survenue.' }]);
@@ -110,29 +113,65 @@ export default function AIChatWidget() {
           </button>
         </div>
 
-        <div className="h-72 space-y-3 overflow-y-auto px-4 py-3 text-sm">
-          {messages.length === 0 ? (
-            <p className="text-center text-brand-600">Pose une question pour commencer.</p>
+        <div className="flex gap-2 px-4 pt-3 text-xs">
+          <button
+            type="button"
+            className={`rounded-full px-3 py-1 ${activeTab === 'chat' ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-brand-800'}`}
+            onClick={() => setActiveTab('chat')}
+          >
+            Conversation
+          </button>
+          <button
+            type="button"
+            className={`rounded-full px-3 py-1 ${activeTab === 'sources' ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-brand-800'}`}
+            onClick={() => setActiveTab('sources')}
+          >
+            Sources utilisées
+          </button>
+        </div>
+
+        <div className="h-64 space-y-3 overflow-y-auto px-4 py-3 text-sm">
+          {activeTab === 'chat' ? (
+            <>
+              {messages.length === 0 ? (
+                <p className="text-center text-brand-600">Pose une question pour commencer.</p>
+              ) : (
+                messages.map((msg, idx) => (
+                  <div
+                    key={`${msg.role}-${idx}`}
+                    className={`max-w-[85%] rounded-2xl px-3 py-2 ${
+                      msg.role === 'user'
+                        ? 'ml-auto bg-sky-600 text-white'
+                        : 'mr-auto bg-emerald-50 text-brand-900'
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                ))
+              )}
+              {loading ? (
+                <div className="mr-auto max-w-[85%] rounded-2xl bg-emerald-50 px-3 py-2 text-brand-700">
+                  IA écrit...
+                </div>
+              ) : null}
+              <div ref={endRef} />
+            </>
           ) : (
-            messages.map((msg, idx) => (
-              <div
-                key={`${msg.role}-${idx}`}
-                className={`max-w-[85%] rounded-2xl px-3 py-2 ${
-                  msg.role === 'user'
-                    ? 'ml-auto bg-sky-600 text-white'
-                    : 'mr-auto bg-emerald-50 text-brand-900'
-                }`}
-              >
-                {msg.text}
-              </div>
-            ))
+            <>
+              {lastSources.length === 0 ? (
+                <p className="text-center text-brand-600">Aucune source disponible.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {lastSources.map((src, idx) => (
+                    <li key={`${src.fileName}-${idx}`} className="rounded-lg border border-brand-100 p-2 text-xs">
+                      <div className="font-semibold text-brand-900">{src.fileName}</div>
+                      <div className="text-brand-700">{src.level} · {src.subject} · {src.docType}</div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
           )}
-          {loading ? (
-            <div className="mr-auto max-w-[85%] rounded-2xl bg-emerald-50 px-3 py-2 text-brand-700">
-              IA écrit...
-            </div>
-          ) : null}
-          <div ref={endRef} />
         </div>
 
         {error ? (

@@ -140,7 +140,10 @@ export default function SuperDashboardPage() {
   async function loadAiDocs() {
     setAiDocsLoading(true);
     try {
-      const res = await fetch(`${AI_SERVICE_URL}/ai/docs`);
+      const token = getToken();
+      const res = await fetch(`${AI_SERVICE_URL}/ai/docs`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
         throw new Error(payload?.detail || 'Erreur chargement documents IA.');
@@ -446,9 +449,10 @@ export default function SuperDashboardPage() {
               onClick={async () => {
                 setAiMessage('');
                 try {
+                  const token = getToken();
                   const res = await fetch(`${AI_SERVICE_URL}/ai/rebuild-docs`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                     body: JSON.stringify({
                       level: aiRebuildLevel || null,
                       subject: aiRebuildSubject || null
@@ -473,7 +477,11 @@ export default function SuperDashboardPage() {
                 setAiMessage('');
                 setAiIndexLog('');
                 try {
-                  const res = await fetch(`${AI_SERVICE_URL}/ai/index-existing`, { method: 'POST' });
+                  const token = getToken();
+                  const res = await fetch(`${AI_SERVICE_URL}/ai/index-existing`, {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${token}` }
+                  });
                   if (!res.ok) {
                     const payload = await res.json().catch(() => ({}));
                     throw new Error(payload?.message || 'Erreur indexation.');
@@ -561,8 +569,10 @@ export default function SuperDashboardPage() {
                 form.append('subject', aiSubject);
                 form.append('docType', aiDocType);
 
+                const token = getToken();
                 const res = await fetch(`${AI_SERVICE_URL}/ai/upload-docs?rebuild=true`, {
                   method: 'POST',
+                  headers: { Authorization: `Bearer ${token}` },
                   body: form
                 });
                 if (!res.ok) {
@@ -631,6 +641,15 @@ export default function SuperDashboardPage() {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    {file.fileUrl ? (
+                      <button
+                        className="btn-secondary !px-3 !py-1"
+                        type="button"
+                        onClick={() => window.open(file.fileUrl, '_blank')}
+                      >
+                        Voir PDF
+                      </button>
+                    ) : null}
                     <button
                       className="btn-secondary !px-3 !py-1"
                       type="button"
@@ -652,8 +671,10 @@ export default function SuperDashboardPage() {
                         if (typeof window !== 'undefined' && !window.confirm('Supprimer ce PDF ?')) return;
                         setAiMessage('');
                         try {
+                          const token = getToken();
                           const res = await fetch(`${AI_SERVICE_URL}/ai/docs/${file.id}`, {
-                            method: 'DELETE'
+                            method: 'DELETE',
+                            headers: { Authorization: `Bearer ${token}` }
                           });
                           if (!res.ok) {
                             const payload = await res.json().catch(() => ({}));
@@ -713,10 +734,11 @@ export default function SuperDashboardPage() {
                           className="btn-primary !px-3 !py-1"
                           type="button"
                           onClick={async () => {
-                            try {
+                          try {
+                              const token = getToken();
                               const res = await fetch(`${AI_SERVICE_URL}/ai/docs/${file.id}`, {
                                 method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                                 body: JSON.stringify(editingAiDoc)
                               });
                               if (!res.ok) {
