@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AI_SERVICE_URL } from '@/lib/runtime-config';
 
 const STORAGE_KEY = 'linkedu_chat_messages_v1';
+const WELCOME_MESSAGE = "Salut ! Je suis EduPro AI. Comment puis-je vous accompagner aujourd'hui ?";
 
 export default function AIChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,11 +22,14 @@ export default function AIChatWidget() {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
           setMessages(parsed);
+          return;
         }
       }
     } catch (_) {
       // Ignore storage errors
     }
+
+    setMessages([{ role: 'ai', text: WELCOME_MESSAGE }]);
   }, []);
 
   useEffect(() => {

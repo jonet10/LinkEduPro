@@ -81,6 +81,14 @@ export default function SuperDashboardPage() {
   const [aiMessage, setAiMessage] = useState('');
   const [aiDocs, setAiDocs] = useState([]);
   const [aiDocsLoading, setAiDocsLoading] = useState(false);
+  const [aiLevel, setAiLevel] = useState('NSI');
+  const [aiSubject, setAiSubject] = useState('Math');
+  const [aiDocType, setAiDocType] = useState('COURSE');
+  const [aiRebuildLevel, setAiRebuildLevel] = useState('');
+  const [aiRebuildSubject, setAiRebuildSubject] = useState('');
+  const [aiIndexLog, setAiIndexLog] = useState('');
+  const [editingAiDocId, setEditingAiDocId] = useState(null);
+  const [editingAiDoc, setEditingAiDoc] = useState({ level: 'NSI', subject: 'Math', docType: 'COURSE' });
 
   useEffect(() => {
     const token = getToken();
@@ -438,7 +446,14 @@ export default function SuperDashboardPage() {
               onClick={async () => {
                 setAiMessage('');
                 try {
-                  const res = await fetch(`${AI_SERVICE_URL}/ai/rebuild-docs`, { method: 'POST' });
+                  const res = await fetch(`${AI_SERVICE_URL}/ai/rebuild-docs`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      level: aiRebuildLevel || null,
+                      subject: aiRebuildSubject || null
+                    })
+                  });
                   if (!res.ok) {
                     const payload = await res.json().catch(() => ({}));
                     throw new Error(payload?.detail || 'Erreur rebuild IA.');
@@ -451,12 +466,75 @@ export default function SuperDashboardPage() {
             >
               Rebuild index
             </button>
+            <button
+              className="btn-secondary"
+              type="button"
+              onClick={async () => {
+                setAiMessage('');
+                setAiIndexLog('');
+                try {
+                  const res = await fetch(`${AI_SERVICE_URL}/ai/index-existing`, { method: 'POST' });
+                  if (!res.ok) {
+                    const payload = await res.json().catch(() => ({}));
+                    throw new Error(payload?.message || 'Erreur indexation.');
+                  }
+                  const data = await res.json();
+                  setAiIndexLog(
+                    `Scan: ${data.report?.scanned || 0}, Créés: ${data.report?.created || 0}, ` +
+                    `Ignorés: ${data.report?.skipped || 0}`
+                  );
+                  await loadAiDocs();
+                } catch (e) {
+                  setAiMessage(e.message || 'Erreur indexation.');
+                }
+              }}
+            >
+              Indexer les documents existants
+            </button>
           </div>
         </div>
         <p className="text-sm text-brand-700">
           Ajoute des PDF pour enrichir la base documentaire IA (RAG). Les fichiers sont indexés automatiquement.
         </p>
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-4">
+          <select
+            className="input"
+            value={aiLevel}
+            onChange={(e) => setAiLevel(e.target.value)}
+            required
+          >
+            <option value="NSI">NSI</option>
+            <option value="NSII">NSII</option>
+            <option value="NSIII">NSIII</option>
+          </select>
+          <select
+            className="input"
+            value={aiSubject}
+            onChange={(e) => setAiSubject(e.target.value)}
+            required
+          >
+            <option value="Math">Math</option>
+            <option value="Français">Français</option>
+            <option value="Sciences">Sciences</option>
+            <option value="Physique">Physique</option>
+            <option value="Chimie">Chimie</option>
+            <option value="SVT">SVT</option>
+            <option value="Histoire">Histoire</option>
+            <option value="Géographie">Géographie</option>
+            <option value="Anglais">Anglais</option>
+            <option value="Général">Général</option>
+          </select>
+          <select
+            className="input"
+            value={aiDocType}
+            onChange={(e) => setAiDocType(e.target.value)}
+            required
+          >
+            <option value="COURSE">Cours</option>
+            <option value="EXAM">Examen</option>
+            <option value="BOOK">Livre</option>
+            <option value="EXERCISE">Exercice</option>
+          </select>
           <input
             className="input md:col-span-2"
             type="file"
@@ -479,6 +557,9 @@ export default function SuperDashboardPage() {
               try {
                 const form = new FormData();
                 aiFiles.forEach((file) => form.append('files', file));
+                form.append('level', aiLevel);
+                form.append('subject', aiSubject);
+                form.append('docType', aiDocType);
 
                 const res = await fetch(`${AI_SERVICE_URL}/ai/upload-docs?rebuild=true`, {
                   method: 'POST',
@@ -489,7 +570,7 @@ export default function SuperDashboardPage() {
                   throw new Error(payload?.detail || 'Erreur upload IA.');
                 }
                 const data = await res.json();
-                setAiMessage(`Upload terminé: ${data.count || 0} fichier(s) indexé(s).`);
+                setAiMessage(`Upload terminé: ${data.createdCount || 0} fichier(s) indexé(s).`);
                 setAiFiles([]);
                 await loadAiDocs();
               } catch (e) {
@@ -502,6 +583,36 @@ export default function SuperDashboardPage() {
             {aiUploading ? 'Upload en cours...' : 'Uploader les PDF'}
           </button>
         </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <select
+            className="input"
+            value={aiRebuildLevel}
+            onChange={(e) => setAiRebuildLevel(e.target.value)}
+          >
+            <option value="">Rebuild: Tous niveaux</option>
+            <option value="NSI">NSI</option>
+            <option value="NSII">NSII</option>
+            <option value="NSIII">NSIII</option>
+          </select>
+          <select
+            className="input"
+            value={aiRebuildSubject}
+            onChange={(e) => setAiRebuildSubject(e.target.value)}
+          >
+            <option value="">Rebuild: Toutes matières</option>
+            <option value="Math">Math</option>
+            <option value="Français">Français</option>
+            <option value="Sciences">Sciences</option>
+            <option value="Physique">Physique</option>
+            <option value="Chimie">Chimie</option>
+            <option value="SVT">SVT</option>
+            <option value="Histoire">Histoire</option>
+            <option value="Géographie">Géographie</option>
+            <option value="Anglais">Anglais</option>
+            <option value="Général">Général</option>
+          </select>
+        </div>
+        {aiIndexLog ? <p className="text-sm text-brand-700">{aiIndexLog}</p> : null}
         <div className="rounded-lg border border-brand-100 p-3">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-sm font-semibold text-brand-900">PDF indexés</p>
@@ -512,31 +623,126 @@ export default function SuperDashboardPage() {
           ) : (
             <ul className="space-y-2 text-sm">
               {aiDocs.map((file) => (
-                <li key={file.name} className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-brand-900">{file.name}</span>
-                  <button
-                    className="btn-secondary !px-3 !py-1"
-                    type="button"
-                    onClick={async () => {
-                      if (typeof window !== 'undefined' && !window.confirm('Supprimer ce PDF ?')) return;
-                      setAiMessage('');
-                      try {
-                        const res = await fetch(`${AI_SERVICE_URL}/ai/docs/${encodeURIComponent(file.name)}?rebuild=true`, {
-                          method: 'DELETE'
+                <li key={file.id} className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-brand-900">
+                    <div className="font-medium">{file.fileName}</div>
+                    <div className="text-xs text-brand-700">
+                      {file.level} · {file.subject} · {file.docType} · {file.status}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      className="btn-secondary !px-3 !py-1"
+                      type="button"
+                      onClick={() => {
+                        setEditingAiDocId(file.id);
+                        setEditingAiDoc({
+                          level: file.level,
+                          subject: file.subject,
+                          docType: file.docType
                         });
-                        if (!res.ok) {
-                          const payload = await res.json().catch(() => ({}));
-                          throw new Error(payload?.detail || 'Erreur suppression PDF.');
+                      }}
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      className="btn-secondary !px-3 !py-1"
+                      type="button"
+                      onClick={async () => {
+                        if (typeof window !== 'undefined' && !window.confirm('Supprimer ce PDF ?')) return;
+                        setAiMessage('');
+                        try {
+                          const res = await fetch(`${AI_SERVICE_URL}/ai/docs/${file.id}`, {
+                            method: 'DELETE'
+                          });
+                          if (!res.ok) {
+                            const payload = await res.json().catch(() => ({}));
+                            throw new Error(payload?.detail || 'Erreur suppression PDF.');
+                          }
+                          setAiMessage('PDF supprimé.');
+                          await loadAiDocs();
+                        } catch (e) {
+                          setAiMessage(e.message || 'Erreur suppression PDF.');
                         }
-                        setAiMessage('PDF supprimé.');
-                        await loadAiDocs();
-                      } catch (e) {
-                        setAiMessage(e.message || 'Erreur suppression PDF.');
-                      }
-                    }}
-                  >
-                    Supprimer
-                  </button>
+                      }}
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                  {editingAiDocId === file.id ? (
+                    <div className="mt-2 w-full rounded-lg border border-brand-100 p-3">
+                      <div className="grid gap-2 md:grid-cols-3">
+                        <select
+                          className="input"
+                          value={editingAiDoc.level}
+                          onChange={(e) => setEditingAiDoc((prev) => ({ ...prev, level: e.target.value }))}
+                        >
+                          <option value="NSI">NSI</option>
+                          <option value="NSII">NSII</option>
+                          <option value="NSIII">NSIII</option>
+                        </select>
+                        <select
+                          className="input"
+                          value={editingAiDoc.subject}
+                          onChange={(e) => setEditingAiDoc((prev) => ({ ...prev, subject: e.target.value }))}
+                        >
+                          <option value="Math">Math</option>
+                          <option value="Français">Français</option>
+                          <option value="Sciences">Sciences</option>
+                          <option value="Physique">Physique</option>
+                          <option value="Chimie">Chimie</option>
+                          <option value="SVT">SVT</option>
+                          <option value="Histoire">Histoire</option>
+                          <option value="Géographie">Géographie</option>
+                          <option value="Anglais">Anglais</option>
+                          <option value="Général">Général</option>
+                        </select>
+                        <select
+                          className="input"
+                          value={editingAiDoc.docType}
+                          onChange={(e) => setEditingAiDoc((prev) => ({ ...prev, docType: e.target.value }))}
+                        >
+                          <option value="COURSE">Cours</option>
+                          <option value="EXAM">Examen</option>
+                          <option value="BOOK">Livre</option>
+                          <option value="EXERCISE">Exercice</option>
+                        </select>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <button
+                          className="btn-primary !px-3 !py-1"
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(`${AI_SERVICE_URL}/ai/docs/${file.id}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(editingAiDoc)
+                              });
+                              if (!res.ok) {
+                                const payload = await res.json().catch(() => ({}));
+                                throw new Error(payload?.message || 'Erreur mise à jour.');
+                              }
+                              setAiMessage('Métadonnées mises à jour.');
+                              setEditingAiDocId(null);
+                              await loadAiDocs();
+                            } catch (e) {
+                              setAiMessage(e.message || 'Erreur mise à jour.');
+                            }
+                          }}
+                        >
+                          Enregistrer
+                        </button>
+                        <button
+                          className="btn-secondary !px-3 !py-1"
+                          type="button"
+                          onClick={() => setEditingAiDocId(null)}
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
                 </li>
               ))}
             </ul>
