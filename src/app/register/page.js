@@ -9,6 +9,7 @@ const CONTACT_EMAIL = 'infolinkedupro@gmail.com';
 const CONTACT_WHATSAPP_URL = 'https://wa.me/50938378375';
 
 const initialState = {
+  role: 'STUDENT',
   academicLevel: '',
   nsivTrack: 'ORDINAIRE',
   firstName: '',
@@ -83,9 +84,9 @@ export default function RegisterPage() {
 
     try {
       const payload = {
-        role: 'STUDENT',
-        academicLevel: form.academicLevel,
-        nsivTrack: form.academicLevel === 'NSIV' ? form.nsivTrack : undefined,
+        role: form.role,
+        academicLevel: form.role === 'STUDENT' ? form.academicLevel : undefined,
+        nsivTrack: form.role === 'STUDENT' && form.academicLevel === 'NSIV' ? form.nsivTrack : undefined,
         firstName: form.firstName,
         lastName: form.lastName,
         sex: form.sex,
@@ -130,22 +131,30 @@ export default function RegisterPage() {
 
   return (
     <section className="mx-auto max-w-2xl card">
-      <h1 className="mb-6 text-2xl font-bold text-brand-900">Inscription élève et universitaire</h1>
+      <h1 className="mb-6 text-2xl font-bold text-brand-900">Inscription LinkEduPro</h1>
       <p className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-900">
-        Inscription directe réservée aux élèves (secondaire et universitaire). Sélectionne ton département, ta commune et ton École.
+        Choisis ton profil (élève, parent ou tuteur) pour accéder aux fonctionnalités adaptées.
       </p>
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
-        <select className="input md:col-span-2" name="academicLevel" value={form.academicLevel} onChange={onChange} required>
-          <option value="">Niveau académique</option>
-          <option value="9e">9e</option>
-          <option value="NSI">NSI</option>
-          <option value="NSII">NSII</option>
-          <option value="NSIII">NSIII</option>
-          <option value="NSIV">NSIV</option>
-          <option value="Universitaire">Universitaire</option>
+        <select className="input md:col-span-2" name="role" value={form.role} onChange={onChange} required>
+          <option value="STUDENT">Élève</option>
+          <option value="PARENT">Parent</option>
+          <option value="TUTOR">Tuteur</option>
         </select>
 
-        {form.academicLevel === 'NSIV' ? (
+        {form.role === 'STUDENT' ? (
+          <select className="input md:col-span-2" name="academicLevel" value={form.academicLevel} onChange={onChange} required>
+            <option value="">Niveau académique</option>
+            <option value="9e">9e</option>
+            <option value="NSI">NSI</option>
+            <option value="NSII">NSII</option>
+            <option value="NSIII">NSIII</option>
+            <option value="NSIV">NSIV</option>
+            <option value="Universitaire">Universitaire</option>
+          </select>
+        ) : null}
+
+        {form.role === 'STUDENT' && form.academicLevel === 'NSIV' ? (
           <select className="input md:col-span-2" name="nsivTrack" value={form.nsivTrack} onChange={onChange} required>
             <option value="ORDINAIRE">Filière NSIV : Ordinaire</option>
             <option value="SVT">Filière NSIV : SVT</option>
