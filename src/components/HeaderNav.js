@@ -676,10 +676,10 @@ export default function HeaderNav() {
             <Link href="/tutors" className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-emerald-600">
               Trouver un tuteur
             </Link>
-            <Link href="/register" className="rounded-full border border-brand-300 bg-white px-5 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50">
+            <Link href="/tutor-partner" className="rounded-full border border-brand-300 bg-white px-5 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50">
               Devenir tuteur
             </Link>
-            <Link href="/register" className="rounded-full border border-brand-300 bg-white px-5 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50">
+            <Link href="/tutor-partner" className="rounded-full border border-brand-300 bg-white px-5 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50">
               Devenir partenaire
             </Link>
           </div>
