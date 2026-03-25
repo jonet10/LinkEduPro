@@ -178,14 +178,22 @@ export default function RegisterPage() {
               onChange={onChange}
               required
             />
-            <input
+            <select
               className="input md:col-span-2"
               name="childLevel"
-              placeholder="Niveau de l’enfant (ex: 7e, 8e, 9e, NSI...)"
               value={form.childLevel}
               onChange={onChange}
               required
-            />
+            >
+              <option value="">Niveau de l’enfant</option>
+              <option value="7e">7e</option>
+              <option value="8e">8e</option>
+              <option value="9e">9e</option>
+              <option value="NSI">NSI</option>
+              <option value="NSII">NSII</option>
+              <option value="NSIII">NSIII</option>
+              <option value="NSIV">NSIV</option>
+            </select>
           </>
         ) : null}
 
