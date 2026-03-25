@@ -114,7 +114,7 @@ export default function HomeCarousel({ isAuthed = false }) {
 
           {!isAuthed ? (
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/tutors" className="rounded-full bg-[#f15b5b] px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5">
+              <Link href="/tutors" className="rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-600">
                 Trouver un tuteur
               </Link>
               <Link href="/register" className="rounded-full border border-white/60 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">

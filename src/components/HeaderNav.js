@@ -673,7 +673,7 @@ export default function HeaderNav() {
           </div>
 
           <div className="mx-2 flex flex-1 flex-wrap items-center gap-2">
-            <Link href="/tutors" className="rounded-full bg-[#f15b5b] px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5">
+            <Link href="/tutors" className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-emerald-600">
               Trouver un tuteur
             </Link>
             <Link href="/register" className="rounded-full border border-brand-300 bg-white px-5 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50">
