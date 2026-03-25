@@ -22,7 +22,9 @@ const initialState = {
   password: '',
   department: '',
   commune: '',
-  schoolFromList: ''
+  schoolFromList: '',
+  childName: '',
+  childLevel: ''
 };
 
 export default function RegisterPage() {
@@ -87,6 +89,8 @@ export default function RegisterPage() {
         role: form.role,
         academicLevel: form.role === 'STUDENT' ? form.academicLevel : undefined,
         nsivTrack: form.role === 'STUDENT' && form.academicLevel === 'NSIV' ? form.nsivTrack : undefined,
+        childName: form.role === 'PARENT' ? form.childName : undefined,
+        childLevel: form.role === 'PARENT' ? form.childLevel : undefined,
         firstName: form.firstName,
         lastName: form.lastName,
         sex: form.sex,
@@ -139,7 +143,6 @@ export default function RegisterPage() {
         <select className="input md:col-span-2" name="role" value={form.role} onChange={onChange} required>
           <option value="STUDENT">Élève</option>
           <option value="PARENT">Parent</option>
-          <option value="TUTOR">Tuteur</option>
         </select>
 
         {form.role === 'STUDENT' ? (
@@ -163,6 +166,27 @@ export default function RegisterPage() {
             <option value="LLA">Filière NSIV : LLA</option>
             <option value="AUTRE">Filière NSIV : Autre</option>
           </select>
+        ) : null}
+
+        {form.role === 'PARENT' ? (
+          <>
+            <input
+              className="input md:col-span-2"
+              name="childName"
+              placeholder="Nom complet de l’enfant"
+              value={form.childName}
+              onChange={onChange}
+              required
+            />
+            <input
+              className="input md:col-span-2"
+              name="childLevel"
+              placeholder="Niveau de l’enfant (ex: 7e, 8e, 9e, NSI...)"
+              value={form.childLevel}
+              onChange={onChange}
+              required
+            />
+          </>
         ) : null}
 
         <input className="input" name="firstName" placeholder="Prénom" value={form.firstName} onChange={onChange} required />
