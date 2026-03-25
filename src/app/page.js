@@ -8,7 +8,6 @@ import { resolveMediaUrl } from '@/lib/media';
 import VerifiedTestimonials from '@/components/VerifiedTestimonials';
 import SectionIcon from '@/components/ui/SectionIcon';
 import StudentDashboard from '@/components/student-dashboard/StudentDashboard';
-import TutorMarketplacePopup from '@/components/tutors/TutorMarketplacePopup';
 
 const LANDING_SUBJECTS = [
   { id: 'chimie', label: 'Chimie', iconImage: '/images/subject-chimie.png' },
@@ -469,7 +468,6 @@ export default function HomePage() {
   if (!isAuthed) {
     return (
       <section className="landing-shell landing-glass-clean space-y-8">
-        <TutorMarketplacePopup />
         {platformDonationFeedback ? <p className="text-sm text-brand-700">{platformDonationFeedback}</p> : null}
 
         <section className="landing-hero content-grid card">
