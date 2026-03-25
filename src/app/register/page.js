@@ -188,11 +188,8 @@ export default function RegisterPage() {
               <option value="">Niveau de l’enfant</option>
               <option value="7e">7e</option>
               <option value="8e">8e</option>
-              <option value="9e">9e</option>
-              <option value="NSI">NSI</option>
-              <option value="NSII">NSII</option>
-              <option value="NSIII">NSIII</option>
-              <option value="NSIV">NSIV</option>
+              <option value="7e">7e</option>
+              <option value="8e">8e</option>
             </select>
           </>
         ) : null}
