@@ -37,6 +37,10 @@ export default function TeacherDashboardPage() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileStep, setProfileStep] = useState(1);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState('');
+  const [photoUploading, setPhotoUploading] = useState(false);
   const [profileForm, setProfileForm] = useState({
     profilePhoto: '',
     subjects: [],
@@ -99,6 +103,10 @@ export default function TeacherDashboardPage() {
       .catch((e) => {
         if (!mounted) return;
         setProfileError(e.message || 'Impossible de charger le profil tuteur.');
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setProfileLoaded(true);
       });
     return () => {
       mounted = false;
@@ -109,7 +117,7 @@ export default function TeacherDashboardPage() {
   const sessionRevenues = dashboard?.revenuesBySession || [];
   const levelStats = dashboard?.statsByLevel || [];
   const topBooks = dashboard?.library?.revenuesByBook || [];
-  const needsProfile = profile && !profile.isProfileComplete;
+  const needsProfile = profileLoaded && (!profile || !profile.isProfileComplete);
 
   useEffect(() => {
     if (needsProfile) {
@@ -117,6 +125,37 @@ export default function TeacherDashboardPage() {
       setShowProfileModal(true);
     }
   }, [needsProfile]);
+
+  const onSelectPhoto = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setSelectedPhoto(file);
+    const preview = URL.createObjectURL(file);
+    setPhotoPreview(preview);
+  };
+
+  const uploadPhoto = async () => {
+    if (!selectedPhoto || !token) return;
+    setPhotoUploading(true);
+    setProfileError('');
+    try {
+      const body = new FormData();
+      body.append('photo', selectedPhoto);
+      const data = await apiClient('/v2/profile/photo', {
+        method: 'POST',
+        token,
+        body
+      });
+      const url = data?.profile?.photoUrl || '';
+      setProfileForm((prev) => ({ ...prev, profilePhoto: url }));
+      setPhotoPreview('');
+      setSelectedPhoto(null);
+    } catch (e) {
+      setProfileError(e.message || 'Erreur upload photo');
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
 
   const onProfileChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -310,13 +349,56 @@ export default function TeacherDashboardPage() {
             <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2">
               {profileStep === 1 ? (
                 <div className="grid gap-3 md:grid-cols-2">
-                  <input
-                    className="input"
-                    name="profilePhoto"
-                    placeholder="Photo de profil (URL)"
-                    value={profileForm.profilePhoto}
-                    onChange={onProfileChange}
-                  />
+                  <div className="md:col-span-2">
+                    <p className="text-sm font-semibold text-brand-900">Photo de profil</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-3">
+                      <div className="h-16 w-16 overflow-hidden rounded-full bg-brand-100">
+                        {photoPreview || profileForm.profilePhoto ? (
+                          <img
+                            src={photoPreview || profileForm.profilePhoto}
+                            alt="Aperçu"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs text-brand-600">
+                            Photo
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <label className="btn-secondary cursor-pointer">
+                          Importer une photo
+                          <input type="file" accept="image/*" className="hidden" onChange={onSelectPhoto} />
+                        </label>
+                        <label className="btn-secondary cursor-pointer">
+                          Prendre une photo
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="user"
+                            className="hidden"
+                            onChange={onSelectPhoto}
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          disabled={!selectedPhoto || photoUploading}
+                          onClick={uploadPhoto}
+                        >
+                          {photoUploading ? 'Upload...' : 'Téléverser'}
+                        </button>
+                      </div>
+                    </div>
+                    <input
+                      className="input mt-3"
+                      name="profilePhoto"
+                      placeholder="Ou coller un lien photo (URL)"
+                      value={profileForm.profilePhoto}
+                      onChange={onProfileChange}
+                    />
+                  </div>
+
                   <input
                     className="input"
                     type="number"
