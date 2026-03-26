@@ -219,25 +219,6 @@ export default function TeacherDashboardPage() {
         </div>
       </div>
 
-      {profile ? (
-        <div className="card">
-          <h2 className="text-lg font-semibold text-brand-900">Profil tuteur</h2>
-          <p className="mt-1 text-sm text-brand-700">
-            {needsProfile
-              ? 'Complète ton profil pour être visible dans la section “Trouver un tuteur”.'
-              : 'Ton profil tuteur est complet et visible.'}
-          </p>
-          {profileError ? <p className="mt-2 text-sm text-red-600">{profileError}</p> : null}
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${needsProfile ? 'bg-orange-100 text-orange-700' : 'bg-emerald-100 text-emerald-700'}`}>
-              {needsProfile ? 'Profil incomplet' : 'Profil validé'}
-            </span>
-            <button type="button" className="btn-primary" onClick={() => setShowProfileModal(true)}>
-              {needsProfile ? 'Compléter le profil' : 'Mettre à jour'}
-            </button>
-          </div>
-        </div>
-      ) : null}
 
       {loading ? <p className="text-sm text-brand-700">Chargement...</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
