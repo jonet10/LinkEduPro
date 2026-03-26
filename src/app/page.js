@@ -313,6 +313,8 @@ export default function HomePage() {
   });
   const [platformDonationFeedback, setPlatformDonationFeedback] = useState('');
   const [error, setError] = useState('');
+  const [teacherProfile, setTeacherProfile] = useState(null);
+  const [teacherProfileError, setTeacherProfileError] = useState('');
   const [activeLandingSubject, setActiveLandingSubject] = useState(LANDING_SUBJECTS[0].id);
   const [learningShowcaseSections, setLearningShowcaseSections] = useState(LEARNING_SHOWCASE_SECTIONS);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
@@ -331,6 +333,7 @@ export default function HomePage() {
   const dailyObjective = useMemo(() => getDailyObjective(student), [student]);
   const isStudentRole = student?.role === 'STUDENT';
   const isAdminRole = student?.role === 'ADMIN';
+  const isTeacherRole = student?.role === 'TEACHER';
 
   const quizProgressPercent = useMemo(() => {
     const preferred = Number(progress?.overview?.averageScore || 0);
@@ -410,6 +413,25 @@ export default function HomePage() {
         setReady(true);
       });
   }, []);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token || !isTeacherRole) return;
+    let mounted = true;
+    setTeacherProfileError('');
+    apiClient('/teacher/profile', { token })
+      .then((data) => {
+        if (!mounted) return;
+        setTeacherProfile(data?.profile || null);
+      })
+      .catch((e) => {
+        if (!mounted) return;
+        setTeacherProfileError(e.message || 'Impossible de charger le profil tuteur.');
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [isTeacherRole]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -700,6 +722,27 @@ export default function HomePage() {
       {isStudentRole ? null : (
         <article className="card motion-enter motion-delay-3 lift-card home-gold-soft">
           <h2 className="home-gold-title mb-3 text-xl font-semibold text-brand-900">Centre de gestion</h2>
+          {isTeacherRole ? (
+            <div className="mb-4 rounded-2xl border border-brand-100 bg-white/80 p-4 shadow-sm">
+              <h3 className="text-lg font-semibold text-brand-900">Profil tuteur</h3>
+              <p className="mt-1 text-sm text-brand-700">
+                {teacherProfile?.isProfileComplete
+                  ? 'Ton profil tuteur est complet et visible.'
+                  : 'Complète ton profil tuteur pour apparaître dans la liste.'}
+              </p>
+              {teacherProfileError ? <p className="mt-1 text-sm text-red-600">{teacherProfileError}</p> : null}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  teacherProfile?.isProfileComplete ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
+                }`}>
+                  {teacherProfile?.isProfileComplete ? 'Profil validé' : 'Profil à compléter'}
+                </span>
+                <Link href="/teacher/dashboard" className="btn-primary">
+                  Mettre à jour
+                </Link>
+              </div>
+            </div>
+          ) : null}
           <div className="grid gap-3 sm:grid-cols-2">
             {managerQuickActions.map((action, idx) => (
               <Link key={action.href} href={action.href} className={`rounded-xl border border-brand-100 p-4 lift-card palette-card palette-${(idx % 4) + 1}`}>
