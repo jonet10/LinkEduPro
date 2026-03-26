@@ -53,6 +53,14 @@ export default function StudentDashboard({
               Filière: {trackLabel || 'Général'} · Préparation estimée: <span className="font-bold">{successProbability}%</span>
             </p>
           </div>
+          <div className="flex flex-1 items-center justify-center">
+            <Link
+              href="/bookings"
+              className="rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-emerald-600"
+            >
+              Mes sessions tuteur
+            </Link>
+          </div>
           <div className="min-w-[240px] rounded-2xl border border-brand-100 bg-white/60 p-4">
             <p className="text-xs font-semibold text-brand-700">Progression globale</p>
             <p className="mt-2 text-3xl font-black text-brand-900">{overallPct}%</p>
