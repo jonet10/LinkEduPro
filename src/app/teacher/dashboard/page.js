@@ -309,31 +309,67 @@ export default function TeacherDashboardPage() {
                 value={profileForm.experienceYears}
                 onChange={onProfileChange}
               />
-
-              <select
-                className="input md:col-span-2"
-                name="subjects"
-                multiple
-                value={profileForm.subjects}
-                onChange={onProfileMulti}
-              >
-                {SUBJECT_OPTIONS.map((subject) => (
-                  <option key={subject} value={subject}>{subject}</option>
-                ))}
-              </select>
-              <select
-                className="input md:col-span-2"
-                name="levels"
-                multiple
-                value={profileForm.levels}
-                onChange={onProfileMulti}
-              >
-                {LEVEL_OPTIONS.map((level) => (
-                  <option key={level} value={level}>{level}</option>
-                ))}
-              </select>
             </div>
-            <p className="mt-2 text-xs text-brand-600">Sélection multiple possible pour les matières et niveaux.</p>
+            <div className="mt-4">
+              <p className="text-sm font-semibold text-brand-900">Matières enseignées</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {SUBJECT_OPTIONS.map((subject) => {
+                  const active = profileForm.subjects.includes(subject);
+                  return (
+                    <button
+                      type="button"
+                      key={subject}
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                        active
+                          ? 'bg-emerald-500 text-white shadow-sm'
+                          : 'bg-white text-brand-800 ring-1 ring-brand-200 hover:bg-brand-50'
+                      }`}
+                      onClick={() =>
+                        setProfileForm((prev) => ({
+                          ...prev,
+                          subjects: active
+                            ? prev.subjects.filter((item) => item !== subject)
+                            : [...prev.subjects, subject]
+                        }))
+                      }
+                    >
+                      {subject}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <p className="text-sm font-semibold text-brand-900">Classes / niveaux</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {LEVEL_OPTIONS.map((level) => {
+                  const active = profileForm.levels.includes(level);
+                  return (
+                    <button
+                      type="button"
+                      key={level}
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                        active
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'bg-white text-brand-800 ring-1 ring-brand-200 hover:bg-brand-50'
+                      }`}
+                      onClick={() =>
+                        setProfileForm((prev) => ({
+                          ...prev,
+                          levels: active
+                            ? prev.levels.filter((item) => item !== level)
+                            : [...prev.levels, level]
+                        }))
+                      }
+                    >
+                      {level}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs text-brand-600">Clique pour sélectionner plusieurs matières et niveaux.</p>
+            </div>
 
             <textarea
               className="input mt-3 min-h-[110px]"
