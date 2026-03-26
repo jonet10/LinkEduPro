@@ -28,7 +28,7 @@ export default function TutorDetailPage() {
       router.push(`/login?redirect=/tutors/${params?.id}`);
       return;
     }
-    router.push('/messages');
+    router.push(`/tutors/${params?.id}/book`);
   };
 
   if (loading) return <p className="mx-auto max-w-4xl px-4 py-8">Chargement...</p>;
