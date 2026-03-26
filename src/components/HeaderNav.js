@@ -133,6 +133,7 @@ export default function HeaderNav() {
       { href: '/', label: 'Accueil' },
       { href: '/video-lessons', label: 'Classe Numerique' },
       { href: '/rattrapage', label: 'Rattrapage' },
+      ...(isAuthed && student?.role === 'STUDENT' && isNsivStudent(student) ? [{ href: '/tutors', label: 'Trouver un tuteur' }] : []),
       ...(isAuthed && roleUpper === 'TEACHER' ? [{ href: '/teacher/dashboard', label: 'Revenus' }] : []),
       { href: '/subjects', label: 'Quiz' },
       { href: '/probable-exercises', label: 'Examens passés' },
@@ -144,7 +145,7 @@ export default function HeaderNav() {
       tabs.push({ href: '/admin/super-dashboard', label: 'Dashboard' });
     }
     return tabs;
-  }, [isAuthed, roleUpper]);
+  }, [isAuthed, roleUpper, student]);
   const quickDiscoverLinks = useMemo(
     () => ([
       { href: '/library', label: t.digitalLibrary, icon: '📚' },
@@ -820,7 +821,7 @@ export default function HeaderNav() {
         )}
 
         {isAuthed ? (
-          <div className="hidden w-full items-center gap-1 overflow-x-auto border-t border-brand-100 pt-2 md:flex">
+          <div className="hidden w-full items-center justify-center gap-1 overflow-x-auto border-t border-brand-100 pt-2 md:flex">
             {globalAuthedTabs.map((tab) => (
               <Link
                 key={`${tab.href}-${tab.label}`}
