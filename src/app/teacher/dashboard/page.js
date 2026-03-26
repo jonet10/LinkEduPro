@@ -36,6 +36,7 @@ export default function TeacherDashboardPage() {
   const [profileError, setProfileError] = useState('');
   const [profileSaving, setProfileSaving] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileStep, setProfileStep] = useState(1);
   const [profileForm, setProfileForm] = useState({
     profilePhoto: '',
     subjects: [],
@@ -111,7 +112,10 @@ export default function TeacherDashboardPage() {
   const needsProfile = profile && !profile.isProfileComplete;
 
   useEffect(() => {
-    if (needsProfile) setShowProfileModal(true);
+    if (needsProfile) {
+      setProfileStep(1);
+      setShowProfileModal(true);
+    }
   }, [needsProfile]);
 
   const onProfileChange = (e) => {
@@ -291,115 +295,155 @@ export default function TeacherDashboardPage() {
 
             {profileError ? <p className="mt-2 text-sm text-red-600">{profileError}</p> : null}
 
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              <input
-                className="input"
-                name="profilePhoto"
-                placeholder="Photo de profil (URL)"
-                value={profileForm.profilePhoto}
-                onChange={onProfileChange}
-              />
-              <input
-                className="input"
-                type="number"
-                min="0"
-                max="60"
-                name="experienceYears"
-                placeholder="Années d'expérience"
-                value={profileForm.experienceYears}
-                onChange={onProfileChange}
-              />
-            </div>
-            <div className="mt-4">
-              <p className="text-sm font-semibold text-brand-900">Matières enseignées</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {SUBJECT_OPTIONS.map((subject) => {
-                  const active = profileForm.subjects.includes(subject);
-                  return (
-                    <button
-                      type="button"
-                      key={subject}
-                      className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                        active
-                          ? 'bg-emerald-500 text-white shadow-sm'
-                          : 'bg-white text-brand-800 ring-1 ring-brand-200 hover:bg-brand-50'
-                      }`}
-                      onClick={() =>
-                        setProfileForm((prev) => ({
-                          ...prev,
-                          subjects: active
-                            ? prev.subjects.filter((item) => item !== subject)
-                            : [...prev.subjects, subject]
-                        }))
-                      }
-                    >
-                      {subject}
-                    </button>
-                  );
-                })}
+            <div className="mt-4 flex items-center justify-between text-xs text-brand-600">
+              <span>Étape {profileStep} / 3</span>
+              <div className="flex gap-2">
+                {[1, 2, 3].map((step) => (
+                  <span
+                    key={step}
+                    className={`h-2 w-10 rounded-full ${profileStep >= step ? 'bg-brand-600' : 'bg-brand-200'}`}
+                  />
+                ))}
               </div>
             </div>
 
-            <div className="mt-4">
-              <p className="text-sm font-semibold text-brand-900">Classes / niveaux</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {LEVEL_OPTIONS.map((level) => {
-                  const active = profileForm.levels.includes(level);
-                  return (
-                    <button
-                      type="button"
-                      key={level}
-                      className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                        active
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'bg-white text-brand-800 ring-1 ring-brand-200 hover:bg-brand-50'
-                      }`}
-                      onClick={() =>
-                        setProfileForm((prev) => ({
-                          ...prev,
-                          levels: active
-                            ? prev.levels.filter((item) => item !== level)
-                            : [...prev.levels, level]
-                        }))
-                      }
-                    >
-                      {level}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="mt-2 text-xs text-brand-600">Clique pour sélectionner plusieurs matières et niveaux.</p>
-            </div>
-
-            <textarea
-              className="input mt-3 min-h-[110px]"
-              name="availability"
-              placeholder="Disponibilités (ex: Lundi 8h-12h, Mercredi 14h-18h)"
-              value={profileForm.availability}
-              onChange={onProfileChange}
-            />
-            <textarea
-              className="input mt-3 min-h-[140px]"
-              name="bio"
-              placeholder="Bio (30 caractères minimum)"
-              value={profileForm.bio}
-              onChange={onProfileChange}
-            />
-
-            <label className="mt-3 flex items-center gap-2 text-sm text-brand-700">
-              <input type="checkbox" name="isTutor" checked={profileForm.isTutor} onChange={onProfileChange} />
-              Activer mon profil en tant que tuteur
-            </label>
-
-            <div className="mt-4 flex items-center justify-end gap-2">
-              {!needsProfile ? (
-                <button type="button" className="btn-secondary" onClick={() => setShowProfileModal(false)}>
-                  Annuler
-                </button>
+            <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2">
+              {profileStep === 1 ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                  <input
+                    className="input"
+                    name="profilePhoto"
+                    placeholder="Photo de profil (URL)"
+                    value={profileForm.profilePhoto}
+                    onChange={onProfileChange}
+                  />
+                  <input
+                    className="input"
+                    type="number"
+                    min="0"
+                    max="60"
+                    name="experienceYears"
+                    placeholder="Années d'expérience"
+                    value={profileForm.experienceYears}
+                    onChange={onProfileChange}
+                  />
+                </div>
               ) : null}
-              <button type="button" className="btn-primary" disabled={profileSaving} onClick={submitProfile}>
-                {profileSaving ? 'Enregistrement...' : 'Enregistrer'}
+
+              {profileStep === 2 ? (
+                <>
+                  <div>
+                    <p className="text-sm font-semibold text-brand-900">Matières enseignées</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {SUBJECT_OPTIONS.map((subject) => {
+                        const active = profileForm.subjects.includes(subject);
+                        return (
+                          <button
+                            type="button"
+                            key={subject}
+                            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                              active
+                                ? 'bg-emerald-500 text-white shadow-sm'
+                                : 'bg-white text-brand-800 ring-1 ring-brand-200 hover:bg-brand-50'
+                            }`}
+                            onClick={() =>
+                              setProfileForm((prev) => ({
+                                ...prev,
+                                subjects: active
+                                  ? prev.subjects.filter((item) => item !== subject)
+                                  : [...prev.subjects, subject]
+                              }))
+                            }
+                          >
+                            {subject}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <p className="text-sm font-semibold text-brand-900">Classes / niveaux</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {LEVEL_OPTIONS.map((level) => {
+                        const active = profileForm.levels.includes(level);
+                        return (
+                          <button
+                            type="button"
+                            key={level}
+                            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                              active
+                                ? 'bg-blue-600 text-white shadow-sm'
+                                : 'bg-white text-brand-800 ring-1 ring-brand-200 hover:bg-brand-50'
+                            }`}
+                            onClick={() =>
+                              setProfileForm((prev) => ({
+                                ...prev,
+                                levels: active
+                                  ? prev.levels.filter((item) => item !== level)
+                                  : [...prev.levels, level]
+                              }))
+                            }
+                          >
+                            {level}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-2 text-xs text-brand-600">Clique pour sélectionner plusieurs matières et niveaux.</p>
+                  </div>
+                </>
+              ) : null}
+
+              {profileStep === 3 ? (
+                <>
+                  <textarea
+                    className="input min-h-[110px]"
+                    name="availability"
+                    placeholder="Disponibilités (ex: Lundi 8h-12h, Mercredi 14h-18h)"
+                    value={profileForm.availability}
+                    onChange={onProfileChange}
+                  />
+                  <textarea
+                    className="input mt-3 min-h-[140px]"
+                    name="bio"
+                    placeholder="Bio (30 caractères minimum)"
+                    value={profileForm.bio}
+                    onChange={onProfileChange}
+                  />
+                  <label className="mt-3 flex items-center gap-2 text-sm text-brand-700">
+                    <input type="checkbox" name="isTutor" checked={profileForm.isTutor} onChange={onProfileChange} />
+                    Activer mon profil en tant que tuteur
+                  </label>
+                </>
+              ) : null}
+            </div>
+
+            <div className="mt-4 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                className="btn-secondary"
+                disabled={profileStep === 1}
+                onClick={() => setProfileStep((s) => Math.max(1, s - 1))}
+              >
+                Précédent
               </button>
+              <div className="flex items-center gap-2">
+                {!needsProfile ? (
+                  <button type="button" className="btn-secondary" onClick={() => setShowProfileModal(false)}>
+                    Annuler
+                  </button>
+                ) : null}
+                {profileStep < 3 ? (
+                  <button type="button" className="btn-primary" onClick={() => setProfileStep((s) => Math.min(3, s + 1))}>
+                    Suivant
+                  </button>
+                ) : (
+                  <button type="button" className="btn-primary" disabled={profileSaving} onClick={submitProfile}>
+                    {profileSaving ? 'Enregistrement...' : 'Enregistrer'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
