@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getStudent, getToken } from '@/lib/auth';
 
@@ -24,10 +24,12 @@ function compactNumber(value) {
 
 export default function TeacherDashboardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const token = useMemo(() => getToken(), []);
   const student = useMemo(() => getStudent(), []);
   const isTeacher = student?.role === 'TEACHER';
   const isAdmin = student?.role === 'ADMIN';
+  const shouldOpenProfile = searchParams?.get('profile') === '1';
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -125,6 +127,13 @@ export default function TeacherDashboardPage() {
       setShowProfileModal(true);
     }
   }, [needsProfile]);
+
+  useEffect(() => {
+    if (shouldOpenProfile) {
+      setProfileStep(1);
+      setShowProfileModal(true);
+    }
+  }, [shouldOpenProfile]);
 
   const onSelectPhoto = (event) => {
     const file = event.target.files?.[0];

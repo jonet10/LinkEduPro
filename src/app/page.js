@@ -737,7 +737,7 @@ export default function HomePage() {
                 }`}>
                   {teacherProfile?.isProfileComplete ? 'Profil validé' : 'Profil à compléter'}
                 </span>
-                <Link href="/teacher/dashboard" className="btn-primary">
+                <Link href="/teacher/dashboard?profile=1" className="btn-primary">
                   Mettre à jour
                 </Link>
               </div>
