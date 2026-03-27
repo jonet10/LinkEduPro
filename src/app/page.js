@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { getToken, getStudent, isNsivStudent } from '@/lib/auth';
 import { resolveMediaUrl } from '@/lib/media';
@@ -296,6 +297,7 @@ function LearningShowcaseSection({ section }) {
 }
 
 export default function HomePage() {
+  const router = useRouter();
   const [ready, setReady] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
   const [student, setStudent] = useState(null);
@@ -334,6 +336,13 @@ export default function HomePage() {
   const isStudentRole = student?.role === 'STUDENT';
   const isAdminRole = student?.role === 'ADMIN';
   const isTeacherRole = student?.role === 'TEACHER';
+
+  const openTutorProfile = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('openTutorProfile', '1');
+    }
+    router.push('/teacher/dashboard?profile=1');
+  };
 
   const quizProgressPercent = useMemo(() => {
     const preferred = Number(progress?.overview?.averageScore || 0);
@@ -737,9 +746,9 @@ export default function HomePage() {
                 }`}>
                   {teacherProfile?.isProfileComplete ? 'Profil validé' : 'Profil à compléter'}
                 </span>
-                <Link href="/teacher/dashboard?profile=1" className="btn-primary">
+                <button type="button" className="btn-primary" onClick={openTutorProfile}>
                   Mettre à jour
-                </Link>
+                </button>
               </div>
             </div>
           ) : null}

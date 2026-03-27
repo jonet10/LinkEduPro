@@ -128,6 +128,13 @@ export default function TeacherDashboardPage() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    const stored = window.localStorage.getItem('openTutorProfile');
+    if (stored === '1') {
+      window.localStorage.removeItem('openTutorProfile');
+      setProfileStep(1);
+      setShowProfileModal(true);
+      return;
+    }
     const params = new URLSearchParams(window.location.search || '');
     const shouldOpen = params.get('profile') === '1';
     if (shouldOpen) {
