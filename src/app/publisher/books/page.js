@@ -14,6 +14,8 @@ export default function PublisherBooksPage() {
     author: '',
     subject: '',
     level: '',
+    subjectOther: '',
+    levelOther: '',
     description: '',
     isPaid: false,
     price: ''
@@ -36,6 +38,30 @@ export default function PublisherBooksPage() {
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
+  const SUBJECT_OPTIONS = [
+    'Littérature',
+    'Roman',
+    'Recueil',
+    'Poésie',
+    'Histoire',
+    'Philosophie',
+    'Français',
+    'Sciences',
+    'Mathématiques',
+    'Économie',
+    'Religieux',
+    'Autre'
+  ];
+
+  const LEVEL_OPTIONS = [
+    'Tout public',
+    'Primaire',
+    'Secondaire',
+    'Universitaire',
+    'Professionnel',
+    'Autre'
+  ];
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -44,10 +70,29 @@ export default function PublisherBooksPage() {
       setError('PDF obligatoire.');
       return;
     }
+    if (form.subject === 'Autre' && !form.subjectOther.trim()) {
+      setError('Veuillez préciser la catégorie.');
+      return;
+    }
+    if (form.level === 'Autre' && !form.levelOther.trim()) {
+      setError('Veuillez préciser le niveau.');
+      return;
+    }
     try {
       setLoading(true);
       const body = new FormData();
-      Object.entries(form).forEach(([key, value]) => {
+      const resolvedSubject = form.subject === 'Autre' ? form.subjectOther : form.subject;
+      const resolvedLevel = form.level === 'Autre' ? form.levelOther : form.level;
+      const payload = {
+        title: form.title,
+        author: form.author,
+        subject: resolvedSubject,
+        level: resolvedLevel,
+        description: form.description,
+        isPaid: form.isPaid,
+        price: form.price
+      };
+      Object.entries(payload).forEach(([key, value]) => {
         if (value !== undefined && value !== null) body.append(key, value);
       });
       body.append('file', file);
@@ -70,6 +115,8 @@ export default function PublisherBooksPage() {
         author: '',
         subject: '',
         level: '',
+        subjectOther: '',
+        levelOther: '',
         description: '',
         isPaid: false,
         price: ''
@@ -103,8 +150,24 @@ export default function PublisherBooksPage() {
         {success ? <p className="text-sm text-emerald-600">{success}</p> : null}
         <input className="input" name="title" placeholder="Titre" value={form.title} onChange={onChange} required />
         <input className="input" name="author" placeholder="Auteur" value={form.author} onChange={onChange} />
-        <input className="input" name="subject" placeholder="Matière" value={form.subject} onChange={onChange} required />
-        <input className="input" name="level" placeholder="Niveau" value={form.level} onChange={onChange} required />
+        <select className="input" name="subject" value={form.subject} onChange={onChange} required>
+          <option value="">Choisir une catégorie</option>
+          {SUBJECT_OPTIONS.map((option) => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
+        {form.subject === 'Autre' ? (
+          <input className="input" name="subjectOther" placeholder="Préciser la catégorie" value={form.subjectOther} onChange={onChange} />
+        ) : null}
+        <select className="input" name="level" value={form.level} onChange={onChange} required>
+          <option value="">Choisir le niveau</option>
+          {LEVEL_OPTIONS.map((option) => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
+        {form.level === 'Autre' ? (
+          <input className="input" name="levelOther" placeholder="Préciser le niveau" value={form.levelOther} onChange={onChange} />
+        ) : null}
         <textarea className="input min-h-[120px]" name="description" placeholder="Description" value={form.description} onChange={onChange} />
         <label className="flex items-center gap-2 text-sm text-brand-700">
           <input type="checkbox" name="isPaid" checked={form.isPaid} onChange={onChange} />
