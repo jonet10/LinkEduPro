@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getStudent, getToken, normalizeAcademicLevel } from '@/lib/auth';
 import { apiClient } from '@/lib/api';
+import { getApiBaseUrl } from '@/lib/runtime-config';
 
 const CLASS_OPTIONS = [
   { value: '9e', label: '9e AF' },
@@ -135,6 +136,15 @@ function formatHtg(value) {
   }).format(amount);
 }
 
+function formatFileSize(bytes) {
+  const size = Number(bytes || 0);
+  if (!size || size < 1024) return `${size || 0} o`;
+  const kb = size / 1024;
+  if (kb < 1024) return `${kb.toFixed(1)} Ko`;
+  const mb = kb / 1024;
+  return `${mb.toFixed(1)} Mo`;
+}
+
 function getVideoPlayerConfig(rawUrl) {
   const url = String(rawUrl || '').trim();
   if (!url) return { type: 'none', src: '' };
@@ -147,22 +157,22 @@ function getVideoPlayerConfig(rawUrl) {
 
     if (host.includes('youtube.com')) {
       const id = parsed.searchParams.get('v');
-      if (id) return { type: 'iframe', src: `https://www.youtube.com/embed/${id}` };
+      if (id) return { type: 'iframe', src: `https://www.youtube.com/embed/${id}?enablejsapi=1&rel=0` };
       const shortPath = parsed.pathname.split('/').filter(Boolean);
       if (shortPath[0] === 'shorts' && shortPath[1]) {
-        return { type: 'iframe', src: `https://www.youtube.com/embed/${shortPath[1]}` };
+        return { type: 'iframe', src: `https://www.youtube.com/embed/${shortPath[1]}?enablejsapi=1&rel=0` };
       }
     }
 
     if (host.includes('youtu.be')) {
       const id = parsed.pathname.split('/').filter(Boolean)[0];
-      if (id) return { type: 'iframe', src: `https://www.youtube.com/embed/${id}` };
+      if (id) return { type: 'iframe', src: `https://www.youtube.com/embed/${id}?enablejsapi=1&rel=0` };
     }
 
     if (host.includes('vimeo.com')) {
       const id = parsed.pathname.split('/').filter(Boolean)[0];
       if (id && /^\d+$/.test(id)) {
-        return { type: 'iframe', src: `https://player.vimeo.com/video/${id}` };
+        return { type: 'iframe', src: `https://player.vimeo.com/video/${id}?api=1` };
       }
     }
   } catch (_) {
@@ -216,6 +226,64 @@ function getVideoThumbnail(rawUrl) {
   return '';
 }
 
+function getIframeProvider(rawUrl) {
+  try {
+    const parsed = new URL(String(rawUrl || '').trim());
+    const host = parsed.hostname.toLowerCase();
+    if (host.includes('youtube.com') || host.includes('youtu.be')) return 'youtube';
+    if (host.includes('vimeo.com')) return 'vimeo';
+  } catch (_) {
+  }
+  return null;
+}
+
+let youtubeApiPromise = null;
+function loadYoutubeApi() {
+  if (youtubeApiPromise) return youtubeApiPromise;
+  youtubeApiPromise = new Promise((resolve, reject) => {
+    if (typeof window === 'undefined') return resolve(null);
+    if (window.YT && window.YT.Player) return resolve(window.YT);
+    const existing = document.querySelector('script[data-yt-iframe]');
+    if (existing) {
+      window.onYouTubeIframeAPIReady = () => resolve(window.YT);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://www.youtube.com/iframe_api';
+    script.async = true;
+    script.setAttribute('data-yt-iframe', '1');
+    script.onload = () => {
+      if (window.YT && window.YT.Player) resolve(window.YT);
+    };
+    script.onerror = reject;
+    window.onYouTubeIframeAPIReady = () => resolve(window.YT);
+    document.body.appendChild(script);
+  });
+  return youtubeApiPromise;
+}
+
+let vimeoApiPromise = null;
+function loadVimeoApi() {
+  if (vimeoApiPromise) return vimeoApiPromise;
+  vimeoApiPromise = new Promise((resolve, reject) => {
+    if (typeof window === 'undefined') return resolve(null);
+    if (window.Vimeo && window.Vimeo.Player) return resolve(window.Vimeo);
+    const existing = document.querySelector('script[data-vimeo-player]');
+    if (existing) {
+      existing.addEventListener('load', () => resolve(window.Vimeo));
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://player.vimeo.com/api/player.js';
+    script.async = true;
+    script.setAttribute('data-vimeo-player', '1');
+    script.onload = () => resolve(window.Vimeo);
+    script.onerror = reject;
+    document.body.appendChild(script);
+  });
+  return vimeoApiPromise;
+}
+
 export default function VideoLessonsPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
@@ -226,6 +294,15 @@ export default function VideoLessonsPage() {
   const [activeVideo, setActiveVideo] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [activeTab, setActiveTab] = useState('RESOURCES');
+  const [resources, setResources] = useState([]);
+  const [resourcesLoading, setResourcesLoading] = useState(false);
+  const [resourcesError, setResourcesError] = useState('');
+  const [uploadingResource, setUploadingResource] = useState(false);
+  const [pendingResources, setPendingResources] = useState([]);
+  const [pendingResourceError, setPendingResourceError] = useState('');
+  const [certStatus, setCertStatus] = useState(null);
+  const [certLoading, setCertLoading] = useState(false);
   const [filter, setFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [classFilter, setClassFilter] = useState('ALL');
@@ -245,6 +322,9 @@ export default function VideoLessonsPage() {
     levels: ['Terminale'],
     publishNow: false
   });
+  const lastProgressSentRef = useRef(0);
+  const iframeRef = useRef(null);
+  const iframeTrackingRef = useRef({ intervalId: null, player: null, type: null });
 
   useEffect(() => {
     const currentToken = getToken();
@@ -310,10 +390,292 @@ export default function VideoLessonsPage() {
     }
   }
 
+  async function loadResources(targetVideo = activeVideo) {
+    if (!token || !targetVideo?.id) return;
+    try {
+      setResourcesLoading(true);
+      setResourcesError('');
+      const data = await apiClient(`/v2/contents/${targetVideo.id}/resources`, { token });
+      setResources(Array.isArray(data.resources) ? data.resources : []);
+    } catch (e) {
+      setResourcesError(e.message || 'Impossible de charger les ressources.');
+      setResources([]);
+    } finally {
+      setResourcesLoading(false);
+    }
+  }
+
+  async function loadCertificationStatus(targetVideo = activeVideo) {
+    if (!token || !targetVideo?.id || student?.role !== 'STUDENT') return;
+    try {
+      setCertLoading(true);
+      const data = await apiClient(`/v2/contents/${targetVideo.id}/certification-status`, { token });
+      setCertStatus(data);
+    } catch (e) {
+      setCertStatus(null);
+    } finally {
+      setCertLoading(false);
+    }
+  }
+
+  async function uploadResource(file) {
+    if (!file || !token || !activeVideo?.id) return;
+    try {
+      setUploadingResource(true);
+      setResourcesError('');
+      const formData = new FormData();
+      formData.append('file', file);
+      const data = await apiClient(`/v2/contents/${activeVideo.id}/resources`, {
+        method: 'POST',
+        token,
+        body: formData
+      });
+      if (data?.resource) {
+        setResources((prev) => [data.resource, ...prev]);
+      } else {
+        await loadResources(activeVideo);
+      }
+    } catch (e) {
+      setResourcesError(e.message || 'Upload impossible.');
+    } finally {
+      setUploadingResource(false);
+    }
+  }
+
+  function addPendingResources(fileList) {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+    const allowed = files.filter((file) => /\.(pdf|docx?)$/i.test(file.name));
+    if (!allowed.length) {
+      setPendingResourceError('Seuls les fichiers PDF, DOC, DOCX sont acceptés.');
+      return;
+    }
+    setPendingResourceError('');
+    setPendingResources((prev) => [...prev, ...allowed]);
+  }
+
+  function removePendingResource(index) {
+    setPendingResources((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  async function uploadResourcesForContent(contentId, files) {
+    if (!files.length || !token || !contentId) return;
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+      await apiClient(`/v2/contents/${contentId}/resources`, {
+        method: 'POST',
+        token,
+        body: formData
+      });
+    }
+  }
+
+  async function downloadResource(resource) {
+    if (!resource?.id || !token || !activeVideo?.id) return;
+    try {
+      const apiBaseUrl = getApiBaseUrl();
+      const res = await fetch(`${apiBaseUrl}/v2/contents/${activeVideo.id}/resources/${resource.id}/download`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        throw new Error('Téléchargement impossible.');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = resource.fileName || `ressource-${resource.id}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      if (student?.role === 'STUDENT') {
+        await loadCertificationStatus(activeVideo);
+      }
+    } catch (e) {
+      setResourcesError(e.message || 'Téléchargement impossible.');
+    }
+  }
+
+  async function downloadCertificate() {
+    if (!token || !activeVideo?.id) return;
+    try {
+      const apiBaseUrl = getApiBaseUrl();
+      const res = await fetch(`${apiBaseUrl}/v2/contents/${activeVideo.id}/certificate`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        throw new Error('Téléchargement du certificat impossible.');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `certificat-${activeVideo.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      setResourcesError(e.message || 'Téléchargement du certificat impossible.');
+    }
+  }
+
+  async function deleteResource(resource) {
+    if (!resource?.id || !token || !activeVideo?.id) return;
+    const confirmed = typeof window !== 'undefined'
+      ? window.confirm('Supprimer cette ressource ?')
+      : false;
+    if (!confirmed) return;
+    try {
+      await apiClient(`/v2/contents/${activeVideo.id}/resources/${resource.id}`, {
+        method: 'DELETE',
+        token
+      });
+      setResources((prev) => prev.filter((item) => item.id !== resource.id));
+    } catch (e) {
+      setResourcesError(e.message || 'Suppression impossible.');
+    }
+  }
+
+  async function sendProgressUpdate(percent, watchedSeconds, durationSeconds) {
+    if (!token || !activeVideo?.id || student?.role !== 'STUDENT') return;
+    try {
+      await apiClient(`/v2/contents/${activeVideo.id}/progress`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({
+          progressPercent: percent,
+          watchedSeconds,
+          durationSeconds
+        })
+      });
+      await loadCertificationStatus(activeVideo);
+    } catch (_) {
+    }
+  }
+
+  function clearIframeTracking() {
+    if (iframeTrackingRef.current.intervalId) {
+      clearInterval(iframeTrackingRef.current.intervalId);
+    }
+    iframeTrackingRef.current = { intervalId: null, player: null, type: null };
+  }
+
+  async function setupIframeTracking() {
+    clearIframeTracking();
+    if (!iframeRef.current || !activeVideo?.videoUrl || student?.role !== 'STUDENT') return;
+    const provider = getIframeProvider(activeVideo.videoUrl);
+    if (!provider) return;
+
+    if (provider === 'youtube') {
+      try {
+        const YT = await loadYoutubeApi();
+        if (!YT || !YT.Player) return;
+        const player = new YT.Player(iframeRef.current, {
+          events: {
+            onStateChange: (event) => {
+              if (event.data === YT.PlayerState.PLAYING) {
+                if (iframeTrackingRef.current.intervalId) return;
+                iframeTrackingRef.current.intervalId = setInterval(() => {
+                  const duration = player.getDuration?.() || 0;
+                  const currentTime = player.getCurrentTime?.() || 0;
+                  if (!duration) return;
+                  const percent = Math.min(100, Math.round((currentTime / duration) * 100));
+                  if (percent - lastProgressSentRef.current >= 5 || percent === 100) {
+                    lastProgressSentRef.current = percent;
+                    sendProgressUpdate(percent, Math.round(currentTime), Math.round(duration));
+                  }
+                }, 4000);
+              }
+              if (event.data === YT.PlayerState.ENDED) {
+                clearIframeTracking();
+                lastProgressSentRef.current = 100;
+                sendProgressUpdate(100, null, null);
+              }
+              if (event.data === YT.PlayerState.PAUSED) {
+                if (iframeTrackingRef.current.intervalId) {
+                  clearInterval(iframeTrackingRef.current.intervalId);
+                  iframeTrackingRef.current.intervalId = null;
+                }
+              }
+            }
+          }
+        });
+        iframeTrackingRef.current.player = player;
+        iframeTrackingRef.current.type = 'youtube';
+      } catch (_) {
+      }
+    }
+
+    if (provider === 'vimeo') {
+      try {
+        const Vimeo = await loadVimeoApi();
+        if (!Vimeo || !Vimeo.Player) return;
+        const player = new Vimeo.Player(iframeRef.current);
+        player.on('timeupdate', (data) => {
+          const percent = Math.min(100, Math.round((data.percent || 0) * 100));
+          if (percent - lastProgressSentRef.current >= 5 || percent === 100) {
+            lastProgressSentRef.current = percent;
+            sendProgressUpdate(percent, Math.round(data.seconds || 0), Math.round(data.duration || 0));
+          }
+        });
+        player.on('ended', () => {
+          lastProgressSentRef.current = 100;
+          sendProgressUpdate(100, null, null);
+        });
+        iframeTrackingRef.current.player = player;
+        iframeTrackingRef.current.type = 'vimeo';
+      } catch (_) {
+      }
+    }
+  }
+
+  function handleVideoTimeUpdate(event) {
+    const video = event?.currentTarget;
+    if (!video || !video.duration) return;
+    const percent = Math.min(100, Math.round((video.currentTime / video.duration) * 100));
+    if (percent - lastProgressSentRef.current >= 5 || percent === 100) {
+      lastProgressSentRef.current = percent;
+      sendProgressUpdate(percent, Math.round(video.currentTime), Math.round(video.duration));
+    }
+  }
+
+  function handleVideoEnded(event) {
+    const video = event?.currentTarget;
+    if (!video) return;
+    lastProgressSentRef.current = 100;
+    sendProgressUpdate(100, Math.round(video.duration || 0), Math.round(video.duration || 0));
+  }
+
   useEffect(() => {
     if (!ready) return;
     loadVideos(token, student);
   }, [ready, token, student]);
+
+  useEffect(() => {
+    if (!activeVideo?.id || !token) return;
+    setActiveTab('RESOURCES');
+    lastProgressSentRef.current = 0;
+    loadResources(activeVideo);
+    loadCertificationStatus(activeVideo);
+    if (getVideoPlayerConfig(activeVideo.videoUrl).type === 'iframe') {
+      setupIframeTracking();
+    } else {
+      clearIframeTracking();
+    }
+    return () => {
+      clearIframeTracking();
+    };
+  }, [activeVideo?.id, token, student?.role]);
+
+  useEffect(() => {
+    if (activeVideo) return;
+    setResources([]);
+    setCertStatus(null);
+    setResourcesError('');
+  }, [activeVideo]);
 
   const filteredVideos = useMemo(() => {
     let next = videos;
@@ -441,6 +803,7 @@ export default function VideoLessonsPage() {
         setPublicationType('SINGLE');
         setSeriesLessons([createEmptyLesson(0)]);
         setShowComposer(false);
+        setPendingResources([]);
         setSuccess('Vidéo modifiée avec succès.');
         setSubmitting(false);
         return;
@@ -482,6 +845,9 @@ export default function VideoLessonsPage() {
       const createdVideos = createdResponses
         .map((response) => mapContentToVideo(response.content))
         .filter((item) => item?.id);
+      if (publicationType === 'SINGLE' && pendingResources.length && createdVideos.length === 1) {
+        await uploadResourcesForContent(createdVideos[0].id, pendingResources);
+      }
       setVideos((prev) => [...createdVideos, ...prev]);
       setForm((prev) => ({
         ...prev,
@@ -493,6 +859,7 @@ export default function VideoLessonsPage() {
         videoUrl: '',
         publishNow: false
       }));
+      setPendingResources([]);
       setPublicationType('SINGLE');
       setSeriesLessons([createEmptyLesson(0)]);
       setShowComposer(false);
@@ -519,6 +886,7 @@ export default function VideoLessonsPage() {
     setEditingId(item.id);
     setPublicationType('SINGLE');
     setSeriesLessons([createEmptyLesson(0)]);
+    setPendingResources([]);
     setForm((prev) => ({
       ...prev,
       title: item.title || '',
@@ -616,6 +984,7 @@ export default function VideoLessonsPage() {
                   onClick={() => {
                     setEditingId(null);
                     setShowComposer(false);
+                    setPendingResources([]);
                     setForm((prev) => ({
                       ...prev,
                       title: '',
@@ -720,17 +1089,56 @@ export default function VideoLessonsPage() {
             </label>
 
             {publicationType === 'SINGLE' ? (
-              <label className="space-y-1 md:col-span-2">
-                <span className="text-sm font-medium text-brand-900">Lien vidéo (YouTube, Vimeo, etc.)</span>
-                <input
-                  className="input w-full"
-                  type="url"
-                  value={form.videoUrl}
-                  onChange={(e) => onChangeField('videoUrl', e.target.value)}
-                  placeholder="https://..."
-                  required
-                />
-              </label>
+              <>
+                <label className="space-y-1 md:col-span-2">
+                  <span className="text-sm font-medium text-brand-900">Lien vidéo (YouTube, Vimeo, etc.)</span>
+                  <input
+                    className="input w-full"
+                    type="url"
+                    value={form.videoUrl}
+                    onChange={(e) => onChangeField('videoUrl', e.target.value)}
+                    placeholder="https://..."
+                    required
+                  />
+                </label>
+
+                <div
+                  className="md:col-span-2 rounded-xl border border-dashed border-brand-200 bg-brand-50/40 p-4 text-sm text-brand-700"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    addPendingResources(e.dataTransfer?.files);
+                  }}
+                >
+                  <p className="font-semibold text-brand-900">Ressources de la leçon (PDF, DOC, DOCX)</p>
+                  <p className="mt-1">Glisse tes documents ici ou sélectionne-les.</p>
+                  <input
+                    className="mt-3 block w-full text-sm"
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => addPendingResources(e.target.files)}
+                  />
+                  {pendingResourceError ? <p className="mt-2 text-xs text-red-600">{pendingResourceError}</p> : null}
+                  {pendingResources.length ? (
+                    <div className="mt-3 space-y-2">
+                      {pendingResources.map((file, index) => (
+                        <div key={`${file.name}-${index}`} className="flex items-center justify-between gap-2 rounded-lg border border-brand-100 bg-white px-3 py-2">
+                          <div>
+                            <p className="text-xs font-semibold text-brand-900">{file.name}</p>
+                            <p className="text-[11px] text-brand-600">{formatFileSize(file.size)}</p>
+                          </div>
+                          <button type="button" className="btn-secondary" onClick={() => removePendingResource(index)}>
+                            Retirer
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-xs text-brand-600">Les fichiers seront uploadés après publication.</p>
+                  )}
+                </div>
+              </>
             ) : (
               <div className="space-y-2 md:col-span-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -982,23 +1390,31 @@ export default function VideoLessonsPage() {
                 Fermer
               </button>
             </div>
-            <div className="p-4">
+            <div className="space-y-4 p-4">
               {activeVideo.videoUrl ? (() => {
                 const player = getVideoPlayerConfig(activeVideo.videoUrl);
                 if (player.type === 'file') {
                   return (
                     <div className="overflow-hidden rounded-xl border border-brand-100 bg-black">
-                      <video className="aspect-video w-full" controls preload="metadata" src={player.src} />
+                      <video
+                        className="aspect-video w-full"
+                        controls
+                        preload="metadata"
+                        src={player.src}
+                        onTimeUpdate={handleVideoTimeUpdate}
+                        onEnded={handleVideoEnded}
+                      />
                     </div>
                   );
                 }
                 if (player.type === 'iframe') {
                   return (
-                    <div className="overflow-hidden rounded-xl border border-brand-100 bg-black">
+                    <div className="overflow-hidden rounded-2xl border border-brand-100 bg-black shadow-lg">
                       <iframe
                         src={player.src}
                         title={activeVideo.title}
                         className="aspect-video w-full"
+                        ref={iframeRef}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                       />
@@ -1013,6 +1429,157 @@ export default function VideoLessonsPage() {
               })() : (
                 <p className="text-sm text-brand-700">Aucun lien vidéo fourni.</p>
               )}
+
+              {student?.role === 'STUDENT' && getVideoPlayerConfig(activeVideo.videoUrl).type !== 'file' ? (
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => sendProgressUpdate(100, null, null)}
+                >
+                  Marquer la vidéo comme terminée
+                </button>
+              ) : null}
+
+              <div className="rounded-xl border border-brand-100 bg-white">
+                <div className="flex flex-wrap items-center gap-2 border-b border-brand-100 px-4 py-3">
+                  <button
+                    type="button"
+                    className={activeTab === 'RESOURCES' ? 'btn-primary' : 'btn-secondary'}
+                    onClick={() => setActiveTab('RESOURCES')}
+                  >
+                    Ressources
+                  </button>
+                  <button
+                    type="button"
+                    className={activeTab === 'CERTIFICATION' ? 'btn-primary' : 'btn-secondary'}
+                    onClick={() => setActiveTab('CERTIFICATION')}
+                  >
+                    Certification
+                  </button>
+                </div>
+
+                <div className="space-y-3 p-4">
+                  {activeTab === 'RESOURCES' ? (
+                    <>
+                      {canManage ? (
+                        <div
+                          className="rounded-xl border border-dashed border-brand-200 bg-brand-50/40 p-4 text-sm text-brand-700"
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            const file = e.dataTransfer?.files?.[0];
+                            if (file) uploadResource(file);
+                          }}
+                        >
+                          <p className="font-semibold text-brand-900">Ajouter des ressources (PDF, DOC, DOCX)</p>
+                          <p className="mt-1">Glisse un fichier ici ou clique pour sélectionner.</p>
+                          <input
+                            className="mt-3 block w-full text-sm"
+                            type="file"
+                            accept=".pdf,.doc,.docx"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) uploadResource(file);
+                            }}
+                            disabled={uploadingResource}
+                          />
+                          {uploadingResource ? <p className="mt-2 text-xs text-brand-700">Upload en cours...</p> : null}
+                        </div>
+                      ) : null}
+
+                      {resourcesError ? <p className="text-sm text-red-600">{resourcesError}</p> : null}
+                      {resourcesLoading ? <p className="text-sm text-brand-700">Chargement des ressources...</p> : null}
+
+                      {!resourcesLoading && resources.length === 0 ? (
+                        <p className="text-sm text-brand-700">Aucune ressource liée à cette leçon.</p>
+                      ) : null}
+
+                      <div className="space-y-2">
+                        {resources.map((resource) => (
+                          <div key={resource.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-brand-100 bg-white p-3">
+                            <div>
+                              <p className="text-sm font-semibold text-brand-900">{resource.fileName || `Ressource #${resource.id}`}</p>
+                              <p className="text-xs text-brand-600">
+                                {String(resource.fileType || '').toUpperCase()} • {formatFileSize(resource.fileSize)}
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button
+                                type="button"
+                                className="btn-secondary"
+                                onClick={() => downloadResource(resource)}
+                              >
+                                Télécharger
+                              </button>
+                              {canManage ? (
+                                <button
+                                  type="button"
+                                  className="btn-secondary"
+                                  onClick={() => deleteResource(resource)}
+                                >
+                                  Supprimer
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
+
+                  {activeTab === 'CERTIFICATION' ? (
+                    <>
+                      {student?.role !== 'STUDENT' ? (
+                        <p className="text-sm text-brand-700">La certification est réservée aux élèves.</p>
+                      ) : certLoading ? (
+                        <p className="text-sm text-brand-700">Vérification des conditions...</p>
+                      ) : certStatus ? (
+                        <>
+                          <div className="rounded-lg bg-brand-50 p-3 text-sm text-brand-800">
+                            <p className="font-semibold">Progression vidéo: {certStatus.progressPercent || 0}%</p>
+                          </div>
+                          <ul className="space-y-2 text-sm">
+                            <li className="flex items-center justify-between">
+                              <span>Vidéo visionnée à 100%</span>
+                              <span className={certStatus.conditions?.videoWatched ? 'text-emerald-600 font-semibold' : 'text-amber-600 font-semibold'}>
+                                {certStatus.conditions?.videoWatched ? 'OK' : 'En attente'}
+                              </span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <span>Documents téléchargés</span>
+                              <span className={certStatus.conditions?.resourcesDownloaded ? 'text-emerald-600 font-semibold' : 'text-amber-600 font-semibold'}>
+                                {certStatus.conditions?.resourcesDownloaded ? 'OK' : 'En attente'}
+                              </span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <span>Quiz réussi (≥ 80%)</span>
+                              <span className={certStatus.conditions?.quizPassed ? 'text-emerald-600 font-semibold' : 'text-amber-600 font-semibold'}>
+                                {certStatus.conditions?.quizPassed ? 'OK' : 'En attente'}
+                              </span>
+                            </li>
+                          </ul>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <button type="button" className="btn-secondary" onClick={() => loadCertificationStatus(activeVideo)}>
+                              Actualiser
+                            </button>
+                            {certStatus.isCertified ? (
+                              <button
+                                type="button"
+                                className="btn-primary"
+                                onClick={downloadCertificate}
+                              >
+                                Télécharger le certificat
+                              </button>
+                            ) : null}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-sm text-brand-700">Impossible de charger le statut de certification.</p>
+                      )}
+                    </>
+                  ) : null}
+                </div>
+              </div>
             </div>
           </div>
         </div>

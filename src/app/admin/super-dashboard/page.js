@@ -425,6 +425,35 @@ export default function SuperDashboardPage() {
       ) : null}
 
       <section className="card space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-semibold text-brand-900">Formations certifiantes</h2>
+            <p className="mt-1 text-sm text-brand-700">
+              Pilote le nouveau parcours Classe Numérique: vidéos + ressources + quiz + certificat.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <a className="btn-primary" href="/video-lessons">Gérer les vidéos</a>
+            <a className="btn-secondary" href="/video-lessons">Voir l’expérience élève</a>
+          </div>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="rounded-xl border border-brand-100 bg-brand-50/50 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Contenu</p>
+            <p className="mt-1 text-sm text-brand-900">Ajoute les ressources (PDF/DOC) directement sous chaque leçon.</p>
+          </div>
+          <div className="rounded-xl border border-brand-100 bg-brand-50/50 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Certification</p>
+            <p className="mt-1 text-sm text-brand-900">Validation automatique: 100% vidéo, ressources téléchargées, quiz ≥ 80%.</p>
+          </div>
+          <div className="rounded-xl border border-brand-100 bg-brand-50/50 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Certificat</p>
+            <p className="mt-1 text-sm text-brand-900">PDF dynamique avec nom élève, formation et date.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="card space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xl font-semibold">Documents IA (PDF)</h2>
           <div className="flex flex-wrap gap-2">
