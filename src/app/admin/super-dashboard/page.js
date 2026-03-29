@@ -38,6 +38,7 @@ export default function SuperDashboardPage() {
   const [email, setEmail] = useState('');
   const [expiresInHours, setExpiresInHours] = useState(72);
   const [inviteLink, setInviteLink] = useState('');
+  const [inviteRole, setInviteRole] = useState('TEACHER');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState([]);
@@ -289,10 +290,11 @@ export default function SuperDashboardPage() {
       const res = await apiClient('/community/admin/teacher-invitations', {
         method: 'POST',
         token,
-        body: JSON.stringify({ email, expiresInHours })
+        body: JSON.stringify({ email, expiresInHours, role: inviteRole })
       });
       setInviteLink(res.inviteLink || '');
       setEmail('');
+      setInviteRole('TEACHER');
       await load(token);
     } catch (e) {
       setError(e.message);
@@ -1307,9 +1309,13 @@ export default function SuperDashboardPage() {
       </section>
 
       <section className="card space-y-3">
-        <h2 className="text-xl font-semibold">Inviter un professeur</h2>
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-          <input className="input" placeholder="Email professeur" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <h2 className="text-xl font-semibold">Inviter un professeur / partenaire</h2>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+          <input className="input" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <select className="input" value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}>
+            <option value="TEACHER">Professeur</option>
+            <option value="PUBLISHER">Partenaire certifiant</option>
+          </select>
           <input className="input" type="number" min={1} max={168} value={expiresInHours} onChange={(e) => setExpiresInHours(Number(e.target.value || 72))} />
           <button className="btn-primary" onClick={createInvite}>Generer invitation</button>
         </div>
@@ -1411,13 +1417,14 @@ export default function SuperDashboardPage() {
           <table className="min-w-full text-sm">
             <thead>
               <tr className="text-left">
-                <th>Email</th><th>Expire</th><th>Utilisee</th>
+                <th>Email</th><th>Rôle</th><th>Expire</th><th>Utilisee</th>
               </tr>
             </thead>
             <tbody>
               {invites.slice(0, 20).map((i) => (
                 <tr key={i.id}>
                   <td>{i.email}</td>
+                  <td>{i.role === 'PUBLISHER' ? 'Partenaire' : 'Professeur'}</td>
                   <td>{new Date(i.expiresAt).toLocaleString()}</td>
                   <td>{i.used ? 'Oui' : 'Non'}</td>
                 </tr>

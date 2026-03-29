@@ -78,17 +78,21 @@ export default function InviteProfesseurPage() {
         body: JSON.stringify(payload)
       });
       setAuth(res.token, res.student);
-      setMessage('Compte professeur créé avec succès.');
+      const createdRole = res?.student?.role === 'PUBLISHER' ? 'Partenaire certifiant' : 'Professeur';
+      setMessage(`Compte ${createdRole} créé avec succès.`);
     } catch (e) {
       setError(e.message);
     }
   }
 
+  const roleLabel = info?.role === 'PUBLISHER' ? 'Partenaire certifiant' : 'Professeur';
+
   return (
     <main className="mx-auto max-w-2xl space-y-4 px-4 py-10">
       <section className="card space-y-3">
-        <h1 className="text-2xl font-semibold">Invitation Professeur</h1>
+        <h1 className="text-2xl font-semibold">Invitation {roleLabel}</h1>
         {info?.email ? <p>Email invité: <strong>{info.email}</strong></p> : null}
+        {info?.role ? <p className="text-sm text-brand-700">Rôle: <strong>{roleLabel}</strong></p> : null}
         {error ? <p className="text-red-600">{error}</p> : null}
         {message ? <p className="text-green-700">{message}</p> : null}
 
