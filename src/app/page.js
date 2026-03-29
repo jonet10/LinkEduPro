@@ -302,6 +302,8 @@ export default function HomePage() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [student, setStudent] = useState(null);
   const [community, setCommunity] = useState({ leaderboard: [], recent: [], schools: [] });
+  const [publisherProfile, setPublisherProfile] = useState(null);
+  const [publisherError, setPublisherError] = useState('');
   const [onlineStats, setOnlineStats] = useState({
     counts: { total: 0, students: 0, teachers: 0, admins: 0, others: 0 },
     latestSeenAt: null,
@@ -336,6 +338,7 @@ export default function HomePage() {
   const isStudentRole = student?.role === 'STUDENT';
   const isAdminRole = student?.role === 'ADMIN';
   const isTeacherRole = student?.role === 'TEACHER';
+  const isPublisherRole = student?.role === 'PUBLISHER';
 
   const openTutorProfile = () => {
     if (typeof window !== 'undefined') {
@@ -441,6 +444,29 @@ export default function HomePage() {
       mounted = false;
     };
   }, [isTeacherRole]);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token || !isPublisherRole) {
+      setPublisherProfile(null);
+      setPublisherError('');
+      return;
+    }
+    let mounted = true;
+    setPublisherError('');
+    apiClient('/publishers/me', { token })
+      .then((data) => {
+        if (!mounted) return;
+        setPublisherProfile(data?.publisher || null);
+      })
+      .catch((e) => {
+        if (!mounted) return;
+        setPublisherError(e.message || 'Impossible de charger le profil partenaire.');
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [isPublisherRole]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -611,6 +637,172 @@ export default function HomePage() {
         ))}
 
         <VerifiedTestimonials />
+      </section>
+    );
+  }
+
+  if (isPublisherRole) {
+    const publisherName = publisherProfile?.name || `${student?.firstName || ''} ${student?.lastName || ''}`.trim() || 'Partenaire';
+    const publisherType = publisherProfile?.type || 'PARTENAIRE';
+    const features = publisherProfile?.features || {};
+    const featureState = (value) => {
+      if (value === true) return 'enabled';
+      if (value === false) return 'disabled';
+      return 'unset';
+    };
+    const featureBadge = (state, label) => (
+      <span className={`partner-chip partner-chip-${state}`}>{label}</span>
+    );
+
+    return (
+      <section className="home-gold-shell authed-transparent-scope space-y-6">
+        {platformDonationFeedback ? <p className="text-sm text-brand-700">{platformDonationFeedback}</p> : null}
+        {publisherError ? <p className="rounded border border-red-300 bg-red-50 p-3 text-red-700">{publisherError}</p> : null}
+
+        <div className="partner-dash-shell">
+          <aside className="partner-dash-sidebar">
+            <div className="partner-dash-brand">
+              <div className="partner-avatar">{getUserInitials(student)}</div>
+              <div>
+                <p className="partner-brand-title">Espace Partenaire</p>
+                <p className="partner-brand-subtitle">{publisherName}</p>
+              </div>
+            </div>
+            <div className="partner-dash-menu">
+              <button className="partner-menu-item is-active" type="button">Tableau de bord</button>
+              <button className="partner-menu-item" type="button" onClick={() => router.push('/publisher/books')}>
+                Mes livres
+              </button>
+              <button className="partner-menu-item" type="button" onClick={() => router.push('/video-lessons')}>
+                Mes formations
+              </button>
+              <button className="partner-menu-item" type="button" onClick={() => router.push('/messages')}>
+                Mes annonces
+              </button>
+              <button className="partner-menu-item" type="button" onClick={() => router.push('/rattrapage')}>
+                Mes rendez-vous
+              </button>
+            </div>
+            <div className="partner-dash-meta">
+              <p className="partner-meta-label">Type partenaire</p>
+              <p className="partner-meta-value">{publisherType}</p>
+              <p className="partner-meta-label">Email</p>
+              <p className="partner-meta-value">{student?.email || '—'}</p>
+            </div>
+          </aside>
+
+          <div className="partner-dash-main">
+            <div className="partner-hero">
+              <div>
+                <p className="partner-hero-kicker">Bienvenue dans votre cockpit</p>
+                <h1 className="partner-hero-title">Gérez vos contenus certifiants et vos publications</h1>
+                <p className="partner-hero-subtitle">
+                  Activez vos modules, suivez les performances et planifiez vos conférences live.
+                </p>
+              </div>
+              <div className="partner-hero-actions">
+                <button className="btn-primary" type="button" onClick={() => router.push('/video-lessons')}>
+                  Publier une formation
+                </button>
+                <button className="btn-secondary" type="button" onClick={() => router.push('/publisher/books')}>
+                  Publier un livre
+                </button>
+              </div>
+            </div>
+
+            <div className="partner-kpi-grid">
+              <article className="partner-kpi-card">
+                <div>
+                  <p className="partner-kpi-label">Mes livres</p>
+                  <p className="partner-kpi-value">—</p>
+                  <p className="partner-kpi-meta">Catalogue & ventes</p>
+                </div>
+                {featureBadge(featureState(features.canPublishBooks), 'Livres')}
+              </article>
+              <article className="partner-kpi-card">
+                <div>
+                  <p className="partner-kpi-label">Mes formations</p>
+                  <p className="partner-kpi-value">—</p>
+                  <p className="partner-kpi-meta">Cours certifiants</p>
+                </div>
+                {featureBadge(featureState(features.canPublishCertifiedContent), 'Formations')}
+              </article>
+              <article className="partner-kpi-card">
+                <div>
+                  <p className="partner-kpi-label">Mes annonces</p>
+                  <p className="partner-kpi-value">—</p>
+                  <p className="partner-kpi-meta">Actualités partenaires</p>
+                </div>
+                {featureBadge(featureState(features.canPublishAnnouncements), 'Annonces')}
+              </article>
+              <article className="partner-kpi-card">
+                <div>
+                  <p className="partner-kpi-label">Rendez-vous live</p>
+                  <p className="partner-kpi-value">—</p>
+                  <p className="partner-kpi-meta">Webinaires & conférences</p>
+                </div>
+                {featureBadge(featureState(features.canHostLiveEvents), 'Live')}
+              </article>
+            </div>
+
+            <div className="partner-grid-2">
+              <section className="partner-panel">
+                <div className="partner-panel-head">
+                  <h3>Fonctionnalités activées</h3>
+                  <span className="partner-panel-chip">Paramétrées par le super admin</span>
+                </div>
+                <div className="partner-feature-list">
+                  <div className="partner-feature-row">
+                    <p>Publication de livres</p>
+                    {featureBadge(featureState(features.canPublishBooks), 'Livres')}
+                  </div>
+                  <div className="partner-feature-row">
+                    <p>Formations certifiantes</p>
+                    {featureBadge(featureState(features.canPublishCertifiedContent), 'Formations')}
+                  </div>
+                  <div className="partner-feature-row">
+                    <p>Annonces globales</p>
+                    {featureBadge(featureState(features.canPublishAnnouncements), 'Annonces')}
+                  </div>
+                  <div className="partner-feature-row">
+                    <p>Rendez-vous en direct</p>
+                    {featureBadge(featureState(features.canHostLiveEvents), 'Live')}
+                  </div>
+                  <div className="partner-feature-row">
+                    <p>Dashboard des ventes</p>
+                    {featureBadge(featureState(features.canViewSalesDashboard), 'Ventes')}
+                  </div>
+                </div>
+              </section>
+
+              <section className="partner-panel">
+                <div className="partner-panel-head">
+                  <h3>Actions rapides</h3>
+                  <span className="partner-panel-chip">Boostez votre visibilité</span>
+                </div>
+                <div className="partner-action-list">
+                  <button className="partner-action" type="button" onClick={() => router.push('/publisher/books')}>
+                    Publier un livre
+                  </button>
+                  <button className="partner-action" type="button" onClick={() => router.push('/video-lessons')}>
+                    Créer une formation certifiante
+                  </button>
+                  <button className="partner-action" type="button" onClick={() => router.push('/messages')}>
+                    Publier une annonce globale
+                  </button>
+                  <button className="partner-action" type="button" onClick={() => router.push('/rattrapage')}>
+                    Programmer un rendez-vous live
+                  </button>
+                </div>
+                <div className="partner-panel-foot">
+                  <p className="partner-panel-note">
+                    Certains modules peuvent être désactivés selon votre profil (auteur, institution, entreprise, organisation).
+                  </p>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
       </section>
     );
   }
