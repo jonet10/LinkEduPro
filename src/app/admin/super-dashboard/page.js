@@ -432,6 +432,25 @@ export default function SuperDashboardPage() {
       <section className="card space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
+            <h2 className="text-xl font-semibold text-brand-900">Partenaires certifiants</h2>
+            <p className="mt-1 text-sm text-brand-700">
+              Gère les partenaires (institutions, universités, entreprises, organisations, auteurs) et leurs fonctionnalités.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn-primary" type="button" onClick={() => router.push('/admin/publishers')}>
+              Voir tous les partenaires
+            </button>
+            <button className="btn-secondary" type="button" onClick={() => router.push('/admin/publishers')}>
+              Paramétrer les contenus
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="card space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
             <h2 className="text-xl font-semibold text-brand-900">Formations certifiantes</h2>
             <p className="mt-1 text-sm text-brand-700">
               Pilote le nouveau parcours Classe Numérique: vidéos + ressources + quiz + certificat.
