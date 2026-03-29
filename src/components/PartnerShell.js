@@ -78,6 +78,13 @@ export default function PartnerShell({ children }) {
               {item.label}
             </button>
           ))}
+          <button
+            className="partner-menu-item"
+            type="button"
+            onClick={() => router.push('/')}
+          >
+            Retour accueil
+          </button>
         </div>
         <div className="partner-dash-meta">
           <p className="partner-meta-label">Type partenaire</p>
