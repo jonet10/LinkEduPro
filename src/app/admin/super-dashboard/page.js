@@ -44,6 +44,8 @@ export default function SuperDashboardPage() {
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [userActionLoadingId, setUserActionLoadingId] = useState(null);
+  const [showStudents, setShowStudents] = useState(false);
+  const [showUsers, setShowUsers] = useState(false);
   const [userFilters, setUserFilters] = useState({
     q: '',
     role: ''
@@ -1045,7 +1047,20 @@ export default function SuperDashboardPage() {
       </section>
 
       <section className="card space-y-3">
-        <h2 className="text-xl font-semibold">Liste globale des Élèves (module Élèves)</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-semibold">Liste globale des Élèves (module Élèves)</h2>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setShowStudents((prev) => !prev)}
+          >
+            {showStudents ? 'Masquer' : 'Afficher'}
+          </button>
+        </div>
+        {!showStudents ? (
+          <p className="text-sm text-brand-700">Contenu masqué. Clique sur “Afficher” pour voir la liste.</p>
+        ) : (
+          <>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
           <select
             className="input"
@@ -1122,7 +1137,7 @@ export default function SuperDashboardPage() {
         {students.length === 0 ? (
           <p className="text-sm text-brand-700">Aucun élève trouvé.</p>
         ) : (
-          <div className="overflow-auto">
+          <div className="max-h-[55vh] overflow-auto rounded-lg border border-brand-100">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="text-left">
@@ -1151,10 +1166,25 @@ export default function SuperDashboardPage() {
             </table>
           </div>
         )}
+          </>
+        )}
       </section>
 
       <section className="card space-y-3">
-        <h2 className="text-xl font-semibold">Gestion utilisateurs (toutes catégories)</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-semibold">Gestion utilisateurs (toutes catégories)</h2>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setShowUsers((prev) => !prev)}
+          >
+            {showUsers ? 'Masquer' : 'Afficher'}
+          </button>
+        </div>
+        {!showUsers ? (
+          <p className="text-sm text-brand-700">Contenu masqué. Clique sur “Afficher” pour voir la liste.</p>
+        ) : (
+          <>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
           <input
             className="input"
@@ -1272,6 +1302,8 @@ export default function SuperDashboardPage() {
             </table>
           </div>
         ) : null}
+          </>
+        )}
       </section>
 
       <section className="card space-y-3">
