@@ -81,6 +81,7 @@ export default function SuperDashboardPage() {
   const [aiMessage, setAiMessage] = useState('');
   const [aiDocs, setAiDocs] = useState([]);
   const [aiDocsLoading, setAiDocsLoading] = useState(false);
+  const [showAiDocs, setShowAiDocs] = useState(false);
   const [aiLevel, setAiLevel] = useState('AF7');
   const [aiSubject, setAiSubject] = useState('Math');
   const [aiDocType, setAiDocType] = useState('COURSE');
@@ -665,12 +666,23 @@ export default function SuperDashboardPage() {
         <div className="rounded-lg border border-brand-100 p-3">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-sm font-semibold text-brand-900">PDF indexés</p>
-            <span className="text-xs text-brand-700">{aiDocs.length} fichier(s)</span>
+            <div className="flex items-center gap-2 text-xs text-brand-700">
+              <span>{aiDocs.length} fichier(s)</span>
+              <button
+                type="button"
+                className="btn-secondary !px-3 !py-1"
+                onClick={() => setShowAiDocs((prev) => !prev)}
+              >
+                {showAiDocs ? 'Masquer' : 'Afficher'}
+              </button>
+            </div>
           </div>
-          {aiDocs.length === 0 ? (
+          {!showAiDocs ? (
+            <p className="text-sm text-brand-700">Liste masquée pour garder le tableau de bord compact.</p>
+          ) : aiDocs.length === 0 ? (
             <p className="text-sm text-brand-700">Aucun document pour le moment.</p>
           ) : (
-            <ul className="space-y-2 text-sm">
+            <ul className="max-h-[380px] space-y-2 overflow-auto pr-1 text-sm">
               {aiDocs.map((file) => (
                 <li key={file.id} className="flex flex-wrap items-center justify-between gap-2">
                   <div className="text-brand-900">
