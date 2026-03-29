@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getToken, getStudent } from '@/lib/auth';
 import { getApiBaseUrl } from '@/lib/runtime-config';
+import { apiClient } from '@/lib/api';
 
 export default function PublisherBooksPage() {
   const token = getToken();
   const student = getStudent();
+  const [publisher, setPublisher] = useState(null);
   const [form, setForm] = useState({
     title: '',
     author: '',
@@ -21,6 +23,13 @@ export default function PublisherBooksPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    if (!token || student?.role !== 'PUBLISHER') return;
+    apiClient('/publishers/me', { token })
+      .then((data) => setPublisher(data?.publisher || null))
+      .catch(() => setPublisher(null));
+  }, [token, student?.role]);
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -76,6 +85,10 @@ export default function PublisherBooksPage() {
 
   if (!token || student?.role !== 'PUBLISHER') {
     return <p className="text-sm text-brand-700">Accès réservé aux éditeurs.</p>;
+  }
+
+  if (publisher?.features && publisher.features.canPublishBooks === false) {
+    return <p className="text-sm text-brand-700">L&apos;administration a désactivé la publication de livres pour ce compte.</p>;
   }
 
   return (
