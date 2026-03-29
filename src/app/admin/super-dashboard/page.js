@@ -85,6 +85,7 @@ export default function SuperDashboardPage() {
   const [aiDocs, setAiDocs] = useState([]);
   const [aiDocsLoading, setAiDocsLoading] = useState(false);
   const [showAiDocs, setShowAiDocs] = useState(false);
+  const [partnersCount, setPartnersCount] = useState(0);
   const [aiLevel, setAiLevel] = useState('AF7');
   const [aiSubject, setAiSubject] = useState('Math');
   const [aiDocType, setAiDocType] = useState('COURSE');
@@ -113,17 +114,19 @@ export default function SuperDashboardPage() {
     try {
       setError('');
       setLoading(true);
-      const [d, i, c, donationsPayload, withdrawalsPayload] = await Promise.all([
+      const [d, i, c, donationsPayload, withdrawalsPayload, partnersPayload] = await Promise.all([
         apiClient('/community/admin/super-dashboard', { token }),
         apiClient('/community/admin/teacher-invitations', { token }),
         apiClient('/community/admin/config', { token }),
         apiClient('/platform-donations/admin/all', { token }),
-        apiClient('/payouts/pending', { token })
+        apiClient('/payouts/pending', { token }),
+        apiClient('/publishers', { token })
       ]);
       setDashboard(d);
       setInvites(i.invitations || []);
       setPlatformDonations(Array.isArray(donationsPayload?.donations) ? donationsPayload.donations : []);
       setWithdrawalsPending(Array.isArray(withdrawalsPayload?.pending) ? withdrawalsPayload.pending : []);
+      setPartnersCount(Array.isArray(partnersPayload?.items) ? partnersPayload.items.length : 0);
       if (c?.config) {
         setCommunityConfig(c.config);
         setTiktokEditors(Array.isArray(c.config.tiktokCreators) ? c.config.tiktokCreators : []);
@@ -416,10 +419,11 @@ export default function SuperDashboardPage() {
       {aiMessage ? <p className="rounded border border-brand-200 bg-brand-50 p-3 text-brand-800">{aiMessage}</p> : null}
 
       {dashboard?.analytics ? (
-        <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <section className="grid grid-cols-2 gap-4 md:grid-cols-5">
           <div className="card"><p className="text-sm">Écoles</p><p className="text-2xl font-bold">{dashboard.analytics.schools}</p></div>
           <div className="card"><p className="text-sm">Élèves (tous niveaux)</p><p className="text-2xl font-bold">{dashboard.analytics.publicStudents}</p></div>
           <div className="card"><p className="text-sm">Professeurs</p><p className="text-2xl font-bold">{dashboard.analytics.teachers}</p></div>
+          <div className="card"><p className="text-sm">Partenaires</p><p className="text-2xl font-bold">{partnersCount}</p></div>
           <div className="card">
             <p className="text-sm">Frais School Manager (mois)</p>
             <p className="text-2xl font-bold">{formatHtg(dashboard.analytics.schoolManagerMonthlyRevenue)}</p>
