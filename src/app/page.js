@@ -673,13 +673,13 @@ export default function HomePage() {
               <button className="partner-menu-item" type="button" onClick={() => router.push('/publisher/books')}>
                 Mes livres
               </button>
-              <button className="partner-menu-item" type="button" onClick={() => router.push('/video-lessons')}>
+              <button className="partner-menu-item" type="button" onClick={() => router.push('/publisher/formations')}>
                 Mes formations
               </button>
-              <button className="partner-menu-item" type="button" onClick={() => router.push('/messages')}>
+              <button className="partner-menu-item" type="button" onClick={() => router.push('/publisher/annonces')}>
                 Mes annonces
               </button>
-              <button className="partner-menu-item" type="button" onClick={() => router.push('/rattrapage')}>
+              <button className="partner-menu-item" type="button" onClick={() => router.push('/publisher/rendezvous')}>
                 Mes rendez-vous
               </button>
               {features.canViewSalesDashboard ? (
@@ -789,13 +789,13 @@ export default function HomePage() {
                   <button className="partner-action" type="button" onClick={() => router.push('/publisher/books')}>
                     Publier un livre
                   </button>
-                  <button className="partner-action" type="button" onClick={() => router.push('/video-lessons')}>
+                  <button className="partner-action" type="button" onClick={() => router.push('/publisher/formations')}>
                     Créer une formation certifiante
                   </button>
-                  <button className="partner-action" type="button" onClick={() => router.push('/messages')}>
+                  <button className="partner-action" type="button" onClick={() => router.push('/publisher/annonces')}>
                     Publier une annonce globale
                   </button>
-                  <button className="partner-action" type="button" onClick={() => router.push('/rattrapage')}>
+                  <button className="partner-action" type="button" onClick={() => router.push('/publisher/rendezvous')}>
                     Programmer un rendez-vous live
                   </button>
                   {features.canViewSalesDashboard ? (
