@@ -129,6 +129,7 @@ export default function HeaderNav() {
     { href: '/rattrapage', label: t.liveCatchup, icon: '📅' }
   ]), [t]);
   const globalAuthedTabs = useMemo(() => {
+    if (roleUpper === 'PUBLISHER') return [];
     const tabs = [
       { href: '/', label: 'Accueil' },
       { href: '/video-lessons', label: 'Classe Numerique' },
@@ -820,7 +821,7 @@ export default function HeaderNav() {
           </div>
         )}
 
-        {isAuthed ? (
+        {isAuthed && globalAuthedTabs.length ? (
           <div className="hidden w-full items-center justify-center gap-1 overflow-x-auto border-t border-brand-100 pt-2 md:flex">
             {globalAuthedTabs.map((tab) => (
               <Link

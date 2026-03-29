@@ -682,6 +682,11 @@ export default function HomePage() {
               <button className="partner-menu-item" type="button" onClick={() => router.push('/rattrapage')}>
                 Mes rendez-vous
               </button>
+              {features.canViewSalesDashboard ? (
+                <button className="partner-menu-item" type="button" onClick={() => router.push('/publisher/sales')}>
+                  Statistiques de ventes
+                </button>
+              ) : null}
             </div>
             <div className="partner-dash-meta">
               <p className="partner-meta-label">Type partenaire</p>
@@ -793,6 +798,11 @@ export default function HomePage() {
                   <button className="partner-action" type="button" onClick={() => router.push('/rattrapage')}>
                     Programmer un rendez-vous live
                   </button>
+                  {features.canViewSalesDashboard ? (
+                    <button className="partner-action" type="button" onClick={() => router.push('/publisher/sales')}>
+                      Ouvrir dashboard des ventes
+                    </button>
+                  ) : null}
                 </div>
                 <div className="partner-panel-foot">
                   <p className="partner-panel-note">
