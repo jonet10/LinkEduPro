@@ -1,9 +1,0 @@
-{
-  "appId": "com.linkedupro.app",
-  "appName": "LinkEduPro",
-  "webDir": "web-mobile",
-  "server": {
-    "url": "https://linkedupro-1.onrender.com",
-    "cleartext": false
-  }
-}

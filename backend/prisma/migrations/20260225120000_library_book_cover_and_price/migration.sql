@@ -1,8 +1,0 @@
-ALTER TABLE "library_books"
-  ADD COLUMN IF NOT EXISTS "coverImageUrl" TEXT,
-  ADD COLUMN IF NOT EXISTS "isPaid" BOOLEAN NOT NULL DEFAULT false,
-  ADD COLUMN IF NOT EXISTS "price" DECIMAL(10, 2) NOT NULL DEFAULT 0;
-
-UPDATE "library_books"
-SET "isPaid" = false
-WHERE "isPaid" IS DISTINCT FROM false;
