@@ -4,6 +4,7 @@ import Image from 'next/image';
 import HeaderNav from '@/components/HeaderNav';
 import ThemeInit from '@/components/ThemeInit';
 import Footer from '@/components/Footer';
+import AIChatWidget from '@/components/AIChatWidget';
 import SplashScreenGate from '@/components/SplashScreenGate';
 import PwaInit from '@/components/PwaInit';
 import MobileBackButton from '@/components/MobileBackButton';
@@ -67,6 +68,7 @@ export default function RootLayout({ children }) {
         </header>
         <main className="relative z-0 mx-auto w-full max-w-6xl flex-1 px-6 py-8 pb-28 md:pb-8">{children}</main>
         <Footer />
+        <AIChatWidget />
       </body>
     </html>
   );
