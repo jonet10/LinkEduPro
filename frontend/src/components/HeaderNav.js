@@ -119,7 +119,6 @@ export default function HeaderNav() {
   const publicStudyTools = useMemo(() => ([
     { href: '/subjects', label: t.learn, icon: '🧠' },
     { href: '/study-plans', label: t.studyPlans, icon: '🗂️' },
-    { href: '/educollect', label: 'EduCollect', icon: '💸' },
     { href: '/subjects', label: t.trainingTest, icon: '🧪' },
     { href: '/blog', label: t.expertSolutions, icon: '✅' },
     { href: '/search', label: t.studySearch, icon: '🔎' },
@@ -140,7 +139,6 @@ export default function HeaderNav() {
       { href: '/probable-exercises', label: 'Examens passés' },
       { href: '/library', label: 'Bibliothèque' },
       { href: '/partners', label: 'Compte partenaire' },
-      { href: '/educollect', label: 'EduCollect' },
       { href: '/blog', label: 'Forum' },
       { href: '/support', label: 'Faire un Don' }
     ];
@@ -467,7 +465,6 @@ export default function HeaderNav() {
       ...(canSeeProbableExercises ? [{ href: '/probable-exercises', label: 'Examens passés', icon: '🎯' }] : []),
       ...(canSeeStudyPlans ? [{ href: '/study-plans', label: 'Plans', icon: '🗂️' }] : []),
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
-      { href: '/educollect', label: 'EduCollect', icon: '💸' },
       { href: '/blog', label: 'Forum', icon: '📝' },
       { href: '/support', label: 'Faire un Don', icon: '💝' },
       ...(canSeeGlobalAdminDashboard ? [{ href: '/admin/super-dashboard', label: 'Dashboard', icon: '🛠️' }] : [])
@@ -488,7 +485,6 @@ export default function HeaderNav() {
   const mobileToolItems = useMemo(
     () => [
       { href: '/library', label: 'Bibliothèque', icon: '📚' },
-      { href: '/educollect', label: 'EduCollect', icon: '💸' },
       { href: '/blog', label: 'Forum', icon: '📝' },
       { href: '/support', label: 'Faire un Don', icon: '💝' },
       ...(canSeeTeacherDashboard ? [{ href: '/teacher/dashboard', label: 'Revenus', icon: '💼' }] : []),
