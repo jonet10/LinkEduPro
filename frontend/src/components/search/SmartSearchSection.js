@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { getToken } from '@/lib/auth';
@@ -183,6 +184,30 @@ export default function SmartSearchSection({ className = '', initialQuery = '' }
     <section className={`card ${className}`.trim()} ref={rootRef}>
       <h2 className="text-2xl font-bold text-brand-900">Recherche intelligente</h2>
       <p className="mt-2 text-sm text-brand-700">Recherche multi-catégorie avec filtres, suggestions et historique utilisateur.</p>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <Link href="/tutors" className="rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-600">
+          Trouver un tuteur
+        </Link>
+        <Link href="/tutor-partner" className="rounded-full border border-brand-200 bg-white px-4 py-2 text-xs font-semibold text-brand-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-50">
+          Devenir tuteur
+        </Link>
+        <Link href="/tutor-partner" className="rounded-full border border-brand-200 bg-white px-4 py-2 text-xs font-semibold text-brand-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-50">
+          Devenir partenaire
+        </Link>
+        <button
+          type="button"
+          className="ml-1 inline-flex h-10 w-10 items-center justify-center rounded-full border border-brand-200 bg-white text-brand-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-50"
+          aria-label="Assistant EduPro"
+        >
+          <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12 3a7 7 0 0 0-7 7v2H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2v1a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3v-1h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-1V10a7 7 0 0 0-7-7Zm-5 9v-2a5 5 0 1 1 10 0v2H7Zm1 7v-1h8v1a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1Z"
+            />
+          </svg>
+        </button>
+      </div>
 
       <div className={styles.wrapper}>
         <SearchBar
