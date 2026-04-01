@@ -82,9 +82,19 @@ export default function AIChatWidget() {
       {open ? (
         <div className="w-[320px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
           <div className="flex items-center justify-between bg-brand-700 px-4 py-3 text-white">
-            <div>
-              <p className="text-sm font-semibold">Assistant IA</p>
-              <p className="text-xs text-white/80">LinkEduPro • Mistral</p>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/15">
+                <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M12 3a7 7 0 0 0-7 7v2H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2v1a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3v-1h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-1V10a7 7 0 0 0-7-7Zm-5 9v-2a5 5 0 1 1 10 0v2H7Zm1 7v-1h8v1a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1Z"
+                  />
+                </svg>
+              </span>
+              <div>
+                <p className="text-sm font-semibold">EduPro</p>
+                <p className="text-xs text-white/80">Assistant IA</p>
+              </div>
             </div>
             <button
               type="button"
@@ -141,10 +151,16 @@ export default function AIChatWidget() {
       ) : (
         <button
           type="button"
-          className="flex items-center gap-2 rounded-full bg-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-brand-800"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-700 text-white shadow-lg hover:bg-brand-800"
           onClick={() => setOpen(true)}
+          aria-label="Ouvrir EduPro"
         >
-          Assistant IA
+          <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12 3a7 7 0 0 0-7 7v2H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2v1a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3v-1h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-1V10a7 7 0 0 0-7-7Zm-5 9v-2a5 5 0 1 1 10 0v2H7Zm1 7v-1h8v1a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1Z"
+            />
+          </svg>
         </button>
       )}
     </div>
