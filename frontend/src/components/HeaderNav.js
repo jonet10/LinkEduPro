@@ -674,18 +674,26 @@ export default function HeaderNav() {
             ) : null}
           </div>
 
-          <form
-            onSubmit={onDesktopSearch}
-            className="public-neon-search search-container mx-2 flex min-w-[320px] flex-1 items-center rounded-full border border-brand-300 bg-white px-4 py-2 shadow-sm transition-all duration-200 focus-within:-translate-y-[1px] focus-within:border-brand-500 focus-within:shadow-lg focus-within:ring-2 focus-within:ring-brand-200"
-          >
-            <span className="mr-2 text-brand-600">🔎</span>
-            <input
-              className="w-full bg-transparent text-sm text-brand-900 outline-none placeholder:text-brand-500"
-              placeholder={t.publicSearchPlaceholder}
-              value={desktopSearch}
-              onChange={(e) => setDesktopSearch(e.target.value)}
-            />
-          </form>
+          <div className="mx-2 flex flex-1 items-center gap-2">
+            <Link
+              href="/tutors"
+              className="rounded-full bg-emerald-500 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-600"
+            >
+              Trouver un tuteur
+            </Link>
+            <Link
+              href="/tutor-partner"
+              className="rounded-full border border-brand-200 bg-white px-5 py-2 text-xs font-semibold text-brand-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-50"
+            >
+              Devenir tuteur
+            </Link>
+            <Link
+              href="/tutor-partner"
+              className="rounded-full border border-brand-200 bg-white px-5 py-2 text-xs font-semibold text-brand-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-50"
+            >
+              Devenir partenaire
+            </Link>
+          </div>
 
           <button
             type="button"
