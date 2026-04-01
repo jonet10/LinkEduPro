@@ -59,6 +59,36 @@ function parseVideoContentBody(rawBody) {
   }
 }
 
+const AI_LEVEL_OPTIONS = [
+  { value: 'AF7', label: 'AF7' },
+  { value: 'AF8', label: 'AF8' },
+  { value: 'AF9', label: 'AF9' },
+  { value: 'NSI', label: 'NSI' },
+  { value: 'NSII', label: 'NSII' },
+  { value: 'NSIII', label: 'NSIII' },
+  { value: 'NSIV', label: 'NSIV' },
+  { value: 'UNIVERSITAIRE', label: 'Universitaire' }
+];
+
+const AI_DOC_TYPES = [
+  { value: 'COURSE', label: 'Cours' },
+  { value: 'EXAM', label: 'Examen' },
+  { value: 'BOOK', label: 'Livre' },
+  { value: 'EXERCISE', label: 'Exercice' }
+];
+
+function formatBytes(bytes) {
+  if (!bytes) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let value = bytes;
+  let index = 0;
+  while (value >= 1024 && index < units.length - 1) {
+    value /= 1024;
+    index += 1;
+  }
+  return `${value.toFixed(value < 10 && index > 0 ? 1 : 0)} ${units[index]}`;
+}
+
 export default function SuperDashboardPage() {
   const router = useRouter();
   const [dashboard, setDashboard] = useState(null);
@@ -110,6 +140,20 @@ export default function SuperDashboardPage() {
   const [pendingVideosError, setPendingVideosError] = useState('');
   const [pendingVideoActionLoadingId, setPendingVideoActionLoadingId] = useState(null);
   const [pendingVideoActionMessage, setPendingVideoActionMessage] = useState('');
+  const [aiDocs, setAiDocs] = useState([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const [aiNotice, setAiNotice] = useState('');
+  const [aiUploading, setAiUploading] = useState(false);
+  const [aiRebuildLoading, setAiRebuildLoading] = useState(false);
+  const [aiIndexing, setAiIndexing] = useState(false);
+  const [aiDeleteId, setAiDeleteId] = useState(null);
+  const [aiForm, setAiForm] = useState({
+    level: 'NSIV',
+    subject: '',
+    docType: 'COURSE',
+    files: []
+  });
 
   useEffect(() => {
     const token = getToken();
@@ -131,6 +175,11 @@ export default function SuperDashboardPage() {
     return () => clearInterval(watcher);
   }, [authToken]);
 
+  useEffect(() => {
+    if (!authToken) return;
+    loadAiDocs(authToken);
+  }, [authToken]);
+
   async function loadPendingVideos(forcedToken = null) {
     const token = forcedToken || getToken();
     if (!token) return;
@@ -149,6 +198,129 @@ export default function SuperDashboardPage() {
       setPendingVideos([]);
     } finally {
       setPendingVideosLoading(false);
+    }
+  }
+
+  async function loadAiDocs(token) {
+    setAiError('');
+    setAiLoading(true);
+    try {
+      const data = await apiClient('/ai/docs', { token });
+      setAiDocs(Array.isArray(data.files) ? data.files : []);
+    } catch (e) {
+      setAiError(e.message || 'Impossible de charger les documents EduPro.');
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  async function uploadAiDocs(event) {
+    event.preventDefault();
+    const token = getToken();
+    if (!token) return;
+    if (!aiForm.files || aiForm.files.length === 0) {
+      setAiError('Sélectionne au moins un fichier.');
+      return;
+    }
+
+    setAiError('');
+    setAiNotice('');
+    setAiUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('level', aiForm.level);
+      formData.append('subject', aiForm.subject.trim() || 'Général');
+      formData.append('docType', aiForm.docType);
+      Array.from(aiForm.files).forEach((file) => {
+        formData.append('files', file);
+      });
+
+      const res = await apiClient('/ai/upload-docs', {
+        method: 'POST',
+        token,
+        body: formData
+      });
+
+      const createdCount = res.createdCount || 0;
+      const skippedCount = res.skippedCount || 0;
+      const unsupported = Array.isArray(res.unsupported) ? res.unsupported : [];
+      const messages = [];
+      if (createdCount) messages.push(`${createdCount} fichier(s) ajouté(s).`);
+      if (skippedCount) messages.push(`${skippedCount} fichier(s) déjà existant(s).`);
+      if (unsupported.length) messages.push(`Formats non indexés: ${unsupported.join(', ')}`);
+      setAiNotice(messages.join(' '));
+      setAiForm((prev) => ({ ...prev, files: [] }));
+      await loadAiDocs(token);
+    } catch (e) {
+      setAiError(e.message || 'Erreur pendant l’upload.');
+    } finally {
+      setAiUploading(false);
+    }
+  }
+
+  async function rebuildAiIndex() {
+    const token = getToken();
+    if (!token) return;
+    setAiRebuildLoading(true);
+    setAiError('');
+    setAiNotice('');
+    try {
+      await apiClient('/ai/rebuild-docs', {
+        method: 'POST',
+        token,
+        body: JSON.stringify({})
+      });
+      setAiNotice('Index EduPro relancé.');
+    } catch (e) {
+      setAiError(e.message || 'Erreur pendant la reconstruction de l’index.');
+    } finally {
+      setAiRebuildLoading(false);
+    }
+  }
+
+  async function indexExistingAiDocs() {
+    const token = getToken();
+    if (!token) return;
+    setAiIndexing(true);
+    setAiError('');
+    setAiNotice('');
+    try {
+      const res = await apiClient('/ai/index-existing', {
+        method: 'POST',
+        token,
+        body: JSON.stringify({})
+      });
+      const report = res.report;
+      if (report) {
+        setAiNotice(`Scannés: ${report.scanned} · Ajoutés: ${report.created} · Ignorés: ${report.skipped}`);
+      } else {
+        setAiNotice('Indexation des documents existants lancée.');
+      }
+      await loadAiDocs(token);
+    } catch (e) {
+      setAiError(e.message || 'Erreur pendant l’indexation.');
+    } finally {
+      setAiIndexing(false);
+    }
+  }
+
+  async function deleteAiDoc(id) {
+    const token = getToken();
+    if (!token) return;
+    if (typeof window !== 'undefined' && !window.confirm('Supprimer ce document EduPro ?')) return;
+    setAiDeleteId(id);
+    setAiError('');
+    try {
+      await apiClient(`/ai/docs/${id}`, {
+        method: 'DELETE',
+        token
+      });
+      await loadAiDocs(token);
+    } catch (e) {
+      setAiError(e.message || 'Erreur suppression document.');
+    } finally {
+      setAiDeleteId(null);
     }
   }
 
@@ -475,6 +647,138 @@ export default function SuperDashboardPage() {
           <div className="card"><p className="text-sm">Paiements mensuels</p><p className="text-2xl font-bold">{String(dashboard.analytics.monthlyInternalPayments)}</p></div>
         </section>
       ) : null}
+
+      <section className="card space-y-4">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-brand-900">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M12 3c-2.76 0-5 2.24-5 5v2H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2v1a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3v-1h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-2V8c0-2.76-2.24-5-5-5Zm-3 5a3 3 0 1 1 6 0v2H9V8Zm0 11v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1Zm10-5h-2v2a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-2H5v-2h14v2Z"
+                />
+              </svg>
+            </span>
+            <div>
+              <h2 className="text-xl font-semibold">EduPro – Entraînement IA</h2>
+              <p className="text-sm text-brand-700">
+                Charge des contenus pour entraîner EduPro (PDF, DOCX, TXT). Les médias audio/vidéo seront stockés
+                et nécessitent une transcription pour être indexés.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn-secondary" onClick={indexExistingAiDocs} disabled={aiIndexing}>
+              {aiIndexing ? 'Indexation...' : 'Indexer existants'}
+            </button>
+            <button className="btn-secondary" onClick={rebuildAiIndex} disabled={aiRebuildLoading}>
+              {aiRebuildLoading ? 'Reconstruction...' : 'Recalculer l’index'}
+            </button>
+          </div>
+        </div>
+
+        {aiError ? <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{aiError}</p> : null}
+        {aiNotice ? <p className="rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{aiNotice}</p> : null}
+
+        <form className="grid grid-cols-1 gap-3 md:grid-cols-4" onSubmit={uploadAiDocs}>
+          <select
+            className="input"
+            value={aiForm.level}
+            onChange={(e) => setAiForm((prev) => ({ ...prev, level: e.target.value }))}
+          >
+            {AI_LEVEL_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+          <input
+            className="input"
+            placeholder="Matière (ex: Math, Français)"
+            value={aiForm.subject}
+            onChange={(e) => setAiForm((prev) => ({ ...prev, subject: e.target.value }))}
+          />
+          <select
+            className="input"
+            value={aiForm.docType}
+            onChange={(e) => setAiForm((prev) => ({ ...prev, docType: e.target.value }))}
+          >
+            {AI_DOC_TYPES.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+          <input
+            className="input"
+            type="file"
+            multiple
+            accept=".pdf,.doc,.docx,.txt,.md,.mp3,.mp4,.wav,.m4a"
+            onChange={(e) => setAiForm((prev) => ({ ...prev, files: e.target.files }))}
+          />
+          <div className="md:col-span-4 flex flex-wrap items-center gap-3">
+            <button className="btn-primary" type="submit" disabled={aiUploading}>
+              {aiUploading ? 'Envoi en cours...' : 'Ajouter au corpus EduPro'}
+            </button>
+            <p className="text-xs text-brand-600">
+              Formats gérés: PDF, DOCX, TXT, MD. Audio/vidéo stockés pour transcription.
+            </p>
+          </div>
+        </form>
+
+        <div className="rounded-xl border border-brand-100">
+          <div className="flex items-center justify-between border-b border-brand-100 px-4 py-2">
+            <h3 className="text-sm font-semibold text-brand-900">Documents EduPro</h3>
+            {aiLoading ? <span className="text-xs text-brand-600">Chargement...</span> : null}
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-brand-50 text-left text-xs uppercase tracking-wide text-brand-700">
+                <tr>
+                  <th className="px-4 py-2">Fichier</th>
+                  <th className="px-4 py-2">Niveau</th>
+                  <th className="px-4 py-2">Matière</th>
+                  <th className="px-4 py-2">Type</th>
+                  <th className="px-4 py-2">Statut</th>
+                  <th className="px-4 py-2">Taille</th>
+                  <th className="px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {aiDocs.length === 0 ? (
+                  <tr>
+                    <td className="px-4 py-3 text-sm text-brand-700" colSpan="7">Aucun document pour le moment.</td>
+                  </tr>
+                ) : (
+                  aiDocs.map((doc) => (
+                    <tr key={doc.id} className="border-t border-brand-100">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-brand-900">{doc.fileName}</div>
+                        <div className="text-xs text-brand-600">{doc.fileUrl ? 'Stocké' : 'Local'}</div>
+                      </td>
+                      <td className="px-4 py-3">{doc.level}</td>
+                      <td className="px-4 py-3">{doc.subject}</td>
+                      <td className="px-4 py-3">{doc.docType}</td>
+                      <td className="px-4 py-3">
+                        <span className="rounded-full bg-brand-100 px-2 py-1 text-xs text-brand-800">
+                          {doc.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">{formatBytes(doc.size)}</td>
+                      <td className="px-4 py-3">
+                        <button
+                          className="btn-secondary"
+                          type="button"
+                          onClick={() => deleteAiDoc(doc.id)}
+                          disabled={aiDeleteId === doc.id}
+                        >
+                          {aiDeleteId === doc.id ? 'Suppression...' : 'Supprimer'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
       {dashboard?.revenues ? (
         <section className="card space-y-3">
