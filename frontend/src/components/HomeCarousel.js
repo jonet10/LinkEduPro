@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import SmartSearchSection from '@/components/search/SmartSearchSection';
 
 const SLIDES = [
   {
@@ -114,7 +113,17 @@ export default function HomeCarousel({ isAuthed = false }) {
           ) : null}
 
           {!isAuthed ? (
-            <SmartSearchSection className="mt-6 border border-white/35 bg-white/90 backdrop-blur" />
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href="/tutors" className="rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-600">
+                Trouver un tuteur
+              </Link>
+              <Link href="/tutor-partner" className="rounded-full border border-white/60 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">
+                Devenir tuteur
+              </Link>
+              <Link href="/tutor-partner" className="rounded-full border border-white/60 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">
+                Devenir partenaire
+              </Link>
+            </div>
           ) : null}
 
           <div className="mt-8 grid gap-3 md:grid-cols-3">
