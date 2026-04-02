@@ -148,6 +148,7 @@ export default function SuperDashboardPage() {
   const [aiRebuildLoading, setAiRebuildLoading] = useState(false);
   const [aiIndexing, setAiIndexing] = useState(false);
   const [aiDeleteId, setAiDeleteId] = useState(null);
+  const [aiDocsExpanded, setAiDocsExpanded] = useState(true);
   const [aiForm, setAiForm] = useState({
     level: 'NSIV',
     subject: '',
@@ -724,12 +725,24 @@ export default function SuperDashboardPage() {
 
         <div className="rounded-xl border border-brand-100">
           <div className="flex items-center justify-between border-b border-brand-100 px-4 py-2">
-            <h3 className="text-sm font-semibold text-brand-900">Documents EduPro</h3>
-            {aiLoading ? <span className="text-xs text-brand-600">Chargement...</span> : null}
+            <div className="flex items-center gap-3">
+              <h3 className="text-sm font-semibold text-brand-900">Documents EduPro</h3>
+              <span className="text-xs text-brand-600">{aiDocs.length} fichier(s)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {aiLoading ? <span className="text-xs text-brand-600">Chargement...</span> : null}
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setAiDocsExpanded((prev) => !prev)}
+              >
+                {aiDocsExpanded ? 'Réduire' : 'Afficher'}
+              </button>
+            </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className={aiDocsExpanded ? 'max-h-[340px] overflow-auto' : 'hidden'}>
             <table className="min-w-full text-sm">
-              <thead className="bg-brand-50 text-left text-xs uppercase tracking-wide text-brand-700">
+              <thead className="sticky top-0 z-[1] bg-brand-50 text-left text-xs uppercase tracking-wide text-brand-700">
                 <tr>
                   <th className="px-4 py-2">Fichier</th>
                   <th className="px-4 py-2">Niveau</th>
