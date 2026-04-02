@@ -77,6 +77,16 @@ const AI_DOC_TYPES = [
   { value: 'EXERCISE', label: 'Exercice' }
 ];
 
+const AI_CATEGORIES = [
+  { value: 'GENERAL', label: 'Général' },
+  { value: 'PROFESSOR', label: 'Professeur / Formateur' },
+  { value: 'NEWS', label: 'Actualités / Événements' },
+  { value: 'PROGRAM', label: 'Programme / Parcours' },
+  { value: 'MEDIA', label: 'Ressources multimédias' },
+  { value: 'FAQ', label: 'FAQ / Conseils' },
+  { value: 'PARTNER', label: 'Partenaires / Institutions' }
+];
+
 function formatBytes(bytes) {
   if (!bytes) return '0 B';
   const units = ['B', 'KB', 'MB', 'GB'];
@@ -152,6 +162,7 @@ export default function SuperDashboardPage() {
   const [aiForm, setAiForm] = useState({
     level: 'NSIV',
     subject: '',
+    category: 'GENERAL',
     docType: 'COURSE',
     files: []
   });
@@ -231,7 +242,8 @@ export default function SuperDashboardPage() {
     try {
       const formData = new FormData();
       formData.append('level', aiForm.level);
-      formData.append('subject', aiForm.subject.trim() || 'Général');
+      const subjectLabel = aiForm.subject.trim() || AI_CATEGORIES.find((c) => c.value === aiForm.category)?.label || 'Général';
+      formData.append('subject', subjectLabel);
       formData.append('docType', aiForm.docType);
       Array.from(aiForm.files).forEach((file) => {
         formData.append('files', file);
@@ -693,10 +705,19 @@ export default function SuperDashboardPage() {
           </select>
           <input
             className="input"
-            placeholder="Matière (ex: Math, Français)"
+            placeholder="Matière (optionnel, ex: Math, Français)"
             value={aiForm.subject}
             onChange={(e) => setAiForm((prev) => ({ ...prev, subject: e.target.value }))}
           />
+          <select
+            className="input"
+            value={aiForm.category}
+            onChange={(e) => setAiForm((prev) => ({ ...prev, category: e.target.value }))}
+          >
+            {AI_CATEGORIES.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
           <select
             className="input"
             value={aiForm.docType}
