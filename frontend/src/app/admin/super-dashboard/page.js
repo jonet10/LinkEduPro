@@ -60,6 +60,7 @@ function parseVideoContentBody(rawBody) {
 }
 
 const AI_LEVEL_OPTIONS = [
+  { value: 'GLOBAL', label: 'Global' },
   { value: 'AF7', label: 'AF7' },
   { value: 'AF8', label: 'AF8' },
   { value: 'AF9', label: 'AF9' },
@@ -67,7 +68,8 @@ const AI_LEVEL_OPTIONS = [
   { value: 'NSII', label: 'NSII' },
   { value: 'NSIII', label: 'NSIII' },
   { value: 'NSIV', label: 'NSIV' },
-  { value: 'UNIVERSITAIRE', label: 'Universitaire' }
+  { value: 'UNIVERSITAIRE', label: 'Universitaire' },
+  { value: 'PROFESSIONNEL', label: 'Professionnel' }
 ];
 
 const AI_DOC_TYPES = [
@@ -242,7 +244,7 @@ export default function SuperDashboardPage() {
     try {
       const formData = new FormData();
       formData.append('level', aiForm.level);
-      const subjectLabel = aiForm.subject.trim() || AI_CATEGORIES.find((c) => c.value === aiForm.category)?.label || 'Général';
+      const subjectLabel = aiForm.subject.trim();
       formData.append('subject', subjectLabel);
       formData.append('docType', aiForm.docType);
       Array.from(aiForm.files).forEach((file) => {
