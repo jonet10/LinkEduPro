@@ -222,6 +222,9 @@ export default function VideoLessonsPage() {
   const [loading, setLoading] = useState(true);
   const [student, setStudent] = useState(null);
   const [token, setToken] = useState(null);
+  const [academicEnabled, setAcademicEnabled] = useState(false);
+  const [academicDashboard, setAcademicDashboard] = useState(null);
+  const [academicLoading, setAcademicLoading] = useState(false);
   const [videos, setVideos] = useState([]);
   const [activeVideo, setActiveVideo] = useState(null);
   const [error, setError] = useState('');
@@ -314,6 +317,30 @@ export default function VideoLessonsPage() {
     if (!ready) return;
     loadVideos(token, student);
   }, [ready, token, student]);
+
+  useEffect(() => {
+    if (!token) return;
+    let mounted = true;
+    setAcademicLoading(true);
+    apiClient('/academic/dashboard', { token })
+      .then((data) => {
+        if (!mounted) return;
+        setAcademicEnabled(true);
+        setAcademicDashboard(data);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setAcademicEnabled(false);
+        setAcademicDashboard(null);
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setAcademicLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [token]);
 
   const filteredVideos = useMemo(() => {
     let next = videos;
@@ -598,6 +625,59 @@ export default function VideoLessonsPage() {
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
         {success ? <p className="mt-2 text-sm text-emerald-700">{success}</p> : null}
       </section>
+
+      {academicEnabled ? (
+        <section className="card">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-semibold text-brand-900">Sous-module : Academic Recovery</h2>
+              <p className="mt-1 text-sm text-brand-700">
+                Suivi de progression et évaluations par niveau intégrés à la classe numérique.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => router.push('/subjects')}
+            >
+              Démarrer un quiz
+            </button>
+          </div>
+          {academicLoading ? (
+            <p className="mt-3 text-sm text-brand-700">Chargement du suivi académique...</p>
+          ) : academicDashboard ? (
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              <div className="rounded-xl border border-brand-100 bg-brand-50/40 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Niveau actuel</p>
+                <p className="mt-2 text-xl font-bold text-brand-900">{academicDashboard?.currentLevel?.name || '—'}</p>
+                <p className="text-xs text-brand-700">
+                  Progression: {academicDashboard?.currentProgress?.progressPercentage ?? 0}%
+                </p>
+              </div>
+              <div className="rounded-xl border border-brand-100 bg-white p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Évaluations</p>
+                <p className="mt-2 text-xl font-bold text-brand-900">{academicDashboard?.assessments?.length || 0}</p>
+                <p className="text-xs text-brand-700">Dernier score: {academicDashboard?.latestAssessment?.score ?? '—'}</p>
+              </div>
+              <div className="rounded-xl border border-brand-100 bg-white p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Objectif</p>
+                <p className="mt-2 text-sm text-brand-700">
+                  Complète 1 quiz et mets à jour ta progression pour débloquer le niveau suivant.
+                </p>
+                <button
+                  type="button"
+                  className="btn-primary mt-3"
+                  onClick={() => router.push('/subjects')}
+                >
+                  Continuer
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-brand-700">Le suivi académique n’est pas encore disponible pour ton compte.</p>
+          )}
+        </section>
+      ) : null}
 
       {canManage ? (
         <section className="card">
