@@ -76,7 +76,8 @@ const AI_DOC_TYPES = [
   { value: 'COURSE', label: 'Cours' },
   { value: 'EXAM', label: 'Examen' },
   { value: 'BOOK', label: 'Livre' },
-  { value: 'EXERCISE', label: 'Exercice' }
+  { value: 'EXERCISE', label: 'Exercice' },
+  { value: 'RESOURCE', label: 'Ressource / Info' }
 ];
 
 const AI_CATEGORIES = [
@@ -165,7 +166,7 @@ export default function SuperDashboardPage() {
     level: 'NSIV',
     subject: '',
     category: 'GENERAL',
-    docType: 'COURSE',
+    docType: 'RESOURCE',
     files: []
   });
 
