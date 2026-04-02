@@ -162,6 +162,12 @@ export default function SuperDashboardPage() {
   const [aiIndexing, setAiIndexing] = useState(false);
   const [aiDeleteId, setAiDeleteId] = useState(null);
   const [aiDocsExpanded, setAiDocsExpanded] = useState(true);
+  const [aiEditId, setAiEditId] = useState(null);
+  const [aiEditForm, setAiEditForm] = useState({
+    level: '',
+    subject: '',
+    docType: ''
+  });
   const [aiForm, setAiForm] = useState({
     level: 'NSIV',
     subject: '',
@@ -337,6 +343,41 @@ export default function SuperDashboardPage() {
       setAiError(e.message || 'Erreur suppression document.');
     } finally {
       setAiDeleteId(null);
+    }
+  }
+
+  function startEditAiDoc(doc) {
+    setAiEditId(doc.id);
+    setAiEditForm({
+      level: doc.level || 'GLOBAL',
+      subject: doc.subject || '',
+      docType: doc.docType || 'RESOURCE'
+    });
+  }
+
+  function cancelEditAiDoc() {
+    setAiEditId(null);
+    setAiEditForm({ level: '', subject: '', docType: '' });
+  }
+
+  async function saveEditAiDoc(id) {
+    const token = getToken();
+    if (!token) return;
+    setAiError('');
+    try {
+      await apiClient(`/ai/docs/${id}`, {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify({
+          level: aiEditForm.level,
+          subject: aiEditForm.subject,
+          docType: aiEditForm.docType
+        })
+      });
+      await loadAiDocs(token);
+      cancelEditAiDoc();
+    } catch (e) {
+      setAiError(e.message || 'Erreur modification document.');
     }
   }
 
@@ -789,9 +830,42 @@ export default function SuperDashboardPage() {
                         <div className="font-medium text-brand-900">{doc.fileName}</div>
                         <div className="text-xs text-brand-600">{doc.fileUrl ? 'Stocké' : 'Local'}</div>
                       </td>
-                      <td className="px-4 py-3">{doc.level}</td>
-                      <td className="px-4 py-3">{doc.subject}</td>
-                      <td className="px-4 py-3">{doc.docType}</td>
+                      <td className="px-4 py-3">
+                        {aiEditId === doc.id ? (
+                          <select
+                            className="input"
+                            value={aiEditForm.level}
+                            onChange={(e) => setAiEditForm((prev) => ({ ...prev, level: e.target.value }))}
+                          >
+                            {AI_LEVEL_OPTIONS.map((option) => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                          </select>
+                        ) : doc.level}
+                      </td>
+                      <td className="px-4 py-3">
+                        {aiEditId === doc.id ? (
+                          <input
+                            className="input"
+                            placeholder="Matière (optionnel)"
+                            value={aiEditForm.subject}
+                            onChange={(e) => setAiEditForm((prev) => ({ ...prev, subject: e.target.value }))}
+                          />
+                        ) : doc.subject}
+                      </td>
+                      <td className="px-4 py-3">
+                        {aiEditId === doc.id ? (
+                          <select
+                            className="input"
+                            value={aiEditForm.docType}
+                            onChange={(e) => setAiEditForm((prev) => ({ ...prev, docType: e.target.value }))}
+                          >
+                            {AI_DOC_TYPES.map((option) => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                          </select>
+                        ) : doc.docType}
+                      </td>
                       <td className="px-4 py-3">
                         <span className="rounded-full bg-brand-100 px-2 py-1 text-xs text-brand-800">
                           {doc.status}
@@ -799,14 +873,42 @@ export default function SuperDashboardPage() {
                       </td>
                       <td className="px-4 py-3">{formatBytes(doc.size)}</td>
                       <td className="px-4 py-3">
-                        <button
-                          className="btn-secondary"
-                          type="button"
-                          onClick={() => deleteAiDoc(doc.id)}
-                          disabled={aiDeleteId === doc.id}
-                        >
-                          {aiDeleteId === doc.id ? 'Suppression...' : 'Supprimer'}
-                        </button>
+                        {aiEditId === doc.id ? (
+                          <>
+                            <button
+                              className="btn-primary"
+                              type="button"
+                              onClick={() => saveEditAiDoc(doc.id)}
+                            >
+                              Enregistrer
+                            </button>
+                            <button
+                              className="btn-secondary"
+                              type="button"
+                              onClick={cancelEditAiDoc}
+                            >
+                              Annuler
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="btn-secondary"
+                              type="button"
+                              onClick={() => startEditAiDoc(doc)}
+                            >
+                              Modifier
+                            </button>
+                            <button
+                              className="btn-secondary"
+                              type="button"
+                              onClick={() => deleteAiDoc(doc.id)}
+                              disabled={aiDeleteId === doc.id}
+                            >
+                              {aiDeleteId === doc.id ? 'Suppression...' : 'Supprimer'}
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))
