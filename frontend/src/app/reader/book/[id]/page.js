@@ -104,7 +104,7 @@ export default function BookReaderPage() {
       setError('');
       try {
         const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.js';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
         const streamUrl = `${getApiBaseUrl()}/reader/books/${bookId}/stream`;
         const loadingTask = pdfjsLib.getDocument({
