@@ -36,6 +36,7 @@ export default function BookReaderPage() {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const renderRef = useRef(null);
+  const scrollLockRef = useRef(false);
 
   const [pdfDoc, setPdfDoc] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -206,6 +207,24 @@ export default function BookReaderPage() {
       if (!containerRef.current) return;
       const scrollPosition = Math.round(containerRef.current.scrollTop || 0);
       persistProgress(pageNumber, scrollPosition);
+
+      const container = containerRef.current;
+      const nearBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 24;
+      const nearTop = container.scrollTop <= 24;
+      if (scrollLockRef.current) return;
+      if (nearBottom && pageNumber < numPages) {
+        scrollLockRef.current = true;
+        setPageNumber((p) => Math.min(numPages, p + 1));
+        setTimeout(() => {
+          scrollLockRef.current = false;
+        }, 350);
+      } else if (nearTop && pageNumber > 1) {
+        scrollLockRef.current = true;
+        setPageNumber((p) => Math.max(1, p - 1));
+        setTimeout(() => {
+          scrollLockRef.current = false;
+        }, 350);
+      }
     };
 
     const node = containerRef.current;
@@ -230,6 +249,20 @@ export default function BookReaderPage() {
     persistProgress(1, 0);
   }
 
+  async function toggleFullscreen() {
+    const container = containerRef.current;
+    if (!container || typeof document === 'undefined') return;
+    try {
+      if (!document.fullscreenElement) {
+        await container.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (_) {
+      // ignore
+    }
+  }
+
   const progressPercent = computeProgressPercent();
 
   return (
@@ -242,6 +275,9 @@ export default function BookReaderPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button className="btn-secondary" type="button" onClick={() => router.back()}>
             Retour
+          </button>
+          <button className="btn-secondary" type="button" onClick={toggleFullscreen}>
+            Plein écran
           </button>
           <button className="btn-secondary" type="button" onClick={handleRestart}>
             Reprendre depuis le début
