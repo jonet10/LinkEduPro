@@ -166,8 +166,11 @@ export default function SuperDashboardPage() {
   const [aiEditForm, setAiEditForm] = useState({
     level: '',
     subject: '',
-    docType: ''
+    docType: '',
+    status: ''
   });
+  const [aiSearch, setAiSearch] = useState('');
+  const [aiSavedId, setAiSavedId] = useState(null);
   const [aiForm, setAiForm] = useState({
     level: 'NSIV',
     subject: '',
@@ -351,13 +354,14 @@ export default function SuperDashboardPage() {
     setAiEditForm({
       level: doc.level || 'GLOBAL',
       subject: doc.subject || '',
-      docType: doc.docType || 'RESOURCE'
+      docType: doc.docType || 'RESOURCE',
+      status: doc.status || 'READY'
     });
   }
 
   function cancelEditAiDoc() {
     setAiEditId(null);
-    setAiEditForm({ level: '', subject: '', docType: '' });
+    setAiEditForm({ level: '', subject: '', docType: '', status: '' });
   }
 
   async function saveEditAiDoc(id) {
@@ -371,11 +375,16 @@ export default function SuperDashboardPage() {
         body: JSON.stringify({
           level: aiEditForm.level,
           subject: aiEditForm.subject,
-          docType: aiEditForm.docType
+          docType: aiEditForm.docType,
+          status: aiEditForm.status
         })
       });
       await loadAiDocs(token);
       cancelEditAiDoc();
+      setAiSavedId(id);
+      setTimeout(() => {
+        setAiSavedId((current) => (current === id ? null : current));
+      }, 2500);
     } catch (e) {
       setAiError(e.message || 'Erreur modification document.');
     }
@@ -805,6 +814,22 @@ export default function SuperDashboardPage() {
               </button>
             </div>
           </div>
+          <div className="flex flex-wrap items-center gap-2 border-b border-brand-100 px-4 py-3">
+            <input
+              className="input flex-1 min-w-[220px]"
+              placeholder="Rechercher un fichier, matière, niveau..."
+              value={aiSearch}
+              onChange={(e) => setAiSearch(e.target.value)}
+            />
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => setAiSearch('')}
+              disabled={!aiSearch}
+            >
+              Effacer
+            </button>
+          </div>
           <div className={aiDocsExpanded ? 'max-h-[340px] overflow-auto' : 'hidden'}>
             <table className="min-w-full text-sm">
               <thead className="sticky top-0 z-[1] bg-brand-50 text-left text-xs uppercase tracking-wide text-brand-700">
@@ -824,7 +849,20 @@ export default function SuperDashboardPage() {
                     <td className="px-4 py-3 text-sm text-brand-700" colSpan="7">Aucun document pour le moment.</td>
                   </tr>
                 ) : (
-                  aiDocs.map((doc) => (
+                  aiDocs
+                    .filter((doc) => {
+                      const q = aiSearch.trim().toLowerCase();
+                      if (!q) return true;
+                      const haystack = [
+                        doc.fileName,
+                        doc.subject,
+                        doc.level,
+                        doc.docType,
+                        doc.status
+                      ].join(' ').toLowerCase();
+                      return haystack.includes(q);
+                    })
+                    .map((doc) => (
                     <tr key={doc.id} className="border-t border-brand-100">
                       <td className="px-4 py-3">
                         <div className="font-medium text-brand-900">{doc.fileName}</div>
@@ -867,9 +905,21 @@ export default function SuperDashboardPage() {
                         ) : doc.docType}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="rounded-full bg-brand-100 px-2 py-1 text-xs text-brand-800">
-                          {doc.status}
-                        </span>
+                        {aiEditId === doc.id ? (
+                          <select
+                            className="input"
+                            value={aiEditForm.status || doc.status}
+                            onChange={(e) => setAiEditForm((prev) => ({ ...prev, status: e.target.value }))}
+                          >
+                            {['READY', 'PROCESSING', 'FAILED'].map((status) => (
+                              <option key={status} value={status}>{status}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="rounded-full bg-brand-100 px-2 py-1 text-xs text-brand-800">
+                            {doc.status}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3">{formatBytes(doc.size)}</td>
                       <td className="px-4 py-3">
@@ -892,6 +942,9 @@ export default function SuperDashboardPage() {
                           </>
                         ) : (
                           <>
+                            {aiSavedId === doc.id ? (
+                              <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">Modifié</span>
+                            ) : null}
                             <button
                               className="btn-secondary"
                               type="button"
