@@ -545,8 +545,9 @@ export default function LibraryPage() {
   }
 
   function openPdfViewer(book) {
-    if (!book?.fileUrl) return;
-    const url = getStorageUrl(book.fileUrl);
+    const targetUrl = book?.secureViewUrl || book?.fileUrl;
+    if (!targetUrl) return;
+    const url = getStorageUrl(targetUrl);
     const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
 
     if (isMobileViewport && typeof window !== 'undefined') {

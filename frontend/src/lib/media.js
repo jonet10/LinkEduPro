@@ -32,9 +32,14 @@ export function resolveMediaUrl(url) {
     return raw;
   }
 
-  if (raw.startsWith('/')) {
-    return `${backendBaseUrl}${encodeURI(raw)}`;
+  const normalizedBase = backendBaseUrl.replace(/\/+$/, '');
+  if (normalizedBase.endsWith('/api') && raw.startsWith('/api/')) {
+    return `${normalizedBase.replace(/\/api$/, '')}${encodeURI(raw)}`;
   }
 
-  return `${backendBaseUrl}/${encodeURI(raw)}`;
+  if (raw.startsWith('/')) {
+    return `${normalizedBase}${encodeURI(raw)}`;
+  }
+
+  return `${normalizedBase}/${encodeURI(raw)}`;
 }
