@@ -121,8 +121,7 @@ export default function HeaderNav() {
     { href: '/study-plans', label: t.studyPlans, icon: '🗂️' },
     { href: '/subjects', label: t.trainingTest, icon: '🧪' },
     { href: '/blog', label: t.expertSolutions, icon: '✅' },
-    { href: '/search', label: t.studySearch, icon: '🔎' },
-    { href: '/partners', label: 'Partenaires', icon: '🤝' }
+    { href: '/search', label: t.studySearch, icon: '🔎' }
   ]), [t]);
 
   const publicTeacherTools = useMemo(() => ([
@@ -138,7 +137,6 @@ export default function HeaderNav() {
       { href: '/subjects', label: 'Quiz' },
       { href: '/probable-exercises', label: 'Examens passés' },
       { href: '/library', label: 'Bibliothèque' },
-      { href: '/partners', label: 'Compte partenaire' },
       { href: '/blog', label: 'Forum' },
       { href: '/support', label: 'Faire un Don' }
     ];

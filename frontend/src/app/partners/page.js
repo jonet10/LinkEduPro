@@ -202,20 +202,36 @@ export default function PartnersPage() {
     }
   }
 
+  if (!token) {
+    return (
+      <section className="space-y-6">
+        <header className="rounded-3xl border border-brand-100 bg-white/90 p-6 shadow-sm">
+          <p className="text-sm font-semibold text-brand-600">Compte partenaire</p>
+          <h1 className="mt-2 text-3xl font-black text-brand-900">Espace partenaire LinkEduPro</h1>
+          <p className="mt-3 text-sm text-brand-700">
+            Ce formulaire s&apos;affiche via un lien d&apos;inscription généré par un administrateur.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/login" className="btn-primary">Se connecter</Link>
+            <Link href="/tutor-partner" className="btn-secondary">Demander un accès partenaire</Link>
+          </div>
+        </header>
+      </section>
+    );
+  }
+
   return (
     <section className="space-y-8">
       <header className="rounded-3xl border border-brand-100 bg-white/90 p-6 shadow-sm">
         <p className="text-sm font-semibold text-brand-600">Compte partenaire</p>
-        <h1 className="mt-2 text-3xl font-black text-brand-900">Publier vos contenus éducatifs</h1>
+        <h1 className="mt-2 text-3xl font-black text-brand-900">Gérez vos contenus certifiants et publications</h1>
         <p className="mt-3 text-sm text-brand-700">
-          Les partenaires LinkEduPro peuvent être des écrivains, des écoles professionnelles/universités,
-          ou des ONG. Publiez des livres gratuits ou payants, et des modules de formation certifiante.
+          Publiez des livres, modules certifiants et annonces. Suivez vos ventes et vos performances.
         </p>
-        {!token ? (
-          <div className="mt-4">
-            <Link href="/login" className="btn-primary">Se connecter</Link>
-          </div>
-        ) : null}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <a href="#publish-training" className="btn-primary">Publier une formation</a>
+          <a href="#publish-book" className="btn-secondary">Publier un livre</a>
+        </div>
       </header>
 
       {loading ? (
@@ -229,168 +245,228 @@ export default function PartnersPage() {
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{success}</div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="space-y-4 rounded-3xl border border-brand-100 bg-white/90 p-6">
-          <h2 className="text-xl font-bold text-brand-900">Espace Écrivain / Éditeur</h2>
-          <p className="text-sm text-brand-700">
-            Publiez vos livres (PDF) gratuits ou payants et suivez vos ventes.
-          </p>
-
-          {!isPublisher ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-              Votre compte n&apos;est pas encore configuré comme éditeur. Contactez un administrateur
-              pour activer le statut partenaire.
-            </div>
-          ) : null}
-
-          {publisher ? (
-            <div className="flex items-center gap-4 rounded-2xl border border-brand-100 bg-brand-50/60 p-4">
-              {publisher.logo ? (
-                <img src={resolveMediaUrl(publisher.logo)} alt="Logo partenaire" className="h-12 w-12 rounded-full object-cover" />
-              ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-200 text-brand-900">
-                  {publisher.name?.slice(0, 2) || 'PR'}
-                </div>
-              )}
-              <div>
-                <p className="text-sm font-semibold text-brand-900">{publisher.name}</p>
-                <p className="text-xs text-brand-700">{publisher.type}</p>
-              </div>
-            </div>
-          ) : null}
-
-          {publisherSales ? (
-            <div className="grid gap-3 rounded-2xl border border-brand-100 bg-white p-4 text-sm text-brand-800 md:grid-cols-3">
-              <div>
-                <p className="text-xs text-brand-500">Ventes</p>
-                <p className="text-lg font-bold">{publisherSales.summary?.totalSales || 0}</p>
-              </div>
-              <div>
-                <p className="text-xs text-brand-500">Revenu net</p>
-                <p className="text-lg font-bold">{formatHtg(publisherSales.summary?.netRevenue)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-brand-500">Livres</p>
-                <p className="text-lg font-bold">{publisherSales.summary?.totalBooks || 0}</p>
-              </div>
-            </div>
-          ) : null}
-
-          <div className="space-y-3 rounded-2xl border border-brand-100 bg-white p-4">
-            <h3 className="text-lg font-semibold text-brand-900">Publier un livre</h3>
-            <div className="grid gap-3">
-              <input className="input" placeholder="Titre du livre" value={bookForm.title} onChange={(e) => setBookForm((p) => ({ ...p, title: e.target.value }))} />
-              <input className="input" placeholder="Auteur" value={bookForm.author} onChange={(e) => setBookForm((p) => ({ ...p, author: e.target.value }))} />
-              <input className="input" placeholder="Matière" value={bookForm.subject} onChange={(e) => setBookForm((p) => ({ ...p, subject: e.target.value }))} />
-              <select className="input" value={bookForm.level} onChange={(e) => setBookForm((p) => ({ ...p, level: e.target.value }))}>
-                {LEVEL_OPTIONS.map((lvl) => (
-                  <option key={lvl} value={lvl}>{lvl}</option>
-                ))}
-              </select>
-              <textarea className="input min-h-[120px]" placeholder="Description" value={bookForm.description} onChange={(e) => setBookForm((p) => ({ ...p, description: e.target.value }))} />
-              <label className="flex items-center gap-2 text-sm text-brand-700">
-                <input type="checkbox" checked={bookForm.isPaid} onChange={(e) => setBookForm((p) => ({ ...p, isPaid: e.target.checked }))} />
-                Livre payant
-              </label>
-              {bookForm.isPaid ? (
-                <input className="input" placeholder="Prix HTG" value={bookForm.price} onChange={(e) => setBookForm((p) => ({ ...p, price: e.target.value }))} />
-              ) : null}
-              <div className="grid gap-2 text-sm text-brand-700">
-                <label>Fichier PDF</label>
-                <input type="file" accept="application/pdf" onChange={(e) => setBookFile(e.target.files?.[0] || null)} />
-              </div>
-              <div className="grid gap-2 text-sm text-brand-700">
-                <label>Image de couverture (optionnel)</label>
-                <input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
-              </div>
-              <button className="btn-primary" type="button" onClick={submitBook} disabled={!isPublisher || submittingBook}>
-                {submittingBook ? 'Publication...' : 'Publier le livre'}
-              </button>
-            </div>
+      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+        <aside className="rounded-3xl border border-brand-100 bg-white/90 p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-brand-500">Espace partenaire</p>
+          <p className="mt-3 text-lg font-bold text-brand-900">{student?.firstName || 'Partenaire'}</p>
+          <p className="text-xs text-brand-600">{student?.email}</p>
+          <div className="mt-4 space-y-2">
+            {[
+              { href: '#dashboard', label: 'Tableau de bord' },
+              { href: '#books', label: 'Mes livres' },
+              { href: '#formations', label: 'Mes formations' },
+              { href: '#annonces', label: 'Mes annonces' },
+              { href: '#rendezvous', label: 'Mes rendez-vous' }
+            ].map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="flex items-center justify-between rounded-xl border border-brand-100 px-3 py-2 text-sm text-brand-800 hover:bg-brand-50"
+              >
+                {item.label}
+                <span className="text-brand-400">›</span>
+              </a>
+            ))}
           </div>
 
-          {books.length ? (
-            <div className="space-y-2 rounded-2xl border border-brand-100 bg-white p-4">
-              <h3 className="text-lg font-semibold text-brand-900">Mes livres</h3>
-              {books.slice(0, 6).map((book) => (
-                <div key={book.id} className="flex items-center justify-between rounded-xl border border-brand-100 px-3 py-2 text-sm">
-                  <div>
-                    <p className="font-semibold text-brand-900">{book.title}</p>
-                    <p className="text-xs text-brand-600">{book.subject} • {book.level}</p>
+          <div className="mt-6 rounded-2xl border border-brand-100 bg-brand-50/70 p-3 text-xs text-brand-700">
+            Type partenaire
+            <div className="mt-2 text-sm font-semibold text-brand-900">{publisher?.type || (isPublisher ? 'AUTHOR' : 'PARTNER')}</div>
+          </div>
+        </aside>
+
+        <main className="space-y-6">
+          <section id="dashboard" className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-brand-100 bg-white/90 p-4">
+              <p className="text-xs text-brand-500">Mes livres</p>
+              <p className="text-2xl font-bold text-brand-900">{books.length}</p>
+            </div>
+            <div className="rounded-2xl border border-brand-100 bg-white/90 p-4">
+              <p className="text-xs text-brand-500">Mes formations</p>
+              <p className="text-2xl font-bold text-brand-900">{contentItems.length}</p>
+            </div>
+            <div className="rounded-2xl border border-brand-100 bg-white/90 p-4">
+              <p className="text-xs text-brand-500">Revenu net</p>
+              <p className="text-2xl font-bold text-brand-900">{formatHtg(publisherSales?.summary?.netRevenue)}</p>
+            </div>
+          </section>
+
+          <section className="space-y-4 rounded-3xl border border-brand-100 bg-white/90 p-6">
+            <h2 className="text-xl font-bold text-brand-900">Espace Écrivain / Éditeur</h2>
+            <p className="text-sm text-brand-700">
+              Publiez vos livres (PDF) gratuits ou payants et suivez vos ventes.
+            </p>
+
+            {!isPublisher ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                Votre compte n&apos;est pas encore configuré comme éditeur. Contactez un administrateur
+                pour activer le statut partenaire.
+              </div>
+            ) : null}
+
+            {publisher ? (
+              <div className="flex items-center gap-4 rounded-2xl border border-brand-100 bg-brand-50/60 p-4">
+                {publisher.logo ? (
+                  <img src={resolveMediaUrl(publisher.logo)} alt="Logo partenaire" className="h-12 w-12 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-200 text-brand-900">
+                    {publisher.name?.slice(0, 2) || 'PR'}
                   </div>
-                  <span className="text-xs text-brand-700">{book.isPaid ? formatHtg(book.price) : 'Gratuit'}</span>
+                )}
+                <div>
+                  <p className="text-sm font-semibold text-brand-900">{publisher.name}</p>
+                  <p className="text-xs text-brand-700">{publisher.type}</p>
                 </div>
-              ))}
+              </div>
+            ) : null}
+
+            {publisherSales ? (
+              <div className="grid gap-3 rounded-2xl border border-brand-100 bg-white p-4 text-sm text-brand-800 md:grid-cols-3">
+                <div>
+                  <p className="text-xs text-brand-500">Ventes</p>
+                  <p className="text-lg font-bold">{publisherSales.summary?.totalSales || 0}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-brand-500">Revenu net</p>
+                  <p className="text-lg font-bold">{formatHtg(publisherSales.summary?.netRevenue)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-brand-500">Livres</p>
+                  <p className="text-lg font-bold">{publisherSales.summary?.totalBooks || 0}</p>
+                </div>
+              </div>
+            ) : null}
+
+            <div id="publish-book" className="space-y-3 rounded-2xl border border-brand-100 bg-white p-4">
+              <h3 className="text-lg font-semibold text-brand-900">Publier un livre</h3>
+              <div className="grid gap-3">
+                <input className="input" placeholder="Titre du livre" value={bookForm.title} onChange={(e) => setBookForm((p) => ({ ...p, title: e.target.value }))} />
+                <input className="input" placeholder="Auteur" value={bookForm.author} onChange={(e) => setBookForm((p) => ({ ...p, author: e.target.value }))} />
+                <input className="input" placeholder="Matière" value={bookForm.subject} onChange={(e) => setBookForm((p) => ({ ...p, subject: e.target.value }))} />
+                <select className="input" value={bookForm.level} onChange={(e) => setBookForm((p) => ({ ...p, level: e.target.value }))}>
+                  {LEVEL_OPTIONS.map((lvl) => (
+                    <option key={lvl} value={lvl}>{lvl}</option>
+                  ))}
+                </select>
+                <textarea className="input min-h-[120px]" placeholder="Description" value={bookForm.description} onChange={(e) => setBookForm((p) => ({ ...p, description: e.target.value }))} />
+                <label className="flex items-center gap-2 text-sm text-brand-700">
+                  <input type="checkbox" checked={bookForm.isPaid} onChange={(e) => setBookForm((p) => ({ ...p, isPaid: e.target.checked }))} />
+                  Livre payant
+                </label>
+                {bookForm.isPaid ? (
+                  <input className="input" placeholder="Prix HTG" value={bookForm.price} onChange={(e) => setBookForm((p) => ({ ...p, price: e.target.value }))} />
+                ) : null}
+                <div className="grid gap-2 text-sm text-brand-700">
+                  <label>Fichier PDF</label>
+                  <input type="file" accept="application/pdf" onChange={(e) => setBookFile(e.target.files?.[0] || null)} />
+                </div>
+                <div className="grid gap-2 text-sm text-brand-700">
+                  <label>Image de couverture (optionnel)</label>
+                  <input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
+                </div>
+                <button className="btn-primary" type="button" onClick={submitBook} disabled={!isPublisher || submittingBook}>
+                  {submittingBook ? 'Publication...' : 'Publier le livre'}
+                </button>
+              </div>
             </div>
-          ) : null}
-        </div>
 
-        <div className="space-y-4 rounded-3xl border border-brand-100 bg-white/90 p-6">
-          <h2 className="text-xl font-bold text-brand-900">Espace Formation certifiante</h2>
-          <p className="text-sm text-brand-700">
-            Publiez des modules certifiants (vidéos, PDF, quiz) pour les écoles, universités et ONG.
-          </p>
-
-          {!canPublishContent ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-              Ce module nécessite un compte Administrateur ou Enseignant. Contactez l&apos;équipe pour
-              activer les droits formation certifiante.
+            <div id="books" className="space-y-2 rounded-2xl border border-brand-100 bg-white p-4">
+              <h3 className="text-lg font-semibold text-brand-900">Mes livres</h3>
+              {books.length ? (
+                books.slice(0, 6).map((book) => (
+                  <div key={book.id} className="flex items-center justify-between rounded-xl border border-brand-100 px-3 py-2 text-sm">
+                    <div>
+                      <p className="font-semibold text-brand-900">{book.title}</p>
+                      <p className="text-xs text-brand-600">{book.subject} • {book.level}</p>
+                    </div>
+                    <span className="text-xs text-brand-700">{book.isPaid ? formatHtg(book.price) : 'Gratuit'}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-brand-600">Aucun livre pour le moment.</p>
+              )}
             </div>
-          ) : null}
+          </section>
 
-          <div className="space-y-3 rounded-2xl border border-brand-100 bg-white p-4">
-            <h3 className="text-lg font-semibold text-brand-900">Publier une formation</h3>
-            <div className="grid gap-3">
-              <input className="input" placeholder="Titre de la formation" value={contentForm.title} onChange={(e) => setContentForm((p) => ({ ...p, title: e.target.value }))} />
-              <textarea className="input min-h-[140px]" placeholder="Description / contenu principal" value={contentForm.body} onChange={(e) => setContentForm((p) => ({ ...p, body: e.target.value }))} />
-              <select className="input" value={contentForm.level} onChange={(e) => setContentForm((p) => ({ ...p, level: e.target.value }))}>
-                {LEVEL_OPTIONS.map((lvl) => (
-                  <option key={lvl} value={lvl}>{lvl}</option>
-                ))}
-              </select>
-              <select className="input" value={contentForm.type} onChange={(e) => setContentForm((p) => ({ ...p, type: e.target.value }))}>
-                {CONTENT_TYPES.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <label className="flex items-center gap-2 text-sm text-brand-700">
-                <input
-                  type="checkbox"
-                  checked={contentForm.isPaid}
-                  onChange={(e) => setContentForm((p) => ({ ...p, isPaid: e.target.checked }))}
-                />
-                Formation payante
-              </label>
-              {contentForm.isPaid ? (
-                <input
-                  className="input"
-                  placeholder="Prix HTG"
-                  value={contentForm.price}
-                  onChange={(e) => setContentForm((p) => ({ ...p, price: e.target.value }))}
-                />
-              ) : null}
-              <button className="btn-primary" type="button" onClick={submitContent} disabled={!canPublishContent || submittingContent}>
-                {submittingContent ? 'Publication...' : 'Soumettre la formation'}
-              </button>
+          <section id="formations" className="space-y-4 rounded-3xl border border-brand-100 bg-white/90 p-6">
+            <h2 className="text-xl font-bold text-brand-900">Espace Formation certifiante</h2>
+            <p className="text-sm text-brand-700">
+              Publiez des modules certifiants (vidéos, PDF, quiz) pour les écoles, universités et ONG.
+            </p>
+
+            {!canPublishContent ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                Ce module nécessite un compte Administrateur ou Enseignant. Contactez l&apos;équipe pour
+                activer les droits formation certifiante.
+              </div>
+            ) : null}
+
+            <div id="publish-training" className="space-y-3 rounded-2xl border border-brand-100 bg-white p-4">
+              <h3 className="text-lg font-semibold text-brand-900">Publier une formation</h3>
+              <div className="grid gap-3">
+                <input className="input" placeholder="Titre de la formation" value={contentForm.title} onChange={(e) => setContentForm((p) => ({ ...p, title: e.target.value }))} />
+                <textarea className="input min-h-[140px]" placeholder="Description / contenu principal" value={contentForm.body} onChange={(e) => setContentForm((p) => ({ ...p, body: e.target.value }))} />
+                <select className="input" value={contentForm.level} onChange={(e) => setContentForm((p) => ({ ...p, level: e.target.value }))}>
+                  {LEVEL_OPTIONS.map((lvl) => (
+                    <option key={lvl} value={lvl}>{lvl}</option>
+                  ))}
+                </select>
+                <select className="input" value={contentForm.type} onChange={(e) => setContentForm((p) => ({ ...p, type: e.target.value }))}>
+                  {CONTENT_TYPES.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <label className="flex items-center gap-2 text-sm text-brand-700">
+                  <input
+                    type="checkbox"
+                    checked={contentForm.isPaid}
+                    onChange={(e) => setContentForm((p) => ({ ...p, isPaid: e.target.checked }))}
+                  />
+                  Formation payante
+                </label>
+                {contentForm.isPaid ? (
+                  <input
+                    className="input"
+                    placeholder="Prix HTG"
+                    value={contentForm.price}
+                    onChange={(e) => setContentForm((p) => ({ ...p, price: e.target.value }))}
+                  />
+                ) : null}
+                <button className="btn-primary" type="button" onClick={submitContent} disabled={!canPublishContent || submittingContent}>
+                  {submittingContent ? 'Publication...' : 'Soumettre la formation'}
+                </button>
+              </div>
             </div>
-          </div>
 
-          {contentItems.length ? (
             <div className="space-y-2 rounded-2xl border border-brand-100 bg-white p-4">
               <h3 className="text-lg font-semibold text-brand-900">Mes formations</h3>
-              {contentItems.slice(0, 6).map((item) => (
-                <div key={item.id} className="rounded-xl border border-brand-100 px-3 py-2 text-sm">
-                  <p className="font-semibold text-brand-900">{item.title}</p>
-                  <p className="text-xs text-brand-600">{item.type?.toUpperCase()} • {item.level}</p>
-                  <p className="text-xs text-brand-500">Statut: {item.status}</p>
-                  <p className="text-xs text-brand-500">
-                    {item.isPaid ? `Payant • ${formatHtg(item.price)}` : 'Gratuit'}
-                  </p>
-                </div>
-              ))}
+              {contentItems.length ? (
+                contentItems.slice(0, 6).map((item) => (
+                  <div key={item.id} className="rounded-xl border border-brand-100 px-3 py-2 text-sm">
+                    <p className="font-semibold text-brand-900">{item.title}</p>
+                    <p className="text-xs text-brand-600">{item.type?.toUpperCase()} • {item.level}</p>
+                    <p className="text-xs text-brand-500">Statut: {item.status}</p>
+                    <p className="text-xs text-brand-500">
+                      {item.isPaid ? `Payant • ${formatHtg(item.price)}` : 'Gratuit'}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-brand-600">Aucune formation pour le moment.</p>
+              )}
             </div>
-          ) : null}
-        </div>
+          </section>
+
+          <section id="annonces" className="rounded-3xl border border-brand-100 bg-white/90 p-6">
+            <h2 className="text-xl font-bold text-brand-900">Mes annonces</h2>
+            <p className="text-sm text-brand-700">Section en préparation pour les annonces partenaires.</p>
+          </section>
+
+          <section id="rendezvous" className="rounded-3xl border border-brand-100 bg-white/90 p-6">
+            <h2 className="text-xl font-bold text-brand-900">Mes rendez-vous</h2>
+            <p className="text-sm text-brand-700">Section en préparation pour les rendez-vous et webinaires.</p>
+          </section>
+        </main>
       </div>
     </section>
   );

@@ -14,7 +14,6 @@ const footerSections = [
       { label: 'Our Mission', href: '/mission' },
       { label: 'Our Vision', href: '/vision' },
       { label: 'Our Team', href: '/team' },
-      { label: 'Partners', href: '/partners' },
       { label: 'Careers', href: '/careers' }
     ]
   },
