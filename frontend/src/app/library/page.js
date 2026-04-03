@@ -547,7 +547,13 @@ export default function LibraryPage() {
   function openPdfViewer(book) {
     const targetUrl = book?.secureViewUrl || book?.fileUrl;
     if (!targetUrl) return;
-    const url = getStorageUrl(targetUrl);
+    const rawUrl = getStorageUrl(targetUrl);
+    const authToken = getToken();
+    let url = rawUrl;
+    if (authToken && String(rawUrl || '').includes('/api/books/view/')) {
+      const joiner = rawUrl.includes('?') ? '&' : '?';
+      url = `${rawUrl}${joiner}token=${encodeURIComponent(authToken)}`;
+    }
     const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
 
     if (isMobileViewport && typeof window !== 'undefined') {
