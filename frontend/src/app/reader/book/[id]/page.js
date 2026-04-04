@@ -49,6 +49,7 @@ export default function BookReaderPage() {
   const [showResume, setShowResume] = useState(false);
   const [isBlurred, setIsBlurred] = useState(false);
   const [watermarkUrl, setWatermarkUrl] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     if (!token || !bookId) return;
@@ -69,6 +70,9 @@ export default function BookReaderPage() {
 
     const handleBlur = () => setIsBlurred(true);
     const handleFocus = () => setIsBlurred(false);
+    const handleFullscreen = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
     const handleKey = (event) => {
       if (event.ctrlKey || event.metaKey) {
         const key = event.key.toLowerCase();
@@ -82,10 +86,12 @@ export default function BookReaderPage() {
     window.addEventListener('blur', handleBlur);
     window.addEventListener('focus', handleFocus);
     window.addEventListener('keydown', handleKey, { capture: true });
+    document.addEventListener('fullscreenchange', handleFullscreen);
     return () => {
       window.removeEventListener('blur', handleBlur);
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('keydown', handleKey, { capture: true });
+      document.removeEventListener('fullscreenchange', handleFullscreen);
     };
   }, []);
 
@@ -380,7 +386,7 @@ export default function BookReaderPage() {
 
         <div
           ref={containerRef}
-          className="relative max-h-[75vh] overflow-auto rounded-3xl border border-slate-800 bg-slate-900/40 p-4"
+          className={`relative overflow-auto rounded-3xl border border-slate-800 bg-slate-900/40 p-4 ${isFullscreen ? 'h-[calc(100vh-140px)] max-h-none' : 'max-h-[75vh]'}`}
           onContextMenu={(e) => e.preventDefault()}
         >
           {loading ? <p className="text-sm text-slate-400">Chargement du document...</p> : null}
