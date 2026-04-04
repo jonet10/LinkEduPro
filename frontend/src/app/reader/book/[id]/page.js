@@ -139,7 +139,13 @@ export default function BookReaderPage() {
       try {
         const page = await pdfDoc.getPage(pageNumber);
         if (cancelled) return;
-        const viewport = page.getViewport({ scale });
+        const baseViewport = page.getViewport({ scale: 1 });
+        const containerWidth = containerRef.current?.clientWidth || baseViewport.width;
+        const targetScale = Math.min(2, Math.max(0.6, (containerWidth - 24) / baseViewport.width));
+        if (Number.isFinite(targetScale) && Math.abs(targetScale - scale) > 0.01) {
+          setScale(targetScale);
+        }
+        const viewport = page.getViewport({ scale: targetScale });
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
         if (!context) return;
@@ -353,7 +359,7 @@ export default function BookReaderPage() {
         >
           {loading ? <p className="text-sm text-slate-400">Chargement du document...</p> : null}
           <div className="relative flex justify-center">
-            <canvas ref={canvasRef} className="rounded-xl bg-white" />
+            <canvas ref={canvasRef} className="h-auto max-w-full rounded-xl bg-white" />
             {watermarkUrl ? (
               <div
                 className="pointer-events-none absolute inset-0"
