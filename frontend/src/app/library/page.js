@@ -546,7 +546,24 @@ export default function LibraryPage() {
 
   function openPdfViewer(book) {
     if (!book?.id) return;
-    router.push(`/reader/book/${book.id}`);
+    const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
+    if (isMobileViewport) {
+      router.push(`/reader/book/${book.id}`);
+      return;
+    }
+    const targetUrl = book?.secureViewUrl || book?.fileUrl;
+    if (!targetUrl) return;
+    const rawUrl = getStorageUrl(targetUrl);
+    const authToken = getToken();
+    let url = rawUrl;
+    if (authToken && String(rawUrl || '').includes('/api/books/view/')) {
+      const joiner = rawUrl.includes('?') ? '&' : '?';
+      url = `${rawUrl}${joiner}token=${encodeURIComponent(authToken)}`;
+    }
+    setPdfViewer({
+      title: book.title || 'Lecture PDF',
+      url
+    });
   }
 
   async function togglePdfFullscreen() {
