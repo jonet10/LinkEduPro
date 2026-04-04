@@ -227,12 +227,36 @@ export default function BookReaderPage() {
       }
     };
 
+    const wheelHandler = (event) => {
+      if (!containerRef.current) return;
+      const container = containerRef.current;
+      const nearBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 8;
+      const nearTop = container.scrollTop <= 8;
+      if (scrollLockRef.current) return;
+
+      if (event.deltaY > 0 && nearBottom && pageNumber < numPages) {
+        scrollLockRef.current = true;
+        setPageNumber((p) => Math.min(numPages, p + 1));
+        setTimeout(() => {
+          scrollLockRef.current = false;
+        }, 350);
+      } else if (event.deltaY < 0 && nearTop && pageNumber > 1) {
+        scrollLockRef.current = true;
+        setPageNumber((p) => Math.max(1, p - 1));
+        setTimeout(() => {
+          scrollLockRef.current = false;
+        }, 350);
+      }
+    };
+
     const node = containerRef.current;
     if (node) {
       node.addEventListener('scroll', scrollHandler);
+      node.addEventListener('wheel', wheelHandler, { passive: true });
     }
     return () => {
       if (node) node.removeEventListener('scroll', scrollHandler);
+      if (node) node.removeEventListener('wheel', wheelHandler);
     };
   }, [pageNumber]);
 
@@ -340,6 +364,28 @@ export default function BookReaderPage() {
                 }}
               />
             ) : null}
+          </div>
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex w-14 items-center justify-center">
+            <button
+              type="button"
+              className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-xl text-white backdrop-blur-sm transition hover:bg-white/20"
+              onClick={() => setPageNumber((p) => Math.max(1, p - 1))}
+              disabled={pageNumber <= 1}
+              aria-label="Page précédente"
+            >
+              ‹
+            </button>
+          </div>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex w-14 items-center justify-center">
+            <button
+              type="button"
+              className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-xl text-white backdrop-blur-sm transition hover:bg-white/20"
+              onClick={() => setPageNumber((p) => Math.min(numPages, p + 1))}
+              disabled={pageNumber >= numPages}
+              aria-label="Page suivante"
+            >
+              ›
+            </button>
           </div>
         </div>
 
