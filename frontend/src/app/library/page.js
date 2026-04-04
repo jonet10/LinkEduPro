@@ -550,7 +550,13 @@ export default function LibraryPage() {
       window.matchMedia('(max-width: 1024px)').matches ||
       window.matchMedia('(pointer: coarse)').matches
     );
-    if (isMobileViewport) {
+    const isStandalone = typeof window !== 'undefined' && (
+      window.matchMedia?.('(display-mode: standalone)')?.matches ||
+      window.navigator?.standalone === true
+    );
+    const isCapacitor = typeof window !== 'undefined' && Boolean(window.Capacitor);
+    const forceReader = isMobileViewport || isStandalone || isCapacitor;
+    if (forceReader) {
       router.push(`/reader/book/${book.id}`);
       return;
     }
