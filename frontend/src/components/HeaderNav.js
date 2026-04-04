@@ -412,6 +412,16 @@ export default function HeaderNav() {
   }, [isPublicMobileMenuOpen, mounted]);
 
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const isOpen = isMobileMenuOpen || isMobileNotifOpen || isPublicMobileMenuOpen;
+    if (isOpen) {
+      document.body.dataset.mobileNavOpen = '1';
+    } else {
+      delete document.body.dataset.mobileNavOpen;
+    }
+  }, [isMobileMenuOpen, isMobileNotifOpen, isPublicMobileMenuOpen]);
+
+  useEffect(() => {
     if (hidePublicMobileMenu) {
       setIsPublicMobileMenuOpen(false);
     }

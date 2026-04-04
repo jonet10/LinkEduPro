@@ -27,6 +27,7 @@ export default function AIChatWidget() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [input, setInput] = useState('');
+  const [navOpen, setNavOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -44,6 +45,17 @@ export default function AIChatWidget() {
       endRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }, [messages, open]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const updateState = () => {
+      setNavOpen(Boolean(document.body?.dataset?.mobileNavOpen));
+    };
+    updateState();
+    const observer = new MutationObserver(updateState);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-mobile-nav-open'] });
+    return () => observer.disconnect();
+  }, []);
 
   async function sendMessage() {
     const question = String(input || '').trim();
@@ -77,8 +89,12 @@ export default function AIChatWidget() {
     }
   }
 
+  const wrapperClass = `fixed z-[200] md:bottom-6 md:right-6 ${navOpen ? 'bottom-28 right-5' : 'bottom-20 right-5'}`;
+  const fabSizeClass = navOpen && !open ? 'h-10 w-10' : 'h-14 w-14';
+  const fabIconClass = navOpen && !open ? 'h-8 w-8' : 'h-12 w-12';
+
   return (
-    <div className="fixed bottom-6 right-6 z-[200] md:bottom-6 md:right-6 bottom-20 right-5">
+    <div className={wrapperClass}>
       {open ? (
         <div className="w-[320px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
           <div className="flex items-center justify-between bg-brand-700 px-4 py-3 text-white dark:bg-slate-800">
@@ -158,11 +174,11 @@ export default function AIChatWidget() {
       ) : (
         <button
           type="button"
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-transparent shadow-lg"
+          className={`flex ${fabSizeClass} items-center justify-center rounded-full bg-transparent shadow-lg transition`}
           onClick={() => setOpen(true)}
           aria-label="Ouvrir EduPro"
         >
-          <svg viewBox="0 0 64 64" className="h-12 w-12" aria-hidden="true">
+          <svg viewBox="0 0 64 64" className={fabIconClass} aria-hidden="true">
             <defs>
               <linearGradient id="edupro-bubble-fab" x1="0" x2="1" y1="0" y2="1">
                 <stop offset="0%" stopColor="#37E0D4" />
