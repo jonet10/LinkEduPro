@@ -42,6 +42,7 @@ export default function BookReaderPage() {
   const [pageNumber, setPageNumber] = useState(1);
   const [numPages, setNumPages] = useState(0);
   const [scale, setScale] = useState(1.2);
+  const [userScale, setUserScale] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [progress, setProgress] = useState(null);
@@ -141,7 +142,8 @@ export default function BookReaderPage() {
         if (cancelled) return;
         const baseViewport = page.getViewport({ scale: 1 });
         const containerWidth = containerRef.current?.clientWidth || baseViewport.width;
-        const targetScale = Math.min(2, Math.max(0.6, (containerWidth - 24) / baseViewport.width));
+        const fitScale = Math.min(2, Math.max(0.6, (containerWidth - 24) / baseViewport.width));
+        const targetScale = userScale ? Math.min(3, Math.max(0.6, userScale)) : fitScale;
         if (Number.isFinite(targetScale) && Math.abs(targetScale - scale) > 0.01) {
           setScale(targetScale);
         }
@@ -293,6 +295,24 @@ export default function BookReaderPage() {
     }
   }
 
+  function zoomIn() {
+    setUserScale((prev) => {
+      const current = prev || scale || 1;
+      return Math.min(3, Number((current + 0.2).toFixed(2)));
+    });
+  }
+
+  function zoomOut() {
+    setUserScale((prev) => {
+      const current = prev || scale || 1;
+      return Math.max(0.6, Number((current - 0.2).toFixed(2)));
+    });
+  }
+
+  function resetZoom() {
+    setUserScale(null);
+  }
+
   const progressPercent = computeProgressPercent();
 
   return (
@@ -335,7 +355,7 @@ export default function BookReaderPage() {
               Page suivante
             </button>
           </div>
-          <div className="flex items-center gap-3 text-sm text-slate-300">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
             <span>Page {pageNumber} / {numPages || 0}</span>
             <span>{progressPercent}%</span>
             <input
@@ -345,6 +365,12 @@ export default function BookReaderPage() {
               value={pageNumber}
               onChange={(e) => setPageNumber(Number(e.target.value))}
             />
+            <div className="flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/60 px-2 py-1 text-xs">
+              <button type="button" className="btn-secondary h-7 px-2" onClick={zoomOut}>-</button>
+              <span className="min-w-[48px] text-center">{Math.round((userScale || scale || 1) * 100)}%</span>
+              <button type="button" className="btn-secondary h-7 px-2" onClick={zoomIn}>+</button>
+              <button type="button" className="btn-secondary h-7 px-2" onClick={resetZoom}>Auto</button>
+            </div>
           </div>
         </div>
 
