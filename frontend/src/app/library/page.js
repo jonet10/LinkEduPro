@@ -546,7 +546,10 @@ export default function LibraryPage() {
 
   function openPdfViewer(book) {
     if (!book?.id) return;
-    const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
+    const isMobileViewport = typeof window !== 'undefined' && (
+      window.matchMedia('(max-width: 1024px)').matches ||
+      window.matchMedia('(pointer: coarse)').matches
+    );
     if (isMobileViewport) {
       router.push(`/reader/book/${book.id}`);
       return;
