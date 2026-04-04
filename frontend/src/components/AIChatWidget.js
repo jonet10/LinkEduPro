@@ -78,7 +78,7 @@ export default function AIChatWidget() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-[200]">
+    <div className="fixed bottom-6 right-6 z-[200] md:bottom-6 md:right-6 bottom-20 right-5">
       {open ? (
         <div className="w-[320px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
           <div className="flex items-center justify-between bg-brand-700 px-4 py-3 text-white dark:bg-slate-800">
