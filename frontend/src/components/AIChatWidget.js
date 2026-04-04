@@ -80,8 +80,8 @@ export default function AIChatWidget() {
   return (
     <div className="fixed bottom-6 right-6 z-[200]">
       {open ? (
-        <div className="w-[320px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-          <div className="flex items-center justify-between bg-brand-700 px-4 py-3 text-white">
+        <div className="w-[320px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+          <div className="flex items-center justify-between bg-brand-700 px-4 py-3 text-white dark:bg-slate-800">
             <div className="flex items-center gap-2">
               <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
                 <svg viewBox="0 0 64 64" className="h-7 w-7" aria-hidden="true">
@@ -121,8 +121,8 @@ export default function AIChatWidget() {
                 <div
                   className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                     msg.role === 'user'
-                      ? 'bg-brand-600 text-white'
-                      : 'bg-slate-100 text-slate-700'
+                      ? 'bg-brand-600 text-white dark:bg-brand-500'
+                      : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
                   }`}
                 >
                   {msg.content}
@@ -132,7 +132,7 @@ export default function AIChatWidget() {
             <div ref={endRef} />
           </div>
 
-          <div className="border-t border-slate-100 px-3 py-3">
+          <div className="border-t border-slate-100 px-3 py-3 dark:border-slate-800">
             <div className="flex items-center gap-2">
               <input
                 value={input}
@@ -141,12 +141,12 @@ export default function AIChatWidget() {
                   if (e.key === 'Enter') sendMessage();
                 }}
                 placeholder="Posez une question..."
-                className="flex-1 rounded-full border border-slate-200 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+                className="flex-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-brand-400 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-400"
                 disabled={busy}
               />
               <button
                 type="button"
-                className="rounded-full bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+                className="rounded-full bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:opacity-60 dark:bg-brand-500 dark:hover:bg-brand-400"
                 onClick={sendMessage}
                 disabled={busy}
               >
