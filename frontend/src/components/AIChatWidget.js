@@ -28,12 +28,7 @@ export default function AIChatWidget() {
   const [busy, setBusy] = useState(false);
   const [input, setInput] = useState('');
   const [navOpen, setNavOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: 'Bonjou! Mwen se asistan LinkEduPro. Kijan mwen ka ede w jodi a?'
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
 
   const endRef = useRef(null);
   const student = useMemo(() => getStudent(), [open]);
