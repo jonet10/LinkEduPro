@@ -57,6 +57,7 @@ export default function AIChatWidget() {
     if (!question || busy) return;
 
     const nextMessages = [...messages, { role: 'user', content: question }];
+    const isFirstMessage = messages.length === 0;
     setMessages(nextMessages);
     setInput('');
     setBusy(true);
@@ -65,7 +66,8 @@ export default function AIChatWidget() {
       const payload = {
         question,
         role: resolveRole(student),
-        history: normalizeHistory(nextMessages)
+        history: normalizeHistory(nextMessages),
+        isFirstMessage
       };
       const data = await apiClient('/ai/ask-docs', {
         method: 'POST',
