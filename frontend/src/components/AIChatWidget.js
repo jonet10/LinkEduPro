@@ -28,6 +28,7 @@ export default function AIChatWidget() {
   const [busy, setBusy] = useState(false);
   const [input, setInput] = useState('');
   const [navOpen, setNavOpen] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const [messages, setMessages] = useState([]);
 
   const endRef = useRef(null);
@@ -49,6 +50,17 @@ export default function AIChatWidget() {
     updateState();
     const observer = new MutationObserver(updateState);
     observer.observe(document.body, { attributes: true, attributeFilter: ['data-mobile-nav-open'] });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const updateTheme = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    updateTheme();
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     return () => observer.disconnect();
   }, []);
 
@@ -154,7 +166,11 @@ export default function AIChatWidget() {
                   if (e.key === 'Enter') sendMessage();
                 }}
                 placeholder="Posez une question..."
-                className="flex-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-brand-400 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-400"
+                className={`flex-1 rounded-full border px-3 py-2 text-sm focus:border-brand-400 focus:outline-none ${
+                  isDark
+                    ? 'border-slate-700 bg-slate-900 text-slate-200 placeholder:text-slate-400'
+                    : 'border-slate-200 bg-white text-slate-700 placeholder:text-slate-400'
+                }`}
                 disabled={busy}
               />
               <button
