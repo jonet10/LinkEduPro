@@ -84,8 +84,14 @@ export default function FormationDetailPage({ params }) {
       <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white">Certifiante</span>
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
-            Bientôt disponible
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              formation.status === 'open'
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-amber-100 text-amber-700'
+            }`}
+          >
+            {formation.status === 'open' ? 'Ouverte' : 'Bientôt disponible'}
           </span>
         </div>
         <h1 className="mt-3 text-2xl font-bold text-slate-900">{formation.title}</h1>
@@ -111,13 +117,13 @@ export default function FormationDetailPage({ params }) {
         <div className="mt-5">
           <button
             type="button"
-            disabled={formation.enrolled || actionLoading}
+            disabled={formation.enrolled || actionLoading || formation.status !== 'open'}
             onClick={enroll}
             className={`rounded-full px-4 py-2 text-sm font-semibold ${
               formation.enrolled ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-700 text-white'
             }`}
           >
-            {formation.enrolled ? 'Déjà inscrit' : 'Participer à la formation'}
+            {formation.enrolled ? 'Déjà inscrit' : (formation.status === 'open' ? 'Participer à la formation' : 'Bientôt disponible')}
           </button>
         </div>
 

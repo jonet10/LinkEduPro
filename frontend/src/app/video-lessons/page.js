@@ -224,7 +224,7 @@ export default function VideoLessonsPage() {
 
       <section className="mx-auto w-full max-w-6xl px-4 pb-2">
         <div className="rounded-3xl border border-blue-100 bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">Formations certifiantes</p>
               <h2 className="mt-2 text-2xl font-bold text-slate-900">Formations Certifiantes</h2>
@@ -232,9 +232,9 @@ export default function VideoLessonsPage() {
                 Découvrez nos parcours certifiants et confirmez votre participation.
               </p>
             </div>
-            <span className="rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700">
-              Bientôt disponible
-            </span>
+              <span className="rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700">
+                Bientôt disponible
+              </span>
           </div>
 
           {formationsLoading ? <p className="mt-4 text-sm text-slate-500">Chargement...</p> : null}
@@ -254,10 +254,16 @@ export default function VideoLessonsPage() {
               <div key={formation.id} className="mt-6 grid gap-6 rounded-2xl border border-slate-100 bg-slate-50 p-6 md:grid-cols-[1.2fr_0.8fr]">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white">Certifiante</span>
-                    <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
-                      Bientôt disponible
-                    </span>
+                  <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white">Certifiante</span>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      formation.status === 'open'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-amber-100 text-amber-700'
+                    }`}
+                  >
+                    {formation.status === 'open' ? 'Ouverte' : 'Bientôt disponible'}
+                  </span>
                   </div>
                   <h3 className="mt-3 text-xl font-bold text-slate-900">{formation.title}</h3>
                   <p className="mt-2 text-sm text-slate-600">{formation.shortDescription}</p>
@@ -273,10 +279,10 @@ export default function VideoLessonsPage() {
                     className={`rounded-full px-4 py-2 text-sm font-semibold ${
                       formation.enrolled ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-700 text-white'
                     }`}
-                    disabled={formation.enrolled || actionLoading}
+                    disabled={formation.enrolled || actionLoading || formation.status !== 'open'}
                     onClick={() => enrollFormation(formation.id)}
                   >
-                    {formation.enrolled ? 'Déjà inscrit' : 'Je participe'}
+                    {formation.enrolled ? 'Déjà inscrit' : (formation.status === 'open' ? 'Je participe' : 'Bientôt disponible')}
                   </button>
                   <button
                     type="button"

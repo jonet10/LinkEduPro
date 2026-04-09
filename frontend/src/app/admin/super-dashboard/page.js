@@ -1738,6 +1738,7 @@ export default function SuperDashboardPage() {
                 <th className="px-3 py-2">École</th>
                 <th className="px-3 py-2">Niveau</th>
                 <th className="px-3 py-2">Statut</th>
+                <th className="px-3 py-2">Progression</th>
                 <th className="px-3 py-2">Date</th>
               </tr>
             </thead>
@@ -1750,6 +1751,7 @@ export default function SuperDashboardPage() {
                   <td className="px-3 py-2 text-brand-700">{row.user?.school || '-'}</td>
                   <td className="px-3 py-2 text-brand-700">{row.user?.gradeLevel || '-'}</td>
                   <td className="px-3 py-2 text-brand-700">{row.status}</td>
+                  <td className="px-3 py-2 text-brand-700">{row.progressPercent ?? 0}%</td>
                   <td className="px-3 py-2 text-brand-700">
                     {row.createdAt ? new Date(row.createdAt).toLocaleDateString('fr-FR') : '-'}
                   </td>
@@ -1757,7 +1759,7 @@ export default function SuperDashboardPage() {
               ))}
               {!formationParticipants.length ? (
                 <tr>
-                  <td className="px-3 py-3 text-center text-brand-600" colSpan={5}>
+                  <td className="px-3 py-3 text-center text-brand-600" colSpan={6}>
                     Aucun participant pour l’instant.
                   </td>
                 </tr>
