@@ -146,7 +146,7 @@ export default function AIChatWidget() {
                 <div
                   className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                     msg.role === 'user'
-                      ? 'bg-brand-600 text-white dark:bg-brand-500'
+                      ? 'bg-blue-600 text-white dark:bg-blue-500'
                       : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
                   }`}
                 >
