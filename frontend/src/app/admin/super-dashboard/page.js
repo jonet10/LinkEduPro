@@ -178,6 +178,11 @@ export default function SuperDashboardPage() {
     docType: 'RESOURCE',
     files: []
   });
+  const [formations, setFormations] = useState([]);
+  const [formationParticipants, setFormationParticipants] = useState([]);
+  const [formationFilter, setFormationFilter] = useState('');
+  const [formationLoading, setFormationLoading] = useState(false);
+  const [formationError, setFormationError] = useState('');
 
   useEffect(() => {
     const token = getToken();
@@ -202,6 +207,11 @@ export default function SuperDashboardPage() {
   useEffect(() => {
     if (!authToken) return;
     loadAiDocs(authToken);
+  }, [authToken]);
+
+  useEffect(() => {
+    if (!authToken) return;
+    loadFormations(authToken);
   }, [authToken]);
 
   async function loadPendingVideos(forcedToken = null) {
@@ -346,6 +356,66 @@ export default function SuperDashboardPage() {
       setAiError(e.message || 'Erreur suppression document.');
     } finally {
       setAiDeleteId(null);
+    }
+  }
+
+  async function loadFormations(token) {
+    setFormationError('');
+    setFormationLoading(true);
+    try {
+      const data = await apiClient('/formations', { token });
+      const list = Array.isArray(data.formations) ? data.formations : [];
+      setFormations(list);
+      const defaultId = formationFilter || (list[0]?.id || '');
+      if (defaultId) {
+        setFormationFilter(defaultId);
+        await loadFormationParticipants(token, defaultId);
+      } else {
+        setFormationParticipants([]);
+      }
+    } catch (e) {
+      setFormationError(e.message || 'Impossible de charger les formations.');
+      setFormations([]);
+      setFormationParticipants([]);
+    } finally {
+      setFormationLoading(false);
+    }
+  }
+
+  async function loadFormationParticipants(token, formationId) {
+    if (!formationId) return;
+    setFormationError('');
+    setFormationLoading(true);
+    try {
+      const data = await apiClient(`/formations/admin/participants?formationId=${formationId}`, { token });
+      setFormationParticipants(Array.isArray(data.participants) ? data.participants : []);
+    } catch (e) {
+      setFormationError(e.message || 'Impossible de charger les participants.');
+      setFormationParticipants([]);
+    } finally {
+      setFormationLoading(false);
+    }
+  }
+
+  async function downloadFormationCsv() {
+    const token = getToken();
+    if (!token || !formationFilter) return;
+    try {
+      setFormationError('');
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/formations/admin/participants?formationId=${formationFilter}&format=csv`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error('Export CSV indisponible.');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `participants-${formationFilter}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      setFormationError(e.message || 'Erreur export CSV.');
     }
   }
 
@@ -1622,6 +1692,76 @@ export default function SuperDashboardPage() {
                   <td>{i.used ? 'Oui' : 'Non'}</td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section className="card">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-semibold text-brand-900">Participants aux formations</h2>
+            <p className="text-sm text-brand-600">Suivi des inscriptions aux formations certifiantes.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              className="input"
+              value={formationFilter}
+              onChange={(e) => {
+                const value = e.target.value;
+                setFormationFilter(value);
+                const token = getToken();
+                if (token) loadFormationParticipants(token, value);
+              }}
+            >
+              {formations.map((formation) => (
+                <option key={formation.id} value={formation.id}>{formation.title}</option>
+              ))}
+            </select>
+            <button className="btn-secondary" onClick={downloadFormationCsv} disabled={!formationFilter}>
+              Export CSV
+            </button>
+          </div>
+        </div>
+
+        {formationLoading ? <p className="mt-4 text-sm text-brand-600">Chargement...</p> : null}
+        {formationError ? (
+          <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {formationError}
+          </div>
+        ) : null}
+
+        <div className="mt-4 overflow-hidden rounded-2xl border border-brand-100 bg-white">
+          <table className="w-full text-sm">
+            <thead className="bg-brand-50 text-left text-xs uppercase text-brand-600">
+              <tr>
+                <th className="px-3 py-2">Nom</th>
+                <th className="px-3 py-2">École</th>
+                <th className="px-3 py-2">Niveau</th>
+                <th className="px-3 py-2">Statut</th>
+                <th className="px-3 py-2">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {formationParticipants.map((row) => (
+                <tr key={row.id} className="border-t border-brand-100">
+                  <td className="px-3 py-2 font-medium text-brand-900">
+                    {row.user?.firstName} {row.user?.lastName}
+                  </td>
+                  <td className="px-3 py-2 text-brand-700">{row.user?.school || '-'}</td>
+                  <td className="px-3 py-2 text-brand-700">{row.user?.gradeLevel || '-'}</td>
+                  <td className="px-3 py-2 text-brand-700">{row.status}</td>
+                  <td className="px-3 py-2 text-brand-700">
+                    {row.createdAt ? new Date(row.createdAt).toLocaleDateString('fr-FR') : '-'}
+                  </td>
+                </tr>
+              ))}
+              {!formationParticipants.length ? (
+                <tr>
+                  <td className="px-3 py-3 text-center text-brand-600" colSpan={5}>
+                    Aucun participant pour l’instant.
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>
