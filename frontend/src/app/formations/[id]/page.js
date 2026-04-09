@@ -114,18 +114,25 @@ export default function FormationDetailPage({ params }) {
           </div>
         ) : null}
 
-        <div className="mt-5">
-          <button
-            type="button"
-            disabled={formation.enrolled || actionLoading || formation.status !== 'open'}
-            onClick={enroll}
-            className={`rounded-full px-4 py-2 text-sm font-semibold ${
-              formation.enrolled ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-700 text-white'
-            }`}
-          >
-            {formation.enrolled ? 'Déjà inscrit' : (formation.status === 'open' ? 'Participer à la formation' : 'Bientôt disponible')}
-          </button>
-        </div>
+      <div className="mt-5">
+        <button
+          type="button"
+          disabled={formation.enrolled || actionLoading || formation.status !== 'open'}
+          onClick={enroll}
+          className={`rounded-full px-4 py-2 text-sm font-semibold ${
+            formation.enrolled ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-700 text-white'
+          }`}
+        >
+          {formation.enrolled ? 'Déjà inscrit' : (formation.status === 'open' ? 'Participer à la formation' : 'Bientôt disponible')}
+        </button>
+        <button
+          type="button"
+          className="ml-3 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600"
+          onClick={() => router.push('/formations/progress')}
+        >
+          Voir ma progression
+        </button>
+      </div>
 
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           <div>
