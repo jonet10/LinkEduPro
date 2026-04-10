@@ -195,26 +195,39 @@ export default function VideoLessonsPage() {
     }
   }
 
+  const courseCounts = useMemo(() => {
+    const totals = {
+      status: { OPEN: 0, UPCOMING: 0, ARCHIVED: 0 },
+      language: { Français: 0, Anglais: 0, Créole: 0 },
+      type: {}
+    };
+    courses.forEach((course) => {
+      const status = String(course.status || '').toUpperCase();
+      if (totals.status[status] !== undefined) totals.status[status] += 1;
+      const lang = course.language || '';
+      if (totals.language[lang] !== undefined) totals.language[lang] += 1;
+      const type = course.category || course.type || '';
+      if (type) totals.type[type] = (totals.type[type] || 0) + 1;
+    });
+    return totals;
+  }, [courses]);
+
   return (
-    <main className="min-h-screen bg-slate-50">
-      <section className="bg-gradient-to-r from-blue-700 via-blue-800 to-blue-900 px-4 py-10 text-white">
+    <main className="min-h-screen bg-white">
+      <section className="bg-blue-700 px-4 py-8 text-white">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-200">Classe numérique</p>
-            <h1 className="mt-2 text-3xl font-black md:text-4xl">Trouver un cours en ligne</h1>
-            <p className="mt-2 max-w-xl text-sm text-blue-100">
-              Inscrivez-vous à un parcours certifiant. Le certificat est généré automatiquement à la fin du cours.
-            </p>
+            <h1 className="text-2xl font-extrabold md:text-3xl">Trouver un cours en ligne</h1>
           </div>
           <div className="w-full max-w-xl">
-            <div className="flex items-center gap-3 rounded-full bg-white/10 p-2 backdrop-blur">
+            <div className="flex items-center gap-3 rounded-full bg-white px-3 py-2 text-blue-900 shadow-sm">
               <input
-                className="w-full bg-transparent px-4 py-2 text-sm text-white placeholder:text-blue-200 focus:outline-none"
-                placeholder="Recherche des cours, établissements, catégories"
+                className="w-full bg-transparent px-3 py-1 text-sm text-blue-900 placeholder:text-blue-500 focus:outline-none"
+                placeholder="Recherche des cours, établissements, des catégories"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
-              <button className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-blue-900">
+              <button className="rounded-full bg-blue-900 px-4 py-2 text-xs font-semibold text-white">
                 Rechercher
               </button>
             </div>
@@ -299,11 +312,11 @@ export default function VideoLessonsPage() {
       </section>
 
       <section className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[260px_1fr]">
-        <aside className="rounded-2xl bg-white p-4 shadow-sm">
+        <aside className="rounded-2xl border border-slate-100 bg-white p-4">
           <h2 className="text-sm font-bold text-slate-800">Filtrer les cours</h2>
           <button
             type="button"
-            className="mt-3 w-full rounded-full bg-red-50 px-3 py-2 text-xs font-semibold text-red-600"
+            className="mt-3 w-full rounded-full bg-red-100 px-3 py-2 text-xs font-semibold text-red-700"
             onClick={() => {
               setStatusFilter('OPEN');
               setLanguageFilter('');
@@ -314,19 +327,23 @@ export default function VideoLessonsPage() {
             Retirer les filtres
           </button>
 
-          <div className="mt-4 space-y-3 text-sm">
+          <div className="mt-5 space-y-4 text-sm">
             <div>
               <p className="font-semibold text-slate-700">Disponibilité</p>
               <div className="mt-2 space-y-2">
                 {STATUS_OPTIONS.map((status) => (
-                  <label key={status.value} className="flex items-center gap-2 text-slate-600">
-                    <input
-                      type="radio"
-                      name="status"
-                      checked={statusFilter === status.value}
-                      onChange={() => setStatusFilter(status.value)}
-                    />
-                    {status.label}
+                  <label key={status.value} className="flex items-center justify-between text-slate-600">
+                    <span className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={statusFilter === status.value}
+                        onChange={() => setStatusFilter(status.value)}
+                      />
+                      {status.label}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      {(courseCounts.status[status.value] || 0)}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -336,47 +353,37 @@ export default function VideoLessonsPage() {
               <p className="font-semibold text-slate-700">Langues</p>
               <div className="mt-2 space-y-2">
                 {['Français', 'Anglais', 'Créole'].map((lang) => (
-                  <label key={lang} className="flex items-center gap-2 text-slate-600">
-                    <input
-                      type="radio"
-                      name="language"
-                      checked={languageFilter === lang}
-                      onChange={() => setLanguageFilter(lang)}
-                    />
-                    {lang}
+                  <label key={lang} className="flex items-center justify-between text-slate-600">
+                    <span className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={languageFilter === lang}
+                        onChange={() => setLanguageFilter(lang)}
+                      />
+                      {lang}
+                    </span>
+                    <span className="text-xs text-slate-400">{courseCounts.language[lang] || 0}</span>
                   </label>
                 ))}
-                <button
-                  type="button"
-                  className="text-xs font-semibold text-blue-600"
-                  onClick={() => setLanguageFilter('')}
-                >
-                  Toutes les langues
-                </button>
               </div>
             </div>
 
             <div>
               <p className="font-semibold text-slate-700">Types</p>
               <div className="mt-2 space-y-2">
-                {['Formation professionnelle', 'Classe numérique', 'Pédagogie', 'Examens'].map((type) => (
-                  <label key={type} className="flex items-center gap-2 text-slate-600">
-                    <input
-                      type="radio"
-                      name="type"
-                      checked={typeFilter === type}
-                      onChange={() => setTypeFilter(type)}
-                    />
-                    {type}
+                {['Formation professionnelle', 'Certificat', 'Classe numérique', 'Examens'].map((type) => (
+                  <label key={type} className="flex items-center justify-between text-slate-600">
+                    <span className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={typeFilter === type}
+                        onChange={() => setTypeFilter(type)}
+                      />
+                      {type}
+                    </span>
+                    <span className="text-xs text-slate-400">{courseCounts.type[type] || 0}</span>
                   </label>
                 ))}
-                <button
-                  type="button"
-                  className="text-xs font-semibold text-blue-600"
-                  onClick={() => setTypeFilter('')}
-                >
-                  Tous les types
-                </button>
               </div>
             </div>
           </div>
@@ -385,16 +392,8 @@ export default function VideoLessonsPage() {
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-slate-600">
-              Résultats {filteredCourses.length} cours correspondant à votre recherche
+              Résultats 1 à {filteredCourses.length} sur {courses.length} cours correspondant à votre recherche
             </p>
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <span className="rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700">
-                Certificat automatique
-              </span>
-              <span className="rounded-full bg-blue-100 px-3 py-1 font-semibold text-blue-700">
-                Inscription immédiate
-              </span>
-            </div>
           </div>
 
           {error ? (
@@ -415,73 +414,50 @@ export default function VideoLessonsPage() {
               const certificateReady = course.certificate && progress >= 100;
               const banner = course.thumbnail || pickFallbackImage(index);
               return (
-                <article key={course.id} className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-                  <div className="relative h-40 bg-gradient-to-br from-blue-200 via-blue-100 to-white">
+                <article key={course.id} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+                  <div className="relative h-40 bg-slate-100">
                     <div
-                      className="absolute inset-0 bg-cover bg-center opacity-90"
+                      className="absolute inset-0 bg-cover bg-center"
                       style={{ backgroundImage: `url(${banner})` }}
                     />
-                    <div className="absolute left-3 top-3 rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white">
-                      {course.category || 'Micro-certification'}
-                    </div>
-                    <div className="absolute right-3 bottom-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700">
-                      {course.level || 'Tous niveaux'}
-                    </div>
                   </div>
 
                   <div className="p-4">
-                    <p className="text-xs font-semibold text-slate-500">{course.provider || 'EduPro'}</p>
-                    <h3 className="mt-1 text-lg font-bold text-slate-900">{course.title}</h3>
-                    <div className="mt-3 flex items-center justify-between text-xs text-slate-600">
-                      <span>{formatStatus(String(course.status || '').toUpperCase())}</span>
-                      <span>{course.language || 'Français'}</span>
-                    </div>
+                    <h3 className="text-sm font-bold text-slate-900">{course.title}</h3>
+                    <p className="mt-2 text-xs text-slate-500">{course.provider || 'EduPro'}</p>
+                  </div>
 
-                    <div className="mt-3">
-                      <div className="h-2 w-full rounded-full bg-slate-100">
-                        <div
-                          className="h-2 rounded-full bg-blue-600"
-                          style={{ width: formatPercent(progress) }}
-                        />
-                      </div>
-                      <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
-                        <span>Progression</span>
-                        <span>{formatPercent(progress)}</span>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-xs text-slate-600">
+                    <span className="font-semibold">{formatPrice(course.isFree)}</span>
+                    {enrolled ? (
+                      <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-700">
+                        Inscrit
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={actionLoading}
+                        className="rounded-full bg-blue-700 px-3 py-1 text-[10px] font-semibold text-white disabled:opacity-60"
+                        onClick={() => enroll(course.id)}
+                      >
+                        S&apos;inscrire
+                      </button>
+                    )}
+                  </div>
 
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-sm font-bold text-emerald-700">{formatPrice(course.isFree)}</span>
-                      {enrolled ? (
-                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-                          Inscrit
-                        </span>
-                      ) : (
-                        <button
-                          type="button"
-                          disabled={actionLoading}
-                          className="rounded-full bg-blue-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-60"
-                          onClick={() => enroll(course.id)}
-                        >
-                          S&apos;inscrire
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500">
-                      <span>{course.certificate ? 'Certificat auto' : 'Certificat indisponible'}</span>
-                      {certificateReady ? (
-                        <button
-                          type="button"
-                          className="rounded-full bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white"
-                          onClick={() => downloadCertificate(course.id)}
-                        >
-                          Télécharger
-                        </button>
-                      ) : (
-                        <span>{certificateReady ? 'Disponible' : 'Après complétion'}</span>
-                      )}
-                    </div>
+                  <div className="flex items-center justify-between bg-red-600 px-4 py-2 text-[11px] font-semibold text-white">
+                    <span>{formatStatus(String(course.status || '').toUpperCase())}</span>
+                    {certificateReady ? (
+                      <button
+                        type="button"
+                        className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold text-white"
+                        onClick={() => downloadCertificate(course.id)}
+                      >
+                        Certificat
+                      </button>
+                    ) : (
+                      <span>Ouvert à inscription</span>
+                    )}
                   </div>
                 </article>
               );
