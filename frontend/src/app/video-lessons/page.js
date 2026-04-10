@@ -314,6 +314,80 @@ export default function VideoLessonsPage() {
         </aside>
 
         <div className="space-y-4">
+          <div className="rounded-2xl border border-blue-100 bg-white p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">Formations certifiantes</p>
+                <h2 className="mt-2 text-lg font-bold text-slate-900">Formations Certifiantes</h2>
+                <p className="mt-1 text-xs text-slate-600">
+                  Découvrez nos parcours certifiants et confirmez votre participation.
+                </p>
+              </div>
+              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                Bientôt disponible
+              </span>
+            </div>
+
+            {formationsLoading ? <p className="mt-4 text-xs text-slate-500">Chargement...</p> : null}
+            {formationError ? (
+              <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                {formationError}
+              </div>
+            ) : null}
+            {formationMessage ? (
+              <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+                {formationMessage}
+              </div>
+            ) : null}
+
+            {!formationsLoading && formations.length ? (
+              formations.map((formation) => (
+                <div key={formation.id} className="mt-4 grid gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 md:grid-cols-[1.2fr_0.8fr]">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-emerald-600 px-2 py-1 text-[11px] font-semibold text-white">Certifiante</span>
+                      <span
+                        className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
+                          formation.status === 'open'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-amber-100 text-amber-700'
+                        }`}
+                      >
+                        {formation.status === 'open' ? 'Ouverte' : 'Bientôt disponible'}
+                      </span>
+                    </div>
+                    <h3 className="mt-2 text-sm font-bold text-slate-900">{formation.title}</h3>
+                    <p className="mt-1 text-xs text-slate-600">{formation.shortDescription}</p>
+                    <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-600">
+                      <span>Durée : {formation.durationWeeks}</span>
+                      <span>Modules : {formation.modulesCount}</span>
+                      <span>{formation.participantsCount || 0} participants</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-start gap-2">
+                    <button
+                      type="button"
+                      className={`rounded-full px-3 py-2 text-xs font-semibold ${
+                        formation.enrolled ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-700 text-white'
+                      }`}
+                      disabled={formation.enrolled || actionLoading || formation.status !== 'open'}
+                      onClick={() => enrollFormation(formation.id)}
+                    >
+                      {formation.enrolled ? 'Déjà inscrit' : (formation.status === 'open' ? 'Je participe' : 'Bientôt disponible')}
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-full border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700"
+                      onClick={() => router.push(`/formations/${formation.id}`)}
+                    >
+                      Voir les détails
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : null}
+          </div>
+
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-slate-600">
               Résultats 1 à {filteredCourses.length} sur {courses.length} cours correspondant à votre recherche
@@ -390,81 +464,6 @@ export default function VideoLessonsPage() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 pb-12">
-        <div className="rounded-3xl border border-blue-100 bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">Formations certifiantes</p>
-              <h2 className="mt-2 text-2xl font-bold text-slate-900">Formations Certifiantes</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Découvrez nos parcours certifiants et confirmez votre participation.
-              </p>
-            </div>
-            <span className="rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700">
-              Bientôt disponible
-            </span>
-          </div>
-
-          {formationsLoading ? <p className="mt-4 text-sm text-slate-500">Chargement...</p> : null}
-          {formationError ? (
-            <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {formationError}
-            </div>
-          ) : null}
-          {formationMessage ? (
-            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              {formationMessage}
-            </div>
-          ) : null}
-
-          {!formationsLoading && formations.length ? (
-            formations.map((formation) => (
-              <div key={formation.id} className="mt-6 grid gap-6 rounded-2xl border border-slate-100 bg-slate-50 p-6 md:grid-cols-[1.2fr_0.8fr]">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white">Certifiante</span>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        formation.status === 'open'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-amber-100 text-amber-700'
-                      }`}
-                    >
-                      {formation.status === 'open' ? 'Ouverte' : 'Bientôt disponible'}
-                    </span>
-                  </div>
-                  <h3 className="mt-3 text-xl font-bold text-slate-900">{formation.title}</h3>
-                  <p className="mt-2 text-sm text-slate-600">{formation.shortDescription}</p>
-                  <div className="mt-4 flex flex-wrap gap-4 text-xs font-semibold text-slate-600">
-                    <span>Durée : {formation.durationWeeks}</span>
-                    <span>Modules : {formation.modulesCount}</span>
-                    <span>{formation.participantsCount || 0} participants</span>
-                  </div>
-                </div>
-                <div className="flex flex-col items-start gap-3">
-                  <button
-                    type="button"
-                    className={`rounded-full px-4 py-2 text-sm font-semibold ${
-                      formation.enrolled ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-700 text-white'
-                    }`}
-                    disabled={formation.enrolled || actionLoading || formation.status !== 'open'}
-                    onClick={() => enrollFormation(formation.id)}
-                  >
-                    {formation.enrolled ? 'Déjà inscrit' : (formation.status === 'open' ? 'Je participe' : 'Bientôt disponible')}
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
-                    onClick={() => router.push(`/formations/${formation.id}`)}
-                  >
-                    Voir les détails
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : null}
-        </div>
-      </section>
     </main>
   );
 }
