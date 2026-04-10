@@ -195,6 +195,11 @@ export default function VideoLessonsPage() {
     }
   }
 
+  function openCourseDetails(courseId) {
+    if (!courseId) return;
+    router.push(`/video-lessons/${courseId}`);
+  }
+
   const courseCounts = useMemo(() => {
     const totals = {
       status: { OPEN: 0, UPCOMING: 0, ARCHIVED: 0 },
@@ -413,15 +418,25 @@ export default function VideoLessonsPage() {
               const banner = course.thumbnail || pickFallbackImage(index);
               return (
                 <article key={course.id} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-                  <div className="relative h-40 bg-slate-100">
+                  <button
+                    type="button"
+                    className="relative h-40 w-full bg-slate-100 text-left"
+                    onClick={() => openCourseDetails(course.id)}
+                  >
                     <div
                       className="absolute inset-0 bg-cover bg-center"
                       style={{ backgroundImage: `url(${banner})` }}
                     />
-                  </div>
+                  </button>
 
                   <div className="p-4">
-                    <h3 className="text-sm font-bold text-slate-900">{course.title}</h3>
+                    <button
+                      type="button"
+                      className="text-left text-sm font-bold text-slate-900 hover:text-blue-700"
+                      onClick={() => openCourseDetails(course.id)}
+                    >
+                      {course.title}
+                    </button>
                     <p className="mt-2 text-xs text-slate-500">{course.provider || 'EduPro'}</p>
                   </div>
 
@@ -454,7 +469,14 @@ export default function VideoLessonsPage() {
                         Certificat
                       </button>
                     ) : (
-                      <span>Ouvert à inscription</span>
+                      <button
+                        type="button"
+                        className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold text-white"
+                        disabled={actionLoading || enrolled}
+                        onClick={() => enroll(course.id)}
+                      >
+                        {enrolled ? 'Déjà inscrit' : 'Ouvert à inscription'}
+                      </button>
                     )}
                   </div>
                 </article>
