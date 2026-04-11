@@ -437,6 +437,10 @@ export default function VideoLessonsPage() {
 
                   <div className="p-4">
                     <p className="text-xs text-slate-600">{course.description}</p>
+                    <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-500">
+                      {course.durationWeeks ? <span>Durée : {course.durationWeeks}</span> : null}
+                      {course.modulesCount ? <span>Modules : {course.modulesCount}</span> : null}
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-xs text-slate-600">

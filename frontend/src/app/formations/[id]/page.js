@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { getStudent, getToken } from '@/lib/auth';
 
 export default function FormationDetailPage({ params }) {
   const router = useRouter();
@@ -13,12 +13,29 @@ export default function FormationDetailPage({ params }) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    shortDescription: '',
+    description: '',
+    durationWeeks: '',
+    modulesCount: '',
+    status: 'coming_soon',
+    openAt: ''
+  });
+  const [saveMessage, setSaveMessage] = useState('');
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     const currentToken = getToken();
     if (!currentToken) {
       router.push('/login');
       return;
+    }
+    const user = getStudent();
+    if (user && ['ADMIN', 'SUPER_ADMIN', 'PUBLISHER'].includes(user.role)) {
+      setCanEdit(true);
     }
     setToken(currentToken);
   }, [router]);
@@ -32,7 +49,19 @@ export default function FormationDetailPage({ params }) {
         setError('');
         const data = await apiClient(`/formations/${params.id}`, { token });
         if (!mounted) return;
-        setFormation(data.formation || null);
+        const payload = data.formation || null;
+        setFormation(payload);
+        if (payload) {
+          setEditForm({
+            title: payload.title || '',
+            shortDescription: payload.shortDescription || '',
+            description: payload.description || '',
+            durationWeeks: payload.durationWeeks || '',
+            modulesCount: payload.modulesCount || '',
+            status: payload.status || 'coming_soon',
+            openAt: payload.openAt ? new Date(payload.openAt).toISOString().slice(0, 10) : ''
+          });
+        }
       } catch (err) {
         if (!mounted) return;
         setError(err?.message || 'Impossible de charger la formation.');
@@ -58,6 +87,34 @@ export default function FormationDetailPage({ params }) {
       setMessage('Vous êtes inscrit à cette formation.');
     } catch (err) {
       setError(err?.message || "Impossible de s'inscrire.");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function saveFormation() {
+    if (!token || !formation) return;
+    try {
+      setSaveError('');
+      setSaveMessage('');
+      setActionLoading(true);
+      await apiClient(`/formations/${formation.id}`, {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify({
+          title: editForm.title,
+          shortDescription: editForm.shortDescription,
+          description: editForm.description,
+          durationWeeks: editForm.durationWeeks,
+          modulesCount: editForm.modulesCount ? Number(editForm.modulesCount) : undefined,
+          status: editForm.status,
+          openAt: editForm.openAt || undefined
+        })
+      });
+      setSaveMessage('Formation mise à jour.');
+      setEditMode(false);
+    } catch (err) {
+      setSaveError(err?.message || 'Impossible de mettre à jour la formation.');
     } finally {
       setActionLoading(false);
     }
@@ -93,6 +150,15 @@ export default function FormationDetailPage({ params }) {
           >
             {formation.status === 'open' ? 'Ouverte' : 'Bientôt disponible'}
           </span>
+          {canEdit ? (
+            <button
+              type="button"
+              className="ml-auto rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600"
+              onClick={() => setEditMode((prev) => !prev)}
+            >
+              {editMode ? 'Annuler' : 'Modifier'}
+            </button>
+          ) : null}
         </div>
         <h1 className="mt-3 text-2xl font-bold text-slate-900">{formation.title}</h1>
         <p className="mt-2 text-sm text-slate-600">{formation.description}</p>
@@ -133,6 +199,78 @@ export default function FormationDetailPage({ params }) {
           Voir ma progression
         </button>
       </div>
+
+      {formation && editMode ? (
+        <div className="mt-6 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900">Modifier la formation</h2>
+          {saveError ? (
+            <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {saveError}
+            </div>
+          ) : null}
+          {saveMessage ? (
+            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              {saveMessage}
+            </div>
+          ) : null}
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <input
+              className="input"
+              placeholder="Titre"
+              value={editForm.title}
+              onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))}
+            />
+            <input
+              className="input"
+              placeholder="Durée (ex: 8 à 12 semaines)"
+              value={editForm.durationWeeks}
+              onChange={(e) => setEditForm((prev) => ({ ...prev, durationWeeks: e.target.value }))}
+            />
+            <input
+              className="input"
+              placeholder="Nombre de modules"
+              value={editForm.modulesCount}
+              onChange={(e) => setEditForm((prev) => ({ ...prev, modulesCount: e.target.value }))}
+            />
+            <select
+              className="input"
+              value={editForm.status}
+              onChange={(e) => setEditForm((prev) => ({ ...prev, status: e.target.value }))}
+            >
+              <option value="open">Ouverte</option>
+              <option value="coming_soon">Bientôt disponible</option>
+            </select>
+            <input
+              className="input"
+              type="date"
+              value={editForm.openAt}
+              onChange={(e) => setEditForm((prev) => ({ ...prev, openAt: e.target.value }))}
+            />
+            <input
+              className="input md:col-span-2"
+              placeholder="Description courte"
+              value={editForm.shortDescription}
+              onChange={(e) => setEditForm((prev) => ({ ...prev, shortDescription: e.target.value }))}
+            />
+            <textarea
+              className="input md:col-span-2 min-h-[140px]"
+              placeholder="Description complète"
+              value={editForm.description}
+              onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
+            />
+          </div>
+          <div className="mt-4 flex justify-end">
+            <button
+              type="button"
+              className="rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white"
+              onClick={saveFormation}
+              disabled={actionLoading}
+            >
+              Enregistrer
+            </button>
+          </div>
+        </div>
+      ) : null}
 
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           <div>
