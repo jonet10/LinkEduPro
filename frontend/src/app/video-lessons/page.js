@@ -54,6 +54,10 @@ export default function VideoLessonsPage() {
   const [formationsLoading, setFormationsLoading] = useState(true);
   const [formationError, setFormationError] = useState('');
   const [formationMessage, setFormationMessage] = useState('');
+  const [comingCourses, setComingCourses] = useState([]);
+  const [comingLoading, setComingLoading] = useState(true);
+  const [comingError, setComingError] = useState('');
+  const [comingMessage, setComingMessage] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -83,6 +87,22 @@ export default function VideoLessonsPage() {
         setFormations([]);
       } finally {
         if (mounted) setFormationsLoading(false);
+      }
+    }
+
+    async function fetchComingCourses() {
+      try {
+        setComingLoading(true);
+        setComingError('');
+        const data = await apiClient('/courses', { token });
+        if (!mounted) return;
+        setComingCourses(Array.isArray(data?.courses) ? data.courses : []);
+      } catch (err) {
+        if (!mounted) return;
+        setComingError(err?.message || 'Impossible de charger les cours à venir.');
+        setComingCourses([]);
+      } finally {
+        if (mounted) setComingLoading(false);
       }
     }
 
@@ -120,6 +140,7 @@ export default function VideoLessonsPage() {
     }
 
     fetchFormations();
+    fetchComingCourses();
     fetchCourses();
     return () => {
       mounted = false;
@@ -169,6 +190,23 @@ export default function VideoLessonsPage() {
       setFormationMessage('Vous êtes inscrit à cette formation.');
     } catch (err) {
       setFormationError(err?.message || "Impossible de s'inscrire à la formation.");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function registerComingCourse(courseId) {
+    if (!token) return;
+    try {
+      setComingMessage('');
+      setComingError('');
+      setActionLoading(true);
+      await apiClient(`/courses/${courseId}/register`, { method: 'POST', token });
+      const data = await apiClient('/courses', { token });
+      setComingCourses(Array.isArray(data?.courses) ? data.courses : []);
+      setComingMessage('Vous serez notifié dès que le cours sera disponible.');
+    } catch (err) {
+      setComingError(err?.message || "Impossible de s'inscrire au cours.");
     } finally {
       setActionLoading(false);
     }
@@ -333,6 +371,16 @@ export default function VideoLessonsPage() {
               {success}
             </div>
           ) : null}
+          {comingError ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {comingError}
+            </div>
+          ) : null}
+          {comingMessage ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              {comingMessage}
+            </div>
+          ) : null}
 
           {loading ? <p className="text-sm text-slate-500">Chargement des cours...</p> : null}
 
@@ -376,6 +424,36 @@ export default function VideoLessonsPage() {
                       onClick={() => enrollFormation(formation.id)}
                     >
                       {formation.enrolled ? 'Déjà inscrit' : 'Je participe'}
+                    </button>
+                  </div>
+                </article>
+              ))
+            ) : null}
+
+            {!comingLoading && comingCourses.length ? (
+              comingCourses.map((course) => (
+                <article key={`coming-${course.id}`} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+                  <div className="relative h-40 bg-slate-100">
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600" />
+                    <div className="absolute inset-0 flex flex-col justify-end p-4 text-white">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Parcours certifiant</span>
+                      <h3 className="mt-2 text-sm font-bold">{course.title}</h3>
+                    </div>
+                  </div>
+
+                  <div className="p-4">
+                    <p className="text-xs text-slate-600">{course.description}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-xs text-slate-600">
+                    <span className="font-semibold">Bientôt disponible</span>
+                    <button
+                      type="button"
+                      className="rounded-full bg-blue-700 px-3 py-1 text-[10px] font-semibold text-white"
+                      disabled={course.registered || actionLoading}
+                      onClick={() => registerComingCourse(course.id)}
+                    >
+                      {course.registered ? 'Inscrit ✔' : "S'inscrire pour être notifié"}
                     </button>
                   </div>
                 </article>
