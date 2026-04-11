@@ -388,12 +388,9 @@ export default function VideoLessonsPage() {
             {!formationsLoading && formations.length ? (
               formations.map((formation) => (
                 <article key={`formation-${formation.id}`} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-                  <div className="relative h-40 bg-slate-100">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-700 via-blue-600 to-blue-500" />
-                    <div className="absolute inset-0 flex flex-col justify-end p-4 text-white">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Formation certifiante</span>
-                      <h3 className="mt-2 text-sm font-bold">{formation.title}</h3>
-                    </div>
+                  <div className="relative h-40 bg-gradient-to-br from-blue-700 via-blue-600 to-blue-500 p-4 text-white">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Formation certifiante</span>
+                    <h3 className="mt-3 text-sm font-bold">{formation.title}</h3>
                   </div>
 
                   <div className="p-4">
@@ -433,12 +430,9 @@ export default function VideoLessonsPage() {
             {!comingLoading && comingCourses.length ? (
               comingCourses.map((course) => (
                 <article key={`coming-${course.id}`} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-                  <div className="relative h-40 bg-slate-100">
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600" />
-                    <div className="absolute inset-0 flex flex-col justify-end p-4 text-white">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Parcours certifiant</span>
-                      <h3 className="mt-2 text-sm font-bold">{course.title}</h3>
-                    </div>
+                  <div className="relative h-40 bg-gradient-to-br from-blue-700 via-blue-600 to-blue-500 p-4 text-white">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Parcours certifiant</span>
+                    <h3 className="mt-3 text-sm font-bold">{course.title}</h3>
                   </div>
 
                   <div className="p-4">
@@ -446,14 +440,25 @@ export default function VideoLessonsPage() {
                   </div>
 
                   <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-xs text-slate-600">
-                    <span className="font-semibold">Bientôt disponible</span>
+                    <span className="font-semibold">{course.waitlistCount || 0} inscrits</span>
                     <button
                       type="button"
                       className="rounded-full bg-blue-700 px-3 py-1 text-[10px] font-semibold text-white"
+                      onClick={() => router.push(`/video-lessons/coming/${course.id}`)}
+                    >
+                      Voir les détails
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-red-600 px-4 py-2 text-[11px] font-semibold text-white">
+                    <span>Bientôt disponible</span>
+                    <button
+                      type="button"
+                      className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold text-white"
                       disabled={course.registered || actionLoading}
                       onClick={() => registerComingCourse(course.id)}
                     >
-                      {course.registered ? 'Inscrit ✔' : "S'inscrire pour être notifié"}
+                      {course.registered ? 'Inscrit ✔' : 'Je participe'}
                     </button>
                   </div>
                 </article>

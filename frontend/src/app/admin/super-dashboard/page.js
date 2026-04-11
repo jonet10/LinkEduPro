@@ -183,6 +183,12 @@ export default function SuperDashboardPage() {
   const [formationFilter, setFormationFilter] = useState('');
   const [formationLoading, setFormationLoading] = useState(false);
   const [formationError, setFormationError] = useState('');
+  const [comingCourses, setComingCourses] = useState([]);
+  const [comingWaitlist, setComingWaitlist] = useState([]);
+  const [comingCourseFilter, setComingCourseFilter] = useState('');
+  const [comingLoading, setComingLoading] = useState(false);
+  const [comingError, setComingError] = useState('');
+  const [comingMessage, setComingMessage] = useState('');
 
   useEffect(() => {
     const token = getToken();
@@ -212,6 +218,11 @@ export default function SuperDashboardPage() {
   useEffect(() => {
     if (!authToken) return;
     loadFormations(authToken);
+  }, [authToken]);
+
+  useEffect(() => {
+    if (!authToken) return;
+    loadComingCourses(authToken);
   }, [authToken]);
 
   async function loadPendingVideos(forcedToken = null) {
@@ -394,6 +405,61 @@ export default function SuperDashboardPage() {
       setFormationParticipants([]);
     } finally {
       setFormationLoading(false);
+    }
+  }
+
+  async function loadComingCourses(token) {
+    setComingError('');
+    setComingLoading(true);
+    try {
+      const data = await apiClient('/courses', { token });
+      const list = Array.isArray(data.courses) ? data.courses : [];
+      setComingCourses(list);
+      const defaultId = comingCourseFilter || (list[0]?.id || '');
+      if (defaultId) {
+        setComingCourseFilter(defaultId);
+        await loadComingWaitlist(token, defaultId);
+      } else {
+        setComingWaitlist([]);
+      }
+    } catch (e) {
+      setComingError(e.message || 'Impossible de charger les cours à venir.');
+      setComingCourses([]);
+      setComingWaitlist([]);
+    } finally {
+      setComingLoading(false);
+    }
+  }
+
+  async function loadComingWaitlist(token, courseId) {
+    if (!courseId) return;
+    setComingError('');
+    setComingLoading(true);
+    try {
+      const data = await apiClient(`/courses/admin/waitlist?courseId=${courseId}`, { token });
+      setComingWaitlist(Array.isArray(data.participants) ? data.participants : []);
+    } catch (e) {
+      setComingError(e.message || 'Impossible de charger la liste d’attente.');
+      setComingWaitlist([]);
+    } finally {
+      setComingLoading(false);
+    }
+  }
+
+  async function activateComingCourse() {
+    const token = getToken();
+    if (!token || !comingCourseFilter) return;
+    try {
+      setComingMessage('');
+      setComingError('');
+      setComingLoading(true);
+      await apiClient(`/courses/admin/${comingCourseFilter}/activate`, { method: 'PATCH', token });
+      setComingMessage('Le cours est maintenant actif et les notifications ont été envoyées.');
+      await loadComingCourses(token);
+    } catch (e) {
+      setComingError(e.message || 'Activation impossible.');
+    } finally {
+      setComingLoading(false);
     }
   }
 
@@ -1761,6 +1827,85 @@ export default function SuperDashboardPage() {
                 <tr>
                   <td className="px-3 py-3 text-center text-brand-600" colSpan={6}>
                     Aucun participant pour l’instant.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="card">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-semibold text-brand-900">Liste d’attente des cours à venir</h2>
+            <p className="text-sm text-brand-600">Pré‑inscriptions et notifications pour les parcours certifiants.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              className="input"
+              value={comingCourseFilter}
+              onChange={(e) => {
+                const value = e.target.value;
+                setComingCourseFilter(value);
+                const token = getToken();
+                if (token) loadComingWaitlist(token, value);
+              }}
+            >
+              {comingCourses.map((course) => (
+                <option key={course.id} value={course.id}>{course.title}</option>
+              ))}
+            </select>
+            <button className="btn-secondary" onClick={activateComingCourse} disabled={!comingCourseFilter}>
+              Activer & notifier
+            </button>
+            <button className="btn-secondary" onClick={() => router.push('/admin/coming-soon-courses')}>
+              Ouvrir la gestion
+            </button>
+          </div>
+        </div>
+
+        {comingLoading ? <p className="mt-4 text-sm text-brand-600">Chargement...</p> : null}
+        {comingError ? (
+          <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {comingError}
+          </div>
+        ) : null}
+        {comingMessage ? (
+          <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {comingMessage}
+          </div>
+        ) : null}
+
+        <div className="mt-4 overflow-hidden rounded-2xl border border-brand-100 bg-white">
+          <table className="w-full text-sm">
+            <thead className="bg-brand-50 text-left text-xs uppercase text-brand-600">
+              <tr>
+                <th className="px-3 py-2">Nom</th>
+                <th className="px-3 py-2">École</th>
+                <th className="px-3 py-2">Niveau</th>
+                <th className="px-3 py-2">Statut</th>
+                <th className="px-3 py-2">Inscrit le</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comingWaitlist.map((row) => (
+                <tr key={row.id} className="border-t border-brand-100">
+                  <td className="px-3 py-2 font-medium text-brand-900">
+                    {row.user?.firstName} {row.user?.lastName}
+                  </td>
+                  <td className="px-3 py-2 text-brand-700">{row.user?.school || '-'}</td>
+                  <td className="px-3 py-2 text-brand-700">{row.user?.gradeLevel || '-'}</td>
+                  <td className="px-3 py-2 text-brand-700">{row.status}</td>
+                  <td className="px-3 py-2 text-brand-700">
+                    {row.createdAt ? new Date(row.createdAt).toLocaleDateString('fr-FR') : '-'}
+                  </td>
+                </tr>
+              ))}
+              {!comingWaitlist.length ? (
+                <tr>
+                  <td className="px-3 py-3 text-center text-brand-600" colSpan={5}>
+                    Aucun inscrit pour l’instant.
                   </td>
                 </tr>
               ) : null}
