@@ -42,6 +42,18 @@ export default function InviteProfesseurPage() {
   async function submit() {
     try {
       setError('');
+      if (role !== 'PUBLISHER') {
+        if (!subjects.trim()) return setError('Ajoute au moins une matière.');
+        if (!levels.trim()) return setError('Ajoute au moins un niveau.');
+        if (!experienceYears || Number(experienceYears) < 0) return setError('Années d’expérience invalides.');
+        if (!bio.trim() || bio.trim().length < 30) return setError('La bio doit contenir au moins 30 caractères.');
+      } else {
+        if (!publisherName.trim()) return setError('Nom du partenaire requis.');
+        if (!publisherType.trim()) return setError('Type partenaire requis.');
+        if (publisherDescription && publisherDescription.trim().length > 0 && publisherDescription.trim().length < 30) {
+          return setError('La description du partenaire doit contenir au moins 30 caractères.');
+        }
+      }
       const res = await apiClient('/auth/teacher/accept-invite', {
         method: 'POST',
         body: JSON.stringify({
@@ -85,18 +97,33 @@ export default function InviteProfesseurPage() {
         <input className="input" type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
         {role !== 'PUBLISHER' ? (
           <>
-            <input className="input" placeholder="Matières (séparées par virgule)" value={subjects} onChange={(e) => setSubjects(e.target.value)} />
-            <input className="input" placeholder="Niveaux (NSI, NSII, NSIII...)" value={levels} onChange={(e) => setLevels(e.target.value)} />
-            <input className="input" type="number" min={0} placeholder="Années d'expérience" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} />
-            <textarea className="input min-h-[120px]" placeholder="Bio / Présentation" value={bio} onChange={(e) => setBio(e.target.value)} />
+            <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">
+              Profil tuteur : indique tes matières, niveaux et une courte présentation.
+            </div>
+            <input className="input" placeholder="Matières (séparées par virgule) *" value={subjects} onChange={(e) => setSubjects(e.target.value)} />
+            <input className="input" placeholder="Niveaux (NSI, NSII, NSIII...) *" value={levels} onChange={(e) => setLevels(e.target.value)} />
+            <input className="input" type="number" min={0} placeholder="Années d'expérience *" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} />
+            <textarea className="input min-h-[120px]" placeholder="Bio / Présentation (min 30 caractères) *" value={bio} onChange={(e) => setBio(e.target.value)} />
           </>
         ) : (
           <>
-            <input className="input" placeholder="Nom de l'organisation" value={publisherName} onChange={(e) => setPublisherName(e.target.value)} />
-            <input className="input" placeholder="Type partenaire (INSTITUTION / UNIVERSITY / ONG...)" value={publisherType} onChange={(e) => setPublisherType(e.target.value)} />
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-900">
+              Profil partenaire : informations de l’organisation et description.
+            </div>
+            <input className="input" placeholder="Nom de l'organisation *" value={publisherName} onChange={(e) => setPublisherName(e.target.value)} />
+            <select className="input" value={publisherType} onChange={(e) => setPublisherType(e.target.value)}>
+              <option value="">Type partenaire *</option>
+              <option value="AUTHOR">Écrivain / Auteur</option>
+              <option value="EDITOR">Éditeur</option>
+              <option value="INSTITUTION">Institution</option>
+              <option value="UNIVERSITY">Université</option>
+              <option value="VOCATIONAL_SCHOOL">École professionnelle</option>
+              <option value="ORGANIZATION">ONG / Organisation</option>
+              <option value="COMPANY">Entreprise</option>
+            </select>
             <input className="input" placeholder="Téléphone partenaire" value={publisherPhone} onChange={(e) => setPublisherPhone(e.target.value)} />
             <input className="input" placeholder="Logo (URL)" value={publisherLogo} onChange={(e) => setPublisherLogo(e.target.value)} />
-            <textarea className="input min-h-[120px]" placeholder="Description du partenaire" value={publisherDescription} onChange={(e) => setPublisherDescription(e.target.value)} />
+            <textarea className="input min-h-[120px]" placeholder="Description du partenaire (min 30 caractères)" value={publisherDescription} onChange={(e) => setPublisherDescription(e.target.value)} />
           </>
         )}
         <button className="btn-primary" onClick={submit}>Activer mon compte</button>
