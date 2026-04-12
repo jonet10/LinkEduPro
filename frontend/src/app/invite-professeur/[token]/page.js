@@ -81,11 +81,13 @@ export default function InviteProfesseurPage() {
     }
   }
 
+  const roleLabel = role === 'PUBLISHER' ? 'Partenaire' : (role === 'TUTOR' ? 'Tuteur' : 'Professeur');
+
   return (
     <main className="mx-auto max-w-xl space-y-4 px-4 py-10">
       <section className="card space-y-3">
         <h1 className="text-2xl font-semibold">
-          {role === 'PUBLISHER' ? 'Invitation Partenaire' : 'Invitation Tuteur'}
+          Invitation {roleLabel}
         </h1>
         {info?.email ? <p>Email invite: <strong>{info.email}</strong></p> : null}
         {error ? <p className="text-red-600">{error}</p> : null}
@@ -98,7 +100,7 @@ export default function InviteProfesseurPage() {
         {role !== 'PUBLISHER' ? (
           <>
             <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">
-              Profil tuteur : indique tes matières, niveaux et une courte présentation.
+              Profil {roleLabel.toLowerCase()} : indique tes matières, niveaux et une courte présentation.
             </div>
             <input className="input" placeholder="Matières (séparées par virgule) *" value={subjects} onChange={(e) => setSubjects(e.target.value)} />
             <input className="input" placeholder="Niveaux (NSI, NSII, NSIII...) *" value={levels} onChange={(e) => setLevels(e.target.value)} />

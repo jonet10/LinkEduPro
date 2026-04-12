@@ -1688,7 +1688,8 @@ export default function SuperDashboardPage() {
         <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
           <input className="input" placeholder="Email invité" value={email} onChange={(e) => setEmail(e.target.value)} />
           <select className="input" value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}>
-            <option value="TEACHER">Tuteur / Professeur</option>
+            <option value="TEACHER">Professeur</option>
+            <option value="TUTOR">Tuteur</option>
             <option value="PUBLISHER">Partenaire (Éditeur / Institution)</option>
           </select>
           <input className="input" type="number" min={1} max={168} value={expiresInHours} onChange={(e) => setExpiresInHours(Number(e.target.value || 72))} />
