@@ -21,6 +21,12 @@ function formatHtg(amount) {
   return `${value.toLocaleString('fr-FR')} HTG`;
 }
 
+function getInitials(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return 'LP';
+  return parts.slice(0, 2).map((part) => part[0].toUpperCase()).join('');
+}
+
 export default function PartnersPage() {
   const student = useMemo(() => getStudent(), []);
   const token = useMemo(() => getToken(), []);
@@ -80,7 +86,7 @@ export default function PartnersPage() {
   const canPublishAnnouncements = ['ADMIN', 'SUPER_ADMIN', 'PUBLISHER'].includes(roleUpper)
     && (roleUpper !== 'PUBLISHER' || Boolean(publisher?.features?.canPublishAnnouncements));
   const panelClass = 'rounded-3xl border border-slate-700/60 bg-slate-900/70 text-slate-100 shadow-lg shadow-slate-950/20';
-  const cardClass = 'rounded-2xl border border-slate-700/60 bg-slate-900/50 text-slate-100';
+  const cardClass = 'rounded-2xl border border-slate-700/60 bg-slate-900/60 text-slate-100';
   const subduedText = 'text-slate-300';
 
   useEffect(() => {
@@ -329,18 +335,6 @@ export default function PartnersPage() {
 
   return (
     <section className="space-y-8">
-      <header className={`${panelClass} p-6`}>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-300">Compte partenaire</p>
-        <h1 className="mt-2 text-3xl font-semibold text-white">Gérez vos contenus certifiants et publications</h1>
-        <p className={`mt-3 text-sm ${subduedText}`}>
-          Publiez des livres, modules certifiants et annonces. Suivez vos ventes et vos performances.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <a href="#publish-training" className="btn-primary">Publier une formation</a>
-          <a href="#publish-book" className="btn-secondary">Publier un livre</a>
-        </div>
-      </header>
-
       {loading ? (
         <div className={`${cardClass} p-6`}>Chargement...</div>
       ) : null}
@@ -354,9 +348,16 @@ export default function PartnersPage() {
 
       <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
         <aside className={`${panelClass} p-5`}>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-300">Espace partenaire</p>
-          <p className="mt-3 text-lg font-semibold text-white">{student?.firstName || 'Partenaire'}</p>
-          <p className="text-xs text-slate-400">{student?.email}</p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
+              {getInitials(`${student?.firstName || ''} ${student?.lastName || ''}`)}
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-300">Espace partenaire</p>
+              <p className="text-sm font-semibold text-white">{student?.firstName || 'Partenaire'}</p>
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-slate-400">{student?.email}</p>
           <div className="mt-4 space-y-2">
             {[
               { href: '#dashboard', label: 'Tableau de bord' },
@@ -383,6 +384,18 @@ export default function PartnersPage() {
         </aside>
 
         <main className="space-y-6">
+          <header className={`${panelClass} p-6`}>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-300">Bienvenue dans votre cockpit</p>
+            <h1 className="mt-2 text-2xl font-semibold text-white">Gérez vos contenus certifiants et vos publications</h1>
+            <p className={`mt-2 text-sm ${subduedText}`}>
+              Activez vos modules, suivez vos performances et planifiez vos conférences live.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <a href="#publish-training" className="btn-primary">Publier une formation</a>
+              <a href="#publish-book" className="btn-secondary">Publier un livre</a>
+            </div>
+          </header>
+
           <nav className={`${panelClass} flex flex-wrap gap-2 p-3`}>
             {[
               { key: 'dashboard', label: 'Tableau de bord' },
@@ -407,18 +420,71 @@ export default function PartnersPage() {
           </nav>
 
           {activeTab === 'dashboard' ? (
-            <section id="dashboard" className="grid gap-4 md:grid-cols-3">
-              <div className={`${cardClass} p-4`}>
-                <p className="text-xs text-slate-300">Mes livres</p>
-                <p className="text-2xl font-bold text-white">{books.length}</p>
+            <section id="dashboard" className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className={`${cardClass} p-4`}>
+                  <p className="text-xs text-slate-300">Mes livres</p>
+                  <p className="text-2xl font-bold text-white">{books.length}</p>
+                </div>
+                <div className={`${cardClass} p-4`}>
+                  <p className="text-xs text-slate-300">Mes formations</p>
+                  <p className="text-2xl font-bold text-white">{partnerFormations.length}</p>
+                </div>
+                <div className={`${cardClass} p-4`}>
+                  <p className="text-xs text-slate-300">Mes annonces</p>
+                  <p className="text-2xl font-bold text-white">{announcementConversations.length}</p>
+                </div>
               </div>
-              <div className={`${cardClass} p-4`}>
-                <p className="text-xs text-slate-300">Mes formations</p>
-                <p className="text-2xl font-bold text-white">{partnerFormations.length}</p>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className={`${cardClass} p-4`}>
+                  <p className="text-xs text-slate-300">Rendez-vous live</p>
+                  <p className="text-2xl font-bold text-white">{bookings.length}</p>
+                </div>
+                <div className={`${cardClass} p-4`}>
+                  <p className="text-xs text-slate-300">Revenu net</p>
+                  <p className="text-2xl font-bold text-white">{formatHtg(publisherSales?.summary?.netRevenue)}</p>
+                </div>
+                <div className={`${cardClass} p-4`}>
+                  <p className="text-xs text-slate-300">Fonctionnalités actives</p>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                    <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-emerald-200">LIVRES</span>
+                    <span className="rounded-full bg-amber-500/20 px-3 py-1 text-amber-200">FORMATIONS</span>
+                    <span className="rounded-full bg-blue-500/20 px-3 py-1 text-blue-200">ANNONCES</span>
+                  </div>
+                </div>
               </div>
-              <div className={`${cardClass} p-4`}>
-                <p className="text-xs text-slate-300">Revenu net</p>
-                <p className="text-2xl font-bold text-white">{formatHtg(publisherSales?.summary?.netRevenue)}</p>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className={`${cardClass} p-4`}>
+                  <p className="text-sm font-semibold text-white">Actions rapides</p>
+                  <div className="mt-3 space-y-2">
+                    <a href="#publish-book" className="btn-secondary w-full">Publier un livre</a>
+                    <a href="#publish-training" className="btn-secondary w-full">Créer une formation certifiante</a>
+                    <a href="#annonces" className="btn-secondary w-full">Poster une annonce</a>
+                  </div>
+                </div>
+                <div className={`${cardClass} p-4`}>
+                  <p className="text-sm font-semibold text-white">Boostez votre visibilité</p>
+                  <p className={`mt-2 text-sm ${subduedText}`}>
+                    Ajoutez un logo, publiez régulièrement et activez vos contenus.
+                  </p>
+                  {publisher ? (
+                    <div className="mt-3 flex items-center gap-3">
+                      {publisher.logo ? (
+                        <img src={resolveMediaUrl(publisher.logo)} alt="Logo partenaire" className="h-10 w-10 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-white">
+                          {getInitials(publisher.name)}
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm font-semibold text-white">{publisher.name}</p>
+                        <p className="text-xs text-slate-400">{publisher.type}</p>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </section>
           ) : null}
