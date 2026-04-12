@@ -189,6 +189,10 @@ export default function SuperDashboardPage() {
   const [comingLoading, setComingLoading] = useState(false);
   const [comingError, setComingError] = useState('');
   const [comingMessage, setComingMessage] = useState('');
+  const [partnerFormationAdmin, setPartnerFormationAdmin] = useState([]);
+  const [partnerFormationStatus, setPartnerFormationStatus] = useState('PENDING');
+  const [partnerFormationLoading, setPartnerFormationLoading] = useState(false);
+  const [partnerFormationError, setPartnerFormationError] = useState('');
 
   useEffect(() => {
     const token = getToken();
@@ -224,6 +228,11 @@ export default function SuperDashboardPage() {
     if (!authToken) return;
     loadComingCourses(authToken);
   }, [authToken]);
+
+  useEffect(() => {
+    if (!authToken) return;
+    loadPartnerFormations(authToken, partnerFormationStatus);
+  }, [authToken, partnerFormationStatus]);
 
   async function loadPendingVideos(forcedToken = null) {
     const token = forcedToken || getToken();
@@ -460,6 +469,36 @@ export default function SuperDashboardPage() {
       setComingError(e.message || 'Activation impossible.');
     } finally {
       setComingLoading(false);
+    }
+  }
+
+  async function loadPartnerFormations(token, status) {
+    setPartnerFormationError('');
+    setPartnerFormationLoading(true);
+    try {
+      const data = await apiClient(`/partner-formations/admin/list?status=${status}`, { token });
+      setPartnerFormationAdmin(Array.isArray(data.items) ? data.items : []);
+    } catch (e) {
+      setPartnerFormationError(e.message || 'Impossible de charger les formations partenaires.');
+      setPartnerFormationAdmin([]);
+    } finally {
+      setPartnerFormationLoading(false);
+    }
+  }
+
+  async function updatePartnerFormationStatus(id, status) {
+    const token = getToken();
+    if (!token) return;
+    try {
+      setPartnerFormationError('');
+      await apiClient(`/partner-formations/admin/${id}/status`, {
+        method: 'PATCH',
+        token,
+        body: JSON.stringify({ status })
+      });
+      await loadPartnerFormations(token, partnerFormationStatus);
+    } catch (e) {
+      setPartnerFormationError(e.message || 'Mise à jour impossible.');
     }
   }
 
@@ -1906,6 +1945,81 @@ export default function SuperDashboardPage() {
                 <tr>
                   <td className="px-3 py-3 text-center text-brand-600" colSpan={5}>
                     Aucun inscrit pour l’instant.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="card">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-semibold text-brand-900">Formations partenaires</h2>
+            <p className="text-sm text-brand-600">Validation des formations certifiantes publiées par les partenaires.</p>
+          </div>
+          <select
+            className="input"
+            value={partnerFormationStatus}
+            onChange={(e) => setPartnerFormationStatus(e.target.value)}
+          >
+            <option value="PENDING">En attente</option>
+            <option value="PUBLISHED">Publiées</option>
+            <option value="REJECTED">Rejetées</option>
+            <option value="ARCHIVED">Archivées</option>
+          </select>
+        </div>
+
+        {partnerFormationLoading ? <p className="mt-4 text-sm text-brand-600">Chargement...</p> : null}
+        {partnerFormationError ? (
+          <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {partnerFormationError}
+          </div>
+        ) : null}
+
+        <div className="mt-4 overflow-hidden rounded-2xl border border-brand-100 bg-white">
+          <table className="w-full text-sm">
+            <thead className="bg-brand-50 text-left text-xs uppercase text-brand-600">
+              <tr>
+                <th className="px-3 py-2">Titre</th>
+                <th className="px-3 py-2">Partenaire</th>
+                <th className="px-3 py-2">Prix</th>
+                <th className="px-3 py-2">Statut</th>
+                <th className="px-3 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {partnerFormationAdmin.map((row) => (
+                <tr key={row.id} className="border-t border-brand-100">
+                  <td className="px-3 py-2 font-medium text-brand-900">{row.title}</td>
+                  <td className="px-3 py-2 text-brand-700">{row.publisher?.name || '-'}</td>
+                  <td className="px-3 py-2 text-brand-700">
+                    {row.isFree ? 'Gratuit' : `${row.price || 0} ${row.currency || 'HTG'}`}
+                  </td>
+                  <td className="px-3 py-2 text-brand-700">{row.status}</td>
+                  <td className="px-3 py-2 text-brand-700">
+                    {row.status === 'PENDING' ? (
+                      <div className="flex flex-wrap gap-2">
+                        <button className="btn-secondary" onClick={() => updatePartnerFormationStatus(row.id, 'PUBLISHED')}>
+                          Approuver
+                        </button>
+                        <button className="btn-secondary" onClick={() => updatePartnerFormationStatus(row.id, 'REJECTED')}>
+                          Rejeter
+                        </button>
+                      </div>
+                    ) : (
+                      <button className="btn-secondary" onClick={() => updatePartnerFormationStatus(row.id, 'ARCHIVED')}>
+                        Archiver
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {!partnerFormationAdmin.length ? (
+                <tr>
+                  <td className="px-3 py-3 text-center text-brand-600" colSpan={5}>
+                    Aucun élément pour l’instant.
                   </td>
                 </tr>
               ) : null}

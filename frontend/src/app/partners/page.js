@@ -30,6 +30,9 @@ export default function PartnersPage() {
   const [publisherSales, setPublisherSales] = useState(null);
   const [books, setBooks] = useState([]);
   const [contentItems, setContentItems] = useState([]);
+  const [partnerFormations, setPartnerFormations] = useState([]);
+  const [partnerFormationsLoading, setPartnerFormationsLoading] = useState(false);
+  const [editingFormationId, setEditingFormationId] = useState(null);
   const [announcementConversations, setAnnouncementConversations] = useState([]);
   const [announcementsLoading, setAnnouncementsLoading] = useState(false);
   const [globalAudience, setGlobalAudience] = useState('ALL');
@@ -58,11 +61,16 @@ export default function PartnersPage() {
 
   const [contentForm, setContentForm] = useState({
     title: '',
+    shortDescription: '',
     body: '',
     level: 'NSIV',
     type: 'video',
     isPaid: false,
-    price: ''
+    price: '',
+    durationWeeks: '',
+    modulesCount: '',
+    certificate: true,
+    modulesText: ''
   });
   const [submittingContent, setSubmittingContent] = useState(false);
 
@@ -106,6 +114,15 @@ export default function PartnersPage() {
       .then((data) => setContentItems(data.contents || []))
       .catch(() => null);
   }, [token, canPublishContent]);
+
+  useEffect(() => {
+    if (!token || !isPublisher) return;
+    setPartnerFormationsLoading(true);
+    apiClient('/partner-formations/mine', { token })
+      .then((data) => setPartnerFormations(Array.isArray(data.items) ? data.items : []))
+      .catch(() => setPartnerFormations([]))
+      .finally(() => setPartnerFormationsLoading(false));
+  }, [token, isPublisher]);
 
   useEffect(() => {
     if (!token) return;
@@ -195,8 +212,8 @@ export default function PartnersPage() {
       setError('Connecte-toi pour publier une formation.');
       return;
     }
-    if (!contentForm.title || !contentForm.body || !contentForm.level) {
-      setError('Titre, contenu et niveau sont requis.');
+    if (!contentForm.title || !contentForm.body) {
+      setError('Titre et description sont requis.');
       return;
     }
 
@@ -205,32 +222,47 @@ export default function PartnersPage() {
     setSuccess('');
 
     try {
+      const modules = contentForm.modulesText
+        ? contentForm.modulesText.split('\n').map((row) => row.trim()).filter(Boolean)
+        : [];
       const payload = {
         title: contentForm.title,
-        body: contentForm.body,
-        level: contentForm.level,
-        type: contentForm.type,
-        status: 'pending',
-        isPaid: Boolean(contentForm.isPaid),
-        price: contentForm.isPaid ? Number(contentForm.price || 0) : 0
+        shortDescription: contentForm.shortDescription,
+        description: contentForm.body,
+        durationWeeks: contentForm.durationWeeks,
+        modulesCount: contentForm.modulesCount ? Number(contentForm.modulesCount) : undefined,
+        modules,
+        isFree: !contentForm.isPaid,
+        price: contentForm.isPaid ? Number(contentForm.price || 0) : 0,
+        certificate: Boolean(contentForm.certificate)
       };
-      const data = await apiClient('/v2/content', {
-        method: 'POST',
+
+      const data = await apiClient(editingFormationId ? `/partner-formations/${editingFormationId}` : '/partner-formations', {
+        method: editingFormationId ? 'PATCH' : 'POST',
         token,
         body: JSON.stringify(payload)
       });
-      if (data?.content) {
-        setContentItems((prev) => [data.content, ...prev]);
+
+      if (editingFormationId && data?.formation) {
+        setPartnerFormations((prev) => prev.map((item) => (item.id === editingFormationId ? data.formation : item)));
+      } else if (data?.formation) {
+        setPartnerFormations((prev) => [data.formation, ...prev]);
       }
+      setEditingFormationId(null);
       setContentForm({
         title: '',
+        shortDescription: '',
         body: '',
         level: 'NSIV',
         type: 'video',
         isPaid: false,
-        price: ''
+        price: '',
+        durationWeeks: '',
+        modulesCount: '',
+        certificate: true,
+        modulesText: ''
       });
-      setSuccess('Formation soumise pour validation.');
+      setSuccess(editingFormationId ? 'Formation mise à jour.' : 'Formation soumise pour validation.');
     } catch (err) {
       setError(err.message || 'Impossible de publier la formation.');
     } finally {
@@ -382,7 +414,7 @@ export default function PartnersPage() {
               </div>
               <div className={`${cardClass} p-4`}>
                 <p className="text-xs text-slate-300">Mes formations</p>
-                <p className="text-2xl font-bold text-white">{contentItems.length}</p>
+                <p className="text-2xl font-bold text-white">{partnerFormations.length}</p>
               </div>
               <div className={`${cardClass} p-4`}>
                 <p className="text-xs text-slate-300">Revenu net</p>
@@ -508,17 +540,13 @@ export default function PartnersPage() {
                 <h3 className="text-lg font-semibold text-white">Publier une formation</h3>
                 <div className="grid gap-3">
                   <input className="input" placeholder="Titre de la formation" value={contentForm.title} onChange={(e) => setContentForm((p) => ({ ...p, title: e.target.value }))} />
+                  <input className="input" placeholder="Description courte" value={contentForm.shortDescription} onChange={(e) => setContentForm((p) => ({ ...p, shortDescription: e.target.value }))} />
                   <textarea className="input min-h-[140px]" placeholder="Description / contenu principal" value={contentForm.body} onChange={(e) => setContentForm((p) => ({ ...p, body: e.target.value }))} />
-                  <select className="input" value={contentForm.level} onChange={(e) => setContentForm((p) => ({ ...p, level: e.target.value }))}>
-                    {LEVEL_OPTIONS.map((lvl) => (
-                      <option key={lvl} value={lvl}>{lvl}</option>
-                    ))}
-                  </select>
-                  <select className="input" value={contentForm.type} onChange={(e) => setContentForm((p) => ({ ...p, type: e.target.value }))}>
-                    {CONTENT_TYPES.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <input className="input" placeholder="Durée (ex: 8 à 12 semaines)" value={contentForm.durationWeeks} onChange={(e) => setContentForm((p) => ({ ...p, durationWeeks: e.target.value }))} />
+                    <input className="input" placeholder="Nombre de modules" value={contentForm.modulesCount} onChange={(e) => setContentForm((p) => ({ ...p, modulesCount: e.target.value }))} />
+                  </div>
+                  <textarea className="input min-h-[120px]" placeholder="Modules (1 par ligne)" value={contentForm.modulesText} onChange={(e) => setContentForm((p) => ({ ...p, modulesText: e.target.value }))} />
                   <label className="flex items-center gap-2 text-sm text-slate-300">
                     <input
                       type="checkbox"
@@ -526,6 +554,14 @@ export default function PartnersPage() {
                       onChange={(e) => setContentForm((p) => ({ ...p, isPaid: e.target.checked }))}
                     />
                     Formation payante
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={contentForm.certificate}
+                      onChange={(e) => setContentForm((p) => ({ ...p, certificate: e.target.checked }))}
+                    />
+                    Certificat inclus
                   </label>
                   {contentForm.isPaid ? (
                     <input
@@ -535,23 +571,79 @@ export default function PartnersPage() {
                       onChange={(e) => setContentForm((p) => ({ ...p, price: e.target.value }))}
                     />
                   ) : null}
-                  <button className="btn-primary" type="button" onClick={submitContent} disabled={!canPublishContent || submittingContent}>
-                    {submittingContent ? 'Publication...' : 'Soumettre la formation'}
-                  </button>
+                  <div className="flex flex-wrap gap-2">
+                    <button className="btn-primary" type="button" onClick={submitContent} disabled={!canPublishContent || submittingContent}>
+                      {submittingContent ? 'Publication...' : (editingFormationId ? 'Mettre à jour' : 'Soumettre la formation')}
+                    </button>
+                    {editingFormationId ? (
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => {
+                          setEditingFormationId(null);
+                          setContentForm({
+                            title: '',
+                            shortDescription: '',
+                            body: '',
+                            level: 'NSIV',
+                            type: 'video',
+                            isPaid: false,
+                            price: '',
+                            durationWeeks: '',
+                            modulesCount: '',
+                            certificate: true,
+                            modulesText: ''
+                          });
+                        }}
+                      >
+                        Annuler
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-2 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4">
                 <h3 className="text-lg font-semibold text-white">Mes formations</h3>
-                {contentItems.length ? (
-                  contentItems.slice(0, 6).map((item) => (
+                {partnerFormationsLoading ? <p className="text-sm text-slate-300">Chargement...</p> : null}
+                {!partnerFormationsLoading && partnerFormations.length ? (
+                  partnerFormations.slice(0, 6).map((item) => (
                     <div key={item.id} className="rounded-xl border border-slate-700/60 px-3 py-2 text-sm">
-                      <p className="font-semibold text-white">{item.title}</p>
-                      <p className="text-xs text-slate-300">{item.type?.toUpperCase()} • {item.level}</p>
-                      <p className="text-xs text-slate-400">Statut: {item.status}</p>
-                      <p className="text-xs text-slate-400">
-                        {item.isPaid ? `Payant • ${formatHtg(item.price)}` : 'Gratuit'}
-                      </p>
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-semibold text-white">{item.title}</p>
+                          <p className="text-xs text-slate-300">Statut: {item.status}</p>
+                          <p className="text-xs text-slate-400">
+                            {item.isFree ? 'Gratuit' : `Payant • ${formatHtg(item.price)}`}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            Durée: {item.durationWeeks || '-'} • Modules: {item.modulesCount || 0}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          onClick={() => {
+                            setEditingFormationId(item.id);
+                            setContentForm({
+                              title: item.title || '',
+                              shortDescription: item.shortDescription || '',
+                              body: item.description || '',
+                              level: 'NSIV',
+                              type: 'video',
+                              isPaid: !item.isFree,
+                              price: item.price ? String(item.price) : '',
+                              durationWeeks: item.durationWeeks || '',
+                              modulesCount: item.modulesCount ? String(item.modulesCount) : '',
+                              certificate: Boolean(item.certificate),
+                              modulesText: Array.isArray(item.modules) ? item.modules.join('\n') : ''
+                            });
+                            setActiveTab('formations');
+                          }}
+                        >
+                          Modifier
+                        </button>
+                      </div>
                     </div>
                   ))
                 ) : (

@@ -58,6 +58,9 @@ export default function VideoLessonsPage() {
   const [comingLoading, setComingLoading] = useState(true);
   const [comingError, setComingError] = useState('');
   const [comingMessage, setComingMessage] = useState('');
+  const [partnerFormations, setPartnerFormations] = useState([]);
+  const [partnerLoading, setPartnerLoading] = useState(true);
+  const [partnerError, setPartnerError] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -106,6 +109,22 @@ export default function VideoLessonsPage() {
       }
     }
 
+    async function fetchPartnerFormations() {
+      try {
+        setPartnerLoading(true);
+        setPartnerError('');
+        const data = await apiClient('/partner-formations/public', { token });
+        if (!mounted) return;
+        setPartnerFormations(Array.isArray(data?.items) ? data.items : []);
+      } catch (err) {
+        if (!mounted) return;
+        setPartnerError(err?.message || 'Impossible de charger les formations partenaires.');
+        setPartnerFormations([]);
+      } finally {
+        if (mounted) setPartnerLoading(false);
+      }
+    }
+
     async function fetchCourses() {
       try {
         setLoading(true);
@@ -141,6 +160,7 @@ export default function VideoLessonsPage() {
 
     fetchFormations();
     fetchComingCourses();
+    fetchPartnerFormations();
     fetchCourses();
     return () => {
       mounted = false;
@@ -381,6 +401,11 @@ export default function VideoLessonsPage() {
               {comingMessage}
             </div>
           ) : null}
+          {partnerError ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {partnerError}
+            </div>
+          ) : null}
 
           {loading ? <p className="text-sm text-slate-500">Chargement des cours...</p> : null}
 
@@ -463,6 +488,47 @@ export default function VideoLessonsPage() {
                       onClick={() => registerComingCourse(course.id)}
                     >
                       {course.registered ? 'Inscrit ✔' : 'Je participe'}
+                    </button>
+                  </div>
+                </article>
+              ))
+            ) : null}
+
+            {!partnerLoading && partnerFormations.length ? (
+              partnerFormations.map((formation) => (
+                <article key={`partner-${formation.id}`} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+                  <div className="relative h-40 bg-gradient-to-br from-blue-700 via-blue-600 to-blue-500 p-4 text-white">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Formation certifiante</span>
+                    <h3 className="mt-3 text-sm font-bold">{formation.title}</h3>
+                  </div>
+
+                  <div className="p-4">
+                    <p className="text-xs text-slate-600">{formation.shortDescription || formation.description}</p>
+                    <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-500">
+                      {formation.durationWeeks ? <span>Durée : {formation.durationWeeks}</span> : null}
+                      {formation.modulesCount ? <span>Modules : {formation.modulesCount}</span> : null}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-xs text-slate-600">
+                    <span className="font-semibold">{formation.participantsCount || 0} participants</span>
+                    <button
+                      type="button"
+                      className="rounded-full bg-blue-700 px-3 py-1 text-[10px] font-semibold text-white"
+                      onClick={() => router.push(`/video-lessons/partner/${formation.id}`)}
+                    >
+                      Voir les détails
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-red-600 px-4 py-2 text-[11px] font-semibold text-white">
+                    <span>{formation.status === 'PUBLISHED' ? 'Disponible' : 'En validation'}</span>
+                    <button
+                      type="button"
+                      className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold text-white"
+                      onClick={() => router.push(`/video-lessons/partner/${formation.id}`)}
+                    >
+                      {formation.enrolled ? 'Inscrit' : 'Je participe'}
                     </button>
                   </div>
                 </article>
