@@ -54,11 +54,24 @@ export default function PartnerFormationDetailPage() {
       setActionLoading(true);
       setError('');
       setMessage('');
-      const res = await apiClient(`/partner-formations/${formation.id}/enroll`, { method: 'POST', token });
-      if (res?.message) {
-        setError(res.message);
+      if (!formation.isFree) {
+        const res = await apiClient(`/partner-formations/${formation.id}/checkout`, { method: 'POST', token });
+        if (res?.redirectUrl) {
+          window.location.assign(res.redirectUrl);
+          return;
+        }
+        if (res?.alreadyPaid) {
+          setMessage('Paiement déjà confirmé. Accès en cours.');
+        } else {
+          setError(res?.message || 'Paiement requis.');
+        }
       } else {
-        setMessage('Vous êtes inscrit à cette formation.');
+        const res = await apiClient(`/partner-formations/${formation.id}/enroll`, { method: 'POST', token });
+        if (res?.message) {
+          setError(res.message);
+        } else {
+          setMessage('Vous êtes inscrit à cette formation.');
+        }
       }
       const refreshed = await apiClient('/partner-formations/public', { token });
       const list = Array.isArray(refreshed?.items) ? refreshed.items : [];
@@ -99,6 +112,7 @@ export default function PartnerFormationDetailPage() {
           {formation.durationWeeks ? <span>Durée : {formation.durationWeeks}</span> : null}
           {formation.modulesCount ? <span>Modules : {formation.modulesCount}</span> : null}
           <span>{formation.participantsCount || 0} participants</span>
+          <span>{formation.isFree ? 'Gratuit' : `${formation.price || 0} ${formation.currency || 'HTG'}`}</span>
         </div>
 
         {message ? (
@@ -119,7 +133,7 @@ export default function PartnerFormationDetailPage() {
             onClick={enroll}
             className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white"
           >
-            {formation.enrolled ? 'Déjà inscrit' : 'Je participe'}
+            {formation.enrolled ? 'Déjà inscrit' : (formation.isFree ? 'Je participe' : 'Payer')}
           </button>
         </div>
       </div>

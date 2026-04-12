@@ -61,6 +61,7 @@ export default function VideoLessonsPage() {
   const [partnerFormations, setPartnerFormations] = useState([]);
   const [partnerLoading, setPartnerLoading] = useState(true);
   const [partnerError, setPartnerError] = useState('');
+  const [partnerMessage, setPartnerMessage] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -406,6 +407,11 @@ export default function VideoLessonsPage() {
               {partnerError}
             </div>
           ) : null}
+          {partnerMessage ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              {partnerMessage}
+            </div>
+          ) : null}
 
           {loading ? <p className="text-sm text-slate-500">Chargement des cours...</p> : null}
 
@@ -507,6 +513,7 @@ export default function VideoLessonsPage() {
                     <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-500">
                       {formation.durationWeeks ? <span>Durée : {formation.durationWeeks}</span> : null}
                       {formation.modulesCount ? <span>Modules : {formation.modulesCount}</span> : null}
+                      <span>{formation.isFree ? 'Gratuit' : `${formation.price || 0} ${formation.currency || 'HTG'}`}</span>
                     </div>
                   </div>
 
@@ -526,9 +533,31 @@ export default function VideoLessonsPage() {
                     <button
                       type="button"
                       className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold text-white"
-                      onClick={() => router.push(`/video-lessons/partner/${formation.id}`)}
+                      disabled={actionLoading}
+                      onClick={async () => {
+                        if (formation.enrolled) return;
+                        if (formation.isFree) {
+                          router.push(`/video-lessons/partner/${formation.id}`);
+                          return;
+                        }
+                        try {
+                          setPartnerMessage('');
+                          setPartnerError('');
+                          setActionLoading(true);
+                          const data = await apiClient(`/partner-formations/${formation.id}/checkout`, { method: 'POST', token });
+                          if (data?.redirectUrl) {
+                            window.location.assign(data.redirectUrl);
+                          } else {
+                            setPartnerError("Impossible de démarrer le paiement.");
+                          }
+                        } catch (err) {
+                          setPartnerError(err?.message || 'Paiement indisponible.');
+                        } finally {
+                          setActionLoading(false);
+                        }
+                      }}
                     >
-                      {formation.enrolled ? 'Inscrit' : 'Je participe'}
+                      {formation.enrolled ? 'Inscrit' : (formation.isFree ? 'Je participe' : 'Payer')}
                     </button>
                   </div>
                 </article>
